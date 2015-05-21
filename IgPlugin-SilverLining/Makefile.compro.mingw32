@@ -1,0 +1,143 @@
+# Makefile for SilverLining static library.
+
+UNAME := $(shell uname)
+MACHINE := $(shell uname -m)
+PROJECT = libSilverLining.a
+
+SRC = $(wildcard Src/*.cpp) SilverLiningOpenGL/SilverLiningOpenGL.cpp \
+	SilverLiningOpenGL/TextureRenderer.cpp third-party/TextureLoader.cpp
+
+SRC32CORE = $(wildcard Src/*.cpp) SilverLiningOpenGL32/SilverLiningOpenGL32.cpp \
+	SilverLiningOpenGL32/TextureRenderer.cpp third-party/TextureLoader.cpp
+
+SRCSTATIC = $(wildcard Src/*.cpp)
+
+OBJ = $(addsuffix .o, $(notdir $(basename $(SRC))))
+
+OBJ32CORE = $(addsuffix .o, $(notdir $(basename $(SRC32CORE))))
+
+OBJSTATIC = $(addsuffix .o, $(notdir $(basename $(SRCSTATIC))))
+
+MAJREV = 3
+MINREV = .025.X
+
+ifeq ($(UNAME), Darwin)
+
+ifeq ($(MACHINE), x86_64)
+ARCH = x86_64
+else
+ARCH = i686
+endif
+
+CCC = clang
+
+CCFLAGS       = -DMAC -DSILVERLINING_STATIC_RENDERER_OPENGL   -I"Public Headers" -I"third-party" -I"Private Headers" -I"third-party/GL/include"  -O3 -c -arch i386 -arch x86_64
+
+CCFLAGS32CORE = -DMAC -DSILVERLINING_STATIC_RENDERER_OPENGL32 -I"Public Headers" -I"third-party" -I"Private Headers" -I"third-party/GL/include"   -O3 -c -arch i386 -arch x86_64
+
+CCFLAGSSTATIC = -DMAC -DSILVERLINING_STATIC_RENDERER_CUSTOM   -I"Public Headers" -I"third-party" -I"Private Headers" -I"third-party/GL/include"   -O3 -c -arch i386 -arch x86_64
+
+OUT       = lib/macos/libSilverLiningOpenGL.a
+OUTSHARED = -current_version $(MINREV) -compatibility_version $(MAJREV).0 -arch $(ARCH) -dynamiclib -o lib/macos/libSilverLiningOpenGL.$(MAJREV).dylib -framework openGL -lstdc++
+
+OUT32CORE       = lib/macos/libSilverLiningOpenGL32Core.a
+OUT32SHAREDCORE = -current_version $(MINREV) -compatibility_version $(MAJREV).0 -arch $(ARCH) -dynamiclib -o lib/macos/libSilverLiningOpenGL32Core.$(MAJREV).dylib -framework openGL -lstdc++
+
+OUTSTATIC  = lib/macos/libSilverLining-norenderer.a
+OUT2SHARED = -current_version $(MINREV) -compatibility_version $(MAJREV).0 -arch $(ARCH) -dynamiclib -o lib/macos/libSilverLining-norenderer.$(MAJREV).dylib -framework openGL -lstdc++
+
+
+all: ogl
+
+else
+
+CCC = g++
+
+CCFLAGS       = -DLINUX -DDONGLE_SUPPORT -DSILVERLINING_STATIC_RENDERER_OPENGL   -I"Public Headers" -I"third-party" -I"Private Headers" -I"third-party/GL/include" -O3 -c -fPIC
+
+CCFLAGS32CORE = -DLINUX -DDONGLE_SUPPORT -DSILVERLINING_STATIC_RENDERER_OPENGL32 -I"Public Headers" -I"third-party" -I"Private Headers" -I"third-party/GL/include" -O3 -c -fPIC
+
+CCFLAGSSTATIC = -DLINUX -DDONGLE_SUPPORT -DSILVERLINING_STATIC_RENDERER_CUSTOM   -I"Public Headers" -I"third-party" -I"Private Headers" -I"third-party/GL/include" -O3 -c -fPIC
+
+OUTLIB    = libSilverLiningOpenGL.so
+OUT       = libSilverLiningOpenGL.a
+OUTSHARED = $(OUTLIB).$(MAJREV)$(MINREV)
+
+OUT32LIB        = libSilverLiningOpenGL32Core.so
+OUT32CORE       = libSilverLiningOpenGL32Core.a
+OUT32SHAREDCORE = $(OUT32LIB).$(MAJREV)$(MINREV)
+
+OUT2LIB    = libSilverLining-norenderer.so
+OUTSTATIC  = libSilverLining-norenderer.a
+OUT2SHARED = $(OUT2LIB).$(MAJREV)$(MINREV)
+
+all: ogl #ogl32core static
+
+endif
+
+ogl: oglobjs
+ifeq ($(UNAME), Darwin)
+	mkdir -p lib/macos
+	ar rcs $(OUT) $(OBJ)
+	lipo $(OUT) -thin $(ARCH) -output $(OUT)
+	$(CCC) $(OUTSHARED) $(OBJ) 
+else
+	if not exist mingw-build mkdir mingw-build
+	$(CCC) -shared -o mingw-build/libSilverLiningOpenGL.dll -Wl,--out-implib,mingw-build/libSilverLiningOpenGL.a $(OBJ) -lglu32 -lwinmm -lopengl32
+endif
+
+ogl32core: ogl32coreobjs
+ifeq ($(UNAME), Darwin)
+	ar rcs $(OUT32CORE) $(OBJ32CORE)
+	$(CCC) $(OUT32SHARED) $(OBJ32CORE) 
+else
+	$(CCC) -shared -Wl,-soname,$(OUT32LIB) -o lib/linux/$(OUT32SHAREDCORE) $(OBJ32CORE) 
+endif
+
+oglobjs:
+	$(CCC) $(CCFLAGS) $(SRC)
+
+ogl32coreobjs:
+	$(CCC) $(CCFLAGS32CORE) $(SRC32CORE)
+
+static: staticobjs
+ifeq ($(UNAME), Darwin)
+	ar rcs $(OUTSTATIC) $(OBJSTATIC)
+	$(CCC) $(OUT2SHARED) $(OBJSTATIC) 
+else
+	$(CCC) -shared -Wl,-soname,$(OUT2LIB) -o lib/linux/$(OUT2SHARED) $(OBJSTATIC) 
+endif
+
+staticobjs:
+	$(CCC) $(CCFLAGSSTATIC) $(SRCSTATIC)
+
+install: uninstall all
+	cp -a "Private Headers" /usr/local/include/Private_Headers
+	cp -a "Public Headers" /usr/local/include/Public_Headers
+ifeq ($(UNAME), Darwin)
+	cp lib/macos/* /usr/local/lib/
+else
+	cp lib/linux/* /usr/local/lib/
+#	cp $(OUT32SHAREDCORE) /usr/local/lib/
+#	cp $(OUT2SHARED) /usr/local/lib/
+	sudo ldconfig
+endif
+
+uninstall:
+	rm -rf /usr/local/include/Private_Headers
+	rm -rf /usr/local/include/Public_Headers
+	rm -rf /usr/local/lib/libSilverLining*
+ifeq ($(UNAME), Darwin)
+	echo "SilverLining uninstalled from MacOS"
+else
+	sudo ldconfig
+	echo "SilverLining uninstalled from Linux"
+endif
+
+clean:
+        #rm -f $(OBJ) $(OUT) $(OBJ32CORE) $(OUT32CORE) $(OBJSTATIC) $(OUTSTATIC) $(OUTSHARED) $(OUT32SHAREDCORE) $(OUT2SHARED) Makefile.bak
+
+cleanobj:
+	echo "CLEANOBJ's..."
+        #rm -f $(OBJ) $(OBJ32CORE) $(OBJSTATIC)
+

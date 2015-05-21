@@ -1,0 +1,10 @@
+<OpenIG-Vegetation-Config>
+    <Vegetation-Type>Crossed-Quads</Vegetation-Type>
+    <LOD-Range>0</LOD-Range>
+    <Pattern>OPEN_IG_Demo</Pattern>
+    <Vegetation-Info>
+        <Objects>coniftree01.dds red_pine01.dds pine02.dds pine03.dds pine01.dds spruce01.dds shrub01.dds</Objects>
+        <Texture>coniftree01.dds</Texture>
+        <UV>0 0 1 1</UV>
+    </Vegetation-Info>
+</OpenIG-Vegetation-Config>

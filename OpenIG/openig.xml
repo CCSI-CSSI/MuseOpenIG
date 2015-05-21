@@ -1,0 +1,56 @@
+<OpenIG-Config>
+    <ShadowedScene-minLightMargin>10.0</ShadowedScene-minLightMargin>
+    <ShadowedScene-maxFarPlane>500.0</ShadowedScene-maxFarPlane>
+    <ShadowedScene-texSize>4096</ShadowedScene-texSize>
+    <ShadowedScene-baseTexUnit>0</ShadowedScene-baseTexUnit>
+    <ShadowedScene-shadowTexUnit>1</ShadowedScene-shadowTexUnit>
+    <Default-diffuse-texture-slot>0</Default-diffuse-texture-slot>
+    <Clouds-Shadows-Texture-Slot>6</Clouds-Shadows-Texture-Slot>
+    <Enable-Clouds-Shadows>yes</Enable-Clouds-Shadows>
+    <Shadows-Factor>0.3</Shadows-Factor>
+    <Lighting-Implementation-Texture-Slot>5</Lighting-Implementation-Texture-Slot>
+    <Scene-Program-Lookup-By-Shader>Lighting: main vertex shader</Scene-Program-Lookup-By-Shader>
+    <Shadowed-GPU-Vegetation>no</Shadowed-GPU-Vegetation>
+</OpenIG-Config>
+<ImageGenerator-Plugins-Config>
+    <Plugin>
+        <Order-Number>-3</Order-Number>
+        <Name>SilverLining</Name>
+    </Plugin>
+    <Plugin>
+        <Order-Number>-2</Order-Number>
+        <Name>ModelComposition</Name>
+    </Plugin>
+    <Plugin>
+        <Order-Number>-1</Order-Number>
+        <Name>Lighting</Name>
+    </Plugin>
+    <Plugin>
+        <Order-Number>2</Order-Number>
+        <Name>VDBOffset</Name>
+    </Plugin>
+    <Plugin>
+        <Order-Number>3</Order-Number>
+        <Name>Animation</Name>
+    </Plugin>
+    <Plugin>
+        <Order-Number>4</Order-Number>
+        <Name>LightPoints</Name>
+    </Plugin>
+    <Plugin>
+        <Order-Number>5</Order-Number>
+        <Name>TimeOfDayBasedMaterial</Name>
+    </Plugin>
+    <Plugin>
+        <Order-Number>6</Order-Number>
+        <Name>GPUVegetation</Name>
+    </Plugin>
+    <Plugin>
+        <Order-Number>7</Order-Number>
+        <Name>RunwayLights</Name>
+    </Plugin>
+    <Plugin>
+        <Order-Number>8</Order-Number>
+        <Name>RunwayLightsControl</Name>
+    </Plugin>
+</ImageGenerator-Plugins-Config>
