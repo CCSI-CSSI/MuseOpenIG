@@ -1,7 +1,7 @@
 # MuseOpenIG
 The Muse OpenIG.  An opensource OpenSceneGraph based image generator application suite.
 
-Binary Downloads for some platforms available at: http://openig.compro.net
+Documentation and Binary Downloads for some platforms available at: http://openig.compro.net
 
 Dependencies for compiling from source:
 --------------------------------------
