@@ -23,7 +23,7 @@
     </Plugin>
     <Plugin>
         <Order-Number>-1</Order-Number>
-        <Name>Lighting</Name>
+        <Name>SimpleLighting</Name>
     </Plugin>
     <Plugin>
         <Order-Number>2</Order-Number>
