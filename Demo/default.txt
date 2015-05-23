@@ -1,10 +1,10 @@
 #Linux/MacOS
-#addentity 1 /usr/local/database/model/A320/a320.obj 0 0 45.9 105 0 0
-#addentity 0 /usr/local/database/terrain/OPEN_IG_Demo_NO_UTM31N_r5/master.flt.osg 0 0 0 0 0 0 -1.20639e+06,-5.099e+06,0
+addentity 1 /usr/local/database/model/A320/a320.obj 0 0 45.9 105 0 0
+addentity 0 /usr/local/database/terrain/OPEN_IG_Demo_NO_UTM31N_r6_LW_/master.flt.osg 0 0 0 0 0 0 -1.20639e+06,-5.099e+06,0
 
 #Windows
-addentity 1 data/model/a320/a320.obj 0 0 45.9 105 0 0
-addentity 0 data/terrain/master.flt.osg 0 0 0 0 0 0 -1.20639e+06,-5.099e+06,0
+#addentity 1 data/model/a320/a320.obj 0 0 45.9 105 0 0
+#addentity 0 data/terrain/master.flt.osg 0 0 0 0 0 0 -1.20639e+06,-5.099e+06,0
 
 manip 1 trackball
 tod 17 0
