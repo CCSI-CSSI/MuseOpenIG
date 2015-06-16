@@ -589,14 +589,14 @@ public:
 
     virtual const std::string getDescription() const
     {
-        return  "sets the attribues of the light sources like diffuse, speculat, ambient ....\n"
-                "     id - the id of the light source\n"
-                "     attrib - light attribute, can be one of these:\n"
-                "          ambient red green blue - the ambient comonent of the light source, followed by the color components\n"
-                "          diffuse red green blue brightness - the diffuse component, followed by a brightness\n"
-                "          speculat red green blue - the specular component\n"
-                "          attenuation distance - the constant attenuation, in meters\n"
-                "          spotcutsoff value - the spot cutsoff of the light source";
+		return  "sets the attribues of the light sources like diffuse, speculat, ambient ....\n"
+			"     id - the id of the light source\n"
+			"     attrib - light attribute, can be one of these:\n"
+			"          ambient red green blue - the ambient comonent of the light source, followed by the color components\n"
+			"          diffuse red green blue brightness [optional:cloudbrightness] - the diffuse component, followed by a brightness\n"
+            "          speculat red green blue - the specular component\n"
+            "          attenuation distance - the constant attenuation, in meters\n"
+            "          spotcutsoff value - the spot cutsoff of the light source";
     }
 
     virtual int exec(const StringUtils::Tokens& tokens)
@@ -607,20 +607,21 @@ public:
             osg::Vec4f      diffuse(0.f,0.f,0.f,1.f);
             osg::Vec4f      specular(0.f,0.f,0.f,1.f);
             float           brightness = 0.f;
+			float           cloudbrightness = 0.f;
             float           attenuation = 0.f;
             float           spotcutoff = 0.f;
             unsigned int    mask = 0x0;
 
             unsigned int id     = atoi(tokens.at(0).c_str());
             std::string attrib  = tokens.at(1);
-
+			
             if (attrib == "ambient" && tokens.size() == 5)
             {
                 ambient.x() = atof(tokens.at(2).c_str());
                 ambient.y() = atof(tokens.at(3).c_str());
                 ambient.z() = atof(tokens.at(4).c_str());
 
-                mask |= igcore::LightAttributes::AMBIENT;
+                mask |= igcore::LightAttributes::AMBIENT;			
             }
             if (attrib == "diffuse" && tokens.size() == 6)
             {
@@ -632,6 +633,18 @@ public:
                 mask |= igcore::LightAttributes::DIFFUSE;
                 mask |= igcore::LightAttributes::BRIGHTNESS;
             }
+			if (attrib == "diffuse" && tokens.size() == 7)
+			{
+				diffuse.x() = atof(tokens.at(2).c_str());
+				diffuse.y() = atof(tokens.at(3).c_str());
+				diffuse.z() = atof(tokens.at(4).c_str());
+				brightness = atof(tokens.at(5).c_str());
+				cloudbrightness = atof(tokens.at(6).c_str());
+
+				mask |= igcore::LightAttributes::DIFFUSE;
+				mask |= igcore::LightAttributes::BRIGHTNESS;
+				mask |= igcore::LightAttributes::CLOUDBRIGHTNESS;
+			}
             if (attrib == "specular" && tokens.size() == 5)
             {
                 specular.x() = atof(tokens.at(2).c_str());
@@ -660,6 +673,7 @@ public:
             attr._brightness = brightness;
             attr._constantAttenuation = attenuation;
             attr._spotCutoff = spotcutoff;
+			attr._cloudBrightness = cloudbrightness;
             attr._dirtyMask = mask;
 
             _ig->updateLightAttributes(id,attr);

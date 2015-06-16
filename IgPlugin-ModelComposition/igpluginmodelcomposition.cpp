@@ -74,7 +74,7 @@ public:
 
     virtual std::string getDescription( ) { return "Compose model based on xml defintion"; }
 
-    virtual std::string getVersion() { return "1.0.0"; }
+    virtual std::string getVersion() { return "1.0.1"; }
 
     virtual std::string getAuthor() { return "ComPro, Nick"; }
 
@@ -152,7 +152,7 @@ public:
             }
             else
             if ( (hour >= 12.0 && hour <= 24.0) || hour < 1.0)
-            {
+            {                
                 t = (hour-12.f) / 12;
 
                 osg::Vec4 nightAmbient = _nightMaterial->getAmbient(osg::Material::FRONT_AND_BACK);
@@ -275,6 +275,8 @@ public:
                 osg::ref_ptr<osg::Image> image = osgDB::readImageFile(textureName);
                 envTexture->setImage(osg::TextureCubeMap::POSITIVE_Z,image);
 
+                if (image.valid()) envTexture->setTextureSize(image->s(),image->t());
+
             }
             if ((**itr).name == "Environmental-Texture-Front")
             {
@@ -282,6 +284,8 @@ public:
                 std::string textureName = _path + "/" + (**itr).contents;
                 osg::ref_ptr<osg::Image> image = osgDB::readImageFile(textureName);
                 envTexture->setImage(osg::TextureCubeMap::NEGATIVE_Z,image);
+
+                if (image.valid()) envTexture->setTextureSize(image->s(),image->t());
 
             }
             if ((**itr).name == "Environmental-Texture-Left")
@@ -291,6 +295,8 @@ public:
                 osg::ref_ptr<osg::Image> image = osgDB::readImageFile(textureName);
                 envTexture->setImage(osg::TextureCubeMap::NEGATIVE_X,image);
 
+                if (image.valid()) envTexture->setTextureSize(image->s(),image->t());
+
             }
             if ((**itr).name == "Environmental-Texture-Right")
             {
@@ -298,6 +304,8 @@ public:
                 std::string textureName = _path + "/" + (**itr).contents;
                 osg::ref_ptr<osg::Image> image = osgDB::readImageFile(textureName);
                 envTexture->setImage(osg::TextureCubeMap::POSITIVE_X,image);
+
+                if (image.valid()) envTexture->setTextureSize(image->s(),image->t());
 
             }
             if ((**itr).name == "Environmental-Texture-Top")
@@ -307,6 +315,8 @@ public:
                 osg::ref_ptr<osg::Image> image = osgDB::readImageFile(textureName);
                 envTexture->setImage(osg::TextureCubeMap::NEGATIVE_Y,image);
 
+                if (image.valid()) envTexture->setTextureSize(image->s(),image->t());
+
             }
             if ((**itr).name == "Environmental-Texture-Bottom")
             {
@@ -314,6 +324,8 @@ public:
                 std::string textureName = _path + "/" + (**itr).contents;
                 osg::ref_ptr<osg::Image> image = osgDB::readImageFile(textureName);
                 envTexture->setImage(osg::TextureCubeMap::POSITIVE_Y,image);
+
+                if (image.valid()) envTexture->setTextureSize(image->s(),image->t());
 
             }
             if ((**itr).name == "Pre-Baked-Ambient-Occlusion-Texture")
@@ -325,6 +337,7 @@ public:
                 {
                     osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D;
                     texture->setImage(image);
+                    texture->setTextureSize(image->s(),image->t());
 
                     _ss->setTextureAttributeAndModes(aoSlot,texture,osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
                     _ss->addUniform(new osg::Uniform("ambientOcclusionTexture",(int)aoSlot),osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE|osg::StateAttribute::PROTECTED);
@@ -335,8 +348,7 @@ public:
             if ((**itr).name == "Ambient-Occlusion")
             {
                 if ((**itr).contents == "yes")
-                {
-                    _ss->addUniform(new osg::Uniform("ambientOcclusionEnabled",(bool)true),osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE|osg::StateAttribute::PROTECTED);
+                {                    
 #if OSG_VERSION_GREATER_OR_EQUAL(3,3,7)
                     _ss->setDefine("AO");
 #endif
@@ -370,25 +382,18 @@ public:
                 if ((**itr).contents == "yes")
                 {
                     environmentalMapping = true;
+                }
 
-                    _ss->addUniform(new osg::Uniform("environmentalEnabled",(bool)true),osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE|osg::StateAttribute::PROTECTED);
-
-                    {
-                        osg::Uniform* u = new osg::Uniform("cameraPos",osg::Vec3());
-                        u->setUpdateCallback( new UpdateCameraPosUniformCallback(context.getImageGenerator()->getViewer()->getView(0)->getCamera()) );
-                        _ss->addUniform( u );
-                    }
+                {
+                    osg::Uniform* u = new osg::Uniform("cameraPos",osg::Vec3());
+                    u->setUpdateCallback( new UpdateCameraPosUniformCallback(context.getImageGenerator()->getViewer()->getView(0)->getCamera()) );
+                    _ss->addUniform( u );
                 }
             }
 
             if ((**itr).name == "Environmental-Factor")
             {
-                float factor = atof((**itr).contents.c_str());
-                osg::Uniform* u = 0;
-                _ss->addUniform(u = new osg::Uniform("environmentalFactor",(float)factor),osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE|osg::StateAttribute::PROTECTED);
-
-                _environmentalFactor = factor;
-                u->setUpdateCallback(new UpdateEnvironmentalFactorUniformCallback(_environmentalFactor));
+                _ss->setDefine("ENVIRONMENTAL_FACTOR",(**itr).contents);
             }
             if ((**itr).name == "Shadowing")
             {
@@ -413,7 +418,6 @@ public:
             if ((**itr).name == "Lighting")
             {
                 bool lighting = (**itr).contents == "yes";
-                _ss->addUniform(new osg::Uniform("lightingEnabled",(bool)lighting),osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE|osg::StateAttribute::PROTECTED);
 
                 if (lighting)
                 {
@@ -448,9 +452,12 @@ public:
             osg::notify(osg::NOTICE) << "Model Composition: setting environmental texture " << _environmentalMapSlot << std::endl;
             _ss->setTextureAttributeAndModes(_environmentalMapSlot,envTexture,osg::StateAttribute::ON);
 
+            envTexture->setInternalFormat(GL_RGB);
             envTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
             envTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
             envTexture->setWrap(osg::Texture::WRAP_R, osg::Texture::CLAMP_TO_EDGE);
+            envTexture->setFilter(osg::TextureCubeMap::MIN_FILTER,osg::TextureCubeMap::LINEAR);
+            envTexture->setFilter(osg::TextureCubeMap::MAG_FILTER,osg::TextureCubeMap::LINEAR);
 
 #if OSG_VERSION_GREATER_OR_EQUAL(3,3,7)
             _ss->setDefine("ENVIRONMENTAL");

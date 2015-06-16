@@ -7,13 +7,15 @@ addentity 1 data/model/a320/a320.obj 0 0 45.9 105 0 0
 addentity 0 data/terrain/master.flt.osg 0 0 0 0 0 0 -1.20639e+06,-5.099e+06,0
 
 manip 1 trackball
-tod 20 0
+tod 17 0
+
+fog 10000
 
 addlight 1 0 0 0 0 0 0
 bindlight 1 10090
 
 updatelightattr 1 ambient 0 0 0
-updatelightattr 1 diffuse 1 1 1 5
+updatelightattr 1 diffuse 1 1 1 7 0.05
 updatelightattr 1 specular 0 0 0
-updatelightattr 1 attenuation 100
+updatelightattr 1 attenuation 1000
 updatelightattr 1 spotcutsoff 30

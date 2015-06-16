@@ -14,7 +14,7 @@ addlight 1 0 0 0 0 0 0
 bindlight 1 10090
 
 updatelightattr 1 ambient 0 0 0
-updatelightattr 1 diffuse 1 1 1 5
+updatelightattr 1 diffuse 1 1 1 7 0.5
 updatelightattr 1 specular 0 0 0
 updatelightattr 1 attenuation 100
 updatelightattr 1 spotcutsoff 30

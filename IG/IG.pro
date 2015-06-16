@@ -7,35 +7,51 @@ TARGET = ig
 
 SOURCES += main.cpp
 
-QMAKE_CXXFLAGS += -fpermissive -shared-libgcc -D_GLIBCXX_DLL
-
-DESTDIR = /usr/local/bin
-
 include(deployment.pri)
 qtcAddDeployment()
 
 LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgGA -lOpenIG -lIgCore
 
-INCLUDEPATH += /usr/local/include
-DEPENDPATH += /usr/local/include
-
 INCLUDEPATH += ../
 DEPENDPATH += ../
 
-INCLUDEPATH += /usr/local/lib64
-DEPENDPATH += /usr/local/lib64
+OTHER_FILES += default.txt
 
-INCLUDEPATH += /usr/lib64
-DEPENDPATH += /usr/lib64
+unix {
+    DESTDIR = /usr/local/bin
 
-OTHER_FILES += \
-    default.txt
+    INCLUDEPATH += /usr/local/include
+    DEPENDPATH += /usr/local/include
 
-unix:!mac {
-    LIBS += -lboost_filesystem -lboost_system -lX11
+    INCLUDEPATH += /usr/local/lib64
+    DEPENDPATH += /usr/local/lib64
+
+    INCLUDEPATH += /usr/lib64
+    DEPENDPATH += /usr/lib64
+
+    !mac:LIBS += -lboost_filesystem -lboost_system -lX11
+
+    # library version number files
+    exists( "../openig_version.pri" ) {
+
+	include( "../openig_version.pri" )
+	isEmpty( VERSION ){ error( "bad or undefined VERSION variable inside file openig_version.pri" )
+	} else {
+	message( "Set version info to: $$VERSION" )
+	}
+
+    }
+    else { error( "could not find pri library version file openig_version.pri" ) }
+
+    # end of library version number files
 }
 
+win32-g++:QMAKE_CXXFLAGS += -fpermissive -shared-libgcc -D_GLIBCXX_DLL
+win32-g++:LIBS += -lstdc++.dll
+
 win32 {
+    LIBS += -lUser32
+
     OSGROOT = $$(OSG_ROOT)
     isEmpty(OSGROOT) {
         message(\"OpenSceneGraph\" not detected...)
@@ -60,14 +76,13 @@ win32 {
         OPENIGBUILD = $$IN_PWD/..
     }
     DESTDIR = $$OPENIGBUILD/bin
-
-    LIBS += -L$$OPENIGBUILD/lib -lstdc++.dll
+    LIBS += -L$$OPENIGBUILD/lib
 
     FILE = $${PWD}/default.txt
     DDIR = $$DESTDIR
 
-    win32:FILE ~= s,/,\\,g
-    win32:DDIR ~= s,/,\\,g
+    FILE ~= s,/,\\,g
+    DDIR ~= s,/,\\,g
 
     QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$FILE) $$quote($$DDIR) $$escape_expand(\\n\\t)
 

@@ -62,6 +62,7 @@ public:
             if ( hour >= 0.0 && hour <= 12.0)
             {
                 float t = hour / 12;
+                if (t == 0.0) t = 0.1;
 
                 osg::Vec4 nightAmbient = _nightMaterial->getAmbient(osg::Material::FRONT_AND_BACK);
                 osg::Vec4 dayAmbient = _dayMaterial->getAmbient(osg::Material::FRONT_AND_BACK);

@@ -34,6 +34,8 @@
 #include <IgCore/animation.h>
 
 #include <osgDB/ReadFile>
+#include <osgDB/FileNameUtils>
+
 #include <osgGA/TrackballManipulator>
 
 #include <osg/ValueObject>
@@ -46,6 +48,11 @@
 #include <osgShadow/StandardShadowMap>
 
 #include <sstream>
+
+#include <limits.h>
+#if ( __WORDSIZE == 64 )
+#define BUILD_64   1
+#endif
 
 using namespace openig;
 using namespace igcore;
@@ -68,7 +75,7 @@ OpenIG::~OpenIG()
 
 std::string OpenIG::version()
 {
-    return "1.0.0";
+    return "1.0.1";
 }
 
 class InitPluginOperation : public PluginOperation
@@ -351,11 +358,18 @@ void OpenIG::init(osgViewer::CompositeViewer* viewer, const std::string& xmlFile
         }
     }
 
+	std::string configPath = osgDB::getFilePath(xmlFileName);	
+	std::string configFileName = osgDB::getSimpleFileName(xmlFileName);
+
 #if     defined (__linux) || defined (__APPLE__)
-    Configuration::instance()->readFromXML(std::string("/usr/local/lib/igdata/") + xmlFileName,"OpenIG-Config");
+	if (configPath.empty()) configPath = std::string("/usr/local/bin/igdata/");	
+	else configPath += std::string("/");
 #elif   defined (_WIN32)
-    Configuration::instance()->readFromXML(std::string("igdata/") + xmlFileName, "OpenIG-Config");
+	if (configPath.empty()) configPath = std::string("igdata/");
+	else configPath += std::string("/");
 #endif
+
+	Configuration::instance()->readFromXML(configPath + configFileName,"OpenIG-Config");
 
     initViewer(viewer);
     initTerminal();
@@ -366,10 +380,16 @@ void OpenIG::init(osgViewer::CompositeViewer* viewer, const std::string& xmlFile
 
     osgDB::Registry::instance()->setReadFileCallback( new DatabaseReadCallback(this) );
 
-#if     defined (__linux) || defined (__APPLE__)
-    PluginHost::loadPlugins("/usr/local/lib/igplugins", "/usr/local/lib/igdata/openig.xml");
+#if     defined (__linux) 
+	#if defined(BUILD_64)
+        PluginHost::loadPlugins("/usr/local/lib64/igplugins", configPath + configFileName);
+    #else
+        PluginHost::loadPlugins("/usr/local/lib/igplugins", configPath + configFileName);
+    #endif
+#elif	defined (__APPLE__)	
+	PluginHost::loadPlugins("/usr/local/lib/igplugins", configPath + configFileName);
 #elif   defined (_WIN32)
-    PluginHost::loadPlugins("igplugins","igdata/openig.xml");
+	PluginHost::loadPlugins("igplugins", configPath + configFileName );
 #endif
 
     osg::ref_ptr<PrintLoadedPluginsPluginOperation> printPluginOperation(new PrintLoadedPluginsPluginOperation);
@@ -413,6 +433,22 @@ protected:
     std::string     _fileName;
 };
 
+class CleanPluginOperation : public igplugincore::PluginOperation
+{
+public:
+	CleanPluginOperation(openig::OpenIG* ig)
+		: _ig(ig)
+	{
+	}
+	virtual void apply(igplugincore::Plugin* plugin)
+    {
+		if (plugin && _ig) plugin->clean(_ig->getPluginContext());
+    }
+
+protected:
+	openig::OpenIG* _ig;
+};
+
 void OpenIG::cleanup()
 {
     _entities.clear();
@@ -421,6 +457,9 @@ void OpenIG::cleanup()
     _lights.clear();
 
     Commands::instance()->clear();
+
+	osg::ref_ptr<CleanPluginOperation> operation(new CleanPluginOperation(this));
+	PluginHost::applyPluginOperation(operation.get());
 
     PluginHost::unloadPlugins();       
 

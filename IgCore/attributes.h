@@ -258,6 +258,7 @@ struct LightAttributes
     float           _constantAttenuation;
     float           _spotCutoff;
     bool            _enabled;
+	float			_cloudBrightness;
     unsigned int    _dirtyMask;
 
     enum Mask
@@ -268,8 +269,9 @@ struct LightAttributes
         BRIGHTNESS          = 8,
         CONSTANTATTENUATION = 16,
         SPOTCUTOFF          = 32,
-        ENABLED             = 64,
-        ALL                 = AMBIENT|DIFFUSE|SPECULAR|BRIGHTNESS|CONSTANTATTENUATION|ENABLED|SPOTCUTOFF
+		CLOUDBRIGHTNESS		= 64,
+        ENABLED             = 128,
+		ALL = AMBIENT | DIFFUSE | SPECULAR | BRIGHTNESS | CLOUDBRIGHTNESS | CONSTANTATTENUATION | ENABLED | SPOTCUTOFF
     };
 
     LightAttributes()
@@ -277,7 +279,8 @@ struct LightAttributes
         , _constantAttenuation(400.f)
         , _spotCutoff(20.f)
         , _enabled(true)
-        , _dirtyMask(ALL)
+		, _cloudBrightness(1.f)
+        , _dirtyMask(0)
     {
 
     }

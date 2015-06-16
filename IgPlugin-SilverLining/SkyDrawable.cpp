@@ -202,16 +202,25 @@ void SkyDrawable::initializeSilverLining(AtmosphereReference *ar) const
 			srand(1234); // constant random seed to ensure consistent clouds across windows
 
             // Update the path below to where you installed SilverLining's resources folder.
-            const char *slPath = _path.c_str();//"/usr/local/SilverLining";//getenv("SILVERLINING_PATH");
+            const char *slPath = getenv("SILVERLINING_PATH");
             if (!slPath)
             {
+                slPath = _path.c_str();
+                if (!slPath)
+                {
 #if 0
-                printf("Can't find SilverLining; set the SILVERLINING_PATH environment variable ");
-                printf("to point to the directory containing the SDK.\n");
+                    printf("Can't find SilverLining; set the SILVERLINING_PATH environment variable ");
+                    printf("to point to the directory containing the SDK.\n");
 #else
-                osg::notify(osg::FATAL) << "SilverLining: Can't find SilverLining, path = " << _path << std::endl;
+                    osg::notify(osg::FATAL) << "SilverLining: Can't find SilverLining" << std::endl;
+                    osg::notify(osg::FATAL) << "\t Either set the environmental variable SILVERLINING_PATH to point to " << std::endl;
+                    osg::notify(osg::FATAL) << "\t the SilverLining installation or set the PATH in the:" << std::endl;
+                    osg::notify(osg::FATAL) << "\t      Windows: igplugins\\IgPlugin-SilverLining.dll.xml" << std::endl;
+                    osg::notify(osg::FATAL) << "\t      MacOS: /usr/local/lib/igplugins/libIgPlugin-SilverLining.dylib.xml" << std::endl;
+                    osg::notify(osg::FATAL) << "\t      Linux: /usr/local/lib/igplugins/libIgPlugin-SilverLining.so.xml" << std::endl;
 #endif
-                exit(0);
+                    exit(0);
+                }
             }
 
             std::string resPath(slPath);
@@ -231,9 +240,10 @@ void SkyDrawable::initializeSilverLining(AtmosphereReference *ar) const
 #else
                 osg::notify(osg::FATAL) << "SilverLining: SilverLining failed to initialize; error code " << ret << std::endl;
                 osg::notify(osg::FATAL) << "SilverLining: Check the path in:" << std::endl;
-                osg::notify(osg::FATAL) << "      Windows: igplugins\\IgPlugin-SilverLining.dll.xml" << std::endl;
-                osg::notify(osg::FATAL) << "      MacOS: /usr/local/lib/igplugins/libIgPlugin-SilverLining.dylib.xml" << std::endl;
-                osg::notify(osg::FATAL) << "      Linux: /usr/local/lib/igplugins/libIgPlugin-SilverLining.so.xml" << std::endl;
+                osg::notify(osg::FATAL) << "\t      Windows: igplugins\\IgPlugin-SilverLining.dll.xml" << std::endl;
+                osg::notify(osg::FATAL) << "\t      MacOS: /usr/local/lib/igplugins/libIgPlugin-SilverLining.dylib.xml" << std::endl;
+                osg::notify(osg::FATAL) << "\t      Linux: /usr/local/lib/igplugins/libIgPlugin-SilverLining.so.xml" << std::endl;
+                osg::notify(osg::FATAL) << "\t or the environmental variable SILVERLINING_PATH" << std::endl;
 #endif
                 exit(0);
             }

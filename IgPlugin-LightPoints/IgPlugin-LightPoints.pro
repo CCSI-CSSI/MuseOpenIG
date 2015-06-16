@@ -17,10 +17,6 @@ SOURCES += igpluginlightpoints.cpp \
     LightPointDrawable.cpp \
     LightPointSpriteDrawable.cpp
 
-DESTDIR = /usr/local/lib/igplugins
-
-QMAKE_CXXFLAGS += -fpermissive -shared-libgcc -D_GLIBCXX_DLL
-
 HEADERS += \
     LightPointDrawable.h \
     LightPointSpriteDrawable.h \
@@ -28,29 +24,46 @@ HEADERS += \
 
 LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgShadow -losgSim -losgUtil -lIgCore -lIgPluginCore
 
-unix {
-    target.path = /usr/lib
-    INSTALLS += target
-}
-
-unix:!mac {
-LIBS += -lGL -lGLU
-}
-
-win32:!mac{
- LIBS += -lopengl32 -lglu32
-}
-
-mac: LIBS += -framework openGL
-
-INCLUDEPATH += /usr/local/include
-DEPENDPATH += /usr/local/include
-
 INCLUDEPATH += ../
 DEPENDPATH += ../
 
-INCLUDEPATH += /usr/local/lib64
-DEPENDPATH += /usr/local/lib64
+unix {
+    !mac:contains(QMAKE_HOST.arch, x86_64):{
+        DESTDIR = /usr/local/lib64/igplugins
+        target.path = /usr/local/lib64/igplugins
+    } else {
+        DESTDIR = /usr/local/lib/igplugins
+        target.path = /usr/local/lib/igplugins
+    }
+    message(Libs will be installed into $$DESTDIR)
+
+    INSTALLS += target
+
+    INCLUDEPATH += /usr/local/include
+    DEPENDPATH += /usr/local/include
+
+    INCLUDEPATH += /usr/local/lib64
+    DEPENDPATH += /usr/local/lib64
+
+    !mac:LIBS += -lGL -lGLU
+    mac: LIBS += -framework openGL
+
+    # library version number files
+    exists( "../openig_version.pri" ) {
+
+	include( "../openig_version.pri" )
+	isEmpty( VERSION ){ error( "bad or undefined VERSION variable inside file openig_version.pri" )
+	} else {
+	message( "Set version info to: $$VERSION" )
+	}
+
+    }
+    else { error( "could not find pri library version file openig_version.pri" ) }
+
+    # end of library version number files
+}
+
+win32-g++:QMAKE_CXXFLAGS += -fpermissive -shared-libgcc -D_GLIBCXX_DLL
 
 win32 {
     OSGROOT = $$(OSG_ROOT)
@@ -79,7 +92,6 @@ win32 {
     DESTDIR = $$OPENIGBUILD/lib
     DLLDESTDIR = $$OPENIGBUILD/bin/igplugins
 
+    LIBS += -lopengl32 -lglu32
     LIBS += -L$$OPENIGBUILD/lib
-    LIBS += -lstdc++.dll
 }
-

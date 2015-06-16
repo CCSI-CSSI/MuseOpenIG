@@ -68,6 +68,7 @@ public:
      * \param The path where the plugins are located
      * \param configFileName The plugin configuration file. \ref openig::OpenIG is
      *      expecting it in: Windows in igdata/openig.xml, Linux and MacOS in /usr/local/lib/igdata/openig.xml
+     *      or Linux 64bit in /usr/local/lib64/igdata/openig.xml
      * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jan 16 2015

@@ -375,7 +375,7 @@ static std::string s_FlightRecordingPath("demo\\flightpath.path");
 #else
 static std::string s_ModelPath("/usr/local/database/model/A320/a320.obj");
 static std::string s_TerrainPath("/usr/local/database/terrain/OPEN_IG_Demo_NO_UTM31N_r5/master.flt.osg");
-static std::string s_FlightRecordingPath("./flightpath.path");
+static std::string s_FlightRecordingPath("./demo/flightpath.path");
 #endif
 
 // These are our entity IDs for the
@@ -520,7 +520,7 @@ int main(int argc, char** argv)
     else
     {
 #if defined(_WIN32)
-        ig->loadScript(std::string("demo/default.txt"));
+        ig->loadScript(std::string("default.txt"));
 #else
         ig->loadScript(std::string("default.txt"));
 #endif
@@ -531,7 +531,7 @@ int main(int argc, char** argv)
     // this entity ID to refer to this model.
     // We will place it at 0,0,HAT
 
-    //osg::Matrixd modelMx = osg::Matrixd::translate(osg::Vec3d(0.0,0.0,45));
+
     //ig->addEntity(MODEL_ENTITY_ID,s_ModelPath,modelMx);
 
     // now we are going to attach a light source
@@ -572,6 +572,7 @@ int main(int argc, char** argv)
     attr._ambient = osg::Vec4(0,0,0,1);
     attr._diffuse = osg::Vec4(1,1,1,1);
     attr._brightness = 5;
+	attr._cloudBrightness = 0.1;
     attr._constantAttenuation = 100;
     attr._specular = osg::Vec4(0,0,0,1);
     attr._spotCutoff = 30;
@@ -672,7 +673,10 @@ int main(int argc, char** argv)
                 if(hdl)
                 {
                     WNDPROC fWndProc = (WNDPROC)::GetWindowLongPtr(hdl->getHWND(), GWLP_WNDPROC);
-                    fWndProc(hdl->getHWND(), msg.message, msg.wParam, msg.lParam);
+                    if (fWndProc && hdl->getHWND())
+					{
+						::CallWindowProc(fWndProc,hdl->getHWND(),msg.message, msg.wParam, msg.lParam);
+					}
                 }
             }
         }

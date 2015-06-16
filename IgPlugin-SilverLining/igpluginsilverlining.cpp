@@ -196,6 +196,20 @@ public:
         }
     }
 
+	virtual void clean(igplugincore::PluginContext& context)
+	{
+		osgViewer::CompositeViewer* viewer = context.getImageGenerator()->getViewer();
+
+		//std::cout << "SilverLining Atmosphere deleting ..." << std::endl;
+		AtmosphereReference *ar = dynamic_cast<AtmosphereReference*>(viewer->getView(0)->getCamera()->getUserData());
+		if (ar && ar->atmosphere)
+		{
+			delete ar->atmosphere;
+			//std::cout << "SilverLining Atmosphere deleted" << std::endl;
+		}
+
+	}
+
 protected:
     std::string                     _userName;
     std::string                     _key;

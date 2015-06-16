@@ -1,2 +1,14 @@
-19 May 2015
+9 Jun 2015, version 1.0.1
+- Added CMake support
+- OpenIG, added support to allow adjustment of the brightness/attenuation 
+  of the landing lights on the SilverLining clouds
+  billboards types work now, Stratus should be in next release.
+- Fixed command line terminal so it takes no input unless
+  it is enabled via the F8 key
+- IgPlugin-SilverLining, updated SunDog Software's SilverLining to release 4.008
+- IgPlugin-SimpleLighting, changed the uniform based branching to use 
+  the new OSG #pragmatic shader composition methods
+- IgPlugin-ModelComposition, fixes for AMD/ATI video cards
+
+19 May 2015, version 1.0.0
 - OpenIG version 1.0.0

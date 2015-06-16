@@ -57,7 +57,7 @@ void OpenIG::initSplashScreen()
 #if defined(_WIN32)
     osg::ref_ptr<osg::Image> splash = osgDB::readImageFile("igdata/OpenIG-Splash.jpg");
 #else
-    osg::ref_ptr<osg::Image> splash = osgDB::readImageFile("/usr/local/lib/igdata/OpenIG-Splash.jpg");
+    osg::ref_ptr<osg::Image> splash = osgDB::readImageFile("/usr/local/bin/igdata/OpenIG-Splash.jpg");
 #endif
     if (splash.valid())
     {

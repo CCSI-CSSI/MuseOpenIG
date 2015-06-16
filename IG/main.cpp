@@ -252,7 +252,10 @@ int main(int argc, char** argv)
                 if(hdl)
                 {
                     WNDPROC fWndProc = (WNDPROC)::GetWindowLongPtr(hdl->getHWND(), GWLP_WNDPROC);
-                    fWndProc(hdl->getHWND(), msg.message, msg.wParam, msg.lParam);
+					if (fWndProc && hdl->getHWND())
+					{
+						::CallWindowProc(fWndProc,hdl->getHWND(),msg.message, msg.wParam, msg.lParam);
+					}
                 }
             }
         }

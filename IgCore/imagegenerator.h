@@ -92,7 +92,7 @@ public:
      *                      expected is to have at least one View.
      *  \param xmlFileName  The file name of the xml configuration file.
      *                      Defaults to openig.xml, on Windows in bin/igdata
-     *                      MacOS and Linux in /usr/local/lib/igdata
+     *                      MacOS and Linux in /usr/local/bin/igdata
      *  \return             Nothing
      *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
      *  \copyright (c)Compro Computer Services, Inc.
@@ -663,6 +663,29 @@ public:
      * \date      Sun Jan 11 2015
      */
     virtual bool isLightEnabled(unsigned int id) = 0;
+
+	typedef std::map< unsigned int, LightAttributes >		LightAttributesMap;
+
+	/*! Returns the LightAttributes map. The inheritants are expected to 
+	*	keep track when they are updates. Plugins might use these
+	* \brief Returns the LightAttributes map
+	* \return The light attributes map
+	* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	* \copyright (c)Compro Computer Services, Inc.
+	* \date      Sat Jun 06 2015
+	*/
+	virtual LightAttributesMap& getLightAttributesMap() = 0;
+
+	/*! Returns the LightAttributes for a given light. The inheritants are expected to
+	*	keep track when they are updates. Plugins might use these
+	* \brief Returns the LightAttributes based on the light ID
+	* \param id The light ID
+	* \return The light attributes of the Light
+	* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	* \copyright (c)Compro Computer Services, Inc.
+	* \date      Sat Jun 06 2015
+	*/
+	virtual LightAttributes getLightAttributes(unsigned int id) = 0;
 
     /*! Updates light attributes via \ref igcore::LightAttributes . Once you set the new
      *  light attributes, be aware that you have to set the dirty mask there as well

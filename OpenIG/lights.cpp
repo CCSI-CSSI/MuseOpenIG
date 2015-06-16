@@ -59,7 +59,35 @@ void OpenIG::updateLightAttributes(unsigned int id, const LightAttributes& attri
     if ( itr != _lights.end() && _lightImplementationCallback.valid())
     {
         _lightImplementationCallback->updateLight(id,attribs);
+
+		LightAttributes& attr = _lightAttributes[id];
+
+		if ((attribs._dirtyMask & LightAttributes::AMBIENT) == LightAttributes::AMBIENT) attr._ambient = attribs._ambient;
+		if ((attribs._dirtyMask & LightAttributes::DIFFUSE) == LightAttributes::DIFFUSE) attr._diffuse = attribs._diffuse;
+		if ((attribs._dirtyMask & LightAttributes::BRIGHTNESS) == LightAttributes::BRIGHTNESS) attr._brightness = attribs._brightness;
+		if ((attribs._dirtyMask & LightAttributes::CLOUDBRIGHTNESS) == LightAttributes::CLOUDBRIGHTNESS) attr._cloudBrightness = attribs._cloudBrightness;
+		if ((attribs._dirtyMask & LightAttributes::CONSTANTATTENUATION) == LightAttributes::CONSTANTATTENUATION) attr._constantAttenuation = attribs._constantAttenuation;
+		if ((attribs._dirtyMask & LightAttributes::ENABLED) == LightAttributes::ENABLED) attr._enabled = attribs._enabled;
+		if ((attribs._dirtyMask & LightAttributes::SPECULAR) == LightAttributes::SPECULAR) attr._specular = attribs._specular;
+		if ((attribs._dirtyMask & LightAttributes::SPOTCUTOFF) == LightAttributes::SPOTCUTOFF) attr._spotCutoff = attribs._spotCutoff;
     }
+}
+
+igcore::ImageGenerator::LightAttributesMap& OpenIG::getLightAttributesMap()
+{
+	return _lightAttributes;
+}
+
+igcore::LightAttributes OpenIG::getLightAttributes(unsigned int id)
+{	
+	LightAttributesMap::iterator itr = _lightAttributes.find(id);
+	if (itr != _lightAttributes.end())
+	{		
+		return itr->second;
+	}
+
+	LightAttributes attr;
+	return attr;
 }
 
 void OpenIG::removeLight(unsigned int id)

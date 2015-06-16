@@ -1,3 +1,4 @@
+
 // Copyright (c) 2008-2012 Sundog Software, LLC. All rights reserved worldwide
 
 #include "CloudsDrawable.h"
@@ -60,7 +61,7 @@ void CloudsDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 	renderInfo.getState()->disableAllVertexArrays();
 
     if (atmosphere)
-    {
+    {		
         osg::GL2Extensions* ext = osg::GL2Extensions::Get(renderInfo.getContextID(),true);
 		if (ext)
         {
@@ -78,6 +79,20 @@ void CloudsDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
                     }
                     ext->glUniform1iv(loc, lightsEnabled.size(), &lightsEnabled.front());
 
+				}
+				GLint cbloc = ext->glGetUniformLocation(shader, "lightsBrightness");
+				if (cbloc != -1)
+				{					
+					std::vector<GLfloat> lightsBrightness;
+					for (size_t i = 0; i<8; ++i)
+					{
+						igcore::LightAttributes attr = _ig->getLightAttributes(i);
+						lightsBrightness.push_back(attr._cloudBrightness);
+
+						//std::cout << "Cloud Light Attrib: " << i << ", " << attr._cloudBrightness << std::endl;
+					}
+					//std::cout << std::endl;
+					ext->glUniform1fv(cbloc, lightsBrightness.size(), &lightsBrightness.front());
 				}
 				ext->glUseProgram(0);
 			}

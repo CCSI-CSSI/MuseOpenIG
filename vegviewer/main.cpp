@@ -32,6 +32,8 @@
 #include <osgGA/TrackballManipulator>
 #include <osgGA/StateSetManipulator>
 
+#include <cctype>
+
 class StringUtils
 {
 protected:

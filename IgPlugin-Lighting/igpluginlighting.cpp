@@ -574,7 +574,7 @@ public:
 
         osg::Shader* mainFragmentShader = new osg::Shader( osg::Shader::FRAGMENT,
             "#version 120                                                           \n"
-            "#pragma import_defines ( SIMPLELIGHTING, LIGHTING, SHADOWING, ENVIRONMENTAL, AO, USER )\n"            
+            "#pragma import_defines ( SIMPLELIGHTING, LIGHTING, SHADOWING, ENVIRONMENTAL, AO, USER, ENVIRONMENTAL_FACTOR )\n"
             "#extension GL_ARB_texture_rectangle : enable                           \n"
             "                                                                       \n"
             "uniform sampler2D baseTexture;                                         \n"
@@ -814,7 +814,7 @@ public:
             "		textureCube(environmentalMapTexture, v).rgb;                    \n"
             "																		\n"
             "   vec3 mixed_color =                                                  \n"
-            "       mix(cube_color, color.rgb, 1.0-environmentalFactor).rgb;        \n"
+            "       mix(cube_color, color.rgb, 1.0-ENVIRONMENTAL_FACTOR).rgb;       \n"
             "	color.rgb *= mixed_color;                                           \n"
             "}																		\n"
             "#endif                                                                 \n"
@@ -913,6 +913,7 @@ public:
                 ss->setDefine("LIGHTING");
 #endif
                 ss->setDefine("SHADOWING");
+                ss->setDefine("ENVIRONMENTAL_FACTOR","0");
 #else
                 osg::notify(osg::NOTICE) << "NOTE: Plugin Lighting built with version prior to 3.3.7." << std::endl;
                 osg::notify(osg::NOTICE) << "  The shader composition will not have effect thus the" << std::endl;

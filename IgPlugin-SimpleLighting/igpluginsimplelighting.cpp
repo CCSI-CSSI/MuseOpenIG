@@ -137,6 +137,30 @@ public:
         }
     }
 
+    class UpdateCameraPosUniformCallback : public osg::Uniform::Callback
+    {
+    public:
+        UpdateCameraPosUniformCallback(igcore::ImageGenerator* ig)
+            : _ig(ig)
+        {
+
+        }
+
+        virtual void operator () (osg::Uniform* u, osg::NodeVisitor* )
+        {
+            osg::Vec3d eye;
+            osg::Vec3d center;
+            osg::Vec3d up;
+
+            _ig->getViewer()->getView(0)->getCamera()->getViewMatrixAsLookAt(eye,center,up);
+
+            u->set(eye);
+        }
+
+    protected:
+        igcore::ImageGenerator*     _ig;
+    };
+
     virtual void init(igplugincore::PluginContext& context)
     {
         _lightImplementationCallback = new SimpleLightImplementationCallback(context.getImageGenerator());
@@ -161,12 +185,12 @@ public:
 
         osg::Shader* mainVertexShader = new osg::Shader( osg::Shader::VERTEX,
             "#version 120                                                           \n"
+            "#pragma import_defines(SIMPLELIGHTING,SHADOWING,ENVIRONMENTAL,AO)      \n"
             "varying vec3 normal;                                                   \n"
             "varying vec3 eyeVec;                                                   \n"
             "varying vec3 lightDirs[8];                                             \n"
             "uniform mat4 osg_ViewMatrixInverse;									\n"
-            "uniform vec3 cameraPos;        										\n"
-            "uniform bool environmentalEnabled;                                     \n"
+            "uniform vec3 cameraPos;        										\n"            
             "mat3 getLinearPart( mat4 m )											\n"
             "{																		\n"
             "	mat3 result;														\n"
@@ -187,8 +211,7 @@ public:
             "}																		\n"
             "																		\n"
             "void environmentalMapping()											\n"
-            "{																		\n"
-            "	if (!environmentalEnabled) return;              					\n"
+            "{																		\n"            
             "	mat4 modelWorld4x4 = osg_ViewMatrixInverse * gl_ModelViewMatrix;	\n"
             "																		\n"
             "	mat3 modelWorld3x3 = getLinearPart( modelWorld4x4 );				\n"
@@ -221,21 +244,19 @@ public:
             "   eyeVec = -vVertex;                                              \n"
             "   vec4  ecPos  = gl_ModelViewMatrix * gl_Vertex;                  \n"
             "   DynamicShadow( ecPos );                                         \n"
+            "#if defined(ENVIRONMENTAL)                                         \n"
             "   environmentalMapping();                                         \n"
+            "#endif                                                             \n"
             "}                                                                  \n"
         );
 
 
         osg::Shader* mainFragmentShader = new osg::Shader( osg::Shader::FRAGMENT,
             "#version 120                                                           \n"
-            "uniform sampler2D ambientOcclusionTexture;                             \n"
-            "uniform bool ambientOcclusionEnabled;                                  \n"
+            "#pragma import_defines(SIMPLELIGHTING,SHADOWING,ENVIRONMENTAL,AO,ENVIRONMENTAL_FACTOR)\n"
+            "uniform sampler2D ambientOcclusionTexture;                             \n"            
             "uniform samplerCube environmentalMapTexture;                           \n"
-            "																		\n"
-            "uniform bool environmentalEnabled;                                     \n"
-            "uniform bool shadowingEnabled;                                         \n"
-            "uniform bool lightingEnabled;                                          \n"
-            "uniform float environmentalFactor;                                     \n"
+            "																		\n"            
             "uniform float ambientOcclusionFactor;                                  \n"
             "uniform float shadowsFactor;                                           \n"
             "                                                                       \n"
@@ -362,32 +383,38 @@ public:
             "	computeFogColor(color);                                             \n"
             "}                                                                      \n"
             "void computeAmbientOcclusion( inout vec4 color )                       \n"
-            "{                                                                      \n"
-            "   if (!ambientOcclusionEnabled) return;                               \n"
+            "{                                                                      \n"            
             "   vec4 aocolor = texture2D(ambientOcclusionTexture,gl_TexCoord[0].xy);\n"
             "   aocolor.rgb *= ambientOcclusionFactor;                              \n"
             "   color.rgb *= aocolor.rgb;                                           \n"
             "}                                                                      \n"
             "void computeEnvironmentalMap( inout vec4 color )                       \n"
-            "{																		\n"
-            "	if (!environmentalEnabled) return;                                  \n"
+            "{																		\n"            
             "   vec3 v = gl_TexCoord[4].xzy;                                        \n"
             "   v.y *= -1.0;                                                        \n"
             "	vec3 cube_color =													\n"
             "		textureCube(environmentalMapTexture, v).rgb;                    \n"
             "																		\n"
             "   vec3 mixed_color =                                                  \n"
-            "       mix(cube_color, color.rgb, 1.0-environmentalFactor).rgb;        \n"
-            "	color.rgb *= mixed_color;//vec4(mixed_color , color.a);                                \n"
+            "       mix(cube_color, color.rgb, 1.0-ENVIRONMENTAL_FACTOR).rgb;        \n"
+            "	color.rgb *= mixed_color;//vec4(mixed_color , color.a);             \n"
             "}																		\n"
             "void main()                                                            \n"
             "{                                                                      \n"
             "   vec4 color = texture2D( baseTexture, gl_TexCoord[0].xy );           \n"
             "   float shadow = DynamicShadow();                                     \n"
-            "   if (shadowingEnabled) color.rgb = mix( color.rgb * (1.0-shadowsFactor), color.rgb, shadow );\n"
-            "   if (lightingEnabled) lighting(color);                               \n"
+            "#if defined(SHADOWING)                                                 \n"
+            "   color.rgb = mix( color.rgb * (1.0-shadowsFactor), color.rgb, shadow );\n"
+            "#endif                                                                 \n"
+            "#if defined(SIMPLELIGHTING)                                            \n"
+            "   lighting(color);                                                    \n"
+            "#endif                                                                 \n"
+            "#if defined(ENVIRONMENTAL)                                             \n"
             "   computeEnvironmentalMap(color);                                     \n"
+            "#endif                                                                 \n"
+            "#if defined(AO)                                                        \n"
             "   computeAmbientOcclusion(color);                                     \n"
+            "#endif                                                                 \n"
             "   gl_FragColor = color;                                               \n"
             "}                                                                      \n"
         );
@@ -447,13 +474,16 @@ public:
                 float shadowsFactor = igcore::Configuration::instance()->getConfig("Shadows-Factor",0.5);
                 ss->addUniform(new osg::Uniform("shadowsFactor",shadowsFactor));
 
-                ss->addUniform(new osg::Uniform("ambientOcclusionEnabled",(bool)false),osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-                ss->addUniform(new osg::Uniform("environmentalEnabled",(bool)false),osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-                ss->addUniform(new osg::Uniform("shadowingEnabled",(bool)true),osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-                ss->addUniform(new osg::Uniform("lightingEnabled",(bool)true),osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+                ss->setDefine("SIMPLELIGHTING");
+                ss->setDefine("SHADOWING");
+                ss->setDefine("ENVIRONMENTAL_FACTOR","0");
 
                 unsigned int defaultDiffuseSlot = igcore::Configuration::instance()->getConfig("Default-diffuse-texture-slot",0);
                 ss->addUniform(new osg::Uniform("baseTexture",(int)defaultDiffuseSlot),osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+
+                osg::Uniform* cu = new osg::Uniform("cameraPos",osg::Vec3d());
+                cu->setUpdateCallback(new UpdateCameraPosUniformCallback(context.getImageGenerator()));
+                ss->addUniform(cu);
 
             }
         }
@@ -525,20 +555,21 @@ protected:
             {
                 osg::LightSource* light = itr->second;
 
-                if (definition._dirtyMask & igcore::LightAttributes::AMBIENT)
+				if ((definition._dirtyMask & igcore::LightAttributes::AMBIENT) == igcore::LightAttributes::AMBIENT)
                     light->getLight()->setAmbient(definition._ambient);
 
-                if (definition._dirtyMask & igcore::LightAttributes::DIFFUSE && definition._dirtyMask & igcore::LightAttributes::BRIGHTNESS)
+				if ((definition._dirtyMask & igcore::LightAttributes::DIFFUSE) == igcore::LightAttributes::DIFFUSE &&
+					(definition._dirtyMask & igcore::LightAttributes::BRIGHTNESS) == igcore::LightAttributes::BRIGHTNESS)
                     light->getLight()->setDiffuse(definition._diffuse*definition._brightness);
 
-                if (definition._dirtyMask & igcore::LightAttributes::SPECULAR)
+				if ((definition._dirtyMask & igcore::LightAttributes::SPECULAR) == igcore::LightAttributes::SPECULAR)
                     light->getLight()->setSpecular(definition._specular);
 
-                if (definition._dirtyMask & igcore::LightAttributes::CONSTANTATTENUATION)
+				if ((definition._dirtyMask & igcore::LightAttributes::CONSTANTATTENUATION) == igcore::LightAttributes::CONSTANTATTENUATION)
                     light->getLight()->setConstantAttenuation(1.f/definition._constantAttenuation);
 
-                if (definition._dirtyMask & igcore::LightAttributes::SPOTCUTOFF)
-                    light->getLight()->setSpotCutoff(definition._spotCutoff);
+				if ((definition._dirtyMask & igcore::LightAttributes::SPOTCUTOFF) == igcore::LightAttributes::SPOTCUTOFF)
+                    light->getLight()->setSpotCutoff(definition._spotCutoff);				
 
             }
         }

@@ -55,6 +55,7 @@ public:
 		, _terminal(terminal)
 		, _position(0)
 		, _insert(false)
+        , _terminalOn(false)
 	{
 		createCursor();
 		setText("");
@@ -222,6 +223,8 @@ public:
 
 	virtual void keyDown(int key)
 	{
+        if (!_terminalOn) return;
+
 		OpenThreads::ScopedLock<OpenThreads::Mutex>		l(_mutex);
 
 		if (key == osgGA::GUIEventAdapter::KEY_Return)
@@ -269,7 +272,7 @@ public:
 				s.resize(_text->getText().size()-1);
 				_text->update();
 				calcOffsets();
-				setCursor();
+                setCursor();
 			}
 		}
 		else
@@ -324,7 +327,7 @@ public:
 
 	
     bool handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter&)
-	{
+	{        
 		switch(ea.getEventType())
 		{
 			case(osgGA::GUIEventAdapter::KEYDOWN):
@@ -406,10 +409,9 @@ public:
 						}
 						break;
 					case osgGA::GUIEventAdapter::KEY_F8:
-						{
-							static bool terminalOn = false;
-							terminalOn = !terminalOn;
-							switch (terminalOn)
+						{							
+                            _terminalOn = !_terminalOn;
+                            switch (_terminalOn)
 							{
 							case true:
 								_scene->addChild(_terminal);
@@ -503,6 +505,7 @@ protected:
 	OpenThreads::Mutex			_mutex;
 	bool						_insert;
 	osg::Geometry*				_cursorgeometry;
+    bool                        _terminalOn;
 };
 
 void OpenIG::initTerminal()

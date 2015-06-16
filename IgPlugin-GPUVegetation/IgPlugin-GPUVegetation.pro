@@ -15,33 +15,52 @@ DEFINES += IGPLUGINGPUVEGETATION_LIBRARY
 
 SOURCES += igplugingpuvegetation.cpp
 
-QMAKE_CXXFLAGS += -fpermissive -shared-libgcc
-
-DESTDIR = /usr/local/lib/igplugins
-
 HEADERS +=
 
-unix {
-    target.path = /usr/lib
-    INSTALLS += target
-}
-
 LIBS += -losg -losgDB -losgViewer -lIgPluginCore -lIgCore -lOpenThreads
-
-INCLUDEPATH += /usr/local/include
-DEPENDPATH += /usr/local/include
 
 INCLUDEPATH += ../
 DEPENDPATH += ../
 
-INCLUDEPATH += /usr/local/lib64
-DEPENDPATH += /usr/local/lib64
+unix {
+    !mac:contains(QMAKE_HOST.arch, x86_64):{
+        DESTDIR = /usr/local/lib64/igplugins
+        target.path = /usr/local/lib64/igplugins
+    } else {
+        DESTDIR = /usr/local/lib/igplugins
+        target.path = /usr/local/lib/igplugins
+    }
+    message(Libs will be installed into $$DESTDIR)
 
-INCLUDEPATH += /usr/local/lib
-DEPENDPATH += /usr/local/lib
+    INSTALLS += target
+
+    INCLUDEPATH += /usr/local/include
+    DEPENDPATH += /usr/local/include
+    INCLUDEPATH += /usr/local/lib64
+    DEPENDPATH += /usr/local/lib64
+
+    INCLUDEPATH += /usr/local/lib
+    DEPENDPATH += /usr/local/lib
+
+    # library version number files
+    exists( "../openig_version.pri" ) {
+
+	include( "../openig_version.pri" )
+	isEmpty( VERSION ){ error( "bad or undefined VERSION variable inside file openig_version.pri" )
+	} else {
+	message( "Set version info to: $$VERSION" )
+	}
+
+    }
+    else { error( "could not find pri library version file openig_version.pri" ) }
+
+    # end of library version number files
+}
 
 OTHER_FILES += \
     Readme.txt
+
+win32-g++:QMAKE_CXXFLAGS += -fpermissive -shared-libgcc -D_GLIBCXX_DLL
 
 win32 {
     OSGROOT = $$(OSG_ROOT)
@@ -71,5 +90,4 @@ win32 {
     DLLDESTDIR = $$OPENIGBUILD/bin/igplugins
 
     LIBS += -L$$OPENIGBUILD/lib
-    LIBS += -lstdc++.dll    
 }

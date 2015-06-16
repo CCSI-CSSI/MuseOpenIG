@@ -326,7 +326,7 @@ protected:
 
             angle = timeOfDay * 2.0 * osg::PI / 24.0;
 
-            if( hours <= 6.0 or hours >= 18.0 )
+            if( hours <= 6.0 || hours >= 18.0 )
             {
                 intFactor = 0.0;
             }

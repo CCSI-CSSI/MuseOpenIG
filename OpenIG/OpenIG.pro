@@ -11,12 +11,7 @@ CONFIG += silent
 TARGET = OpenIG
 TEMPLATE = lib
 
-DESTDIR = /usr/local/lib
-
-QMAKE_CXXFLAGS += -fpermissive -shared-libgcc -D_GLIBCXX_DLL
-
 DEFINES += OPENIG_LIBRARY
-DEFINES += LINUX
 
 SOURCES += \
     openig.cpp \
@@ -32,38 +27,61 @@ HEADERS += openig.h \
     export.h \
     keypad.h
 
-unix {
-    target.path = /usr/lib
-    INSTALLS += target
-}
-
 LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgGA -losgText -losgShadow -lIgCore -lIgPluginCore
-
-FILE = $${PWD}/openig.xml
-DDIR = $${DESTDIR}/igdata
-
-QMAKE_POST_LINK = $$QMAKE_CHK_DIR_EXISTS $$quote($$DDIR) $$QMAKE_MKDIR $$quote($$DDIR) $$escape_expand(\\n\\t)
-QMAKE_POST_LINK = $$QMAKE_COPY $$quote($$FILE) $$quote($$DDIR) $$escape_expand(\\n\\t)
-
-FILE = $${PWD}/OpenIG-Splash.jpg
-DDIR = $${DESTDIR}/igdata
-
-QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$FILE) $$quote($$DDIR) $$escape_expand(\\n\\t)
-
-INCLUDEPATH += /usr/local/include
-DEPENDPATH += /usr/local/include
-
-INCLUDEPATH += /usr/lib64
-DEPENDPATH += /usr/lib64
 
 INCLUDEPATH += ../
 DEPENDPATH += ../
 
-OTHER_FILES += \
-    openig.xml
+unix {
+    DEFINES += LINUX
+    !mac:contains(QMAKE_HOST.arch, x86_64):{
+        DESTDIR = /usr/local/lib64
+        target.path = /usr/local/lib64
+        message(Libs will be installed into /usr/local/lib64)
+    } else {
+        DESTDIR = /usr/local/lib
+        target.path = /usr/local/lib
+        message(Libs will be installed into /usr/local/lib)
+    }
 
-FILE = $${PWD}/openig.xml
-DDIR = $${DESTDIR}
+    INSTALLS += target
+
+    FILE = $${PWD}/openig.xml
+    DDIR = $${DESTDIR}/igdata
+    DFILE = $${DESTDIR}/igdata/openig.xml
+
+    QMAKE_POST_LINK = test -d $$quote($$DDIR) || $$QMAKE_MKDIR $$quote($$DDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += test -e $$quote($$DFILE) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
+
+    FILE = $${PWD}/OpenIG-Splash.jpg
+    DDIR = $${DESTDIR}/igdata
+    DFILE = $${DESTDIR}/igdata/OpenIG-Splash.jpg
+
+    QMAKE_POST_LINK += test -e $$quote($$DFILE) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
+
+    INCLUDEPATH += /usr/local/include
+    DEPENDPATH += /usr/local/include
+
+    INCLUDEPATH += /usr/lib64
+    DEPENDPATH += /usr/lib64
+
+    # library version number files
+    exists( "../openig_version.pri" ) {
+
+	include( "../openig_version.pri" )
+	isEmpty( VERSION ){ error( "bad or undefined VERSION variable inside file openig_version.pri" )
+	} else {
+	message( "Set version info to: $$VERSION" )
+	}
+
+    }
+    else { error( "could not find pri library version file openig_version.pri" ) }
+
+    # end of library version number files
+}
+
+win32-g++:QMAKE_CXXFLAGS += -fpermissive -shared-libgcc -D_GLIBCXX_DLL
+win32-g++:LIBS += -lstdc++.dll
 
 win32 {
     OSGROOT = $$(OSG_ROOT)
@@ -93,29 +111,27 @@ win32 {
     DLLDESTDIR = $$OPENIGBUILD/bin
 
     LIBS += -L$$OPENIGBUILD/lib
-    LIBS += -lIgCore -lstdc++.dll
 
     FILE = $${PWD}/openig.xml
     DFILE = $${OPENIGBUILD}/bin/igdata/openig.xml
     DDIR = $${OPENIGBUILD}/bin/igdata
 
-    win32:FILE ~= s,/,\\,g
-    win32:DFILE ~= s,/,\\,g
-    win32:DDIR ~= s,/,\\,g
+    FILE ~= s,/,\\,g
+    DFILE ~= s,/,\\,g
+    DDIR ~= s,/,\\,g
 
-    QMAKE_POST_LINK = $$QMAKE_CHK_DIR_EXISTS $$quote($$DDIR) $$QMAKE_MKDIR $$quote($$DDIR) $$escape_expand(\\n\\t)
-
-    QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK = if not exist  $$quote($$DDIR) $$QMAKE_MKDIR $$quote($$DDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += if not exist $$quote($$DFILE) copy /y $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
 
     FILE = $${PWD}/OpenIG-Splash.jpg
-    DFILE = $${OPENIGBUILD}/bin/igdata/OpenIG-Splash.jpg
+    DFILE = $${OPENIGBUILD}/bin/igdata/
 
-    win32:FILE ~= s,/,\\,g
-    win32:DFILE ~= s,/,\\,g
+    FILE ~= s,/,\\,g
+    DFILE ~= s,/,\\,g
 
-    QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += if not exist $$quote($$DFILE/OpenIG-Splash.jpg) copy /y $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
 }
 
-DISTFILES += \
-    OpenIG-Splash.jpg
+OTHER_FILES += openig.xml
 
+DISTFILES += OpenIG-Splash.jpg

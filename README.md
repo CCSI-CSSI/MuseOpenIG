@@ -5,10 +5,10 @@ Documentation and Binary Downloads for some platforms available at: http://openi
 
 Dependencies for compiling from source:
 --------------------------------------
-1.  OpenSceneGraph 3.3.7 or later<br />
-    A patched version of OSG 3.3.7 is available on our <a href="http://openig.compro.net/download-openig.html">Downloads</a><br />
-    page that contains some updates and allows full functionality<br />
-    of all features of MuseOpenIG.<br />
+1.  OpenSceneGraph 3.3.7 or later  
+    A patched version of OSG 3.3.7 is available on our [Downloads](http://openig.compro.net/download-openig.html)  
+    page, that contains some updates and allows full functionality  
+    of all features of MuseOpenIG.  
 
 2.  QT 5.4.1 or later
 3.  Boost C++ Libraries 1.54 or later

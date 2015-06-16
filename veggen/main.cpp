@@ -31,6 +31,7 @@
 #include <osg/Texture2D>
 
 #include <limits>
+#include <cctype>
 
 class StringUtils
 {
@@ -235,7 +236,7 @@ public:
                         if ( itr == _printImageFileNames.end())
                         {
                             osg::notify(osg::NOTICE) << "Image: " << simpleFileName << std::endl;
-                            _printImageFileNames[simpleFileName] == true;
+                            _printImageFileNames[simpleFileName] = true;
                         }
                     }
 

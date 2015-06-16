@@ -58,6 +58,9 @@ void PluginHost::loadPlugins(const std::string& path, const std::string& configF
         osg::ref_ptr<osgDB::XmlNode> root = osgDB::readXmlFile(configFileName);
         if (root.valid() && root->children.size())
         {
+			root = root->children.at(0);
+			if (!root.valid()) return;
+
             for (size_t i = 0; i<root->children.size(); ++i)
             {
                 osg::ref_ptr<osgDB::XmlNode> config = root->children.at(i);

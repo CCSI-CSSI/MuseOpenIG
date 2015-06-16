@@ -563,7 +563,11 @@ protected:
             {
                 info._textureName = child->contents;
 
-                osg::ref_ptr<osg::Image> image = osgDB::readImageFile(_path+"/"+info._textureName);
+                osg::ref_ptr<osg::Image> image = osgDB::readImageFile(info._textureName);
+                if (!image.valid())
+                {
+                    image = osgDB::readImageFile(_path+"/"+info._textureName);
+                }
 
                 info._texture = new osg::Texture2D;
                 info._texture->setImage(image);

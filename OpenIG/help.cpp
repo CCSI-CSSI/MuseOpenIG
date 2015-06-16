@@ -44,8 +44,14 @@ namespace openig
 class OnScreenHelp: public osgGA::GUIEventHandler
 {
 public:
-    OnScreenHelp(unsigned int numLines, osgText::Text* text, osgViewer::CompositeViewer* v, osg::Group* scene, osg::Node* help)
-        : _viewer(v)
+    OnScreenHelp(   openig::OpenIG* ig,
+                    unsigned int numLines,
+                    osgText::Text* text,
+                    osgViewer::CompositeViewer* v,
+                    osg::Group* scene,
+                    osg::Node* help)
+        : _ig(ig)
+        , _viewer(v)
         , _scene(scene)
         , _help(help)
         , _text(text)
@@ -115,7 +121,13 @@ public:
            igcore::Commands::Command*   cmd = itr->second;
            std::string                  cmdName = itr->first;
 
-           unsigned int numLines = 1;
+           unsigned int offset = 1;
+           if ( itr == igcore::Commands::instance()->getCommands().begin())
+           {
+               offset = 3;
+           }
+
+           unsigned int numLines = offset;
            numLines += igcore::StringUtils::instance()->numberOfLines(cmd->getUsage());
            numLines += igcore::StringUtils::instance()->numberOfLines(cmd->getDescription());
 
@@ -149,6 +161,12 @@ public:
 
         std::ostringstream oss;
 
+        if (_currentPage == 0)
+        {
+            oss << "OpenIG version: " << _ig->version() << " build: " << __DATE__ << " " __TIME__ << std::endl;
+            oss << std::endl;
+        }
+
         CommandsPage& page = _pages[_currentPage];
         CommandsPageIterator itr = page.begin();
         for ( ; itr != page.end(); ++itr )
@@ -167,6 +185,7 @@ public:
 
 
 protected:
+    openig::OpenIG*             _ig;
     osgViewer::CompositeViewer* _viewer;
     osg::Group*                 _scene;
     osg::ref_ptr<osg::Node>     _help;
@@ -268,7 +287,13 @@ void OpenIG::initOnScreenHelp()
     text->setAlignment(osgText::Text::LEFT_TOP);
 
     _viewer->getView(0)->addEventHandler(
-                new OnScreenHelp(height/22, text, _viewer.get(), _viewer->getView(0)->getSceneData()->asGroup(), helpGroup.get())
+        new OnScreenHelp(
+                this,
+                height/22,
+                text,
+                _viewer.get(),
+                _viewer->getView(0)->getSceneData()->asGroup(),
+                helpGroup.get())
      );
 
 }

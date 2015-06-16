@@ -13,10 +13,6 @@ TEMPLATE = lib
 
 DEFINES += IGPLUGINSILVERLINING_LIBRARY
 
-DESTDIR = /usr/local/lib/igplugins
-
-QMAKE_CXXFLAGS += -fpermissive -shared-libgcc -D_GLIBCXX_DLL
-
 CONFIG -= warn_on
 
 SOURCES += igpluginsilverlining.cpp \
@@ -28,48 +24,67 @@ HEADERS += \
     SkyDrawable.h \
     AtmosphereReference.h
 
-unix {
-    target.path = /usr/lib
-    INSTALLS += target
-}
-
-LIBS += -losg -losgDB -losgViewer -lIgPluginCore -lSilverLiningOpenGL -lIgCore
-
-FILE = $${PWD}/libIgPlugin-SilverLining.so.xml
-DDIR = $${DESTDIR}
-
-mac: DDIR = $${DESTDIR}/libIgPlugin-SilverLining.dylib.xml
-
-QMAKE_POST_LINK = $$QMAKE_COPY $$quote($$FILE) $$quote($$DDIR) $$escape_expand(\\n\\t)
-
-INCLUDEPATH += /usr/local/include
-DEPENDPATH += /usr/local/include
-
 INCLUDEPATH += ../
 DEPENDPATH += ../
 
-INCLUDEPATH += /usr/local/lib64
-DEPENDPATH += /usr/local/lib64
+LIBS += -losg -losgDB -losgViewer -lOpenThreads -lIgPluginCore -lIgCore
 
-INCLUDEPATH += /usr/local/include/Public_Headers
-DEPENDPATH += /usr/local/include/Public_Headers
+unix {
+    !mac:contains(QMAKE_HOST.arch, x86_64):{
+        DESTDIR = /usr/local/lib64/igplugins
+        target.path = /usr/local/lib64/igplugins
+    } else {
+        DESTDIR = /usr/local/lib/igplugins
+        target.path = /usr/local/lib/igplugins
+    }
+    message(Libs will be installed into $$DESTDIR)
 
-unix:!mac {
-LIBS += -lGL -lGLU
+    INSTALLS += target
+
+    INCLUDEPATH += /usr/local/include
+    DEPENDPATH += /usr/local/include
+
+    INCLUDEPATH += /usr/local/lib64
+    DEPENDPATH += /usr/local/lib64
+
+    INCLUDEPATH += /usr/local/include/Public_Headers
+    DEPENDPATH += /usr/local/include/Public_Headers
+
+    LIBS += -lSilverLiningOpenGL
+
+    FILE = $${PWD}/libIgPlugin-SilverLining.so.xml
+    DDIR = $${DESTDIR}/libIgPlugin-SilverLining.so.xml
+
+    mac: DDIR = $${DESTDIR}/libIgPlugin-SilverLining.dylib.xml
+
+    QMAKE_POST_LINK =  test -d $$quote($$DESTDIR) || $$QMAKE_MKDIR $$quote($$DESTDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += test -e $$quote($$DDIR) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DDIR) $$escape_expand(\\n\\t)
+
+    !mac: LIBS += -lGL -lGLU
+    mac: LIBS += -framework openGL
+
+    # library version number files
+    exists( "../openig_version.pri" ) {
+
+	include( "../openig_version.pri" )
+	isEmpty( VERSION ){ error( "bad or undefined VERSION variable inside file openig_version.pri" )
+	} else {
+	message( "Set version info to: $$VERSION" )
+	}
+
+    }
+    else { error( "could not find pri library version file openig_version.pri" ) }
+
+    # end of library version number files
 }
 
-win32:!mac{
- LIBS += -lopengl32 -lglu32
-}
+OTHER_FILES += libIgPlugin-SilverLining.so.xml
 
-mac: LIBS += -framework openGL
-
-LIBS += -lOpenThreads
-
-OTHER_FILES += \
-    libIgPlugin-SilverLining.so.xml
+win32-g++:QMAKE_CXXFLAGS += -fpermissive -shared-libgcc -D_GLIBCXX_DLL
 
 win32 {
+    LIBS += -lopengl32 -lglu32 -lUser32
+
     OSGROOT = $$(OSG_ROOT)
     isEmpty(OSGROOT) {
         message(\"OpenSceneGraph\" not detected...)
@@ -98,7 +113,7 @@ win32 {
 
     LIBS += -L$$OPENIGBUILD/lib
 
-    SLROOT = $$(SILVERLINING)
+    SLROOT = "E:\SilverLining SDK(Full source)"
     isEmpty(SLROOT) {
         message(\"SilverLining\" not detected...)
     }
@@ -107,29 +122,22 @@ win32 {
         INCLUDEPATH += $$quote(\"$$SLROOT/Public Headers\")
         message($$INCLUDEPATH)
     }
-    SLBUILD = $$(SILVERLINING_BUILD)
+    SLBUILD = "E:\SilverLining SDK(Full source)\lib\vc12\x64"
     isEmpty(SLBUILD) {
         message(\"SilverLining build\" not detected...)
     }
     else {
         message(\"SilverLining build\" detected in \"$$SLBUILD\")
         DEPENDPATH += $$SLBUILD
-        LIBS += -L$$SLBUILD
+	LIBS += -L$$SLBUILD -lSilverLining-MT-DLL
     }
 
-    LIBS += -lstdc++.dll
-
-    FILE = $${PWD}/libIgPlugin-SilverLining.so.xml
+    FILE = $${PWD}/libIgPlugin-SilverLining.so.windows.xml
     DFILE = $${DLLDESTDIR}/IgPlugin-SilverLining.dll.xml
 
-    win32:FILE ~= s,/,\\,g
-    win32:DFILE ~= s,/,\\,g
+    FILE ~= s,/,\\,g
+    DFILE ~= s,/,\\,g
 
-    QMAKE_POST_LINK = $$QMAKE_COPY $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK =  if not exist $$quote($$DLLDESTDIR) $$QMAKE_MKDIR $$quote($$DLLDESTDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += if not exist $$quote($$DFILE) copy /y $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
 }
-
-DISTFILES += \
-    Makefile.compro.mingw32
-
-
-
