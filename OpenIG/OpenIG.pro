@@ -46,16 +46,17 @@ unix {
 
     INSTALLS += target
 
+    BDIR = /usr/local/bin
     FILE = $${PWD}/openig.xml
-    DDIR = $${DESTDIR}/igdata
-    DFILE = $${DESTDIR}/igdata/openig.xml
+    DDIR = $${BDIR}/igdata
+    DFILE = $${BDIR}/igdata/openig.xml
 
     QMAKE_POST_LINK = test -d $$quote($$DDIR) || $$QMAKE_MKDIR $$quote($$DDIR) $$escape_expand(\\n\\t)
     QMAKE_POST_LINK += test -e $$quote($$DFILE) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
 
     FILE = $${PWD}/OpenIG-Splash.jpg
-    DDIR = $${DESTDIR}/igdata
-    DFILE = $${DESTDIR}/igdata/OpenIG-Splash.jpg
+    DDIR = $${BDIR}/igdata
+    DFILE = $${BDIR}/igdata/OpenIG-Splash.jpg
 
     QMAKE_POST_LINK += test -e $$quote($$DFILE) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
 
