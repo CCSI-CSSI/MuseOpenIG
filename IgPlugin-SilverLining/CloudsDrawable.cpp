@@ -94,6 +94,19 @@ void CloudsDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 					//std::cout << std::endl;
 					ext->glUniform1fv(cbloc, lightsBrightness.size(), &lightsBrightness.front());
 				}
+				GLint lightingBrightnessLoc = ext->glGetUniformLocation(shader, "todLightsBrightness");
+				if (lightingBrightnessLoc != -1)
+				{					
+					float factor = _todHour > 4 && _todHour < 18 ? _lightBrightness_day : _lightBrightness_night;
+					//std::cout << "todLightsBrightness = " << factor << std::endl;
+					ext->glUniform1f(lightingBrightnessLoc, factor);
+				}
+				GLint lightingBrightnessEnabledLoc = ext->glGetUniformLocation(shader, "todLightsBrightnessEnabled");
+				if (lightingBrightnessEnabledLoc != -1)
+				{	
+					//std::cout << "todLightsBrightnessEnabled = " << _lightBrightness_enable << std::endl;
+					ext->glUniform1i(lightingBrightnessEnabledLoc, _lightBrightness_enable ? 1 : 0);
+				}
 				ext->glUseProgram(0);
 			}
 			{
@@ -116,43 +129,7 @@ void CloudsDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 					ext->glUseProgram(0);
 				}
 			}
-            {
-                SL_VECTOR(unsigned int) shaders = atmosphere->GetActivePlanarCloudShaders();
-                for (SL_VECTOR(unsigned int)::iterator itr = shaders.begin(); itr != shaders.end(); ++itr)
-                {
-                    GLint plShader = (GLint)*itr;
-
-                    ext->glUseProgram(plShader);
-                    GLint plLoc = ext->glGetUniformLocation(plShader, "lightsEnabled[0]");
-                    if (plLoc != -1)
-                    {
-                        std::vector<GLint> lightsEnabled;
-                        for (size_t i=0; i<8; ++i)
-                        {
-                            lightsEnabled.push_back(_ig->isLightEnabled(i) ? 1 : 0);
-                        }
-                        ext->glUniform1iv(plLoc, lightsEnabled.size(), &lightsEnabled.front());
-                    }
-                    GLint invPersMatrixLoc = ext->glGetUniformLocation(plShader,"invPersMatrix");
-                    if (invPersMatrixLoc != -1)
-                    {
-                        osg::Matrixf projectionMatrix;
-                        for ( unsigned int i = 0; i < 4; ++i )
-                            for ( unsigned int j = 0; j < 4; ++j )
-                                projectionMatrix(i,j) = osg::Matrixd::inverse(renderInfo.getCurrentCamera()->getProjectionMatrix())(i,j);
-
-                        ext->glUniformMatrix4fv(invPersMatrixLoc,1,GL_FALSE,projectionMatrix.ptr());
-                    }
-                    GLint viewportLoc = ext->glGetUniformLocation(plShader,"viewport");
-                    if (viewportLoc != -1)
-                    {
-                        osg::Viewport* viewport = renderInfo.getCurrentCamera()->getViewport();
-
-                        ext->glUniform4f(viewportLoc, viewport->x(),viewport->y(),viewport->width(),viewport->height());
-                    }
-                    ext->glUseProgram(0);
-                }
-            }
+            
 			 
 			atmosphere->SetCameraMatrix(renderInfo.getCurrentCamera()->getViewMatrix().ptr());
 			atmosphere->SetProjectionMatrix(renderInfo.getCurrentCamera()->getProjectionMatrix().ptr());

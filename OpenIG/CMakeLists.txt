@@ -17,6 +17,7 @@ set( _OpenIGSourceFiles
     openig.cpp
     splash.cpp
     terminal.cpp
+	effects.cpp
 )
 
 add_library( ${LIB_NAME} SHARED
@@ -38,5 +39,3 @@ set_target_properties (${target} PROPERTIES DEFINE_SYMBOL  "OPENIG_LIBRARY")
 
 include( ModuleInstall REQUIRED )
 
-install(FILES ${CMAKE_CURRENT_LIST_DIR}/OpenIG-Splash.jpg DESTINATION ${INSTALL_BINDIR}/igdata)
-install(FILES ${CMAKE_CURRENT_LIST_DIR}/openig.xml DESTINATION ${INSTALL_BINDIR}/igdata)

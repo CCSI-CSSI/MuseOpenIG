@@ -35,6 +35,7 @@
 
 #include <osgDB/ReadFile>
 #include <osgDB/FileNameUtils>
+#include <osgDB/FileUtils>
 
 #include <osgGA/TrackballManipulator>
 
@@ -75,7 +76,7 @@ OpenIG::~OpenIG()
 
 std::string OpenIG::version()
 {
-    return "1.0.1";
+    return "1.1.0";
 }
 
 class InitPluginOperation : public PluginOperation
@@ -306,7 +307,7 @@ protected:
 class DatabaseReadCallback : public osgDB::Registry::ReadFileCallback
 {
 public:
-    DatabaseReadCallback(igcore::ImageGenerator* ig)
+    DatabaseReadCallback(OpenIG* ig)
         : _ig(ig)
     {
 
@@ -314,7 +315,20 @@ public:
 
     virtual osgDB::ReaderWriter::ReadResult readNode(const std::string& filename, const osgDB::Options* options)
     {
-        osgDB::ReaderWriter::ReadResult result = osgDB::Registry::instance()->readNodeImplementation(filename,options);
+		osgDB::ReaderWriter::ReadResult result;
+
+		if (_ig->getReadNodeImplementationCallback())
+		{
+			osg::ref_ptr<osg::Node> node = _ig->getReadNodeImplementationCallback()->readNode(filename, options);
+			if (node.valid())
+			{
+				result = osgDB::ReaderWriter::ReadResult(node, osgDB::ReaderWriter::ReadResult::FILE_LOADED);
+			}
+		}
+		else
+		{
+			result = osgDB::Registry::instance()->readNodeImplementation(filename, options);
+		}
         if (result.getNode())
         {
             osg::ref_ptr<DatabaseReadPluginOperation> po(
@@ -334,7 +348,7 @@ public:
     }
 
 protected:
-    igcore::ImageGenerator* _ig;
+    OpenIG* _ig;
 };
 
 class PrintLoadedPluginsPluginOperation : public igplugincore::PluginOperation
@@ -345,6 +359,16 @@ public:
         osg::notify(osg::NOTICE) << "Plugin loaded: " << plugin->getName() << ", " << plugin->getDescription() << std::endl;
     }
 };
+void OpenIG::setReadNodeImplementationCallback(igcore::ImageGenerator::ReadNodeImplementationCallback* cb)
+{
+	_readFileCallback = cb;
+}
+
+igcore::ImageGenerator::ReadNodeImplementationCallback* OpenIG::getReadNodeImplementationCallback()
+{
+	return _readFileCallback;
+}
+
 
 void OpenIG::init(osgViewer::CompositeViewer* viewer, const std::string& xmlFileName)
 {
@@ -361,13 +385,13 @@ void OpenIG::init(osgViewer::CompositeViewer* viewer, const std::string& xmlFile
 	std::string configPath = osgDB::getFilePath(xmlFileName);	
 	std::string configFileName = osgDB::getSimpleFileName(xmlFileName);
 
-#if     defined (__linux) || defined (__APPLE__)
-	if (configPath.empty()) configPath = std::string("/usr/local/bin/igdata/");	
-	else configPath += std::string("/");
-#elif   defined (_WIN32)
+//#if     defined (__linux) || defined (__APPLE__)
+//	if (configPath.empty()) configPath = std::string("igdata/");	
+//	else if (configPath.end() != '/') configPath += std::string("/");
+//#elif   defined (_WIN32)
 	if (configPath.empty()) configPath = std::string("igdata/");
 	else configPath += std::string("/");
-#endif
+//#endif
 
 	Configuration::instance()->readFromXML(configPath + configFileName,"OpenIG-Config");
 
@@ -377,19 +401,72 @@ void OpenIG::init(osgViewer::CompositeViewer* viewer, const std::string& xmlFile
     initPluginContext();
     initOnScreenHelp();
     initSplashScreen();
+	initEffects();
 
     osgDB::Registry::instance()->setReadFileCallback( new DatabaseReadCallback(this) );
 
-#if     defined (__linux) 
-	#if defined(BUILD_64)
-        PluginHost::loadPlugins("/usr/local/lib64/igplugins", configPath + configFileName);
-    #else
-        PluginHost::loadPlugins("/usr/local/lib/igplugins", configPath + configFileName);
-    #endif
-#elif	defined (__APPLE__)	
-	PluginHost::loadPlugins("/usr/local/lib/igplugins", configPath + configFileName);
+#if defined (__linux) || defined (__APPLE__)
+    char * oig_root = NULL;
+    std::string igplugin_path;
+
+    oig_root = getenv("OPENIG_LIBRARY_PATH");
+
+    if(!oig_root)
+    {
+        osg::notify(osg::NOTICE) << "Env variable OPENIG_LIBRARY_PATH doesn't exist!!!" << std::endl;
+
+        #if !defined(BUILD_64) || defined (__APPLE__)
+            igplugin_path = "/usr/local/lib/igplugins";
+        #else
+            igplugin_path = "/usr/local/lib64/igplugins";
+        #endif
+    }
+    else
+    {
+        igplugin_path = oig_root;
+        igplugin_path += "/igplugins";
+    }
+    osg::notify(osg::NOTICE) << "Using: " << igplugin_path << " for OpenIG Plugin location!!!!!" << std::endl;
+    PluginHost::loadPlugins(igplugin_path, configPath + configFileName);
 #elif   defined (_WIN32)
-	PluginHost::loadPlugins("igplugins", configPath + configFileName );
+	char* c_oig_root;
+	std::string oig_root;
+	size_t requiredSize;
+	bool var_present = false;
+
+	//Use win32 safe version of getenv()
+	getenv_s(&requiredSize, NULL, 0, "OPENIG_LIBRARY_PATH");
+	if (requiredSize == 0)
+	{
+		osg::notify(osg::NOTICE) << "Env variable OPENIG_LIBRARY_PATH doesn't exist!!!, setting requiredsize to 14 for default path!!!" << std::endl;
+		requiredSize = 14;
+	}
+	else
+		var_present = true;
+
+	c_oig_root = (char*)malloc(requiredSize * sizeof(char));
+	if (!c_oig_root)
+	{
+		osg::notify(osg::NOTICE) << "Failed to allocate memory for OPENIG_LIBRARY_PATH variable!!, exiting!!!" << std::endl;
+		exit(1);
+	}
+
+	if (var_present)
+	{
+		// Get the value of the LIB environment variable.
+		getenv_s(&requiredSize, c_oig_root, requiredSize, "OPENIG_LIBRARY_PATH");
+		oig_root = c_oig_root;
+		oig_root += "\\igplugins";
+	}
+	else //Fallback path to try in event of no env var setting.
+		oig_root = "..\\igplugins";
+
+	osg::notify(osg::NOTICE) << "Loading Plugins from path: " << oig_root << std::endl;
+	osg::notify(osg::NOTICE) << "Loading Plugins from configPath + configFileName: " << configPath + configFileName << std::endl;
+
+	PluginHost::loadPlugins(oig_root, configPath + configFileName);
+
+	//PluginHost::loadPlugins("igplugins", configPath + configFileName );
 #endif
 
     osg::ref_ptr<PrintLoadedPluginsPluginOperation> printPluginOperation(new PrintLoadedPluginsPluginOperation);
@@ -548,9 +625,22 @@ void OpenIG::preRender()
                 if (itr == _entities.end())
                     return;
 
-                osg::NodePath np;
-                np.push_back(itr->second);
+				bool freezeOrientation = false;
+				camera->getUserValue("freeze", freezeOrientation);
+				
+				osg::NodePath np;
 
+				osg::ref_ptr<osg::MatrixTransform> e = new osg::MatrixTransform;
+				if (freezeOrientation)
+				{					
+					e->setMatrix(osg::Matrixd::translate(itr->second->getMatrix().getTrans()));
+					np.push_back(e);
+				}
+				else
+				{
+					np.push_back(itr->second);
+				}
+                              
                 osg::ref_ptr<osg::Group> parent = itr->second->getNumParents() ? itr->second->getParent(0) : 0;
                 while (parent)
                 {
@@ -602,8 +692,8 @@ void OpenIG::postRender()
 
 
 void OpenIG::addEntity(unsigned int id, const std::string& fileName, const osg::Matrixd& mx, const osgDB::Options* options)
-{
-    osg::ref_ptr<osg::Node> model = osgDB::readNodeFile(fileName,options);
+{	
+	osgDB::getDataFilePathList().push_back(osgDB::getFilePath(fileName));
 
     if (options != 0 && !options->getOptionString().empty())
     {
@@ -613,6 +703,32 @@ void OpenIG::addEntity(unsigned int id, const std::string& fileName, const osg::
     {
         osgDB::Registry::instance()->setOptions(0);
     }
+
+	osg::ref_ptr<osg::Node> model; 
+
+	std::string simpleFileName = osgDB::getSimpleFileName(fileName);
+	if (isFileCached(simpleFileName))
+	{
+		EntityCache::iterator itr = _entityCache.find(simpleFileName);
+		if (itr != _entityCache.end())
+		{
+			model = itr->second;
+			osg::notify(osg::NOTICE) << "Model " << simpleFileName << " added from the cache." << std::endl;
+		}
+		else
+		{
+			model = osgDB::readNodeFile(fileName, options);
+			if (model.valid())
+			{
+				_entityCache[simpleFileName] = model;
+				osg::notify(osg::NOTICE) << "Model " << simpleFileName << " added to the cache." << std::endl;
+			}
+		}
+	}
+	else
+	{
+		model = osgDB::readNodeFile(fileName, options);
+	}
 
     if (!model.valid())
     {
@@ -637,6 +753,43 @@ void OpenIG::addEntity(unsigned int id, const std::string& fileName, const osg::
 
     osg::ref_ptr<AddEntityPluginOperation> pluginOperation(new AddEntityPluginOperation(this,mxt,id,fileName));
     this->applyPluginOperation(pluginOperation.get());
+}
+
+void OpenIG::addEntity(unsigned int id, const osg::Node* node, const osg::Matrixd& mx, const osgDB::Options* options)
+{	
+	osg::ref_ptr<osg::Node> model = const_cast<osg::Node*>(node);
+
+	if (options != 0 && !options->getOptionString().empty())
+	{
+		osgDB::Registry::instance()->setOptions(const_cast<osgDB::Options*>(options));
+	}
+	else
+	{
+		osgDB::Registry::instance()->setOptions(0);
+	}
+
+	if (!model.valid())
+	{
+		osg::notify(osg::NOTICE) << "failed to add entity from Node" << std::endl;
+		return;
+	}
+
+	model->getOrCreateStateSet()->setRenderBinDetails(8, "RenderBin");
+
+	osg::ref_ptr<osg::MatrixTransform> mxt = new osg::MatrixTransform;
+	mxt->addChild(model);
+	mxt->setMatrix(mx);
+
+	std::ostringstream oss;
+	oss << id;
+	mxt->setName(oss.str());	
+	mxt->setUserValue("ID", id);
+
+	_entities[id] = mxt;
+	_entitiesToAdd[id] = mxt;
+
+	osg::ref_ptr<AddEntityPluginOperation> pluginOperation(new AddEntityPluginOperation(this, mxt, id, "fromNode"));
+	this->applyPluginOperation(pluginOperation.get());
 }
 
 void OpenIG::reloadEntity(unsigned int id, const std::string& fileName, const osgDB::Options* options)
@@ -799,7 +952,7 @@ struct UpdateEntitiesViewerOperation : public osg::Operation
             itr = ema.begin();
             for ( ; itr != ema.end(); ++itr )
             {
-                _ig->getScene()->asGroup()->addChild(itr->second);
+                _ig->getScene()->asGroup()->addChild(itr->second);				
             }
             ema.clear();
 
@@ -849,6 +1002,7 @@ void OpenIG::initScene()
             _sunOrMoonLight->getLight()->setLightNum(0);
             _sunOrMoonLight->setName("SunOrMoon");
             _sunOrMoonLight->setCullingActive(false);
+
             _viewer->getView(0)->setLight(_sunOrMoonLight->getLight());
             root->addChild(_sunOrMoonLight.get());
 
@@ -999,12 +1153,14 @@ void OpenIG::bindCameraToEntity(unsigned int id, const osg::Matrixd& mx)
     }
 }
 
-void OpenIG::bindCameraSetFixedUp(bool fixedUp)
+void OpenIG::bindCameraSetFixedUp(bool fixedUp, bool freezeOrientation)
 {
     if (_viewer.valid() && _viewer->getNumViews() != 0)
     {
         osg::ref_ptr<osg::Camera> camera = _viewer->getView(0)->getCamera();
         camera->setUserValue("fixedUp",(bool)fixedUp);
+		camera->setUserValue("freeze", (bool)freezeOrientation);
+
     }
 }
 
@@ -1075,7 +1231,7 @@ void OpenIG::setTimeOfDay(unsigned int hour, unsigned int minutes)
 {
     if (hour < 24)
     {
-        igcore::TimeOfDayAttributes tod(hour,minutes);
+        igcore::TimeOfDayAttributes tod((hour ? hour : 1),minutes);
         _context.addAttribute("TOD", new PluginContext::Attribute<igcore::TimeOfDayAttributes>(tod));
     }
 }
@@ -1265,4 +1421,25 @@ OpenIG::LightsMap& OpenIG::getLightsMap()
 {
     return _lights;
 }
+
+const igcore::StringUtils::StringList& OpenIG::getFilesToBeCached() const
+{
+	return _filesToBeCached;
+}
+
+void OpenIG::addFilesToBeCached(const igcore::StringUtils::StringList& files)
+{
+	_filesToBeCached.insert(_filesToBeCached.end(), files.begin(), files.end());
+}
+
+bool OpenIG::isFileCached(const std::string& fileName)
+{
+	igcore::StringUtils::StringList::iterator itr = _filesToBeCached.begin();
+	for (; itr != _filesToBeCached.end(); ++itr)
+	{
+		if (*itr == fileName) return true;
+	}
+	return false;
+}
+
 

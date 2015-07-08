@@ -1,3 +1,19 @@
+6 Jul 2015, version 1.1.0
+- Added support for FBX animations through the new IgPlugin-FBXAnimation plugin
+- Added support for OSG ParticleEffects (smoke, explosions, fire ..) through the IgPlugin-OSGParticleEffects plugin
+- Added support for osgEarth and osgEarth's SimpleLighting through the IgPlugin-OSGEarthSimpleLighting plugin, as well as shader 
+  composition and a sample demo application, openig-earth.
+- Added support for Bullet vehicle physics through the IgPlugin-Bullet as well as a sample openig-bullet demo application
+- Moved the clouds related commands into the IgPlugin-SilverLining plugin and out of the OpenIG main application.
+  Same for the SkyDome plugin, all plugin related commands now reside in their respective plugins.
+- Temporary workaround for TOD 0 and model lighting. This will be revisited in a future release for a more permanent fix.
+- Reorganized the OpenIG file structure.  All demo apps now reside in their own directories, each with its own set of
+  configuration and support files.  This keeps things a bit more structured and easy to find for configuration changes.
+- Added a new light attibute for adjustment of the brighness on SilverLining clouds, together with matching changes to the
+  SilverLining userfunctions shaders/files.
+- Added support for light brightness adjustment based on TOD as read from an XML configuration file.
+- Revisited CMake configuration files for the newly reorganized file structure of OpenIG, as well as a few minor bug fixes.
+
 9 Jun 2015, version 1.0.1
 - Added CMake support
 - OpenIG, added support to allow adjustment of the brightness/attenuation 

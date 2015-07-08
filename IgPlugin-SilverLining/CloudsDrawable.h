@@ -81,6 +81,18 @@ public:
         _pluginContext = context;
     }
 
+	void setLightingBrightness(bool enable, float onDay, float onNight)
+	{
+		_lightBrightness_enable = enable;
+		_lightBrightness_day = onDay;
+		_lightBrightness_night = onNight;
+	}
+
+	void setTOD(unsigned int hour)
+	{
+		_todHour = hour;
+	}
+
 protected:
     void initialize();
 
@@ -89,6 +101,10 @@ protected:
     igcore::ImageGenerator*         _ig;
     bool                            _envMapDirty;
     igplugincore::PluginContext*    _pluginContext;
+	bool							_lightBrightness_enable;
+	float							_lightBrightness_day;
+	float							_lightBrightness_night;
+	unsigned int                    _todHour;
 
 
 };

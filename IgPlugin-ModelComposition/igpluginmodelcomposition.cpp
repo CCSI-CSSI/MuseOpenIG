@@ -65,7 +65,7 @@ public:
         , _environmentalMapSlot(0)
         , _diffuseSlot(0)
         , _environmentalFactor(0.f)
-        , _autoLightId(0)
+        , _autoLightId(0)		
     {
 
     }
@@ -202,9 +202,69 @@ public:
         osg::Camera* _camera;
     };
 
+	class PrserveMaterialNodeVisitor : public osg::NodeVisitor
+	{
+	public:
+		PrserveMaterialNodeVisitor() : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN) {}
+		virtual void apply(osg::Node& node)
+		{
+			osg::ref_ptr<osg::StateSet> ss = node.getOrCreateStateSet();
+			osg::ref_ptr<osg::StateAttribute> attr = ss->getAttribute(osg::StateAttribute::MATERIAL);
+			if (attr.valid())
+			{
+				ss->setAttributeAndModes(attr, osg::StateAttribute::ON | osg::StateAttribute::PROTECTED);
+			}
+			attr = ss->getTextureAttribute(0,osg::StateAttribute::TEXTURE);
+			if (attr.valid())
+			{
+				ss->setTextureAttributeAndModes(0, attr, osg::StateAttribute::ON | osg::StateAttribute::PROTECTED);
+				ss->setDefine("TEXTURING", osg::StateAttribute::ON | osg::StateAttribute::PROTECTED);
+			}
+
+			traverse(node);
+		}
+	};
+	
+	virtual void databaseRead(const std::string& fileName, osg::Node* node, const osgDB::Options*)
+	{
+		if (!osgDB::fileExists(fileName + ".xml"))
+		{
+			osg::notify(osg::NOTICE) << "ModelComposition: No XML found for " << fileName << std::endl;
+			return;
+		}
+		
+		osgDB::XmlNode* root = osgDB::readXmlFile(fileName + ".xml");
+		if (!root) return;
+		if (!root->children.size()) return;
+		if (root->children.at(0)->name != "OpenIg-Model-Composition")  return;
+
+		bool preserveMaterial = false;
+		
+		osgDB::XmlNode::Children::iterator itr = root->children.at(0)->children.begin();
+		for (; itr != root->children.at(0)->children.end(); ++itr)
+		{
+			if ((**itr).name == "PreserveMaterial")
+			{
+				preserveMaterial = (**itr).contents == "yes";
+			}
+		}
+
+		if (preserveMaterial)
+		{
+			PrserveMaterialNodeVisitor nv;
+			node->accept(nv);
+		}
+	}
+
     virtual void entityAdded(igplugincore::PluginContext& context, unsigned int id, osg::Node& entity, const std::string& fileName)
     {
-        if (!osgDB::fileExists(fileName+".xml")) return;
+		if (!osgDB::fileExists(fileName + ".xml"))
+		{
+			osg::notify(osg::NOTICE) << "ModelComposition: No XML found for " << fileName << std::endl;
+			return;
+		}
+
+		osg::notify(osg::NOTICE) << "ModelComposition: Parsing XML for " << fileName << std::endl;
 
         _entity = &entity;
         _ss = new osg::StateSet;
@@ -364,9 +424,11 @@ public:
                 int ReceivesShadowTraversalMask = 0x1;
                 int CastsShadowTraversalMask = 0x2;
 
+				osg::notify(osg::NOTICE) << "ModelComposition: SHADOWING (" << fileName << "): " << (**itr).contents << std::endl;
+
                 if ((**itr).contents == "CAST")
                 {
-                    entity.setNodeMask(CastsShadowTraversalMask);
+                    entity.setNodeMask(CastsShadowTraversalMask);					
                 }
                 if ((**itr).contents == "RECEIVE")
                 {
@@ -415,9 +477,31 @@ public:
 #endif
                 }
             }
+			
+			if ((**itr).name == "Texturing")
+			{
+				bool texturing = (**itr).contents == "yes";
+
+				osg::notify(osg::NOTICE) << "Model Composition: Texturing " << texturing << std::endl;				
+
+				if (texturing)
+				{
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,7)
+					_ss->setDefine("TEXTURING", osg::StateAttribute::ON);
+#endif
+				}
+				else
+				{
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,7)
+					_ss->setDefine("TEXTURING", osg::StateAttribute::OFF);
+#endif
+				}
+			}
             if ((**itr).name == "Lighting")
             {
                 bool lighting = (**itr).contents == "yes";
+
+				osg::notify(osg::NOTICE) << "ModelComposition: LIGHTING (" << fileName << "): " << (**itr).contents << std::endl;
 
                 if (lighting)
                 {
@@ -473,7 +557,7 @@ public:
             entity.getOrCreateStateSet()->setAttributeAndModes(_runtimeMaterial,osg::StateAttribute::ON|osg::StateAttribute::PROTECTED|osg::StateAttribute::OVERRIDE);
         }
     }
-
+	
 protected:
     unsigned int                                        _subentityId;
     std::string                                         _path;
@@ -488,7 +572,7 @@ protected:
     osg::ref_ptr<osg::Material>                         _nightMaterial;
     osg::ref_ptr<osg::Material>                         _runtimeMaterial;
     float                                               _environmentalFactor;
-    unsigned int                                        _autoLightId;
+    unsigned int                                        _autoLightId;	
 
     struct SubModelEntry
     {

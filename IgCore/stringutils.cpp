@@ -40,10 +40,62 @@ StringUtils* StringUtils::instance()
 	return &s_StringUtils;
 }
 
+StringUtils::Tokens StringUtils::tokenizeExtended(const std::string& str)
+{
+	StringUtils::Tokens tokens = StringUtils::instance()->tokenize(str, "\"");
+
+	unsigned int remainder = tokens.size() % 2;
+	if (remainder && tokens.size() != 1)
+	{
+		StringUtils::Tokens newtokens;
+
+		bool decompose = false;
+
+		std::string s = str;
+		std::string::size_type pos = s.find_first_of("\"");
+		while (pos != std::string::npos)
+		{
+			std::string token = s.substr(0, pos);
+
+			decompose = !decompose;
+
+			if (decompose)
+			{
+				StringUtils::Tokens t = StringUtils::instance()->tokenize(token);
+				StringUtils::Tokens::iterator itr = t.begin();
+				for (; itr != t.end(); ++itr)
+				{
+					newtokens.push_back(*itr);
+				}
+			}
+			else
+			{
+				newtokens.push_back(token);
+			}
+
+			s = s.substr(pos, s.length() - pos);
+			s.erase(s.begin());
+
+			pos = s.find_first_of("\"");
+		}
+		std::string token = s;
+
+		newtokens.push_back(token);
+
+		tokens = newtokens;
+	}
+	else
+	{
+		tokens = StringUtils::instance()->tokenize(str);
+	}
+
+	return tokens;
+}
+
 StringUtils::Tokens StringUtils::tokenize(const std::string& str, const std::string& delimiters)
 {
 	Tokens tokens;
-	std::string::size_type delimPos = 0, tokenPos = 0, pos = 0, q = 0;
+    std::string::size_type delimPos = 0, tokenPos = 0, pos = 0;
 
 	if(str.length()<1)  return tokens;
 	while(1)

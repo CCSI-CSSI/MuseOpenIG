@@ -1,10 +1,10 @@
 cmake_minimum_required( VERSION 2.8.8 )
 project( openIG )
 
-set( OPENIG_VERSION 1.0.1 )
+set( OPENIG_VERSION 1.1.0 )
 set( OPENIG_MAJOR_VERSION 1 )
-set( OPENIG_MINOR_VERSION 0 )
-set( OPENIG_SUB_VERSION 1 )
+set( OPENIG_MINOR_VERSION 1 )
+set( OPENIG_SUB_VERSION 0 )
 
 set( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}" )
 
@@ -39,6 +39,9 @@ endif()
 include( FindOSGHelper )
 include( FindBoostHelper )
 include( FindSilverLiningHelper )
+include( FindOsgEarthHelper )
+include( FindBulletHelper )
+include( FindOSGBullet )
 
 find_package(OpenGL)
 
@@ -71,10 +74,26 @@ ADD_SUBDIRECTORY( IgPlugin-SimpleLighting )
 ADD_SUBDIRECTORY( IgPlugin-SkyDome )
 ADD_SUBDIRECTORY( IgPlugin-TimeOfDayBasedMaterial )
 ADD_SUBDIRECTORY( IgPlugin-VDBOffset )
+ADD_SUBDIRECTORY( IgPlugin-FBXAnimation )
+ADD_SUBDIRECTORY( IgPlugin-OSGParticleEffects )
 
-if( SILVERLINING_FOUND )
+IF( SILVERLINING_FOUND )
 ADD_SUBDIRECTORY( IgPlugin-SilverLining )
-endif( SILVERLINING_FOUND )
+ENDIF( SILVERLINING_FOUND )
+
+IF( OSGEARTH_FOUND )
+INCLUDE_DIRECTORIES(
+    ${OSGEARTH_INCLUDE_DIR}
+)
+ADD_SUBDIRECTORY( IG-Earth )
+ADD_SUBDIRECTORY( IgPlugin-OSGEarthSimpleLighting )
+ENDIF( OSGEARTH_FOUND )
+
+IF( BULLET_FOUND AND OSGBULLET_FOUND )
+ADD_SUBDIRECTORY( IgLib-Bullet )
+ADD_SUBDIRECTORY( IgPlugin-Bullet )
+ADD_SUBDIRECTORY( IG-Bullet)
+ENDIF( BULLET_FOUND AND OSGBULLET_FOUND)
 
 install(EXPORT openig-targets DESTINATION ${CMAKE_INSTALL_LIBDIR})
 

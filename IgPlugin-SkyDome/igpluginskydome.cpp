@@ -27,6 +27,10 @@
 #include <IgCore/imagegenerator.h>
 #include <IgCore/attributes.h>
 #include <IgCore/mathematics.h>
+#include <IgCore/commands.h>
+
+#include <iostream>
+#include <sstream>
 
 #include <osg/ref_ptr>
 #include <osg/FrontFace>
@@ -89,9 +93,16 @@ public:
         }
     }
 
+protected:
+    std::string     _modelFileName;
+
+
     virtual void init(igplugincore::PluginContext& context)
     {
 
+        igcore::Commands::instance()->addCommand("fog",  new SetFogCommand(context.getImageGenerator()));
+        igcore::Commands::instance()->addCommand("rain", new RainCommand(context.getImageGenerator()));
+        igcore::Commands::instance()->addCommand("snow", new SnowCommand(context.getImageGenerator()));
 #if 1
         osg::ref_ptr<osgViewer::CompositeViewer> viewer = context.getImageGenerator()->getViewer();
         if (!viewer.valid()) return;
@@ -233,9 +244,6 @@ public:
             }
         }
     }
-
-protected:
-    std::string     _modelFileName;
 
     // Code taken from muse/libs/OtwOsg
     // slightly modified to fit into OpenIg framework
@@ -485,6 +493,107 @@ protected:
     osg::ref_ptr<Sky>                               _sky;
     osg::ref_ptr<osgParticle::PrecipitationEffect>  _precipitation;
 
+    class SetFogCommand : public igcore::Commands::Command
+    {
+    public:
+        SetFogCommand (igcore::ImageGenerator* ig)
+            : _ig(ig) {}
+
+        virtual const std::string getUsage() const
+        {
+            return "visibility";
+        }
+
+        virtual const std::string getDescription() const
+        {
+            return  "sets the visibility of the scene by using fog\n"
+                    "     visibility - in meteres, the distance of the fog";
+        }
+
+        virtual int exec(const igcore::StringUtils::Tokens& tokens)
+        {
+            if (tokens.size() == 1)
+            {
+                double visibility = atof(tokens.at(0).c_str());
+
+                _ig->setFog(visibility);
+
+                return 0;
+            }
+            return -1;
+        }
+
+    protected:
+        igcore::ImageGenerator* _ig;
+    };
+
+    class RainCommand : public igcore::Commands::Command
+    {
+    public:
+        RainCommand(igcore::ImageGenerator* ig)
+            : _ig(ig) {}
+
+        virtual const std::string getUsage() const
+        {
+            return "rainfactor";
+        }
+
+        virtual const std::string getDescription() const
+        {
+            return  "adds rain to the scene\n"
+                    "     rainfactor - from 0.0-1.0, 0 no rain, 1 heavy rain";
+        }
+
+        virtual int exec(const igcore::StringUtils::Tokens& tokens)
+        {
+            if (tokens.size() == 1)
+            {
+                double factor = atof(tokens.at(0).c_str());
+
+                _ig->setRain(factor);
+
+                return 0;
+            }
+
+            return -1;
+        }
+    protected:
+        igcore::ImageGenerator* _ig;
+    };
+
+    class SnowCommand : public igcore::Commands::Command
+    {
+    public:
+        SnowCommand(igcore::ImageGenerator* ig)
+            : _ig(ig) {}
+
+        virtual const std::string getUsage() const
+        {
+            return "snowfactor";
+        }
+
+        virtual const std::string getDescription() const
+        {
+            return  "adds snow to the scene\n"
+                    "     snowfactor - from 0.0-1.0. 0 no snow, 1 heavy snow";
+        }
+
+        virtual int exec(const igcore::StringUtils::Tokens& tokens)
+        {
+            if (tokens.size() == 1)
+            {
+                double factor = atof(tokens.at(0).c_str());
+
+                _ig->setSnow(factor);
+
+                return 0;
+            }
+
+            return -1;
+        }
+    protected:
+        igcore::ImageGenerator* _ig;
+    };
 };
 
 } // namespace

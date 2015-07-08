@@ -77,6 +77,7 @@ win32 {
     else {
         message(\"OpenSceneGraph\" detected in \"$$OSGROOT\")
         INCLUDEPATH += $$OSGROOT/include
+        LIBS += -L$$OSGROOT/lib
     }
     OSGBUILD = $$(OSG_BUILD)
     isEmpty(OSGBUILD) {
@@ -96,6 +97,10 @@ win32 {
     DESTDIR = $$OPENIGBUILD/lib
     DLLDESTDIR = $$OPENIGBUILD/bin/igplugins
 
+    DDIR = $${DLLDESTDIR}
+    DDIR ~= s,/,\\,g
+    QMAKE_PRE_LINK =  if not exist $$quote($$DDIR) $$QMAKE_MKDIR $$quote($$DDIR) $$escape_expand(\\n\\t)
+
     LIBS += -L$$OPENIGBUILD/lib
 
     FILE = $${PWD}/libIgPlugin-SkyDome.so.xml
@@ -104,6 +109,5 @@ win32 {
     FILE ~= s,/,\\,g
     DFILE ~= s,/,\\,g
 
-    QMAKE_POST_LINK =  if not exist $$quote($$DLLDESTDIR) $$QMAKE_MKDIR $$quote($$DLLDESTDIR) $$escape_expand(\\n\\t)
-    QMAKE_POST_LINK += if not exist $$quote($$DFILE) copy /y $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK = if not exist $$quote($$DFILE) copy /y $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
 }

@@ -46,6 +46,8 @@
 #include <osgUtil/PositionalStateContainer>
 
 #include <osgDB/XmlParser>
+#include <osgDB/FileNameUtils>
+#include <osgDB/FileUtils>
 
 #include <osgShadow/ShadowedScene>
 #include <osgShadow/MinimalShadowMap>
@@ -80,6 +82,11 @@ public:
     {
         return _enabled;
     }
+
+	inline void setEnabled(bool enabled)
+	{
+		_enabled = enabled;
+	}
 
     virtual void apply(osg::State& state) const
     {
@@ -196,8 +203,9 @@ unsigned int LightManager::_maxNumOfLights = 0;
 class UpdateLightAttribscallback : public osg::NodeCallback
 {
 public:
-    UpdateLightAttribscallback(osg::Group* scene)
-        : _scene(scene)
+    UpdateLightAttribscallback(igcore::ImageGenerator* ig, osg::Group* scene)
+		: _ig(ig)
+        , _scene(scene)
     {
 
     }
@@ -247,12 +255,46 @@ public:
 
             if (!light) continue;
 
-            osg::Vec4 litPos = light->getPosition() * matrix;
+			bool enabled = false;
+			light->getUserValue("enabled", enabled);
+
+			if (light->getUserData())
+			{
+				DummyLight* nclight = const_cast<DummyLight*>(light);
+				osg::LightSource* ls = dynamic_cast<osg::LightSource*>(nclight->getUserData());
+				if (ls)
+				{
+					osg::NodePath np;
+					np.push_back(ls);
+					
+					osg::ref_ptr<osg::Group> parent = ls->getNumParents() ? ls->getParent(0) : 0;
+					while (parent)
+					{
+						np.insert(np.begin(), parent);
+						parent = parent->getNumParents() ? parent->getParent(0) : 0;
+					}
+
+					osg::Matrixd wmx = osg::computeLocalToWorld(np);
+
+					osg::Matrixd final = osg::Matrixd::translate(osg::Vec3(light->getPosition().x(), light->getPosition().y(), light->getPosition().z())) * wmx;
+
+					osg::Vec3d lw = final.getTrans();
+
+					double lod = 0.0;
+					if (nclight->getUserValue("realLightLOD", lod) && lod > 0.0)
+					{
+						if ((cv->getEyePoint() - lw).length() > lod)
+						{
+							enabled = false;
+						}						
+					}
+
+				}
+			}
+
+            osg::Vec4 litPos = light->getPosition() * matrix;			
             osg::Vec3 litDir = osg::Matrix::transform3x3(light->getDirection(), matrix);
-
-            bool enabled = false;
-            light->getUserValue("enabled",enabled);
-
+            
             osg::ref_ptr<DummyLight> lightDesc = new DummyLight(light->getLightNum(),enabled);
             lightDesc->setPosition(litPos);
             lightDesc->setDirection(litDir);
@@ -291,6 +333,7 @@ public:
 
 protected:
     osg::observer_ptr<osg::Group>   _scene;
+	igcore::ImageGenerator*			_ig;
 };
 
 
@@ -300,6 +343,10 @@ public:
     LightingPlugin()
         : _maxNumLights(0)
         , _cloudsShadowsTextureSlot(6)
+		, _lightBrightness_enable(true)
+		, _lightBrightness_day(1.f)
+		, _lightBrightness_night(1.f)
+		, _todHour(12)
     {
 
     }
@@ -472,9 +519,143 @@ public:
     protected:
         igcore::ImageGenerator* _ig;
     };
+	class UpdateTODBasedLightingUniformCallback : public osg::Uniform::Callback
+	{
+	public:
+		UpdateTODBasedLightingUniformCallback(bool& enabled, float& onDay, float& onNight, unsigned int& tod)
+			: _enabled(enabled)
+			, _onDay(onDay)
+			, _onNight(onNight)
+			, _tod(tod)
+		{
+
+		}
+
+		virtual void operator () (osg::Uniform* u, osg::NodeVisitor*)
+		{
+			if (_enabled)
+			{
+				float factor = _tod > 4 && _tod < 19 ? _onDay : _onNight;
+				u->set(factor);
+			}
+			else
+			{
+				u->set(1.f);
+			}
+		}
+
+	protected:
+		bool&			_enabled;
+		float&			_onDay;
+		float&			_onNight;
+		unsigned int&	_tod;
+	};
+
+	void updateFromXML(const std::string& fileName)
+	{
+		std::string xmlFile = fileName;
+		if (xmlFile.empty())
+		{
+			xmlFile = _currentXMLFile;
+		}
+
+		if (!osgDB::fileExists(xmlFile))
+		{
+			osg::notify(osg::NOTICE) << "Lighting: xml file does not exists: " << xmlFile << std::endl;
+			return;
+		}
+
+		osgDB::XmlNode* root = osgDB::readXmlFile(xmlFile);
+		if (!root)
+		{
+			osg::notify(osg::NOTICE) << "Lighting: NULL root : " << xmlFile << std::endl;
+			return;
+		}
+		if (!root->children.size())
+		{
+			osg::notify(osg::NOTICE) << "Lighting: root with no children: " << xmlFile << std::endl;
+			return;
+		}
+		if (root->children.at(0)->name != "OsgNodeSettings")
+		{
+			osg::notify(osg::NOTICE) << "Lighting: OsgNodeSettings tag not found: " << xmlFile << std::endl;
+			return;
+		}
+
+		osg::notify(osg::NOTICE) << "Lighting: current file: " << xmlFile << std::endl;
+
+		_currentXMLFile = xmlFile;
+
+		osgDB::XmlNode::Children::iterator itr = root->children.at(0)->children.begin();
+		for (; itr != root->children.at(0)->children.end(); ++itr)
+		{
+			osgDB::XmlNode* child = *itr;
+
+			//<LandingLightBrightness  enable="true" day="0.05" night="5"/>
+			if (child->name == "LandingLightBrightness")
+			{
+				osgDB::XmlNode::Properties::iterator pitr = child->properties.begin();
+				for (; pitr != child->properties.end(); ++pitr)
+				{
+					if (pitr->first == "enable")
+					{
+						_lightBrightness_enable = pitr->second == "true";
+					}
+					if (pitr->first == "day")
+					{
+						_lightBrightness_day = atof(pitr->second.c_str());
+					}
+					if (pitr->first == "night")
+					{
+						_lightBrightness_night = atof(pitr->second.c_str());
+					}
+				}
+			}
+		}
+	}
+
+	class UpdateFromXMLCommand : public igcore::Commands::Command
+	{
+	public:
+		UpdateFromXMLCommand(LightingPlugin* plugin)
+			: _plugin(plugin)
+		{
+
+		}
+
+		virtual int exec(const igcore::StringUtils::Tokens& tokens)
+		{
+			if (tokens.size() == 1)
+			{
+				std::string command = tokens.at(0);
+				if (command == "update")
+				{
+					_plugin->updateFromXML("");
+				}
+				return 0;
+			}
+			return -1;
+		}
+
+		virtual const std::string getUsage() const
+		{
+			return "command";
+		}
+		virtual const std::string getDescription() const
+		{
+			return  "updates the lighting factor based on XML definition\n"
+				"        command - one of these: update";
+		}
+
+	protected:
+		LightingPlugin*  _plugin;
+	};
+
 
     virtual void init(igplugincore::PluginContext& context)
     {
+		igcore::Commands::instance()->addCommand("lighting", new UpdateFromXMLCommand(this));
+
         _lightImplementationCallback = new ComplexLightImplementationCallback(context.getImageGenerator());
         context.getImageGenerator()->setLightImplementationCallback(_lightImplementationCallback);
 
@@ -581,6 +762,9 @@ public:
             "const float cos_outer_cone_angle = 0.4; // 36 degrees                  \n"
             "varying vec3 normal;                                                   \n"
             "varying vec3 eyeVec;                                                   \n"
+			"																		\n"
+			"uniform float	todBasedLightBrightness;								\n"
+			"uniform bool	todBasedLightBrightnessEnabled;							\n"
             "                                                                       \n"
             "void computeFogColor(inout vec4 color)                                 \n"
             "{                                                                      \n"
@@ -661,7 +845,9 @@ public:
             "		float lambertTerm = max( dot(N,L), 0.0);                        \n"
             "		if(lambertTerm > 0.0)                                           \n"
             "		{                                                               \n"
-            "			final_color += gl_LightSource[i].diffuse *                  \n"
+			"			float todBasedFactor = todBasedLightBrightnessEnabled ?		\n"
+			"				todBasedLightBrightness : 1.0;							\n"
+            "			final_color += gl_LightSource[i].diffuse * todBasedFactor *	\n"
             "				gl_FrontMaterial.diffuse *                              \n"
             "				lambertTerm * spot * att;                               \n"
             "                                                                       \n"
@@ -773,7 +959,10 @@ public:
             "                                                                       \n"
             "       if (lambertTerm > 0.0)                                          \n"
             "       {                                                               \n"
-            "           final_color += lightDiffuse * gl_FrontMaterial.diffuse * lambertTerm * spot * att;\n"
+			"			float todBasedFactor = todBasedLightBrightnessEnabled ?		\n"
+			"				todBasedLightBrightness : 1.0;							\n"
+            "           final_color += lightDiffuse * gl_FrontMaterial.diffuse *	\n"
+			"				todBasedFactor * lambertTerm * spot * att;				\n"
             "                                                                       \n"
             "           vec3 E = normalize(eyeVec);                                 \n"
             "           vec3 R = reflect(-L,N);                                     \n"
@@ -948,6 +1137,15 @@ public:
                 osg::Uniform* cu = new osg::Uniform("cameraPos",osg::Vec3d());
                 cu->setUpdateCallback(new UpdateCameraPosUniformCallback(context.getImageGenerator()));
                 ss->addUniform(cu);
+
+				osg::Uniform* todBasedLightingUniform = new osg::Uniform("todBasedLightBrightness", (float)1.f);
+				todBasedLightingUniform->setUpdateCallback(new UpdateTODBasedLightingUniformCallback(
+					_lightBrightness_enable, _lightBrightness_day, _lightBrightness_night, _todHour)
+					);
+				ss->addUniform(todBasedLightingUniform);
+
+				osg::Uniform* todBasedLightingEnabledUniform = new osg::Uniform("todBasedLightBrightnessEnabled", (bool)true);
+				ss->addUniform(todBasedLightingEnabledUniform);
             }
         }
 
@@ -955,10 +1153,24 @@ public:
     }
 
 
-    virtual void update(igplugincore::PluginContext&)
+    virtual void update(igplugincore::PluginContext& context)
     {
         LightManager::instance()->updateTextureObject();
-    }
+
+		osg::ref_ptr<osg::Referenced> ref = context.getAttribute("TOD");
+		igplugincore::PluginContext::Attribute<igcore::TimeOfDayAttributes> *attr = dynamic_cast<igplugincore::PluginContext::Attribute<igcore::TimeOfDayAttributes> *>(ref.get());
+		if (attr)
+		{
+			_todHour = attr->getValue().getHour();
+		}
+    }	
+
+	virtual void databaseRead(const std::string& fileName, osg::Node*, const osgDB::Options*)
+	{
+		std::string xmlFile = fileName + ".lighting.xml";
+		updateFromXML(xmlFile);		
+	}
+
 
     virtual void clean(igplugincore::PluginContext& context)
     {
@@ -1035,6 +1247,7 @@ protected:
             light->getLight()->setSpotCutoff(definition._spotCutoff);
             light->getLight()->setPosition(osg::Vec4(0,0,0,1));
             light->getLight()->setDirection(osg::Vec3(0,1,0));
+			light->getLight()->setUserData(light);
 
             if (id >=1 && id < 8)
             {
@@ -1058,7 +1271,7 @@ protected:
                 _dummyGroup = new osg::Group;
                 _lightsGroup->addChild(_dummyGroup);
 
-                _dummyGroup->setCullCallback(new UpdateLightAttribscallback(_ig->getScene()->asGroup()));
+                _dummyGroup->setCullCallback(new UpdateLightAttribscallback(_ig,_ig->getScene()->asGroup()));
             }
 
             return light;
@@ -1086,6 +1299,11 @@ protected:
                 if (definition._dirtyMask & igcore::LightAttributes::SPOTCUTOFF)
                     light->getLight()->setSpotCutoff(definition._spotCutoff);
 
+				if (definition._dirtyMask & igcore::LightAttributes::REALLIGHTLOD)
+				{
+					light->getLight()->setUserValue("realLightLOD", (double)definition._realLightLOD);
+				}
+
                 if (definition._dirtyMask & igcore::LightAttributes::ENABLED)
                 {
                     osg::ref_ptr<DummyLight> light = new DummyLight(id,definition._enabled);
@@ -1111,6 +1329,11 @@ protected:
     unsigned int                                            _maxNumLights;
     unsigned int                                            _cloudsShadowsTextureSlot;
     osg::ref_ptr<osg::Material>                             _sceneMaterial;
+	bool													_lightBrightness_enable;
+	float													_lightBrightness_day;
+	float													_lightBrightness_night;
+	unsigned int											_todHour;
+	std::string												_currentXMLFile;
 };
 
 } // namespace

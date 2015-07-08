@@ -108,6 +108,46 @@ public:
      */
     virtual void cleanup() = 0;
 
+	/*! Call it before destruction
+	*  \brief Performs cleanup.
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Sun Jan 11 2015
+	*/
+
+	/*! Read node callback. Some might want to change how the file
+	*	is read, like osgEarth for example. You have an option
+	*	to read files differently then with osgDB::readNodeFile(...)
+	*  \brief Read node callback
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Mon Jun 16 2015
+	*/
+	struct ReadNodeImplementationCallback : osg::Referenced
+	{
+		virtual osg::Node* readNode(const std::string& fileName, const osgDB::Options* options = 0) = 0;
+	};
+
+	/*! Sets the Read node callback. Some might want to change how the file
+	*	is read, like osgEarth for example. You have an option
+	*	to read files differently then with osgDB::readNodeFile(...)
+	*  \brief Sets the read node callback
+	*  \param cb The callback
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Mon Jun 16 2015
+	*/
+	virtual void setReadNodeImplementationCallback(ReadNodeImplementationCallback* cb) = 0;
+
+	/*! Gets the Read node callback. See \ref setReadNodeImplementationCallback
+	*  \brief Gets the read node callback
+	*  \return cb The callback
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Mon Jun 16 2015
+	*/
+	virtual ReadNodeImplementationCallback* getReadNodeImplementationCallback() = 0;
+
     /*! It calls viewer->frame() and performs internal calling of plugins hooks
      *  like, update, preFrame, postFrame. This method mimics the viewer->frame()
      *  call, only inserts hooks for \ref igplugincore::Plugin methods, in this order,
@@ -172,6 +212,22 @@ public:
      *  \date      Sun Jan 11 2015
      */
     virtual void addEntity(unsigned int id, const std::string& fileName, const osg::Matrixd& mx, const osgDB::Options* options = 0) = 0;
+
+	/*! Adds entity in the scene from osg::Node instead of loading it from a file. See \ref addEntity
+	*  \brief Adds entity in the scene from osg::Node instead of loading it from a file.
+	*  \param id       The id of the \ref Entity. You should use this Entity id to refer
+	*                  to this model in the scene
+	*  \param node	   The node to become an \ref Entity
+	*  \param mx       Initial position as osg::Matrixd
+	*  \param options  Optional. The option string can be processed by some plugins.
+	*                  Good example can be the VDBOffset which shifts the database
+	*                  by a given offset defined in the osgDB::Options string.
+	*  \return         Nothing
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Tue Jun 16 2015
+	*/
+	virtual void addEntity(unsigned int id, const osg::Node* node, const osg::Matrixd& mx, const osgDB::Options* options = 0) = 0;
 
     /*! Again, the removal as well as addition, is not happening
      *  immediatelly, still in the same frame though and it processed in ViewerOperation.
@@ -269,6 +325,70 @@ public:
      */
     virtual std::string getEntityName(unsigned int id) = 0;
 
+	// Effects
+	/*! Adds effect to the scene. This oonly manages internal structures, it
+	*	is up to plugins to provide implementation
+	*  \brief Adds effect to the scene
+	*  \param id	Unique effect to the scene
+	*  \param name	Name of the effect
+	*  \param mx	The initial position/orientation of the effect
+	*  \param attributes String based attributes for the pugins provoding the implementation, in form of token=attr;token=attr ...
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Sun Jun 14 2015
+	*/
+	virtual void addEffect(unsigned int id, const std::string& name, const osg::Matrixd& mx, const std::string& attributes) = 0;
+
+	/*! Removes effect from the scene
+	*  \brief Removes effect from the scene
+	*  \param id	Unique effect to the scene	
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Sun Jun 14 2015
+	*/
+	virtual void removeEffect(unsigned int id) = 0;
+
+	/*! Binds effect to an \ref Entity
+	*  \brief Binds effect to an \ref Entity
+	*  \param id		Unique effect to the scene
+	*  \param entityID	The ID of the \ref Entity
+	*  \param mx		The offset position/orientation of the effect	
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Sun Jun 14 2015
+	*/
+	virtual void bindEffect(unsigned int id, unsigned int entityID, const osg::Matrixd& mx) = 0;
+
+	/*! Unbinds effect to an \ref Entity
+	*  \brief Unbinds effect to an \ref Entity
+	*  \param id		Unique effect to the scene	
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Sun Jun 14 2015
+	*/
+	virtual void unbindEffect(unsigned int id) = 0;
+
+	/*! Update effect with new position/orientation
+	*  \brief Update effect with new position/orientation
+	*  \param id		Unique effect to the scene
+	*  \param mx		The new position/orientation
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Sun Jun 14 2015
+	*/
+	virtual void updateEffect(unsigned int id, const osg::Matrixd& mx) = 0;
+
+	/*! The \ref ImageGenerator, \ref OpenIG only manages structures for the 
+	*	effects. It is up to plugins to provide their implementation. This is
+	*	the callback that provides the effect implementation
+	*  \brief Sets the effect implementation callback
+	*  \param cb		The callback	
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Sun Jun 14 2015
+	*/
+	virtual void setEffectImplementationCallback(GenericImplementationCallback* cb) = 0;
+
     // Camera manipulation
     /*! Sets the position of the camera using Matrix. If the camera is bind to an
      *  \ref Entity, then this Matrix is the local offset. One can check if the camera
@@ -328,11 +448,12 @@ public:
      *  following the \ref Entity orientation, like a bird eye.
      * \brief Sets for fixed up Cametra orientation or not
      * \param       fixedUp true to fix the up axis or false to follow the \ref Entity orientation
+	 * \param       freezeOrientation true to freeze orientation
      * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
-    virtual void bindCameraSetFixedUp(bool fixedUp) = 0;
+    virtual void bindCameraSetFixedUp(bool fixedUp, bool freezeOrientation = false) = 0;
 
     // Animation
     /*! Plays animation on an \ref Entity. At present it uses the internal simple animation handling

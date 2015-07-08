@@ -6,7 +6,7 @@
 
 QT       -= core gui
 
-CONFIG += silent
+#CONFIG += silent
 
 TARGET = OpenIG
 TEMPLATE = lib
@@ -20,17 +20,18 @@ SOURCES += \
     lights.cpp \
     keypad.cpp \
     help.cpp \
-    splash.cpp
+    splash.cpp \
+    effects.cpp
 
 HEADERS += openig.h \
     config.h \
     export.h \
     keypad.h
 
-LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgGA -losgText -losgShadow -lIgCore -lIgPluginCore
-
 INCLUDEPATH += ../
 DEPENDPATH += ../
+
+LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgGA -losgText -losgShadow -losgSim -losgParticle -lIgCore -lIgPluginCore
 
 unix {
     DEFINES += LINUX
@@ -45,20 +46,6 @@ unix {
     }
 
     INSTALLS += target
-
-    BDIR = /usr/local/bin
-    FILE = $${PWD}/openig.xml
-    DDIR = $${BDIR}/igdata
-    DFILE = $${BDIR}/igdata/openig.xml
-
-    QMAKE_POST_LINK = test -d $$quote($$DDIR) || $$QMAKE_MKDIR $$quote($$DDIR) $$escape_expand(\\n\\t)
-    QMAKE_POST_LINK += test -e $$quote($$DFILE) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
-
-    FILE = $${PWD}/OpenIG-Splash.jpg
-    DDIR = $${BDIR}/igdata
-    DFILE = $${BDIR}/igdata/OpenIG-Splash.jpg
-
-    QMAKE_POST_LINK += test -e $$quote($$DFILE) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
 
     INCLUDEPATH += /usr/local/include
     DEPENDPATH += /usr/local/include
@@ -92,6 +79,7 @@ win32 {
     else {
         message(\"OpenSceneGraph\" detected in \"$$OSGROOT\")
         INCLUDEPATH += $$OSGROOT/include
+        LIBS += -L$$OSGROOT/lib
     }
     OSGBUILD = $$(OSG_BUILD)
     isEmpty(OSGBUILD) {
@@ -112,27 +100,4 @@ win32 {
     DLLDESTDIR = $$OPENIGBUILD/bin
 
     LIBS += -L$$OPENIGBUILD/lib
-
-    FILE = $${PWD}/openig.xml
-    DFILE = $${OPENIGBUILD}/bin/igdata/openig.xml
-    DDIR = $${OPENIGBUILD}/bin/igdata
-
-    FILE ~= s,/,\\,g
-    DFILE ~= s,/,\\,g
-    DDIR ~= s,/,\\,g
-
-    QMAKE_POST_LINK = if not exist  $$quote($$DDIR) $$QMAKE_MKDIR $$quote($$DDIR) $$escape_expand(\\n\\t)
-    QMAKE_POST_LINK += if not exist $$quote($$DFILE) copy /y $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
-
-    FILE = $${PWD}/OpenIG-Splash.jpg
-    DFILE = $${OPENIGBUILD}/bin/igdata/
-
-    FILE ~= s,/,\\,g
-    DFILE ~= s,/,\\,g
-
-    QMAKE_POST_LINK += if not exist $$quote($$DFILE/OpenIG-Splash.jpg) copy /y $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
 }
-
-OTHER_FILES += openig.xml
-
-DISTFILES += OpenIG-Splash.jpg

@@ -19,6 +19,9 @@
 #include <osg/Texture2D>
 #include <osg/ValueObject>
 
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/gregorian/gregorian.hpp>
+
 #define UPDATE_DISTANCE_SQ (500.0 * 500.0)
 #define CLOUD_SHADOW_TEXTURE 6
 #define M_PER_NMI           1852.000001 /* No. of meters in a nautical mile   */
@@ -44,10 +47,11 @@ SkyDrawable::SkyDrawable()
         , _removeAllCloudLayers(false)
         , _todDirty(false)        
         , _enableCloudShadows(true)
+		, _geocentric(false)
 {
 }
 
-SkyDrawable::SkyDrawable(const std::string& path, osgViewer::View* view, osg::Light* light, osg::Fog* fog)
+SkyDrawable::SkyDrawable(const std::string& path, osgViewer::View* view, osg::Light* light, osg::Fog* fog, bool geocentric)
         : osg::Drawable()
         , _view(view)
 		, _skyboxSize(100000)
@@ -74,6 +78,7 @@ SkyDrawable::SkyDrawable(const std::string& path, osgViewer::View* view, osg::Li
         , _windDirty(false)
         , _windVolumeHandle(0)
         , _enableCloudShadows(true)
+		, _geocentric(geocentric)
 {    
     _cloudShadowTextureStage =  _cloudShadowTexgenStage = igcore::Configuration::instance()->getConfig("Clouds-Shadows-Texture-Slot",6);
 
@@ -143,11 +148,19 @@ void SkyDrawable::setLighting(SilverLining::Atmosphere *atmosphere) const
         float ra, ga, ba, rd, gd, bd, x, y, z;
         atmosphere->GetAmbientColor(&ra, &ga, &ba);
         atmosphere->GetSunOrMoonColor(&rd, &gd, &bd);
-        atmosphere->GetSunOrMoonPosition(&x, &y, &z);
+		if (_geocentric)
+		{
+			atmosphere->GetSunPositionGeographic(&x, &y, &z);
+			light->setConstantAttenuation(1.f / 100000000);
+		}
+		else
+		{
+			atmosphere->GetSunOrMoonPosition(&x, &y, &z);
+		}
 
         osg::Vec3 ambientDiffuseFactor = osg::Vec3(0.f,0.f,0.f);
 #if 1
-        if (_todHour >= 18.0 || _todHour < 5.0)
+		if ((_todHour >= 18.0 || _todHour < 5.0) && !_geocentric)
         {
             ambientDiffuseFactor = osg::Vec3(0.2f,0.2f,0.2f);
         }
@@ -161,7 +174,6 @@ void SkyDrawable::setLighting(SilverLining::Atmosphere *atmosphere) const
         light->setAmbient(ambient);
         light->setDiffuse(diffuse);
 		light->setSpecular(osg::Vec4(1, 1, 1, 1));
-
         light->setPosition(osg::Vec4(direction.x(), direction.y(), direction.z(), 0));
 
 		float density = 0.f;
@@ -506,6 +518,11 @@ void SkyDrawable::removeClouds(SilverLining::Atmosphere *atmosphere)
     _cloudsQueueToRemove.clear();
 }
 
+void SkyDrawable::setGeocentric(bool geocentric)
+{
+	_geocentric = geocentric;
+}
+
 void SkyDrawable::removeAllCloudLayers()
 {
     _removeAllCloudLayers = true;
@@ -613,7 +630,53 @@ void SkyDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
             mutableThis->_windVolumeHandle = atmosphere->GetConditions()->SetWind(windVolume);
         }
 
-        atmosphere->DrawSky(true, false, _skyboxSize, true, false);
+		if (_geocentric)
+		{
+            osg::Vec3d ceye;
+			osg::Vec3d ccenter;
+			osg::Vec3d cup;
+			renderInfo.getCurrentCamera()->getViewMatrixAsLookAt(ceye, ccenter, cup);
+
+			osg::Vec3d up = ceye;
+			up.normalize();
+			osg::Vec3d north = osg::Vec3d(0, 0, 1);
+			osg::Vec3d east = north ^ up;
+			// Check for edge case of north or south pole
+			if (east.length2() == 0) {
+				east = osg::Vec3d(1, 0, 0);
+			}
+			east.normalize();
+
+			atmosphere->SetUpVector(up.x(), up.y(), up.z());
+			atmosphere->SetRightVector(east.x(), east.y(), east.z());
+
+			double latitude = 0.0;
+			double longitude = 0.0;
+			double altitude = 0.0;
+
+			osg::EllipsoidModel em;
+			em.convertXYZToLatLongHeight(ceye.x(), ceye.y(), ceye.z(), latitude, longitude, altitude);
+
+			SilverLining::Location loc;
+			loc.SetAltitude(altitude);
+			loc.SetLongitude(osg::RadiansToDegrees(longitude));
+			loc.SetLatitude(osg::RadiansToDegrees(latitude));
+			atmosphere->GetConditions()->SetLocation(loc);
+			
+			boost::posix_time::ptime t(
+				boost::gregorian::date(2015, boost::gregorian::Aug, 2),
+				boost::posix_time::hours(_todHour) + boost::posix_time::minutes(_todMinutes)
+			);			
+			boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
+			boost::posix_time::time_duration::sec_type x = (t - epoch).total_seconds();
+			
+			SilverLining::LocalTime utcTime;
+			utcTime.SetFromEpochSeconds(time_t(x));
+			utcTime.SetTimeZone(0);
+			atmosphere->GetConditions()->SetTime(utcTime);
+		}
+
+		atmosphere->DrawSky(true, _geocentric , _skyboxSize, true, false);
 
         setLighting(atmosphere);
         const_cast<SkyDrawable*>(this)->setShadow(atmosphere,renderInfo);
@@ -699,3 +762,4 @@ osg::BoundingBox SilverLiningSkyComputeBoundingBoxCallback::computeBound(const o
 
     return box;
 }
+

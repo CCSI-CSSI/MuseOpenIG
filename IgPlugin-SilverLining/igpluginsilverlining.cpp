@@ -24,13 +24,17 @@
 //#*****************************************************************************
 #include <IgPluginCore/plugin.h>
 #include <IgPluginCore/plugincontext.h>
+
 #include <IgCore/imagegenerator.h>
 #include <IgCore/attributes.h>
+#include <IgCore/commands.h>
 
 #include <osg/ref_ptr>
 #include <osg/ValueObject>
 
 #include <osgDB/XmlParser>
+#include <osgDB/FileUtils>
+#include <osgDB/FileNameUtils>
 
 #include <SilverLining.h>
 
@@ -49,6 +53,15 @@ namespace igplugins
 class SilverLiningPlugin : public igplugincore::Plugin
 {
 public:
+	SilverLiningPlugin()
+		: _geocentric(false)
+		, _lightBrightness_enable(true)
+		, _lightBrightness_day(1.f)
+		, _lightBrightness_night(1.f)
+	{
+
+	}
+
     virtual std::string getName() { return "SilverLining"; }
 
     virtual std::string getDescription() { return "Integration of Sundog's SilverLining Atmopshere model"; }
@@ -57,8 +70,51 @@ public:
 
     virtual std::string getAuthor() { return "ComPro, Nick"; }
 
+	class SilverLiningCommand : public igcore::Commands::Command
+	{
+	public:
+		SilverLiningCommand(SilverLiningPlugin* plugin)
+			: _plugin(plugin)
+		{
+		}
+		virtual const std::string getUsage() const
+		{
+			return "mode";
+		}
+
+		virtual const std::string getDescription() const
+		{
+			return  "configures the SilverLining plugin\n"
+				"     mode - pne of these\n"
+				"        geocentric - if in geocentric mode\n"
+				"        flat - if in flat earth mode\n";
+		}
+
+        virtual int exec(const igcore::StringUtils::Tokens& tokens)
+        {
+            if (tokens.size() == 1 && _plugin != 0)
+            {
+                std::string mode = tokens.at(0);
+                //ensure its lowercase for the string compare....
+                std::transform(mode.begin(), mode.end(), mode.begin(), ::tolower);
+                if ( mode.compare(0,10,"geocentric") == 0 )
+                    _plugin->setGeocentric(true);
+                else if ( mode.compare(0,4,"flat") == 0 )
+                    _plugin->setGeocentric(false);
+
+                return 0;
+            }
+            return -1;
+        }
+
+	protected:
+		SilverLiningPlugin* _plugin;
+	};
+
     virtual void config(const std::string& fileName)
     {
+		igcore::Commands::instance()->addCommand("silverlining", new SilverLiningCommand(this));
+
         osgDB::XmlNode* root = osgDB::readXmlFile(fileName);
         if (root == 0) return;
 
@@ -83,12 +139,33 @@ public:
             {
                 _path = child->contents;
             }
+			if (child->name == "SilverLining-Geocentric")
+			{
+				_geocentric = child->contents == "yes";
+			}
         }
     }
 
+	void setGeocentric(bool geocentric)
+	{
+		_geocentric = geocentric;
+
+		if (_skyDrawable.valid())
+		{
+			_skyDrawable->setGeocentric(_geocentric);
+		}
+	}
+	
     virtual void init(igplugincore::PluginContext& context)
     {
-        initSilverLining(context.getImageGenerator());
+        igcore::Commands::instance()->addCommand("addclouds",       new AddCloudLayerCommand(context.getImageGenerator()));
+        igcore::Commands::instance()->addCommand("removeclouds",    new RemoveCloudLayerCommand(context.getImageGenerator()));
+        igcore::Commands::instance()->addCommand("removeallclouds", new RemoveAllCloudLayersCommand(context.getImageGenerator()));
+        igcore::Commands::instance()->addCommand("fog",             new SetFogCommand(context.getImageGenerator()));
+        igcore::Commands::instance()->addCommand("rain",            new RainCommand(context.getImageGenerator()));
+        igcore::Commands::instance()->addCommand("snow",            new SnowCommand(context.getImageGenerator()));
+
+        initSilverLining(context.getImageGenerator());		
     }
 
     virtual void update(igplugincore::PluginContext& context)
@@ -137,6 +214,7 @@ public:
 
                 _cloudsDrawable->setEnvironmentMapDirty(true);
                 _cloudsDrawable->setPluginContext(&context);
+				_cloudsDrawable->setTOD(attr->getValue().getHour());
             }
 
         }
@@ -210,12 +288,82 @@ public:
 
 	}
 
+	virtual void databaseRead(const std::string& fileName, osg::Node*, const osgDB::Options*)
+	{
+		std::string xmlFile = fileName + ".lighting.xml";
+		if (!osgDB::fileExists(xmlFile))
+		{
+			osg::notify(osg::NOTICE) << "SilverLining: xml file does not exists: " << xmlFile << std::endl;
+			return;
+		}
+
+		osgDB::XmlNode* root = osgDB::readXmlFile(xmlFile);
+		if (!root)
+		{
+			osg::notify(osg::NOTICE) << "SilverLining: NULL root : " << xmlFile << std::endl;
+			return;
+		}
+		if (!root->children.size())
+		{
+			osg::notify(osg::NOTICE) << "SilverLining: root with no children: " << xmlFile << std::endl;
+			return;
+		}
+		if (root->children.at(0)->name != "OsgNodeSettings")
+		{
+			osg::notify(osg::NOTICE) << "SilverLining: OsgNodeSettings tag not found: " << xmlFile << std::endl;
+			return;
+		}
+
+		osg::notify(osg::NOTICE) << "SilverLining: current file: " << fileName << std::endl;
+
+		osgDB::XmlNode::Children::iterator itr = root->children.at(0)->children.begin();
+		for (; itr != root->children.at(0)->children.end(); ++itr)
+		{
+			osgDB::XmlNode* child = *itr;
+
+			//<LightBrightnessOnClouds day="0.01" night=".1" />
+			if (child->name == "LightBrightnessOnClouds")
+			{
+				osgDB::XmlNode::Properties::iterator pitr = child->properties.begin();
+				for (; pitr != child->properties.end(); ++pitr)
+				{
+					if (pitr->first == "enable")
+					{
+						_lightBrightness_enable = pitr->second == "true";
+					}
+					if (pitr->first == "day")
+					{
+						_lightBrightness_day = atof(pitr->second.c_str());
+					}
+					if (pitr->first == "night")
+					{
+						_lightBrightness_night = atof(pitr->second.c_str());
+					}
+				}
+			}
+		}
+
+		if (_cloudsDrawable.valid())
+		{
+			_cloudsDrawable->setLightingBrightness(
+				_lightBrightness_enable,
+				_lightBrightness_day,
+				_lightBrightness_night
+				);
+		}
+	}
+
+
 protected:
     std::string                     _userName;
     std::string                     _key;
     std::string                     _path;
     osg::ref_ptr<SkyDrawable>       _skyDrawable;
     osg::ref_ptr<CloudsDrawable>    _cloudsDrawable;
+	bool							_geocentric;
+	bool							_lightBrightness_enable;
+	float							_lightBrightness_day;
+	float							_lightBrightness_night;
 
     const EnvMapUpdater* initSilverLining(igcore::ImageGenerator* ig)
     {
@@ -251,7 +399,7 @@ protected:
         // Add the sky (calls Atmosphere::DrawSky and handles initialization once you're in
         // the rendering thread)
         osg::Geode *skyGeode = new osg::Geode;
-        _skyDrawable = new SkyDrawable(_path,viewer->getView(0),sunOrMoonLight->getLight(),fog);
+        _skyDrawable = new SkyDrawable(_path,viewer->getView(0),sunOrMoonLight->getLight(),fog, _geocentric);
 
         // ***IMPORTANT!**** Check that the path to the resources folder for SilverLining in SkyDrawable.cpp
         // SkyDrawable::initializeSilverLining matches with where you installed SilverLining.
@@ -271,16 +419,232 @@ protected:
         cloudsGeode->setCullingActive(false);
 
         // Add our sky and clouds into the scene.
-
-    #if 0
-        viewer->getView(0)->getSceneData()->asGroup()->addChild(skyGeode);
-        viewer->getView(0)->getSceneData()->asGroup()->addChild(cloudsGeode);
-    #else
         ig->getScene()->asGroup()->addChild(skyGeode);
         ig->getScene()->asGroup()->addChild(cloudsGeode);
-    #endif
+		
+		_cloudsDrawable->setLightingBrightness(
+			_lightBrightness_enable, 
+			_lightBrightness_day, 
+			_lightBrightness_night
+		);
+
         return _cloudsDrawable.get();
     }
+
+    class AddCloudLayerCommand : public igcore::Commands::Command
+    {
+    public:
+        AddCloudLayerCommand (igcore::ImageGenerator* ig)
+            : _ig(ig) {}
+
+        virtual const std::string getUsage() const
+        {
+            return "id type altitude thickness density";
+        }
+
+        virtual const std::string getDescription() const
+        {
+            return  "add clouds layer based on Sundog's SilverLining plugin\n"
+                    "     id - the id of the cloud latyer across the scene\n"
+                    "     type - from the available cloud types from SilverLining, from 0 to 9 respoding to:\n"
+                    "          0 - CIRROCUMULUS\n"
+                    "          1 - CIRRUS_FIBRATUS\n"
+                    "          2 - STRATUS\n"
+                    "          3 - CUMULUS_MEDIOCRIS\n"
+                    "          4 - CUMULUS_CONGESTUS\n"
+                    "          5 - CUMULUS_CONGESTUS_HI_RES\n"
+                    "          6 - CUMULONIMBUS_CAPPILATUS\n"
+                    "          7 - STRATOCUMULUS\n"
+                    "          8 - TOWERING_CUMULUS\n"
+                    "          9 - SANDSTORM\n"
+                    "     altitude - in meters, the altitude of the layer\n"
+                    "     thickness - the thickness of the layer\n"
+                    "     density - from 0.0-1.0, 1.0 most dense";
+        }
+
+        virtual int exec(const igcore::StringUtils::Tokens& tokens)
+        {
+            if (tokens.size() == 5)
+            {
+                unsigned int id     = atoi(tokens.at(0).c_str());
+                int type            = atoi(tokens.at(1).c_str());
+                double altitude     = atof(tokens.at(2).c_str());
+                double thickness    = atof(tokens.at(3).c_str());
+                double density      = atof(tokens.at(4).c_str());
+
+                _ig->addCloudLayer(id,type,altitude,thickness, density);
+
+                return 0;
+            }
+            return -1;
+        }
+
+    protected:
+        igcore::ImageGenerator* _ig;
+    };
+
+    class RemoveCloudLayerCommand : public igcore::Commands::Command
+    {
+    public:
+        RemoveCloudLayerCommand(igcore::ImageGenerator* ig)
+            : _ig(ig) {}
+
+        virtual const std::string getUsage() const
+        {
+            return "id";
+        }
+
+        virtual const std::string getDescription() const
+        {
+            return  "removes the cloud layer from the scene by a given cloud layer id\n"
+                    "     id - the id of the cloud layer";
+        }
+
+        virtual int exec(const igcore::StringUtils::Tokens& tokens)
+        {
+            if (tokens.size() == 1)
+            {
+                unsigned int id = atoi(tokens.at(0).c_str());
+
+                _ig->removeCloudLayer(id);
+
+                return 0;
+            }
+            return -1;
+        }
+
+    protected:
+        igcore::ImageGenerator* _ig;
+    };
+
+    class RemoveAllCloudLayersCommand : public igcore::Commands::Command
+    {
+    public:
+        RemoveAllCloudLayersCommand(igcore::ImageGenerator* ig)
+            : _ig(ig) {}
+
+        virtual const std::string getUsage() const
+        {
+            return "(no attributes)";
+        }
+
+        virtual const std::string getDescription() const
+        {
+            return "removes all the cloud layers from the scene";
+        }
+
+        virtual int exec(const igcore::StringUtils::Tokens&)
+        {
+            _ig->removeAllCloudlayers();
+
+            return 0;
+        }
+
+    protected:
+        igcore::ImageGenerator* _ig;
+    };
+
+    class SetFogCommand : public igcore::Commands::Command
+    {
+    public:
+        SetFogCommand (igcore::ImageGenerator* ig)
+            : _ig(ig) {}
+
+        virtual const std::string getUsage() const
+        {
+            return "visibility";
+        }
+
+        virtual const std::string getDescription() const
+        {
+            return  "sets the visibility of the scene by using fog\n"
+                    "     visibility - in meteres, the distance of the fog";
+        }
+
+        virtual int exec(const igcore::StringUtils::Tokens& tokens)
+        {
+            if (tokens.size() == 1)
+            {
+                double visibility = atof(tokens.at(0).c_str());
+
+                _ig->setFog(visibility);
+
+                return 0;
+            }
+            return -1;
+        }
+
+    protected:
+        igcore::ImageGenerator* _ig;
+    };
+
+    class RainCommand : public igcore::Commands::Command
+    {
+    public:
+        RainCommand(igcore::ImageGenerator* ig)
+            : _ig(ig) {}
+
+        virtual const std::string getUsage() const
+        {
+            return "rainfactor";
+        }
+
+        virtual const std::string getDescription() const
+        {
+            return  "adds rain to the scene\n"
+                    "     rainfactor - from 0.0-1.0, 0 no rain, 1 heavy rain";
+        }
+
+        virtual int exec(const igcore::StringUtils::Tokens& tokens)
+        {
+            if (tokens.size() == 1)
+            {
+                double factor = atof(tokens.at(0).c_str());
+
+                _ig->setRain(factor);
+
+                return 0;
+            }
+
+            return -1;
+        }
+    protected:
+        igcore::ImageGenerator* _ig;
+    };
+
+    class SnowCommand : public igcore::Commands::Command
+    {
+    public:
+        SnowCommand(igcore::ImageGenerator* ig)
+            : _ig(ig) {}
+
+        virtual const std::string getUsage() const
+        {
+            return "snowfactor";
+        }
+
+        virtual const std::string getDescription() const
+        {
+            return  "adds snow to the scene\n"
+                    "     snowfactor - from 0.0-1.0. 0 no snow, 1 heavy snow";
+        }
+
+        virtual int exec(const igcore::StringUtils::Tokens& tokens)
+        {
+            if (tokens.size() == 1)
+            {
+                double factor = atof(tokens.at(0).c_str());
+
+                _ig->setSnow(factor);
+
+                return 0;
+            }
+
+            return -1;
+        }
+    protected:
+        igcore::ImageGenerator* _ig;
+    };
 
 
 };

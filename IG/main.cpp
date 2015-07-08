@@ -221,7 +221,7 @@ int main(int argc, char** argv)
     }
 
     osg::ref_ptr<openig::OpenIG> ig = new openig::OpenIG;
-    ig->init(viewer.get());
+    ig->init(viewer.get(), "igdata/openig.xml");
     if (argc > 1)
     {
         ig->loadScript(std::string(argv[1]));

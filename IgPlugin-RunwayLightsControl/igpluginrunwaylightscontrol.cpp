@@ -105,7 +105,7 @@ public:
     {
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_mutex);
 
-        std::string xmlFile = fileName + ".runways.xml";
+        std::string xmlFile = fileName + ".lighting.xml";
         if (!osgDB::fileExists(xmlFile))
         {
             osg::notify(osg::NOTICE) << "Runway control: xml file does not exists: " << xmlFile << std::endl;

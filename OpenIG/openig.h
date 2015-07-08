@@ -149,6 +149,27 @@ public:
      */
     virtual void frame();
 
+	/*! Sets the Read node callback. Some might want to change how the file
+	*	is read, like osgEarth for example. You have an option
+	*	to read files differently then with osgDB::readNodeFile(...)
+	*  \brief Sets the read node callback
+	*  \param cb The callback
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Mon Jun 16 2015
+	*/
+	virtual void setReadNodeImplementationCallback(ReadNodeImplementationCallback* cb);
+
+	/*! Gets the Read node callback. See \ref setReadNodeImplementationCallback
+	*  \brief Gets the read node callback
+	*  \return cb The callback
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Mon Jun 16 2015
+	*/
+	virtual ReadNodeImplementationCallback* getReadNodeImplementationCallback();
+
+
     /*! \ref OpenIG is using IDs for everything in the
      *  scene management. The IDs are mainly up to the user to maintain. However
      *  some plugins generates these IDs automatically, for example the \ref
@@ -173,6 +194,22 @@ public:
      *  \date      Sun Jan 11 2015
      */
     virtual void addEntity(unsigned int id, const std::string& fileName, const osg::Matrixd& mx, const osgDB::Options* options = 0);
+
+	/*! Adds entity in the scene from osg::Node instead of loading it from a file. See \ref addEntity
+	*  \brief Adds entity in the scene from osg::Node instead of loading it from a file.
+	*  \param id       The id of the \ref Entity. You should use this Entity id to refer
+	*                  to this model in the scene
+	*  \param node	   The node to become an \ref Entity
+	*  \param mx       Initial position as osg::Matrixd
+	*  \param options  Optional. The option string can be processed by some plugins.
+	*                  Good example can be the VDBOffset which shifts the database
+	*                  by a given offset defined in the osgDB::Options string.
+	*  \return         Nothing
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Tue Jun 16 2015
+	*/
+	virtual void addEntity(unsigned int id, const osg::Node* node, const osg::Matrixd& mx, const osgDB::Options* options = 0);
 
     /*! Again, the removal as well as addition, is not happening
      *  immediatelly, still in the same frame though and it processed in ViewerOperation.
@@ -362,6 +399,72 @@ public:
      */
     virtual void resetAnimation(unsigned int entityId, const StringUtils::StringList& animations);
 
+
+	// Effects
+	/*! Adds effect to the scene. This oonly manages internal structures, it
+	*	is up to plugins to provide implementation
+	*  \brief Adds effect to the scene
+	*  \param id	Unique effect to the scene
+	*  \param name	Name of the effect
+	*  \param mx	The initial position/orientation of the effect
+	*  \param attributes String based attributes for the pugins provoding the implementation, in form of token=attr;token=attr ...
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Sun Jun 14 2015
+	*/
+	virtual void addEffect(unsigned int id, const std::string& name, const osg::Matrixd& mx, const std::string& attributes);
+
+	/*! Removes effect from the scene
+	*  \brief Removes effect from the scene
+	*  \param id	Unique effect to the scene
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Sun Jun 14 2015
+	*/
+	virtual void removeEffect(unsigned int id);
+
+	/*! Binds effect to an \ref Entity
+	*  \brief Binds effect to an \ref Entity
+	*  \param id		Unique effect to the scene
+	*  \param entityID	The ID of the \ref Entity
+	*  \param mx		The offset position/orientation of the effect
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Sun Jun 14 2015
+	*/
+	virtual void bindEffect(unsigned int id, unsigned int entityID, const osg::Matrixd& mx);
+
+	/*! Unbinds effect to an \ref Entity
+	*  \brief Unbinds effect to an \ref Entity
+	*  \param id		Unique effect to the scene
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Sun Jun 14 2015
+	*/
+	virtual void unbindEffect(unsigned int id);
+
+	/*! Update effect with new position/orientation
+	*  \brief Update effect with new position/orientation
+	*  \param id		Unique effect to the scene
+	*  \param mx		The new position/orientation
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Sun Jun 14 2015
+	*/
+	virtual void updateEffect(unsigned int id, const osg::Matrixd& mx);
+
+	/*! The \ref ImageGenerator, \ref OpenIG only manages structures for the
+	*	effects. It is up to plugins to provide their implementation. This is
+	*	the callback that provides the effect implementation
+	*  \brief Sets the effect implementation callback
+	*  \param cb		The callback
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Sun Jun 14 2015
+	*/
+	virtual void setEffectImplementationCallback(GenericImplementationCallback* cb);
+
+
     /*! Sets the position of the camera using Matrix. If the camera is bind to an
      *  \ref Entity, then this Matrix is the local offset. One can check if the camera
      *  is bound by \ref isCameraBoundToEntity
@@ -420,11 +523,12 @@ public:
      *  following the \ref Entity orientation, like a bird eye.
      * \brief Sets for fixed up Cametra orientation or not
      * \param       fixedUp true to fix the up axis or false to follow the \ref Entity orientation
+	 * \param       freezeOrientation true to freeze orientation
      * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
-    virtual void bindCameraSetFixedUp(bool fixedUp);
+	virtual void bindCameraSetFixedUp(bool fixedUp, bool freezeOrientation = false);
 
     /*! Sets fog in the scene. The \ref openig::OpenIG is adding a Fog attribute in the scene
      *  and it is up to plugins to implement it's appearance. Example is the \ref LightingPlugin which
@@ -842,6 +946,33 @@ public:
      */
     LightsMap&                          getLightsMap();
 
+	/*!
+	* \brief Returns the list of files that use file cache
+	* \return	The list of files that use file cache
+	* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	* \copyright (c)Compro Computer Services, Inc.
+	* \date      Sat Jun 27 2015
+	*/
+	const igcore::StringUtils::StringList& getFilesToBeCached() const;
+
+	/*!
+	* \brief	Adds files to use the cache
+	* \param	fileList	The list of files that will use file cache
+	* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	* \copyright (c)Compro Computer Services, Inc.
+	* \date      Sat Jun 27 2015
+	*/
+	void addFilesToBeCached(const igcore::StringUtils::StringList& files);
+
+	/*!
+	* \brief	Returns true if the given file is using the file cache
+	* \return	Returns true if the given file is using the file cache
+	* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	* \copyright (c)Compro Computer Services, Inc.
+	* \date      Sat Jun 27 2015
+	*/
+	bool isFileCached(const std::string& fileName);
+
 protected:
 
     /*! \brief  The current added in the scene \ref Entity es, ID based std::map */
@@ -890,9 +1021,28 @@ protected:
     osg::ref_ptr<osg::Camera>                       _splashCamera;
     /*! \brief  Switch set to true when the splash screen is on */
     bool                                            _splashOn;
+	/*! \brief	The root of the effects*/
+	osg::ref_ptr<osg::Group>						_effectsRoot;
+	/*! \brief	The effect implementation callback */
+	osg::ref_ptr<igcore::GenericImplementationCallback>	_effectsImplementationCallback;
+
+	/*! \brief	Our Effect*/
+	typedef osg::ref_ptr<osg::MatrixTransform>			Effect;
+	typedef std::map< unsigned int, Effect >			EffectMap;
+	EffectMap											_effects;
 
 	/*! \brief The Light Attributes */
 	LightAttributesMap								_lightAttributes;
+
+	/*! \brief The read file callback*/
+	osg::ref_ptr<ReadNodeImplementationCallback>	_readFileCallback;
+
+	/*! \brief The file cache map*/
+	typedef std::map< std::string, osg::ref_ptr<osg::Node> >	EntityCache;
+	EntityCache													_entityCache;
+
+	/*! \brief The files to be cached*/
+	igcore::StringUtils::StringList								_filesToBeCached;
 	
     /*!
      * \brief Init the viewer. It calls \ref initScene and add the
@@ -945,15 +1095,25 @@ protected:
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jan 16 2015
      */
+
     void initOnScreenHelp();
     /*! Init the splash screen. It looks for OpenIG-Splash.jpg in, for Windows in /igdata
-     * Linux and MacOS in /usr/local/lib/igdata
+     * Linux and MacOS in /usr/local/bin/igdata
      * \brief Init the splash screen
      * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jan 16 2015
      */
     void initSplashScreen();
+
+	/*! Init the effects. Add the effects root to the scene
+	* \brief Init the effects
+	* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	* \copyright (c)Compro Computer Services, Inc.
+	* \date      Sun Jun 14 2015
+	*/
+	void initEffects();
+
 };
 
 } // namespace

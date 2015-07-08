@@ -340,7 +340,7 @@ public:
 						keyDown(ea.getKey());
 						break;
 					case osgGA::GUIEventAdapter::KEY_Left:
-						if (ea.getModKeyMask()!=0)
+                        if (ea.getModKeyMask()!=0 && _terminalOn)
 						{
 							bool found = false;
 							for (unsigned int i=0; i<_wordoffsets.size()-1; ++i)
@@ -366,7 +366,7 @@ public:
 						}
 						break;
 					case osgGA::GUIEventAdapter::KEY_Right:
-						if (ea.getModKeyMask()!=0)
+                        if (ea.getModKeyMask()!=0 && _terminalOn)
 						{
 							bool found = false;
 							for (unsigned int i=0; i<_wordoffsets.size()-1; ++i)

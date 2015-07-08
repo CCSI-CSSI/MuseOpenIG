@@ -1,6 +1,6 @@
 
 set( _osgComponents
-    OpenThreads osg osgDB osgUtil osgGA osgText osgViewer osgShadow osgSim osgParticle
+    OpenThreads osg osgDB osgUtil osgGA osgText osgViewer osgShadow osgSim osgParticle osgAnimation
 )
 
 # Macro to force the stock FindOpenSceneGraph.cmake script to

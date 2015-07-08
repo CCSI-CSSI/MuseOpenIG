@@ -14,6 +14,7 @@ include_directories(
         ${OPENSCENEGRAPH_INCLUDE_DIR}
         ${OPENGL_INCLUDE_DIR}
         ${SILVERLINING_INCLUDE_DIR}
+		${Boost_INCLUDE_DIRS}
 )
 
 target_link_libraries( ${LIB_NAME}
@@ -22,6 +23,7 @@ target_link_libraries( ${LIB_NAME}
     ${OPENGL_LIBRARY}
     ${GLU_LIBRARY}
     OpenIG
+	${Boost_LIBRARIES}
 )
 
 set_target_properties( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )

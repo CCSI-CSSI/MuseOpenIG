@@ -189,9 +189,38 @@ public:
             return 0;
     }
 
+	/*!
+	* \brief Gets a value object to pass data to plugins	
+	* \return 0 on failure, the ValueObject if successful
+	* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	* \copyright (c)Compro Computer Services, Inc.
+	* \date      Thu Jun 25 2015
+	*/
+	osg::ValueObject* getOrCreateValueObject()
+	{
+		if (!_valueObject.valid())
+		{
+			_valueObject = new osg::ValueObject;
+		}
+		return _valueObject.get();
+	}
+
+	/*!
+	* \brief Sets a value object to pass data to plugins
+	* \param	valueObject The new ValueObject to be used
+	* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	* \copyright (c)Compro Computer Services, Inc.
+	* \date      Thu Jun 25 2015
+	*/
+	void setValueObject(osg::ValueObject* valueObject)
+	{
+		_valueObject = valueObject;
+	}
+
 protected:
-    igcore::ImageGenerator* _ig;            /*! \brief a reference to ImageGenerator */
-    AttributeMap            _attributes;    /*! \brief attrinute name based map */
+    igcore::ImageGenerator*			_ig;            /*! \brief a reference to ImageGenerator */
+    AttributeMap					_attributes;    /*! \brief attrinute name based map */
+	osg::ref_ptr<osg::ValueObject>	_valueObject;	/*! \brief valueobject used to pass data*/
 };
 
 } // namespace

@@ -9,7 +9,7 @@
     <Enable-Clouds-Shadows>yes</Enable-Clouds-Shadows>
     <Shadows-Factor>0.3</Shadows-Factor>
     <Lighting-Implementation-Texture-Slot>5</Lighting-Implementation-Texture-Slot>
-    <Scene-Program-Lookup-By-Shader>Lighting: main vertex shader</Scene-Program-Lookup-By-Shader>
+    <SplashScreen></SplashScreen>
     <Shadowed-GPU-Vegetation>no</Shadowed-GPU-Vegetation>
   <ImageGenerator-Plugins-Config>
       <Plugin>
@@ -51,6 +51,14 @@
       <Plugin>
           <Order-Number>8</Order-Number>
           <Name>RunwayLightsControl</Name>
+      </Plugin>
+      <Plugin>
+          <Order-Number>9</Order-Number>
+          <Name>FBXAnimation</Name>
+      </Plugin>
+      <Plugin>
+          <Order-Number>10</Order-Number>
+          <Name>OSGParticleEffects</Name>
       </Plugin>
   </ImageGenerator-Plugins-Config>
 </OpenIG-Config>  

@@ -25,6 +25,8 @@
 
 #include "openig.h"
 
+#include <IgCore/configuration.h>
+
 #include <osg/Image>
 #include <osg/TextureRectangle>
 #include <osg/Geometry>
@@ -53,11 +55,15 @@ void OpenIG::initSplashScreen()
     screen_width = viewport->width();
     screen_height = viewport->height();
 #endif
-
+	
 #if defined(_WIN32)
-    osg::ref_ptr<osg::Image> splash = osgDB::readImageFile("igdata/OpenIG-Splash.jpg");
+    std::string splashScreen = Configuration::instance()->getConfig("SplashScreen", "igdata/OpenIG-Splash.jpg");
+    osg::ref_ptr<osg::Image> splash = osgDB::readImageFile(splashScreen);
 #else
-    osg::ref_ptr<osg::Image> splash = osgDB::readImageFile("/usr/local/bin/igdata/OpenIG-Splash.jpg");
+    std::string splashScreen = Configuration::instance()->getConfig("SplashScreen", "igdata/OpenIG-Splash.jpg");
+    //osg::ref_ptr<osg::Image> splash = osgDB::readImageFile("igdata/OpenIG-Splash.jpg");
+    osg::notify(osg::NOTICE)<<"OpenIG::initSplashScreen() loading splashscreen from file: "<< splashScreen << std::endl;
+    osg::ref_ptr<osg::Image> splash = osgDB::readImageFile(splashScreen);
 #endif
     if (splash.valid())
     {

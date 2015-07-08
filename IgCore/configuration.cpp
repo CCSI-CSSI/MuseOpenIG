@@ -58,7 +58,7 @@ bool Configuration::readFromXML(const std::string& fileName, const std::string& 
 const std::string Configuration::getConfig(const std::string& token, const std::string value)
 {
     ConfigMapIterator itr = _configuration.find(token);
-    if (itr != _configuration.end())
+    if (itr != _configuration.end() && !itr->second.empty())
         return itr->second;
 
     return value;

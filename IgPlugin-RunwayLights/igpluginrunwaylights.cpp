@@ -340,6 +340,7 @@ public:
                                 la._constantAttenuation = 50;
                                 la._brightness = 100;
                                 la._spotCutoff = 20;
+								la._realLightLOD = 200.0;
                                 la._dirtyMask = igcore::LightAttributes::ALL;
 
                                 _ig->updateLightAttributes(id,la);

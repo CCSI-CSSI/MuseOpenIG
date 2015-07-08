@@ -203,7 +203,7 @@ public:
                     if (ea.getKey() == osgGA::GUIEventAdapter::KEY_F6)
                     {
                         fixedUpMode = !fixedUpMode;
-                        openIG->bindCameraSetFixedUp(fixedUpMode);
+                        openIG->bindCameraSetFixedUp(fixedUpMode,true);
                         return true;
                     }
                 }
@@ -375,7 +375,7 @@ static std::string s_FlightRecordingPath("demo\\flightpath.path");
 #else
 static std::string s_ModelPath("/usr/local/database/model/A320/a320.obj");
 static std::string s_TerrainPath("/usr/local/database/terrain/OPEN_IG_Demo_NO_UTM31N_r5/master.flt.osg");
-static std::string s_FlightRecordingPath("./demo/flightpath.path");
+static std::string s_FlightRecordingPath("demo/flightpath.path");
 #endif
 
 // These are our entity IDs for the
@@ -489,7 +489,7 @@ int main(int argc, char** argv)
     osg::ref_ptr<openig::OpenIG> ig = new openig::OpenIG;
 
     // We init OpenIG with your Viewer
-    ig->init(viewer.get());
+    ig->init(viewer.get(),"igdata/openig.xml");
 
     // OpenIG provides hook to add entity to
     // the shadowed scene which is default, by
@@ -519,11 +519,7 @@ int main(int argc, char** argv)
     }
     else
     {
-#if defined(_WIN32)
         ig->loadScript(std::string("default.txt"));
-#else
-        ig->loadScript(std::string("default.txt"));
-#endif
     }
 
     // add the Compro a320 model to the scene
@@ -687,8 +683,8 @@ int main(int argc, char** argv)
         // camera only if we set it using our
         // custom command from above
         if (s_CameraManipulator.valid() && ig->isCameraBoundToEntity())
-        {
-            ig->bindCameraUpdate(s_CameraManipulator->getMatrix());
+        {			
+			ig->bindCameraUpdate(s_CameraManipulator->getMatrix());
         }
 
         // Here we call the frame

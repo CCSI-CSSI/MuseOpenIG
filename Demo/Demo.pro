@@ -10,15 +10,27 @@ SOURCES += main.cpp
 include(deployment.pri)
 qtcAddDeployment()
 
-LIBS += -L/usr/local/lib64
-LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgGA -losgText -lOpenIG -lIgCore
-
 INCLUDEPATH += ../
 DEPENDPATH += ../
 
+
+OTHER_FILES += default.txt \
+               openig.xml \
+               OpenIG-Splash.jpg
+
+DISTFILES += default.txt \
+             openig.xml \
+             OpenIG-Splash.jpg \
+             flightpath.bin \
+             flightpath.path
+
+LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgGA -losgText -lOpenIG -lIgCore
+
 unix {
+    LIBS += -L/usr/local/lib64
+
     DEFINES += LINUX
-    DESTDIR = /usr/local/bin
+    DESTDIR = /usr/local/bin/oigDemo
 
     INCLUDEPATH += /usr/local/include
     DEPENDPATH += /usr/local/include
@@ -36,13 +48,28 @@ unix {
     DDIR = $$DESTDIR
     DFILE = $$DESTDIR/default.txt
 
-    QMAKE_POST_LINK = test -e $$quote($$DFILE) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK =  test -d $$quote($$DESTDIR)  || $$QMAKE_MKDIR $$quote($$DESTDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += test -e $$quote($$DFILE) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
 
     FILE = $${PWD}/flightpath.path
     DDIR = $$DESTDIR/demo
     DFILE = $$DESTDIR/demo/flightpath.path
 
     QMAKE_POST_LINK += test -d $$quote($$DDIR)  || $$QMAKE_MKDIR $$quote($$DDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += test -e $$quote($$DFILE) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
+
+    FILE = $${PWD}/openig.xml
+    DDIR = $${DESTDIR}/igdata
+    DFILE = $${DDIR}/openig.xml
+
+    QMAKE_POST_LINK += test -d $$quote($$DDIR) || $$QMAKE_MKDIR $$quote($$DDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += test -e $$quote($$DFILE) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
+
+    FILE = $${PWD}/OpenIG-Splash.jpg
+    DDIR = $${DESTDIR}/igdata
+    DFILE = $${DDIR}/OpenIG-Splash.jpg
+
+    QMAKE_POST_LINK += test -d $$quote($$DDIR) || $$QMAKE_MKDIR $$quote($$DDIR) $$escape_expand(\\n\\t)
     QMAKE_POST_LINK += test -e $$quote($$DFILE) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
 
     # library version number files
@@ -71,6 +98,7 @@ win32 {
     else {
         message(\"OpenSceneGraph\" detected in \"$$OSGROOT\")
         INCLUDEPATH += $$OSGROOT/include
+        LIBS += -L$$OSGBUILD/lib
     }
     OSGBUILD = $$(OSG_BUILD)
     isEmpty(OSGBUILD) {
@@ -90,7 +118,7 @@ win32 {
 
     LIBS += -L$$OPENIGBUILD/lib
 
-    DESTDIR = $$OPENIGBUILD/bin
+    DESTDIR = $$OPENIGBUILD/bin/oigDemo
 
     FILE = $${PWD}/default.txt
     DDIR = $$DESTDIR
@@ -98,6 +126,7 @@ win32 {
     FILE ~= s,/,\\,g
     DDIR ~= s,/,\\,g
 
+    QMAKE_PRE_LINK  = $$QMAKE_CHK_DIR_EXISTS $$quote($$DDIR) $$QMAKE_MKDIR $$quote($$DDIR) $$escape_expand(\\n\\t)
     QMAKE_POST_LINK = $$QMAKE_COPY $$quote($$FILE) $$quote($$DDIR) $$escape_expand(\\n\\t)
 
     FILE = $${PWD}/flightpath.path
@@ -109,11 +138,26 @@ win32 {
     QMAKE_POST_LINK += $$QMAKE_CHK_DIR_EXISTS $$quote($$DDIR) $$QMAKE_MKDIR $$quote($$DDIR) $$escape_expand(\\n\\t)
     QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$FILE) $$quote($$DDIR) $$escape_expand(\\n\\t)
 
+    FILE = $${PWD}/openig.xml
+    DDIR = $${DESTDIR}/igdata
+    DFILE = $${DDIR}/openig.xml
+
+    FILE  ~= s,/,\\,g
+    DDIR  ~= s,/,\\,g
+    DFILE ~= s,/,\\,g
+
+    QMAKE_POST_LINK += $$QMAKE_CHK_DIR_EXISTS $$quote($$DDIR) $$QMAKE_MKDIR $$quote($$DDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
+
+    FILE = $${PWD}/OpenIG-Splash.jpg
+    DDIR = $${DESTDIR}/igdata
+    DFILE = $${DDIR}/OpenIG-Splash.jpg
+
+    FILE  ~= s,/,\\,g
+    DDIR  ~= s,/,\\,g
+    DFILE ~= s,/,\\,g
+
+    QMAKE_POST_LINK += $$QMAKE_CHK_DIR_EXISTS $$quote($$DDIR) $$QMAKE_MKDIR $$quote($$DDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
+
 }
-
-OTHER_FILES += default.txt
-
-DISTFILES += default.txt \
-             flightpath.bin \
-             flightpath.path
-

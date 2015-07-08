@@ -28,6 +28,7 @@
 #include <osg/Vec4>
 #include <osg/Referenced>
 #include <osg/Group>
+#include <osg/ValueObject>
 
 namespace igcore
 {
@@ -259,19 +260,23 @@ struct LightAttributes
     float           _spotCutoff;
     bool            _enabled;
 	float			_cloudBrightness;
+	double			_lod;
+	double			_realLightLOD;
     unsigned int    _dirtyMask;
 
-    enum Mask
-    {
-        AMBIENT             = 1,
-        DIFFUSE             = 2,
-        SPECULAR            = 4,
-        BRIGHTNESS          = 8,
-        CONSTANTATTENUATION = 16,
-        SPOTCUTOFF          = 32,
-		CLOUDBRIGHTNESS		= 64,
-        ENABLED             = 128,
-		ALL = AMBIENT | DIFFUSE | SPECULAR | BRIGHTNESS | CLOUDBRIGHTNESS | CONSTANTATTENUATION | ENABLED | SPOTCUTOFF
+	enum Mask
+	{
+		AMBIENT = 1,
+		DIFFUSE = 2,
+		SPECULAR = 4,
+		BRIGHTNESS = 8,
+		CONSTANTATTENUATION = 16,
+		SPOTCUTOFF = 32,
+		CLOUDBRIGHTNESS = 64,
+		LOD = 128,
+		REALLIGHTLOD = 256,
+		ENABLED = 512,
+		ALL = AMBIENT | DIFFUSE | SPECULAR | BRIGHTNESS | CLOUDBRIGHTNESS | CONSTANTATTENUATION | ENABLED | SPOTCUTOFF | LOD | REALLIGHTLOD
     };
 
     LightAttributes()
@@ -281,6 +286,8 @@ struct LightAttributes
         , _enabled(true)
 		, _cloudBrightness(1.f)
         , _dirtyMask(0)
+		, _lod(0.0)
+		, _realLightLOD(0.0)
     {
 
     }
@@ -317,6 +324,35 @@ struct EnvironmentalMapAttributes
     int _envMapId;
 
     EnvironmentalMapAttributes() : _envMapId(-1) {}
+};
+
+/*! This struct is introduced a bit later, and it is intended to be used
+*	for passing custom data through setUserValue. It is handy and general
+*	enough then the previous defined specialized structures
+* \brief	Struct for passing custom data to plugins via setUserValue
+* \author   Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+* \copyright (c)Compro Computer Services, Inc.
+* \date     Sun Jun 14 2015
+*/
+struct GenericAttribute : public osg::ValueObject
+{
+
+};
+
+/*! This class is general purpose class for creating and managing
+*	custom implementation of entities. As an example can be Effect
+*	Entity that is implemented in a plugin.
+* \brief	This class is general purpose class for creating and managing custom implementation of entities
+* \author   Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+* \copyright (c)Compro Computer Services, Inc.
+* \date     Sun Jun 14 2015
+*/
+class GenericImplementationCallback : public osg::Referenced
+{
+public:
+	virtual osg::Node* create(unsigned int id, const std::string& name, igcore::GenericAttribute* attributes = 0) = 0;
+	virtual void destroy(unsigned int id) = 0;
+	virtual void update(unsigned int id, igcore::GenericAttribute* attributes) = 0;
 };
 
 /*! See \ref igcore::ImageGenerator::setLightImplementationCallback for explanation.

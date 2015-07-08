@@ -50,7 +50,7 @@ unix {
     INCLUDEPATH += /usr/local/include/Public_Headers
     DEPENDPATH += /usr/local/include/Public_Headers
 
-    LIBS += -lSilverLiningOpenGL
+    LIBS += -lSilverLiningOpenGL -lboost_date_time
 
     FILE = $${PWD}/libIgPlugin-SilverLining.so.xml
     DDIR = $${DESTDIR}/libIgPlugin-SilverLining.so.xml
@@ -83,7 +83,7 @@ OTHER_FILES += libIgPlugin-SilverLining.so.xml
 win32-g++:QMAKE_CXXFLAGS += -fpermissive -shared-libgcc -D_GLIBCXX_DLL
 
 win32 {
-    LIBS += -lopengl32 -lglu32 -lUser32
+    LIBS += -lopengl32 -lglu32 -lUser32 -llibboost_date_time
 
     OSGROOT = $$(OSG_ROOT)
     isEmpty(OSGROOT) {
@@ -113,23 +113,39 @@ win32 {
 
     LIBS += -L$$OPENIGBUILD/lib
 
-    SLROOT = "E:\SilverLining SDK(Full source)"
+    SLROOT = $$(SILVERLINING)
     isEmpty(SLROOT) {
         message(\"SilverLining\" not detected...)
     }
     else {
         message(\"SilverLining\" detected in \"$$SLROOT\")
-        INCLUDEPATH += $$quote(\"$$SLROOT/Public Headers\")
+        INCLUDEPATH += $$quote(\"$$SLROOT\Public Headers\")
         message($$INCLUDEPATH)
     }
-    SLBUILD = "E:\SilverLining SDK(Full source)\lib\vc12\x64"
+    SLBUILD = $$(SILVERLINING_BUILD)
     isEmpty(SLBUILD) {
         message(\"SilverLining build\" not detected...)
     }
     else {
         message(\"SilverLining build\" detected in \"$$SLBUILD\")
         DEPENDPATH += $$SLBUILD
-	LIBS += -L$$SLBUILD -lSilverLining-MT-DLL
+        LIBS += -L$$SLBUILD\lib\vc12\x64 -lSilverLining-MT-DLL
+    }
+
+    BOOSTROOT = $$(BOOST_ROOT)
+    isEmpty(BOOSTROOT) {
+        message(\"boost\" not detected...)
+    }
+    else {
+        win32-g++ {
+        message(\"boost\" detected in \"$$BOOSTROOT\")
+        LIBS += -L$$BOOSTROOT\stage\lib -llibboost_date_time
+        INCLUDEPATH += $$BOOSTROOT
+        } else {
+        message(\"boost\" detected in \"$$BOOSTROOT\")
+        LIBS += -L$$BOOSTROOT\stage\lib -llibboost_date_time
+        INCLUDEPATH += $$BOOSTROOT
+        }
     }
 
     FILE = $${PWD}/libIgPlugin-SilverLining.so.windows.xml

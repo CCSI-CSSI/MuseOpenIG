@@ -63,7 +63,7 @@ class SkyDrawable : public osg::Drawable
 {
 public:
 	SkyDrawable();
-    SkyDrawable(const std::string& path, osgViewer::View* view, osg::Light* light, osg::Fog* fog);
+    SkyDrawable(const std::string& path, osgViewer::View* view, osg::Light* light, osg::Fog* fog, bool geocentric = false);
 
     virtual bool isSameKindAs(const Object* obj) const {
         return dynamic_cast<const SkyDrawable*>(obj)!=NULL;
@@ -87,6 +87,7 @@ public:
     void            removeCloudLayer(int id);
     void            updateCloudLayer(int id, double altitude, double thickness, double density);
     void            removeAllCloudLayers();
+	void			setGeocentric(bool geocentric);	
 
 protected:
 	void setLighting(SilverLining::Atmosphere *atm) const;
@@ -132,6 +133,7 @@ protected:
     double                              _snowFactor;
     bool                                _removeAllCloudLayers;
     bool                                _enableCloudShadows;
+	bool								_geocentric;
 
     struct CloudLayerInfo
     {

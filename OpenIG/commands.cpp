@@ -288,40 +288,6 @@ protected:
     igcore::ImageGenerator* _ig;
 };
 
-class SetFogCommand : public Commands::Command
-{
-public:
-    SetFogCommand (ImageGenerator* ig)
-        : _ig(ig) {}
-
-    virtual const std::string getUsage() const
-    {
-        return "visibility";
-    }
-
-    virtual const std::string getDescription() const
-    {
-        return  "sets the visibility of the scene by using fog\n"
-                "     visibility - in meteres, the distance of the fog";
-    }
-
-    virtual int exec(const StringUtils::Tokens& tokens)
-    {
-        if (tokens.size() == 1)
-        {
-            double visibility = atof(tokens.at(0).c_str());
-
-            _ig->setFog(visibility);
-
-            return 0;
-        }
-        return -1;
-    }
-
-protected:
-    igcore::ImageGenerator* _ig;
-};
-
 class SetWindCommand : public Commands::Command
 {
 public:
@@ -352,119 +318,6 @@ public:
             return 0;
         }
         return -1;
-    }
-
-protected:
-    igcore::ImageGenerator* _ig;
-};
-
-class AddCloudLayerCommand : public Commands::Command
-{
-public:
-    AddCloudLayerCommand (ImageGenerator* ig)
-        : _ig(ig) {}
-
-    virtual const std::string getUsage() const
-    {
-        return "id type altitude thickness density";
-    }
-
-    virtual const std::string getDescription() const
-    {
-        return  "add clouds layer based on Sundog's SilverLining plugin\n"
-                "     id - the id of the cloud latyer across the scene\n"
-                "     type - from the available cloud types from SilverLining, from 0 to 9 respoding to:\n"
-                "          0 - CIRROCUMULUS\n"
-                "          1 - CIRRUS_FIBRATUS\n"
-                "          2 - STRATUS\n"
-                "          3 - CUMULUS_MEDIOCRIS\n"
-                "          4 - CUMULUS_CONGESTUS\n"
-                "          5 - CUMULUS_CONGESTUS_HI_RES\n"
-                "          6 - CUMULONIMBUS_CAPPILATUS\n"
-                "          7 - STRATOCUMULUS\n"
-                "          8 - TOWERING_CUMULUS\n"
-                "          9 - SANDSTORM\n"
-                "     altitude - in meters, the altitude of the layer\n"
-                "     thickness - the thickness of the layer\n"
-                "     density - from 0.0-1.0, 1.0 most dense";
-    }
-
-    virtual int exec(const StringUtils::Tokens& tokens)
-    {
-        if (tokens.size() == 5)
-        {
-            unsigned int id     = atoi(tokens.at(0).c_str());
-            int type            = atoi(tokens.at(1).c_str());
-            double altitude     = atof(tokens.at(2).c_str());
-            double thickness    = atof(tokens.at(3).c_str());
-            double density      = atof(tokens.at(4).c_str());
-
-            _ig->addCloudLayer(id,type,altitude,thickness, density);
-
-            return 0;
-        }
-        return -1;
-    }
-
-protected:
-    igcore::ImageGenerator* _ig;
-};
-
-class RemoveCloudLayerCommand : public Commands::Command
-{
-public:
-    RemoveCloudLayerCommand(ImageGenerator* ig)
-        : _ig(ig) {}
-
-    virtual const std::string getUsage() const
-    {
-        return "id";
-    }
-
-    virtual const std::string getDescription() const
-    {
-        return  "removes the cloud layer from the scene by a given cloud layer id\n"
-                "     id - the id of the cloud layer";
-    }
-
-    virtual int exec(const StringUtils::Tokens& tokens)
-    {
-        if (tokens.size() == 1)
-        {
-            unsigned int id = atoi(tokens.at(0).c_str());
-
-            _ig->removeCloudLayer(id);
-
-            return 0;
-        }
-        return -1;
-    }
-
-protected:
-    igcore::ImageGenerator* _ig;
-};
-
-class RemoveAllCloudLayersCommand : public Commands::Command
-{
-public:
-    RemoveAllCloudLayersCommand(ImageGenerator* ig)
-        : _ig(ig) {}
-
-    virtual const std::string getUsage() const
-    {
-        return "(no attributes)";
-    }
-
-    virtual const std::string getDescription() const
-    {
-        return "removes all the cloud layers from the scene";
-    }
-
-    virtual int exec(const StringUtils::Tokens&)
-    {
-        _ig->removeAllCloudlayers();
-
-        return 0;
     }
 
 protected:
@@ -1058,74 +911,6 @@ protected:
     igcore::ImageGenerator* _ig;
 };
 
-class RainCommand : public Commands::Command
-{
-public:
-    RainCommand(ImageGenerator* ig)
-        : _ig(ig) {}
-
-    virtual const std::string getUsage() const
-    {
-        return "rainfactor";
-    }
-
-    virtual const std::string getDescription() const
-    {
-        return  "adds rain to the scene\n"
-                "     rainfactor - from 0.0-1.0, 0 no rain, 1 heavy rain";
-    }
-
-    virtual int exec(const StringUtils::Tokens& tokens)
-    {
-        if (tokens.size() == 1)
-        {
-            double factor = atof(tokens.at(0).c_str());
-
-            _ig->setRain(factor);
-
-            return 0;
-        }
-
-        return -1;
-    }
-protected:
-    igcore::ImageGenerator* _ig;
-};
-
-class SnowCommand : public Commands::Command
-{
-public:
-    SnowCommand(ImageGenerator* ig)
-        : _ig(ig) {}
-
-    virtual const std::string getUsage() const
-    {
-        return "snowfactor";
-    }
-
-    virtual const std::string getDescription() const
-    {
-        return  "adds snow to the scene\n"
-                "     snowfactor - from 0.0-1.0. 0 no snow, 1 heavy snow";
-    }
-
-    virtual int exec(const StringUtils::Tokens& tokens)
-    {
-        if (tokens.size() == 1)
-        {
-            double factor = atof(tokens.at(0).c_str());
-
-            _ig->setSnow(factor);
-
-            return 0;
-        }
-
-        return -1;
-    }
-protected:
-    igcore::ImageGenerator* _ig;
-};
-
 class OffsetCommand: public Commands::Command
 {
 public:
@@ -1221,12 +1006,26 @@ public:
         if (tokens.size() >= 2)
         {
             unsigned int id     = atoi(tokens.at(0).c_str());
-            std::string name    = tokens.at(1);
+			std::string name	= tokens.at(1);
+			
+			unsigned int afterNameIdx = 2;
+			if (name.at(name.length() - 1) == ':' && tokens.size() > 2)
+			{
+				name += tokens.at(2);
+
+				++afterNameIdx;
+			}
+			if (tokens.size() > afterNameIdx && tokens.at(afterNameIdx).at(0) == ':')
+			{
+				name += tokens.at(3);
+
+				++afterNameIdx;
+			}
 
             osg::ref_ptr<RefAnimationSequenceCallbacks> cbs;
-            if (tokens.size() > 2)
+			if (tokens.size() > afterNameIdx)
             {
-                unsigned int i = 2;
+				unsigned int i = afterNameIdx;
                 while (i+1 < tokens.size())
                 {
                     std::string sequence    = tokens.at(i);
@@ -1346,6 +1145,152 @@ protected:
     igcore::ImageGenerator* _ig;
 };
 
+class AddEffectCommand : public igcore::Commands::Command
+{
+public:
+	AddEffectCommand(igcore::ImageGenerator* ig)
+		: _ig(ig) {}
+
+	virtual const std::string getUsage() const
+	{
+		return "id name x y z heading pitch roll [optional:attributes]";
+	}
+
+	virtual const std::string getDescription() const
+	{
+		return  "adds effect in the scene\n"
+			"     id - the id of the effect\n"
+			"     name - the name of the effect\n"
+			"     x - the x position of the new effect\n"
+			"     y - the y position of the new effect\n"
+			"     z - the z position of the new effect\n"
+			"     heading - the heading in degrees of the new effect\n"
+			"     pitch - the pitch in degrees of the new effect\n"
+			"     roll - the roll in degrees of the new effect\n"
+			"     attributes - in the form of token=value token=value";
+	}
+
+	virtual int exec(const igcore::StringUtils::Tokens& tokens)
+	{
+		if (tokens.size() >= 8)
+		{
+			unsigned int	id = atoi(tokens.at(0).c_str());
+			std::string		name = tokens.at(1);
+			double          x = atof(tokens.at(2).c_str());
+			double          y = atof(tokens.at(3).c_str());
+			double          z = atof(tokens.at(4).c_str());
+			double          h = atof(tokens.at(5).c_str());
+			double          p = atof(tokens.at(6).c_str());
+			double          r = atof(tokens.at(7).c_str());
+
+			osg::Matrixd mx = Math::instance()->toMatrix(x, y, z, h, p, r);
+
+			std::ostringstream oss;
+			for (size_t i = 8; i < tokens.size(); ++i)
+			{
+				oss << tokens.at(i) << ";";
+			}
+
+			_ig->addEffect(id, name, mx, oss.str());
+
+			return 0;
+		}
+
+		return -1;
+	}
+protected:
+	igcore::ImageGenerator* _ig;
+};
+
+class BindEffectCommand : public igcore::Commands::Command
+{
+public:
+	BindEffectCommand(igcore::ImageGenerator* ig)
+		: _ig(ig) {}
+
+	virtual const std::string getUsage() const
+	{
+		return "id name x y z heading pitch roll";
+	}
+
+	virtual const std::string getDescription() const
+	{
+		return  "binds effect to an Entity in the scene\n"
+			"     id - the id of the effect\n"
+			"     entityID - the the ID of the Entity\n"
+			"     x - the x position of the new effect\n"
+			"     y - the y position of the new effect\n"
+			"     z - the z position of the new effect\n"
+			"     heading - the heading in degrees of the new effect\n"
+			"     pitch - the pitch in degrees of the new effect\n"
+			"     roll - the roll in degrees of the new effect";			
+	}
+
+	virtual int exec(const igcore::StringUtils::Tokens& tokens)
+	{
+		if (tokens.size() >= 8)
+		{
+			unsigned int	id = atoi(tokens.at(0).c_str());
+			unsigned int	entityID = atoi(tokens.at(1).c_str());
+			double          x = atof(tokens.at(2).c_str());
+			double          y = atof(tokens.at(3).c_str());
+			double          z = atof(tokens.at(4).c_str());
+			double          h = atof(tokens.at(5).c_str());
+			double          p = atof(tokens.at(6).c_str());
+			double          r = atof(tokens.at(7).c_str());
+
+			osg::Matrixd mx = Math::instance()->toMatrix(x, y, z, h, p, r);
+		
+			_ig->bindEffect(id, entityID, mx);
+
+			return 0;
+		}
+
+		return -1;
+	}
+protected:
+	igcore::ImageGenerator* _ig;
+};
+
+class CacheCommand : public igcore::Commands::Command
+{
+public:
+	CacheCommand(openig::OpenIG* ig)
+		: _ig(ig) {}
+
+	virtual const std::string getUsage() const
+	{
+		return "filename1 filename2 filename3 ...";
+	}
+
+	virtual const std::string getDescription() const
+	{
+		return  "adds files to use the cache\n"
+			"     filename1 ... the simple file name with extension without path";
+	}
+
+	virtual int exec(const igcore::StringUtils::Tokens& tokens)
+	{
+		if (tokens.size() > 0)
+		{
+			igcore::StringUtils::StringList files;
+			
+			for (unsigned int i = 0; i < tokens.size(); ++i)
+			{	
+				files.push_back(tokens.at(i));
+			}
+
+			_ig->addFilesToBeCached(files);
+
+			return 0;
+		}
+
+		return -1;
+	}
+protected:
+	openig::OpenIG* _ig;
+};
+
 void OpenIG::initCommands()
 {
     Commands::instance()->addCommand("addentity", new AddEntityCommand(this));
@@ -1354,11 +1299,7 @@ void OpenIG::initCommands()
     Commands::instance()->addCommand("bindcamera", new BindCameraToEntityCommand(this));
     Commands::instance()->addCommand("unbindcamera", new UnbindCameraFromEntityCommand(this));
     Commands::instance()->addCommand("tod", new SetTimeOfDayCommand(this));
-    Commands::instance()->addCommand("fog", new SetFogCommand(this));
     Commands::instance()->addCommand("wind", new SetWindCommand(this));
-    Commands::instance()->addCommand("addclouds", new AddCloudLayerCommand(this));
-    Commands::instance()->addCommand("removeclouds", new RemoveCloudLayerCommand(this));
-    Commands::instance()->addCommand("removeallclouds", new RemoveAllCloudLayersCommand(this));
     Commands::instance()->addCommand("addlight", new AddLightCommand(this));
     Commands::instance()->addCommand("bindlighttocamera", new BindLightTocameraCommand(this));
     Commands::instance()->addCommand("updatelightattr", new LightAttribsCommand(this));
@@ -1370,10 +1311,11 @@ void OpenIG::initCommands()
     Commands::instance()->addCommand("removelight", new RemoveLightCommand(this));
     Commands::instance()->addCommand("bind", new BindEntityCommand(this));
     Commands::instance()->addCommand("unbind", new UnbindEntityCommand(this));
-    Commands::instance()->addCommand("rain", new RainCommand(this));
-    Commands::instance()->addCommand("snow", new SnowCommand(this));
     Commands::instance()->addCommand("offset", new OffsetCommand(this));
     Commands::instance()->addCommand("playanim", new AnimationCommand(this));
     Commands::instance()->addCommand("mplayanim", new MultipleAnimationCommand(this));
     Commands::instance()->addCommand("reloadentity", new ReloadEntityCommand(this));
+	Commands::instance()->addCommand("bindeffect", new BindEffectCommand(this));
+	Commands::instance()->addCommand("addeffect", new AddEffectCommand(this));
+	Commands::instance()->addCommand("cache", new CacheCommand(this));
 }

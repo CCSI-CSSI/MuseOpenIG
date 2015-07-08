@@ -79,6 +79,17 @@ public:
      */
 	Tokens tokenize(const std::string& str, const std::string& delimiters = " ");
 
+	/*!
+	* \brief Creates tokens std::vector<std::string> from a string and "" delimiters
+	* \param str The input string to tokenize
+	* \param delimiters String of delimiter chars
+	* \return std::vector<std::string> of tokens found
+	* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	* \copyright (c)Compro Computer Services, Inc.
+	* \date      Tue Jun 30 2015
+	*/
+	Tokens tokenizeExtended(const std::string& str);
+
     /*!
      * \brief trim a string from left
      * \param s             The text to trim

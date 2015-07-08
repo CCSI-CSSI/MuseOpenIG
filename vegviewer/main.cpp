@@ -50,7 +50,7 @@ public:
     Tokens tokenize(const std::string& str, const std::string& delimiters = " ")
     {
         Tokens tokens;
-        std::string::size_type delimPos = 0, tokenPos = 0, pos = 0, q = 0;
+        std::string::size_type delimPos = 0, tokenPos = 0, pos = 0;
 
         if(str.length()<1)  return tokens;
         while(1)

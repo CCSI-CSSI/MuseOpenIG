@@ -27,6 +27,7 @@
 #include "stringutils.h"
 
 #include <fstream>
+#include <iostream>
 
 using namespace igcore;
 
@@ -51,15 +52,25 @@ void Commands::addCommand(const std::string& command, Commands::Command* cmd)
 
 int Commands::exec(const std::string& command)
 {
-	StringUtils::Tokens tokens = StringUtils::instance()->tokenize(command);
+	StringUtils::Tokens tokens = StringUtils::instance()->tokenizeExtended(command);
+	
 	if (tokens.size())
 	{
+#if 0
+		std::cout << "Command: ";
+		StringUtils::Tokens::iterator itr = tokens.begin();
+		for (; itr != tokens.end(); ++itr)
+		{
+			std::cout << "\"" << *itr << "\" ";
+		}
+		std::cout << std::endl;
+#endif
 		std::string cmd = tokens.at(0);
 		tokens.erase(tokens.begin());
 
 		CommandsMapIterator iter = _commands.find(cmd);
 		if (iter != _commands.end())
-		{
+		{			
 			return iter->second.get()->exec(tokens);
 		}
 	}

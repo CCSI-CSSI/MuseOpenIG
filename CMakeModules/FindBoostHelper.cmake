@@ -1,9 +1,3 @@
-FIND_PATH(Boost_INCLUDE_DIR
-  NAMES
-    filesystem.hpp
-  PATHS
-    /usr/include
-    /usr/local/include
-)
-
-FIND_PACKAGE( Boost 1.52 REQUIRED COMPONENTS "system" "filesystem" )
+set(Boost_USE_MULTITHREADED      ON)
+set(Boost_USE_STATIC_RUNTIME    OFF)
+FIND_PACKAGE( Boost 1.52 REQUIRED COMPONENTS "system" "filesystem" "date_time" )

@@ -76,6 +76,7 @@ win32 {
     else {
         message(\"OpenSceneGraph\" detected in \"$$OSGROOT\")
         INCLUDEPATH += $$OSGROOT/include
+        LIBS += -L$$OSGROOT/lib
     }
     OSGBUILD = $$(OSG_BUILD)
     isEmpty(OSGBUILD) {
@@ -88,19 +89,19 @@ win32 {
         LIBS += -L$$OSGBUILD/lib
     }
 
-    BOOSTROOT = E:\OpenSceneGraph-3.3.7\3rdparty
+    BOOSTROOT = $$(BOOST_ROOT)
     isEmpty(BOOSTROOT) {
         message(\"boost\" not detected...)
     }
     else {
         win32-g++ {
         message(\"boost\" detected in \"$$BOOSTROOT\")
-        LIBS += -L$$BOOSTROOT\lib -llibboost_filesystem -llibboost_system
-        INCLUDEPATH += $$BOOSTROOT\include\
+        LIBS += -L$$BOOSTROOT\stage\lib -llibboost_filesystem -llibboost_system
+        INCLUDEPATH += $$BOOSTROOT
         } else {
         message(\"boost\" detected in \"$$BOOSTROOT\")
-	LIBS += -L$$BOOSTROOT\lib -llibboost_filesystem-vc120-mt-1_55 -llibboost_system-vc120-mt-1_55
-	INCLUDEPATH += $$BOOSTROOT\include\
+        LIBS += -L$$BOOSTROOT\stage\lib -llibboost_filesystem -llibboost_system
+        INCLUDEPATH += $$BOOSTROOT
         }
     }
     OPENIGBUILD = $$(OPENIG_BUILD)
