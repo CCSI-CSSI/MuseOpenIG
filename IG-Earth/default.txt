@@ -1,0 +1,10 @@
+#Linux/MacOS
+addentity 0 /usr/local/database/earth/boston.earth 0 0 0 0 0 0
+
+#Windows
+#addentity 0 ..\data\earth\boston.earth 0 0 0 0 0 0
+
+silverlining geocentric
+
+tod 17 0
+
