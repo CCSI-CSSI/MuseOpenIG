@@ -17,7 +17,7 @@ playanim 2 fbx:"Take 001":LOOP
 #by the keyboard
 manip 1 trackball
 #Set time of day to 5pm
-tod 17 0
+tod 10 0
 #set Visibility value to 5000 meters
 fog 5000
 
