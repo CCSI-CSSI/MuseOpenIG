@@ -1,0 +1,74 @@
+Muse OpenIG can be built using QTCreator and its QMake utility
+or the CMake system.  We have provided the necessary configuration
+files for either build system.  Under Microsoft Windows the
+config files are expecting that you will be using one of
+the MSVC releases, currently tested with Visual Studio 2013.
+Under Linux it will be expected that you have installed at
+least QT5.x or GCC 4.8.3
+
+For MacOSX we have tested this on Xcode 6.x and 7 releases,
+using the Clang build system for both QT5.x and CMake.
+
+
+Here is a list of the Environmental variables that are
+needed on the system before you can successfully build
+Muse OpenIG from source.  Qmake and Cmake use these environmental
+variables for locating the dependency files and install
+locations for OpenIG and its plug-ins.
+
+If you still have problems compiling or installing,
+consult the CMakeFiles.txt or the projects *.pro file directly
+for more variables and/or information that you might need
+to properly configure your system to build OpenIG properly.
+
+If all else fails you can locate or request more help on the OpenIG forum:
+https://www.compro.net/openig_forum/viewforum.php?f=1
+
+
+-------------------------------------------------------------
+
+All Platforms
+-----------------
+For Sundogs SilverLining:
+SILVERLINING_PATH = Location of SilverLining Resources directory
+
+For Sundogs Triton:
+TRITON_PATH = Location of Triton Resources directory
+
+For the Boost Libraries, some/all these env variables
+have been used/needed in the past:
+BOOST_DIRS = Location of Boost
+BOOST_ROOT = Location of the stage\lib directories after building boost
+BOOST_INCLUDE_DIRS = Location of Boost
+BOOST_INCLUDEDIR = Location of Boost
+BOOST_LIBRARYDIR = Location of Boost's compiled libraries
+
+For OpenSceneGraph
+OSGDIR = Location of the directory containing OSG Include and Library directories
+OSG_FILE_PATH = Location(s) of any directories containing textures for use in OpenSceneGraph/OpenIG
+
+For OSGBullet:
+OSGBULLET_ROOT = Location of where OSG Bullet is installed
+
+
+
+Windows Platform Specific
+----------------
+OpenIG install location:
+OPENIG_BUILD=Location/directory where to install OpenIG with the Make Install
+             or the Install solution under MSVC
+
+Triton:
+TRITON=Directory containing "Triton", the include files
+
+SilverLining:
+SILVERLINING=Directory containing "Public Headers", the include files
+
+For location of OpenSceneGraph for all the other libs and plug-ins to find OSG
+You need one or the other of these to be set in your Environment:
+OSG_ROOT = Location of the directory containing OSG Include and Library directorie
+OSG_BUILD = Location of where OSG was built
+
+For OSGEarth:
+OSGEARTH_ROOT=Location of OsgEarth libraries and include files
+
