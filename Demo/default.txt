@@ -13,7 +13,7 @@ addentity 0 /usr/local/database/terrain/OPEN_IG_Demo_NO_UTM31N_r6_LW_/master.flt
 playanim 2 fbx:"Take 001":LOOP
 
 manip 1 trackball
-tod 17 0
+tod 10 0
 fog 5000
 
 addlight 1 0 0 0 0 0 0
