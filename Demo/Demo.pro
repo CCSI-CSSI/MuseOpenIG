@@ -41,7 +41,21 @@ unix {
     INCLUDEPATH += /usr/lib64
     DEPENDPATH += /usr/lib64
 
-    LIBS += -lboost_filesystem -lboost_system
+    #
+    # Allow alternate boost library path to be set via ENV variable
+    #
+    BOOSTROOT = $$(BOOST_ROOT)
+    isEmpty(BOOSTROOT) {
+        message(Demo -- \"BOOST_ROOT env var\" not set...using system default paths to look for boost )
+        LIBS +=  -lboost_system -lboost_filesystem
+    }
+    else {
+        message(Demo -- \"BOOST_ROOT env var\" detected - set to: \"$$BOOSTROOT\")
+        LIBS += -L$$BOOSTROOT/stage/lib \
+                -lboost_system -lboost_filesystem
+        INCLUDEPATH += $$BOOSTROOT
+        DEPENDPATH  += $$BOOSTROOT
+    }
     !mac:LIBS += -lX11
 
     FILE = $${PWD}/default.txt

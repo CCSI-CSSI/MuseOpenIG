@@ -1,4 +1,6 @@
 set( LIB_NAME IgPlugin-SilverLining )
+set( TARGET_OTHER_FILES ConfigFiles/libIgPlugin-SilverLining.so.xml
+                        ConfigFiles/libIgPlugin-SilverLining.so.windows.xml )
 
 add_library( ${LIB_NAME} SHARED
     AtmosphereReference.h
@@ -7,7 +9,7 @@ add_library( ${LIB_NAME} SHARED
     CloudsDrawable.cpp
     SkyDrawable.cpp
     igpluginsilverlining.cpp
-    libIgPlugin-SilverLining.so.xml
+    ${TARGET_OTHER_FILES}
 )
 
 include_directories(
@@ -33,9 +35,9 @@ set_target_properties( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Plugin ${LIB_NAME}"
 include( PluginInstall REQUIRED )
 
 if (APPLE)
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/libIgPlugin-SilverLining.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libIgPlugin-SilverLining.dylib.xml)
+    install(FILES ${CMAKE_CURRENT_LIST_DIR}/ConfigFiles/libIgPlugin-SilverLining.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libIgPlugin-SilverLining.dylib.xml)
 elseif(WIN32)
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/libIgPlugin-SilverLining.so.xml DESTINATION ${INSTALL_BINDIR} RENAME IgPlugin-SilverLining.dll.xml)
+    install(FILES ${CMAKE_CURRENT_LIST_DIR}/ConfigFiles/libIgPlugin-SilverLining.so.windows.xml DESTINATION ${INSTALL_BINDIR} RENAME IgPlugin-SilverLining.dll.xml)
 else()
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/libIgPlugin-SilverLining.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libIgPlugin-SilverLining.so.xml)
+    install(FILES ${CMAKE_CURRENT_LIST_DIR}/ConfigFiles/libIgPlugin-SilverLining.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libIgPlugin-SilverLining.so.xml)
 endif()

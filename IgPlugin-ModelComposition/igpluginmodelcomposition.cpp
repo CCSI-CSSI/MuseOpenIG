@@ -421,6 +421,8 @@ public:
             }
             if ((**itr).name == "Shadow")
             {
+				entity.setNodeMask(0x4);
+
                 int ReceivesShadowTraversalMask = 0x1;
                 int CastsShadowTraversalMask = 0x2;
 
@@ -801,7 +803,7 @@ protected:
 
 
         {
-            osg::ref_ptr<LightPointNode> lpn = new LightPointNode;
+			osg::ref_ptr<igplugins::LightPointNode> lpn = new igplugins::LightPointNode;
 
             //lpn->setPointSprite();
             osg::ref_ptr<osg::Texture2D> spriteTexture = new osg::Texture2D;
@@ -813,7 +815,58 @@ protected:
 
             osg::StateSet* stateSet = lpn->getOrCreateStateSet();
             stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF|osg::StateAttribute::PROTECTED|osg::StateAttribute::OVERRIDE);
-            stateSet->setAttributeAndModes(new osg::Program,osg::StateAttribute::ON|osg::StateAttribute::PROTECTED|osg::StateAttribute::OVERRIDE);
+
+#define USE_LOG_DEPTH_BUFFER
+
+			const char *VertSource = {
+#ifdef USE_LOG_DEPTH_BUFFER
+				"uniform float Fcoef;																		\n"
+				"varying float flogz;																		\n"
+#endif
+				"varying vec3 eyeVec;																		\n"
+				"void main()																				\n"
+				"{																							\n"
+				"   eyeVec = -vec3(gl_ModelViewMatrix * gl_Vertex);											\n"
+				"   gl_FrontColor = gl_Color;																\n"
+				"   gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\n"
+#ifdef USE_LOG_DEPTH_BUFFER
+				"   gl_Position.z = (log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0) * gl_Position.w;	\n"
+				"	flogz = 1.0 + gl_Position.w;													\n"
+#endif
+				"}																							\n"
+			};
+
+
+			const char *FragSource = {
+				"varying vec3 eyeVec;                                                   \n"
+#ifdef USE_LOG_DEPTH_BUFFER
+				"varying float flogz;													\n"
+				"uniform float Fcoef;													\n"
+#endif
+				"void computeFogColor(inout vec4 color)                                 \n"
+				"{                                                                      \n"
+				"   float fogExp = gl_Fog.density * length(eyeVec);                     \n"
+				"   float fogFactor = exp(-(fogExp * fogExp));                          \n"
+				"   fogFactor = clamp(fogFactor, 0.0, 1.0);                             \n"
+				"   vec4 clr = color;                                                   \n"
+				"   color = mix(gl_Fog.color, color, fogFactor);                        \n"
+				"   color.a = clr.a;                                                    \n"
+				"}                                                                      \n"
+				"void main()															\n"
+				"{																		\n"
+				"	vec4 color = gl_Color;												\n"
+				"	computeFogColor(color);												\n"
+				"	gl_FragColor = color;												\n"
+#ifdef USE_LOG_DEPTH_BUFFER
+				"	gl_FragDepth = log2(flogz) * Fcoef * 0.5;							\n"
+#endif
+				"}																		\n"
+			};
+
+			osg::ref_ptr<osg::Program> pointProgram = new osg::Program;
+			pointProgram->addShader(new osg::Shader(osg::Shader::VERTEX, VertSource));
+			pointProgram->addShader(new osg::Shader(osg::Shader::FRAGMENT, FragSource));
+			stateSet->setAttributeAndModes(pointProgram,osg::StateAttribute::ON|osg::StateAttribute::PROTECTED|osg::StateAttribute::OVERRIDE);
 
             if (light._animated)
             {

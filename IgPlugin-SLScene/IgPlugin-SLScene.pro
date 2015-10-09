@@ -30,7 +30,7 @@ unix {
         DESTDIR = /usr/local/lib/igplugins
         target.path = /usr/local/lib/igplugins
     }
-    message(Libs will be installed into $$DESTDIR)
+    message($$TARGET Lib will be installed into $$DESTDIR)
     INSTALLS += target
 
     INCLUDEPATH += /usr/local/include
@@ -46,13 +46,13 @@ unix {
     exists( "../openig_version.pri" ) {
 
 	include( "../openig_version.pri" )
-	isEmpty( VERSION ){ error( "bad or undefined VERSION variable inside file openig_version.pri" )
+        isEmpty( VERSION ){ error( "$$TARGET -- bad or undefined VERSION variable inside file openig_version.pri" )
 	} else {
-	message( "Set version info to: $$VERSION" )
+        message( "$$TARGET -- Set version info to: $$VERSION" )
 	}
 
     }
-    else { error( "could not find pri library version file openig_version.pri" ) }
+    else { error( "$$TARGET -- could not find pri library version file openig_version.pri" ) }
 
     # end of library version number files
 }

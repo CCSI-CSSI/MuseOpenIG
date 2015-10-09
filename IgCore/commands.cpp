@@ -87,7 +87,9 @@ void Commands::loadScript(const std::string& fileName)
         std::string line;
         while (std::getline(file,line))
         {
-            if (line.size() && line.at(0) == '#') continue;
+            //If line starts with a blank or # , or is empty we ignore that line....
+            if ( (line.size() < 2) || (line.at(0) == ' ') || (line.size() && line.at(0) == '#') ) continue;
+            //if ( line.size() && line.at(0) == '#' ) continue;
             exec(line);
         }
         file.close();

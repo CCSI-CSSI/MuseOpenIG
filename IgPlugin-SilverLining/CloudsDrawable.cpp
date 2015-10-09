@@ -1,5 +1,29 @@
-
 // Copyright (c) 2008-2012 Sundog Software, LLC. All rights reserved worldwide
+
+//#******************************************************************************
+//#*
+//#*      Copyright (C) 2015  Compro Computer Services
+//#*      http://openig.compro.net
+//#*
+//#*      Source available at: https://github.com/CCSI-CSSI/MuseOpenIG
+//#*
+//#*      This software is released under the LGPL.
+//#*
+//#*   This software is free software; you can redistribute it and/or modify
+//#*   it under the terms of the GNU Lesser General Public License as published
+//#*   by the Free Software Foundation; either version 2.1 of the License, or
+//#*   (at your option) any later version.
+//#*
+//#*   This software is distributed in the hope that it will be useful,
+//#*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//#*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
+//#*   the GNU Lesser General Public License for more details.
+//#*
+//#*   You should have received a copy of the GNU Lesser General Public License
+//#*   along with this library; if not, write to the Free Software
+//#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+//#*
+//#*****************************************************************************
 
 #include "CloudsDrawable.h"
 #include <SilverLining.h>
@@ -45,9 +69,11 @@ void CloudsDrawable::initialize()
         SilverLiningCloudsUpdateCallback *updateCallback = new SilverLiningCloudsUpdateCallback;
         setUpdateCallback(updateCallback);
 
+#if 0
         SilverLiningCloudsComputeBoundingBoxCallback *boundsCallback = new SilverLiningCloudsComputeBoundingBoxCallback;
         boundsCallback->camera = _view->getCamera();
         setComputeBoundingBoxCallback(boundsCallback);
+#endif
     }
 }
 
@@ -107,7 +133,7 @@ void CloudsDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 					//std::cout << "todLightsBrightnessEnabled = " << _lightBrightness_enable << std::endl;
 					ext->glUniform1i(lightingBrightnessEnabledLoc, _lightBrightness_enable ? 1 : 0);
 				}
-				ext->glUseProgram(0);
+                //ext->glUseProgram(0);
 			}
 			{
 				SL_VECTOR(unsigned int) shaders = atmosphere->GetActivePlanarCloudShaders();
@@ -126,38 +152,41 @@ void CloudsDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
                         }
                         ext->glUniform1iv(loc, lightsEnabled.size(), &lightsEnabled.front());
 					}
-					ext->glUseProgram(0);
 				}
 			}
-            
+            if(ext)
+                ext->glUseProgram(0);
+        }
+
 			 
-			atmosphere->SetCameraMatrix(renderInfo.getCurrentCamera()->getViewMatrix().ptr());
-			atmosphere->SetProjectionMatrix(renderInfo.getCurrentCamera()->getProjectionMatrix().ptr());
+        atmosphere->SetCameraMatrix(renderInfo.getCurrentCamera()->getViewMatrix().ptr());
+        atmosphere->SetProjectionMatrix(renderInfo.getCurrentCamera()->getProjectionMatrix().ptr());
 
-            atmosphere->DrawObjects(true, true, true);
+		glPushAttrib(GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_DEPTH_CLAMP);
+		atmosphere->DrawObjects(true, true, true);
+		glPopAttrib();
 
-            if (false)//(_envMapDirty)
+        if (_envMapDirty)
+        {
+            CloudsDrawable *mutableThis = const_cast<CloudsDrawable*>(this);
+            void*           envPtr = 0;
+
+            if (atmosphere->GetEnvironmentMap(envPtr,6,false,0,true))
             {
-                CloudsDrawable *mutableThis = const_cast<CloudsDrawable*>(this);
-                void*           envPtr = 0;
 
-                if (atmosphere->GetEnvironmentMap(envPtr,6,false,0,false))
+                mutableThis->_envMapID = (GLint)(long)envPtr;
+
+                mutableThis->_envMapDirty = false;
+
+                if (_pluginContext)
                 {
+                    //std::cout << "env map set to: " << mutableThis->_envMapID << std::endl;
 
-                    mutableThis->_envMapID = (GLint)(long)envPtr;
-
-                    mutableThis->_envMapDirty = false;
-
-                    if (_pluginContext)
-                    {
-                        igcore::EnvironmentalMapAttributes attr;
-                        attr._envMapId = mutableThis->_envMapID;
-
-                        mutableThis->_pluginContext->addAttribute("EnvironmentMap", new igplugincore::PluginContext::Attribute<igcore::EnvironmentalMapAttributes>(attr));
-                    }
+                    mutableThis->_pluginContext->getOrCreateValueObject()->setUserValue("SilverLining-EnvironmentMap", (int)mutableThis->_envMapID);
                 }
             }
-		}
+        }
     }
 
     renderInfo.getState()->dirtyAllVertexArrays();

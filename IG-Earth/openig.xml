@@ -27,6 +27,10 @@
       <Plugin>
           <Order-Number>1</Order-Number>
           <Name>TimeOfDayBasedMaterial</Name>
-      </Plugin>      
+      </Plugin>
+      <Plugin>
+          <Order-Number>2</Order-Number>
+          <Name>Triton</Name>
+      </Plugin>
   </ImageGenerator-Plugins-Config>
 </OpenIG-Config>  

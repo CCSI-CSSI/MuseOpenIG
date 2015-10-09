@@ -54,11 +54,16 @@ namespace iglib
 		inline osg::Vec3	getPos(void) { return _pos; }
 		void				setEngineForce(float mult);
 		void				stop(void);
+        void                clearBrakes( void );
 		void				setSteering(bool left, bool update = true);
+        void                setSteering(float steer);
 		inline osg::Vec3	getAtt() { return _att; }
 		void				reset(void);
 		int					getID(void) { return vehicle_data->id; }
 		inline float		getSpeed(void) { return _speed; }
+        void                setBrakes(float brakes);
+        inline float        getEngineForce(void) { return gEngineForce; }
+        void                setInitialPosition( osg::Vec3 pos );
 
 	private:
 		float												gEngineForce;

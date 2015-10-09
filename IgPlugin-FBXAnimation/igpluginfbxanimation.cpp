@@ -124,7 +124,7 @@ namespace igplugins
 					igcore::StringUtils::Tokens tokens = igcore::StringUtils::instance()->tokenize(attr->getValue()._animationName, ":");
 
 					if (tokens.size() < 2) continue;
-					if (tokens.at(0) == "fbx")
+                    if (tokens.at(0).compare(0,3,"fbx") == 0)
 					{						
 						std::string fbxAnimtionName = tokens.at(1);
 
@@ -169,10 +169,10 @@ namespace igplugins
 							osgAnimation::Animation::PlayMode playMode = osgAnimation::Animation::LOOP;
 							if (tokens.size() > 2)
 							{
-								if (tokens.at(2) == "ONCE") playMode = osgAnimation::Animation::ONCE;
-								else if (tokens.at(2) == "STAY") playMode = osgAnimation::Animation::STAY;
-								else if (tokens.at(2) == "LOOP") playMode = osgAnimation::Animation::LOOP;
-								else if (tokens.at(2) == "PPONG") playMode = osgAnimation::Animation::PPONG;
+                                if (tokens.at(2).compare(0,4,"ONCE") == 0) playMode = osgAnimation::Animation::ONCE;
+                                else if (tokens.at(2).compare(0,4,"STAY") == 0) playMode = osgAnimation::Animation::STAY;
+                                else if (tokens.at(2).compare(0,4,"LOOP") == 0) playMode = osgAnimation::Animation::LOOP;
+                                else if (tokens.at(2).compare(0,5,"PPONG") == 0) playMode = osgAnimation::Animation::PPONG;
 
 								osg::notify(osg::NOTICE) << "FBXAnimation: animation playback mode: " << tokens.at(2) << std::endl;
 							}

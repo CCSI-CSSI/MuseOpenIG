@@ -64,5 +64,9 @@
           <Order-Number>11</Order-Number>
           <Name>Bullet</Name>
       </Plugin>
+      <Plugin>
+        <Order-Number>12</Order-Number>
+        <Name>Networking</Name>
+      </Plugin>
   </ImageGenerator-Plugins-Config>
 </OpenIG-Config>  

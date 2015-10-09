@@ -25,6 +25,8 @@
 
 #include <osgDB/XmlParser>
 #include <osgDB/ReadFile>
+#include <osgDB/FileNameUtils>
+#include <osgDB/FileUtils>
 
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
@@ -396,6 +398,8 @@ protected:
             if (child->name == "LOD-Range")
             {
                 _lodRange = atof(child->contents.c_str());
+                if(_lodRange == 0)
+                    _lodRange = 10000;
             }
         }
     }
@@ -499,7 +503,27 @@ int main(int argc, char** argv)
     std::string xml = "VegetationInfo.xml";
     while (arguments.read("--config", xml)) {}
 
-    osgDB::Registry::instance()->setReadFileCallback( new DatabaseReadCallback(pattern,xml) );
+    //If we pass in just the database name, look for
+    //the VegetationInfo.xml file inside that VDB's directory...CGR
+    if(xml == "VegetationInfo.xml")
+    {
+        std::string dbnode;
+        std::string configPath;
+        if( arguments.isString(1) )
+        {
+            dbnode = arguments[1];
+            configPath = osgDB::getFilePath(dbnode);
+        }
+        configPath += "/";
+        configPath += xml;
+        //If the VegetationInfo.xml file is present in the VDB directory we use it
+        //otherwise we just try to find it in the current directory as usual...CGR
+        if(osgDB::fileExists(configPath))
+            xml = configPath;
+        //osg::notify(osg::NOTICE) << "Attempting to use: " << xml << ", for VegetationInfo.xml control file..." << std::endl;
+    }
+
+    osgDB::Registry::instance()->setReadFileCallback( new DatabaseReadCallback(pattern, xml) );
 
     // load the data
     osg::ref_ptr<osg::Node> loadedModel = osgDB::readNodeFiles(arguments);

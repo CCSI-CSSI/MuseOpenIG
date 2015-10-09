@@ -1,18 +1,91 @@
+11 Sep 2015, version 1.2.0
+- Added support for TCP/IP and UDP Network transfers between 
+  a host and the OpenIG through the new library IgLib-Network
+  and the new IgPlugin-Networking Plugin.  These API's are 
+  designed as generic interfaces, to be able to support
+  just about any network protocol required. For example 
+  the CIGI protocol is one that is being added using this
+  new library and plugin and should at least be partially 
+  supported in a future release.  Timing of the network
+  transfers is based on the framerate of the monitor you
+  are running on.  Best results can be obtained if you
+  ensure your MASTER and SLAVES are using the same
+  VSYNC rate on their respective monitors.  This new
+  plugin can be tested/demonstrated using the OpenIG Bullet 
+  demo, which has the Network added to its running configuration
+  already.  
+
+  The user simply needs to modify the appropriate
+  copy of the libIgPlugin-Networking.so.xml config file.
+  It resides in the IgPlugin-Networking plugin directory
+  before installation.  You need ONE MASTER and as many 
+  SLAVES as you want to configure.  This file is 
+  responsible for all network configuration parameters.
+  You modify it for local and server/client IP addresses, 
+  whether you are using the TCP or UDP protocol, etc...
+
+- Added support for Sundog's Triton ocean SDK version 3.38,
+  through the OpenIG's IgPlugin-Triton plugin.  Tritons
+  userfunctions shaders where modified to support OpenIG's new
+  logarithmic depth buffer and OIG's gl lighting functions.
+  So if you have a database that has bathymetric data in it
+  you should be able to load the Triton plugin and use it
+  with your database.  We will be providing a sample Triton
+  capable database in an update of the OpenIG datasets in
+  the near future to demostrate these new features.
+- OpenIG was modified to support a logarithmic depth buffer 
+  Z-buffer implementation, which allows for better support of Triton 
+  in OpenIG, especially in areas where the water is very shallow.
+- Updated Sundogs SilverLining plugin to support version 4.024
+  as well changes to SilverLining's userfunction shaders for
+  the new logarithmic depth buffer implementation.
+- Added new updateclouds command to cli, was already in the
+  C++ API
+- Minor changes to Cmake configuration files, they should 
+  now find the required dependencies better.  We also
+  added some of the "Extra" files to the files that will
+  be listed in an IDE when using one for development to make
+  them easier to open and modify as necessary.
+- The OpenIG core was changed from a delayed entity 
+  addition/removal/reload process in the ViewerOperation,
+  to one where they are now managed directly in their respective calls. 
+  (See:  openig::OpenIG::addEntity or openig::OpenIG::removeEntity)
+- The Muse OpenIG installer now checks to see if there is already
+  a copy of it innstalled.  If there is, it asks the user to uninstall
+  the previous copy before installing the new one.
+- The Muse OpenIG installer now checks to see if the redistributable
+  VC libraries package is installed already before just installing it
+  again.  If not it runs the installer, if it is already installed it
+  just skips this step and proceeds with the rest of the Muse OpenIG
+  installer.
+
 6 Jul 2015, version 1.1.0
-- Added support for FBX animations through the new IgPlugin-FBXAnimation plugin
-- Added support for OSG ParticleEffects (smoke, explosions, fire ..) through the IgPlugin-OSGParticleEffects plugin
-- Added support for osgEarth and osgEarth's SimpleLighting through the IgPlugin-OSGEarthSimpleLighting plugin, as well as shader 
+- Added support for FBX animations through the new 
+  IgPlugin-FBXAnimation plugin
+- Added support for OSG ParticleEffects (smoke, explosions, 
+  fire ..) through the IgPlugin-OSGParticleEffects plugin
+- Added support for osgEarth and osgEarth's SimpleLighting 
+  through the IgPlugin-OSGEarthSimpleLighting plugin, as well as shader 
   composition and a sample demo application, openig-earth.
-- Added support for Bullet vehicle physics through the IgPlugin-Bullet as well as a sample openig-bullet demo application
-- Moved the clouds related commands into the IgPlugin-SilverLining plugin and out of the OpenIG main application.
-  Same for the SkyDome plugin, all plugin related commands now reside in their respective plugins.
-- Temporary workaround for TOD 0 and model lighting. This will be revisited in a future release for a more permanent fix.
-- Reorganized the OpenIG file structure.  All demo apps now reside in their own directories, each with its own set of
-  configuration and support files.  This keeps things a bit more structured and easy to find for configuration changes.
-- Added a new light attibute for adjustment of the brighness on SilverLining clouds, together with matching changes to the
+- Added support for Bullet vehicle physics through the 
+  IgPlugin-Bullet as well as a sample openig-bullet demo application
+- Moved the clouds related commands into the IgPlugin-SilverLining 
+  plugin and out of the OpenIG main application.
+  Same for the SkyDome plugin, all plugin related commands now 
+  reside in their respective plugins.
+- Temporary workaround for TOD 0 and model lighting. This will be 
+  revisited in a future release for a more permanent fix.
+- Reorganized the OpenIG file structure.  All demo apps now reside
+  in their own directories, each with its own set of
+  configuration and support files.  This keeps things a bit more 
+  structured and easy to find for configuration changes.
+- Added a new light attibute for adjustment of the brighness on 
+  SilverLining clouds, together with matching changes to the
   SilverLining userfunctions shaders/files.
-- Added support for light brightness adjustment based on TOD as read from an XML configuration file.
-- Revisited CMake configuration files for the newly reorganized file structure of OpenIG, as well as a few minor bug fixes.
+- Added support for light brightness adjustment based on TOD as 
+  read from an XML configuration file.
+- Revisited CMake configuration files for the newly reorganized 
+  file structure of OpenIG, as well as a few minor bug fixes.
 
 9 Jun 2015, version 1.0.1
 - Added CMake support

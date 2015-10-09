@@ -54,6 +54,12 @@ public:
 
     }
 
+	LightPointNode()
+		: osgSim::LightPointNode()
+	{
+
+	}
+
     virtual void traverse(osg::NodeVisitor& nv)
     {
         if (_lightPointList.empty())

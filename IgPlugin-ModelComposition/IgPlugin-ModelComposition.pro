@@ -27,6 +27,10 @@ LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgShadow -losgSim -losgUtil -
 INCLUDEPATH += ../
 DEPENDPATH += ../
 
+OTHER_FILES += \
+    $${PWD}/ConfigFiles/a320.obj.xml \
+    $${PWD}/ConfigFiles/libIgPlugin-ModelComposition.so.xml
+
 unix {
     !mac:contains(QMAKE_HOST.arch, x86_64):{
         DESTDIR = /usr/local/lib64/igplugins
@@ -35,9 +39,9 @@ unix {
         DESTDIR = /usr/local/lib/igplugins
         target.path = /usr/local/lib/igplugins
     }
-    message(Libs will be installed into $$DESTDIR)
+    message($$TARGET Lib will be installed into $$DESTDIR)
 
-    FILE = $${PWD}/libIgPlugin-ModelComposition.so.xml
+    FILE = $${PWD}/ConfigFiles/libIgPlugin-ModelComposition.so.xml
     DDIR = $${DESTDIR}/libIgPlugin-ModelComposition.so.xml
     mac: DDIR = $${DESTDIR}/libIgPlugin-ModelComposition.dylib.xml
 
@@ -45,6 +49,9 @@ unix {
 
     QMAKE_POST_LINK =  test -d $$quote($$DESTDIR) || $$QMAKE_MKDIR $$quote($$DESTDIR) $$escape_expand(\\n\\t)
     QMAKE_POST_LINK += test -e $$quote($$DDIR) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DDIR) $$escape_expand(\\n\\t)
+
+    #remove the files we manually installed above when we do a make distclean....
+    QMAKE_DISTCLEAN += $${DESTDIR}/libIgPlugin-ModelComposition.*.xml
 
     INCLUDEPATH += /usr/local/include
     DEPENDPATH += /usr/local/include
@@ -59,13 +66,13 @@ unix {
     exists( "../openig_version.pri" ) {
 
 	include( "../openig_version.pri" )
-	isEmpty( VERSION ){ error( "bad or undefined VERSION variable inside file openig_version.pri" )
+        isEmpty( VERSION ){ error( "$$TARGET -- bad or undefined VERSION variable inside file openig_version.pri" )
 	} else {
-	message( "Set version info to: $$VERSION" )
+        message( "$$TARGET -- Set version info to: $$VERSION" )
 	}
 
     }
-    else { error( "could not find pri library version file openig_version.pri" ) }
+    else { error( "$$TARGET -- could not find pri library version file openig_version.pri" ) }
 
     # end of library version number files
 }
@@ -77,19 +84,19 @@ win32 {
 
     OSGROOT = $$(OSG_ROOT)
     isEmpty(OSGROOT) {
-        message(\"OpenSceneGraph\" not detected...)
+        message($$TARGET -- \"OpenSceneGraph\" not detected...)
     }
     else {
-        message(\"OpenSceneGraph\" detected in \"$$OSGROOT\")
+        message($$TARGET -- \"OpenSceneGraph\" detected in \"$$OSGROOT\")
         INCLUDEPATH += $$OSGROOT/include
         LIBS += -L$$OSGROOT/lib
     }
     OSGBUILD = $$(OSG_BUILD)
     isEmpty(OSGBUILD) {
-        message(\"OpenSceneGraph build\" not detected...)
+        message($$TARGET -- \"OpenSceneGraph build\" not detected...)
     }
     else {
-        message(\"OpenSceneGraph build\" detected in \"$$OSGBUILD\")
+        message($$TARGET -- \"OpenSceneGraph build\" detected in \"$$OSGBUILD\")
         DEPENDPATH += $$OSGBUILD/lib
         INCLUDEPATH += $$OSGBUILD/include
         LIBS += -L$$OSGBUILD/lib
@@ -104,7 +111,7 @@ win32 {
 
     LIBS += -L$$OPENIGBUILD/lib
 
-    FILE = $${PWD}/libIgPlugin-ModelComposition.so.xml
+    FILE = $${PWD}/ConfigFiles/libIgPlugin-ModelComposition.so.xml
     DFILE = $${DLLDESTDIR}/IgPlugin-ModelComposition.dll.xml
 
     FILE ~= s,/,\\,g
@@ -112,8 +119,8 @@ win32 {
 
     QMAKE_POST_LINK =  if not exist $$quote($$DLLDESTDIR) $$QMAKE_MKDIR $$quote($$DLLDESTDIR) $$escape_expand(\\n\\t)
     QMAKE_POST_LINK += if not exist $$quote($$DFILE) copy /y $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
-}
 
-OTHER_FILES += \
-    a320.obj.xml \
-    libIgPlugin-ModelComposition.so.xml
+    #remove the files we manually installed above when we do a make distclean....
+    QMAKE_DISTCLEAN += $${DLLDESTDIR}/libIgPlugin-ModelComposition.*.xml
+
+}

@@ -69,6 +69,7 @@ namespace igplugins
 
 		virtual void update(igplugincore::PluginContext& context)
 		{
+			if (iglib::BulletManager::instance()->getIsFreezed()) return;
 #if 1
 			bool bulletSteeringCommand = false;
 			if (context.getOrCreateValueObject()->getUserValue("BulletSteeringCommand", bulletSteeringCommand) && bulletSteeringCommand)
@@ -123,9 +124,46 @@ namespace igplugins
 #endif
 		}
 
+		class BulletCommand : public igcore::Commands::Command
+		{
+		public:
+			virtual const std::string getUsage() const
+			{
+				return "freeze/update";
+			}
+
+			virtual const std::string getDescription() const
+			{
+				return  "controls bullet to update entities or not\n"
+					"     freeze/update - one of these. defult is update";
+			}
+
+            virtual int exec(const igcore::StringUtils::Tokens& tokens)
+			{
+				if (tokens.size() == 1)
+				{
+                    if (tokens.at(0).compare(0,6,"update") == 0)
+                    {
+						iglib::BulletManager::instance()->setFreeze(false);
+                        osg::notify(osg::NOTICE) << "Bullet: update running" << std::endl;
+                    }
+					else
+                    if (tokens.at(0).compare(0,6,"freeze") == 0)
+					{
+						iglib::BulletManager::instance()->setFreeze(true);
+                        osg::notify(osg::NOTICE) << "Bullet: update frozen" << std::endl;
+					}
+				}
+
+				return 0;
+			}
+		};
+
 		virtual void init(igplugincore::PluginContext& context)
 		{
 			iglib::BulletManager::instance()->init(context.getImageGenerator());
+
+			igcore::Commands::instance()->addCommand("bullet", new BulletCommand);
 		}
 	};
 

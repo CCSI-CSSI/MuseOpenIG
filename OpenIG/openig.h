@@ -174,12 +174,7 @@ public:
      *  scene management. The IDs are mainly up to the user to maintain. However
      *  some plugins generates these IDs automatically, for example the \ref
      *  ModelCompositionPlugin or the \ref LightingPlugin. For the automated
-     *  ID generations there is a class \ref igcore::GlobalIdGenerator. Also good
-     *  to know that addition of Entities in the scene is not happening immediatelly,
-     *  but it is still happening in the current frame, to be specific in a ViewerOperation.
-     *  When one inherit it should maintain std::map of Entities that should be available\
-     *  by the \ref getEntitesToAddMap. Once the addition of the new \ref Entity is completed
-     *  the \ref Entity should be available thorugh \ref getEntityMap
+     *  ID generations there is a class \ref igcore::GlobalIdGenerator. 
      *  \brief Adds \ref Entity in the scene.
      *  \param id       The id of the \ref Entity. You should use this Entity id to refer
      *                  to this model in the scene
@@ -211,7 +206,7 @@ public:
 	*/
 	virtual void addEntity(unsigned int id, const osg::Node* node, const osg::Matrixd& mx, const osgDB::Options* options = 0);
 
-    /*! Again, the removal as well as addition, is not happening
+    /*! Removes an entity from the scene. See \ref addEntity
      *  immediatelly, still in the same frame though and it processed in ViewerOperation.
      *  When one inherits, it should maintain std::map of Entities available through \ref
      *  getEntitiesToRemoveMap
@@ -272,10 +267,7 @@ public:
      */
     virtual void unbindFromEntity(unsigned int id);
 
-    /*! You might want to replace the model with another and preserve the id. This is
-     *  processed internally same as addition and removal of Entities, in the same frame but in ViewerOperation.
-     *  Inherits are expected to maintain std::map of Entities available through \ref getEntitiesToReloadMap
-     *  \brief Reloads an \ref Entity.
+    /*! You might want to replace the model with another and preserve the id. See \ref addEntity
      *  \param id       The id of the attached \ref Entity. This is the id you have used with \ref addEntity
      *  \param fileName The file name of the model. Can be the same or new
      *  \param options  Optional. Some plugins can use the option string from the osgDB::Option object
@@ -604,11 +596,14 @@ public:
      * \param thickness The thickness of the cloud layer
      * \param density   The density of the cloud layer. Can be anything although some plugins as the
      *                  \ref SilverLiningPlugin is expecting this to be in the range of 0.0-1.0
+     * \param width     The width of the cloud layer
+     * \param length    The length of the cloud layer
+     * \param infinity  Does the cloud layer go on forever?
      * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
-    virtual void addCloudLayer(unsigned int id, int type, double altitude, double thickness, double density=0.3);
+    virtual void addCloudLayer(unsigned int id, int type, double altitude, double thickness=0, double density=0.3);
 
     /*! Removes a cloud layer from the scene. The \ref openig::OpenIG is not implementing this instead it uses
      *  \ref igplugincore::PluginContext::Attribute to pass commands to all the plugins that might deal with
@@ -877,39 +872,6 @@ public:
      */
     virtual EntityMap&                  getEntityMap();
 
-    /*! The ID based std::map of \ref Entity. It is expected to use this map for \ref Entity
-     *  that are to be introduced in the scene. \ref openig::OpenIG is using this map this
-     *  way to delay the addition in the scene via ViewerOperation see \ref addEntity for more info
-     * \brief The ID based std::map of \ref Entity that are to be added in the scene
-     * \return  The ID based std::map of \ref Entity that are to be added in the scene
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-     * \copyright (c)Compro Computer Services, Inc.
-     * \date      Sun Jan 11 2015
-     */
-    virtual EntityMap&                  getEntitesToAddMap();
-
-    /*! The ID based std::map of \ref Entity that are to be removed from the scene. \ref openig::OpenIG
-     *  is using this map to maintain \ref Entity that are to be removed in the scene in a ViewerOperation
-     *  See \ref addEntity for more info
-     * \brief The ID based std::map of \ref Entity that are to be removed from the scene
-     * \return  The ID based std::map of \ref Entity that are to be removed from the scene
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-     * \copyright (c)Compro Computer Services, Inc.
-     * \date      Sun Jan 11 2015
-     */
-    virtual EntityMap&                  getEntitiesToRemoveMap();
-
-    /*! The ID based std::map of \ref Entity that are to be reloaded in the scene. \ref openig::OpenIG
-     *  is using this map to maintain \ref Entity that are to be reloaded in the scene in a ViewerOperation
-     *  See \ref addEntity for more info
-     * \brief The ID based std::map of \ref Entity that are to be reloaded in the scene
-     * \return  The ID based std::map of \ref Entity that are to be reloaded in the scene
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-     * \copyright (c)Compro Computer Services, Inc.
-     * \date      Sun Jan 11 2015
-     */
-    virtual EntityMap&                  getEntitiesToReloadMap();
-
     /*! The light that represents sun/moon in the scene. It is the reserved light with an ID of 0
      * \brief   The light that represents sun/moon in the scene
      * \return  The light that represents sun/moon in the scene
@@ -977,15 +939,6 @@ protected:
 
     /*! \brief  The current added in the scene \ref Entity es, ID based std::map */
     EntityMap                                       _entities;
-    /*! \brief  The \ref Entity es to be added in the ViewerOperation,
-     *          as \ref addEntity is doing, ID based std::map */
-    EntityMap                                       _entitiesToAdd;
-    /*! \brief  The \ref Entity es to be removed in the ViewerOperation,
-     *          as \ref removeEntity is doing, ID based std::map */
-    EntityMap                                       _entitiesToRemove;
-    /*! \brief  The \ref Entity es to be reloaded in the ViewerOperation,
-     *          as \ref reloadEntity is doing, ID based std::map */
-    EntityMap                                       _entitiesToReload;
 
     /*! \brief  Handle of the viewer you have passed in \ref init */
     osg::ref_ptr<osgViewer::CompositeViewer>        _viewer;

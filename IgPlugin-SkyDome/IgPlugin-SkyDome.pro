@@ -22,6 +22,10 @@ DEPENDPATH += ../
 
 LIBS += -losg -losgDB -losgViewer -losgParticle -lIgPluginCore -lIgCore -lOpenThreads
 
+OTHER_FILES += \
+    $${PWD}/ConfigFiles/libIgPlugin-SkyDome.so.xml \
+    $${PWD}/ConfigFiles/skydome.osgb.tar.gz
+
 unix {
     !mac:contains(QMAKE_HOST.arch, x86_64):{
         DESTDIR = /usr/local/lib64/igplugins
@@ -30,16 +34,19 @@ unix {
         DESTDIR = /usr/local/lib/igplugins
         target.path = /usr/local/lib/igplugins
     }
-    message(Libs will be installed into $$DESTDIR)
+    message($$TARGET Lib will be installed into $$DESTDIR)
 
     INSTALLS += target
 
-    FILE = $${PWD}/libIgPlugin-SkyDome.so.xml
+    FILE = $${PWD}/ConfigFiles/libIgPlugin-SkyDome.so.xml
     DDIR = $${DESTDIR}/libIgPlugin-SkyDome.so.xml
     mac: DDIR = $${DESTDIR}/libIgPlugin-SkyDome.dylib.xml
 
     QMAKE_POST_LINK =  test -d $$quote($$DESTDIR) || $$QMAKE_MKDIR $$quote($$DESTDIR) $$escape_expand(\\n\\t)
     QMAKE_POST_LINK += test -e $$quote($$DDIR) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DDIR) $$escape_expand(\\n\\t)
+
+    #remove the files we manually installed above when we do a make distclean....
+    QMAKE_DISTCLEAN += $${DESTDIR}/libIgPlugin-SkyDome.*.xml
 
     INCLUDEPATH += /usr/local/include
     DEPENDPATH += /usr/local/include
@@ -51,20 +58,16 @@ unix {
     exists( "../openig_version.pri" ) {
 
 	include( "../openig_version.pri" )
-	isEmpty( VERSION ){ error( "bad or undefined VERSION variable inside file openig_version.pri" )
+        isEmpty( VERSION ){ error( "$$TARGET -- bad or undefined VERSION variable inside file openig_version.pri" )
 	} else {
-	message( "Set version info to: $$VERSION" )
+        message( "$$TARGET -- Set version info to: $$VERSION" )
 	}
 
     }
-    else { error( "could not find pri library version file openig_version.pri" ) }
+    else { error( "$$TARGET -- could not find pri library version file openig_version.pri" ) }
 
     # end of library version number files
 }
-
-OTHER_FILES += \
-    libIgPlugin-SkyDome.so.xml \
-    skydome.osgb.tar.gz
 
 win32-g++:QMAKE_CXXFLAGS += -fpermissive -shared-libgcc -D_GLIBCXX_DLL
 win32-g++:LIBS += -lstdc++.dll
@@ -72,19 +75,19 @@ win32-g++:LIBS += -lstdc++.dll
 win32 {
     OSGROOT = $$(OSG_ROOT)
     isEmpty(OSGROOT) {
-        message(\"OpenSceneGraph\" not detected...)
+        message($$TARGET -- \"OpenSceneGraph\" not detected...)
     }
     else {
-        message(\"OpenSceneGraph\" detected in \"$$OSGROOT\")
+        message($$TARGET -- \"OpenSceneGraph\" detected in \"$$OSGROOT\")
         INCLUDEPATH += $$OSGROOT/include
         LIBS += -L$$OSGROOT/lib
     }
     OSGBUILD = $$(OSG_BUILD)
     isEmpty(OSGBUILD) {
-        message(\"OpenSceneGraph build\" not detected...)
+        message($$TARGET -- \"OpenSceneGraph build\" not detected...)
     }
     else {
-        message(\"OpenSceneGraph build\" detected in \"$$OSGBUILD\")
+        message($$TARGET -- \"OpenSceneGraph build\" detected in \"$$OSGBUILD\")
         DEPENDPATH += $$OSGBUILD/lib
         INCLUDEPATH += $$OSGBUILD/include
         LIBS += -L$$OSGBUILD/lib
@@ -94,6 +97,7 @@ win32 {
     isEmpty (OPENIGBUILD) {
         OPENIGBUILD = $$IN_PWD/..
     }
+    message($$TARGET -- \"openig build\" detected in \"$$OPENIGBUILD\")
     DESTDIR = $$OPENIGBUILD/lib
     DLLDESTDIR = $$OPENIGBUILD/bin/igplugins
 
@@ -103,11 +107,15 @@ win32 {
 
     LIBS += -L$$OPENIGBUILD/lib
 
-    FILE = $${PWD}/libIgPlugin-SkyDome.so.xml
+    FILE = $${PWD}/ConfigFiles/libIgPlugin-SkyDome.so.xml
     DFILE = $${DLLDESTDIR}/IgPlugin-SkyDome.dll.xml
 
     FILE ~= s,/,\\,g
     DFILE ~= s,/,\\,g
 
     QMAKE_POST_LINK = if not exist $$quote($$DFILE) copy /y $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
+
+    #remove the files we manually installed above when we do a make distclean....
+    QMAKE_DISTCLEAN += $${DLLDESTDIR}/libIgPlugin-SkyDome.*.xml
+
 }

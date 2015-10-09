@@ -110,6 +110,12 @@ osg::Node* createInfoHUD()
 // accross the whole app
 static osg::ref_ptr<osgGA::CameraManipulator> s_CameraManipulator;
 
+// We might want to bind the camera manipulator to
+// an entity but update from network, so in this case
+// the following will be set to false and will not get
+// updates from the mouse/keyboard
+static bool s_CameraManipulatorOn = true;
+
 class CameraTrackballManipulator : public osgGA::TrackballManipulator
 {
 public:
@@ -120,11 +126,50 @@ public:
 
     }
 
+	void pick(osgViewer::View* view, const osgGA::GUIEventAdapter& ea)
+	{
+		
+
+	}
+
+
     virtual bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& us)
     {
 		
         switch(ea.getEventType())
             {
+#if 0
+			case osgGA::GUIEventAdapter::PUSH:
+			{
+				if (ea.getButton() == osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON)
+				{
+					if (_openIG->isCameraBoundToEntity())
+					{
+						_openIG->unbindCameraFromEntity();
+					}
+
+					osgUtil::LineSegmentIntersector::Intersections intersections;
+
+					if (_openIG->getViewer()->getView(0)->computeIntersections(ea, intersections))
+					{
+						for (osgUtil::LineSegmentIntersector::Intersections::iterator hitr = intersections.begin();
+							hitr != intersections.end();
+							++hitr)
+						{
+							if (!hitr->nodePath.empty() && !(hitr->nodePath.back()->getName().empty()))
+							{
+								osg::ref_ptr<osg::Node> pickedNode = hitr->nodePath.back();
+								if (pickedNode.valid())
+								{
+
+								}
+							}
+						}
+					}
+				}
+			}
+			break;
+#endif
             case(osgGA::GUIEventAdapter::KEYDOWN):
                 {
                     if (ea.getKey() == osgGA::GUIEventAdapter::KEY_F4)
@@ -222,18 +267,21 @@ public:
     // help. This one is a must
     virtual const std::string getUsage() const
     {
-        return "id name";
+        return "id name [optional:off]";
     }
 
     // Convinient method for the onscreen
     // help. This one is a must too
     virtual const std::string getDescription() const
     {
-        return  "sets camera manipulator\n"
-                "     id - the id of the model\n"
-                "     name - one of these:\n"
-                "           trackball - the OSG Trackball camera manipulator\n"
-                "           earth - the osgEarth camera manipulator";
+		return  "sets camera manipulator\n"
+			"     id - the id of the model\n"
+			"     name - one of these:\n"
+			"           trackball - the OSG Trackball camera manipulator\n"
+			"           earth - the osgEarth camera manipulator\n"
+			"     off - optional, if provided the camera manipulator will be bound\n"
+			"           to the entity but will not be updated (ex: might be over network)";
+				
     }
 
     // This method is called when you invoke a command in the
@@ -244,7 +292,7 @@ public:
     {        
         // We need only two arguments: the entity ID and the
         // manipulator name
-        if (tokens.size() == 2)
+        if (tokens.size() >= 2)
         {
             unsigned int id     = atoi(tokens.at(0).c_str());
             std::string name    = tokens.at(1);
@@ -260,7 +308,7 @@ public:
                 // manipulator. For now, only
                 // the trackball is implemented
                 osg::ref_ptr<osgGA::CameraManipulator> manip;
-                if (name == "trackball")
+                if (name.compare(0,9,"trackball") == 0)
                 {
                     // Set up the trackball
                     // manipulator with some
@@ -295,7 +343,7 @@ public:
 
                 }
                 else
-                if (name == "earth")
+                if (name.compare(0,5,"earth") == 0)
                 {
                     osg::notify(osg::NOTICE) << "OpenIG: earth camera manipulator not implemented yet" << std::endl;
                 }
@@ -328,6 +376,16 @@ public:
                     s_CameraManipulator = manip;
 
                     osg::notify(osg::NOTICE) << "IG: " << name << " bound to entity " << id << std::endl;
+
+                    if (tokens.size() >= 3 && (tokens.at(2).compare(0,3,"off") == 0) )
+					{
+						s_CameraManipulatorOn = false;
+                        osg::notify(osg::NOTICE) << "Manipulator set to: OFF" << std::endl;
+
+					}
+//                    else
+//                        osg::notify(osg::NOTICE) << "Manipulator set to: ON" << std::endl;
+
                 }
             }
 
@@ -378,8 +436,8 @@ int main(int argc, char** argv)
 #if 0
         traits->x = 10;
         traits->y = 10;
-        traits->width = screen_width;
-        traits->height = screen_height;
+		traits->width = 800;
+		traits->height = 405;
         traits->windowDecoration = true;
 #else
         traits->x = 0;
@@ -460,6 +518,12 @@ int main(int argc, char** argv)
     // code bellow is present to see how to load
     // entities in the scene too
 
+	// Add this custom command from above
+	// the first argument is the name of
+	// the command, so we invoke it by
+	// 'manip'
+	igcore::Commands::instance()->addCommand("manip", new SetCameraManipulatorCommand(ig));
+
     // we espect an argument with the name
     // of the script. If none provided, search
     // for defaults
@@ -472,12 +536,6 @@ int main(int argc, char** argv)
     {
         ig->loadScript(std::string("default.txt"));
     }    
-
-    // Add this custom command from above
-    // the first argument is the name of
-    // the command, so we invoke it by
-    // 'manip'
-    igcore::Commands::instance()->addCommand("manip", new SetCameraManipulatorCommand(ig));        
 
     // Show our viewer
     viewer->realize();        
@@ -536,33 +594,14 @@ int main(int argc, char** argv)
         // based on the Trackball manipulators
         // camera only if we set it using our
         // custom command from above
-        if (s_CameraManipulator.valid() && ig->isCameraBoundToEntity())
+		if (s_CameraManipulatorOn && s_CameraManipulator.valid() && ig->isCameraBoundToEntity())
         {			
 			ig->bindCameraUpdate(s_CameraManipulator->getMatrix());
         }
 
         // Here we call the frame
-        ig->frame();
-        
-        // We have to wait for a one frame
-        // to happen to look for Entiies
-        // due to the delayed managment of
-        // Entities. Addition, removal, reloading
-        // of OpenIG Entities is happening
-        // in Viewer::Operation which is happening
-        // before the frame. Then the EntityMap
-        // is updated and it is safe to look up for
-        // Entities there
-        static bool firstFrame = true;
-        if (firstFrame)
-        {
-            firstFrame = false;
+        ig->frame(); 
 
-            // We invoke our new command here
-            // to set the camera manipulator
-            // to look at the model at startup
-            igcore::Commands::instance()->exec("manip 1 trackball");
-        }       
     }
 
     // Here the mandatory cleanup

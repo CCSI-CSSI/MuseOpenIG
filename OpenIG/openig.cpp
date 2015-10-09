@@ -4,7 +4,7 @@
 //#*      http://openig.compro.net
 //#*
 //#*      Source available at: https://github.com/CCSI-CSSI/MuseOpenIG
-//#*
+//#*i
 //#*      This software is released under the LGPL.
 //#*
 //#*   This software is free software; you can redistribute it and/or modify
@@ -39,6 +39,7 @@
 
 #include <osgGA/TrackballManipulator>
 
+#include <osg/Depth>
 #include <osg/ValueObject>
 #include <osg/Vec3d>
 #include <osg/Quat>
@@ -76,7 +77,7 @@ OpenIG::~OpenIG()
 
 std::string OpenIG::version()
 {
-    return "1.1.0";
+    return "1.2.0";
 }
 
 class InitPluginOperation : public PluginOperation
@@ -369,6 +370,27 @@ igcore::ImageGenerator::ReadNodeImplementationCallback* OpenIG::getReadNodeImple
 	return _readFileCallback;
 }
 
+struct SetFarPlaneUniformCallback : public osg::Camera::DrawCallback
+{
+    osg::ref_ptr<osg::Uniform>              _uniform;
+
+    SetFarPlaneUniformCallback(osg::Uniform* uniform)
+    {
+        _uniform = uniform;
+    }
+
+    void operator () (osg::RenderInfo& renderInfo) const
+    {
+        const osg::Matrix& proj = renderInfo.getCurrentCamera()->getProjectionMatrix();
+
+        float vfov, ar, n, f;
+        proj.getPerspective(vfov, ar, n, f);
+        float fc = (float)(2.0f / log2(f + 1.0f));
+        _uniform->set(fc);
+
+       // std::cout << "(SetFarPlaneUniformCallback) Fcoef = " << fc << std::endl;
+    }
+};
 
 void OpenIG::init(osgViewer::CompositeViewer* viewer, const std::string& xmlFileName)
 {
@@ -529,8 +551,6 @@ protected:
 void OpenIG::cleanup()
 {
     _entities.clear();
-    _entitiesToAdd.clear();
-    _entitiesToRemove.clear();
     _lights.clear();
 
     Commands::instance()->clear();
@@ -666,10 +686,6 @@ void OpenIG::preRender()
                 }
                 setCameraPosition(final);
 
-                if (_updateViewerCameraMainpulator && _viewerCameraManipulator.valid())
-                {
-                    _viewerCameraManipulator->setByMatrix(final);
-                }
             }
         }
 
@@ -736,8 +752,6 @@ void OpenIG::addEntity(unsigned int id, const std::string& fileName, const osg::
         return;
     }
 
-    model->getOrCreateStateSet()->setRenderBinDetails(8, "RenderBin");
-
     osg::ref_ptr<osg::MatrixTransform> mxt = new osg::MatrixTransform;
     mxt->addChild(model);
     mxt->setMatrix(mx);
@@ -749,7 +763,7 @@ void OpenIG::addEntity(unsigned int id, const std::string& fileName, const osg::
     mxt->setUserValue("ID",id);
 
     _entities[id] = mxt;
-    _entitiesToAdd[id] = mxt;
+	getScene()->asGroup()->addChild(mxt);
 
     osg::ref_ptr<AddEntityPluginOperation> pluginOperation(new AddEntityPluginOperation(this,mxt,id,fileName));
     this->applyPluginOperation(pluginOperation.get());
@@ -774,8 +788,6 @@ void OpenIG::addEntity(unsigned int id, const osg::Node* node, const osg::Matrix
 		return;
 	}
 
-	model->getOrCreateStateSet()->setRenderBinDetails(8, "RenderBin");
-
 	osg::ref_ptr<osg::MatrixTransform> mxt = new osg::MatrixTransform;
 	mxt->addChild(model);
 	mxt->setMatrix(mx);
@@ -786,7 +798,7 @@ void OpenIG::addEntity(unsigned int id, const osg::Node* node, const osg::Matrix
 	mxt->setUserValue("ID", id);
 
 	_entities[id] = mxt;
-	_entitiesToAdd[id] = mxt;
+	getScene()->asGroup()->addChild(mxt);
 
 	osg::ref_ptr<AddEntityPluginOperation> pluginOperation(new AddEntityPluginOperation(this, mxt, id, "fromNode"));
 	this->applyPluginOperation(pluginOperation.get());
@@ -801,7 +813,20 @@ void OpenIG::reloadEntity(unsigned int id, const std::string& fileName, const os
     itr->second->setUserValue("fileName",fileName);
     itr->second->getChild(0)->setUserData(const_cast<osgDB::Options*>(options));
 
-    _entitiesToReload[itr->first] = itr->second;
+	osg::ref_ptr<osg::Node> model = osgDB::readNodeFile(fileName, options);
+
+	if (!model.valid())
+	{
+		osg::notify(osg::NOTICE) << "failed to reload entity: " << fileName << std::endl;
+		return;
+	}
+
+	osg::notify(osg::NOTICE) << "reloading :" << fileName << std::endl;
+
+	itr->second->setUserValue("fileName", fileName);
+	itr->second->replaceChild(itr->second->getChild(0), model);
+
+	osg::notify(osg::NOTICE) << "reloading done:" << fileName << std::endl;
 }
 
 void OpenIG::setEntityName(unsigned int id, const std::string& name)
@@ -829,7 +854,7 @@ void OpenIG::removeEntity(unsigned int id)
     if (itr == _entities.end())
         return;
 
-    _entitiesToRemove[id] = itr->second;
+	getScene()->asGroup()->removeChild(itr->second);
     _entities.erase(itr);
 }
 
@@ -883,12 +908,6 @@ void OpenIG::bindToEntity(unsigned int id, unsigned int toEntityId)
         pl.at(i)->removeChild(entity);
     }
 
-    EntityMapIterator eaitr = _entitiesToAdd.find(id);
-    if (eaitr != _entitiesToAdd.end())
-    {
-        _entitiesToAdd.erase(eaitr);
-    }
-
     titr->second->addChild(entity);
 
 }
@@ -920,75 +939,7 @@ void OpenIG::unbindFromEntity(unsigned int id)
     }
 
     entity->setMatrix(wmx);
-
-    _entitiesToAdd[id] = entity;
 }
-
-struct UpdateEntitiesViewerOperation : public osg::Operation
-{
-    UpdateEntitiesViewerOperation(osgViewer::CompositeViewer* viewer, igcore::ImageGenerator* ig)
-        : _viewer(viewer)
-        , _ig(ig)
-    {
-        setKeep(true);
-        setName("UpdateEntitiesViewerOperation");
-    }
-
-    virtual void operator () (osg::Object*)
-    {
-        if (_viewer && _ig && _viewer->getNumViews()!=0 && _viewer->getView(0)->getSceneData())
-        {
-            igcore::ImageGenerator::EntityMap& emr = _ig->getEntitiesToRemoveMap();
-            igcore::ImageGenerator::EntityMap& ema = _ig->getEntitesToAddMap();
-            igcore::ImageGenerator::EntityMap& emrl = _ig->getEntitiesToReloadMap();
-
-            igcore::ImageGenerator::EntityMapIterator itr = emr.begin();
-            for ( ; itr != emr.end(); ++itr )
-            {
-                _ig->getScene()->asGroup()->removeChild(itr->second);
-            }
-            emr.clear();
-
-            itr = ema.begin();
-            for ( ; itr != ema.end(); ++itr )
-            {
-                _ig->getScene()->asGroup()->addChild(itr->second);				
-            }
-            ema.clear();
-
-
-            itr = emrl.begin();
-            for ( ; itr != emrl.end(); ++itr )
-            {
-                std::string fileName;
-                itr->second->getUserValue("fileName",fileName);
-
-                osg::ref_ptr<osgDB::Options> options = dynamic_cast<osgDB::Options*>(itr->second->getChild(0)->getUserData());
-
-                osg::ref_ptr<osg::Node> model = osgDB::readNodeFile(fileName,options);
-
-                if (!model.valid())
-                {
-                    osg::notify(osg::NOTICE) << "failed to reload entity: " << fileName << std::endl;
-                    continue;
-                }
-
-                model->getOrCreateStateSet()->setRenderBinDetails(8, "RenderBin");
-
-                osg::notify(osg::NOTICE) << "reloading :" << fileName << std::endl;
-
-                itr->second->setUserValue("fileName",fileName);
-                itr->second->replaceChild(itr->second->getChild(0),model);
-
-                osg::notify(osg::NOTICE) << "reloading done:" << fileName << std::endl;
-            }
-            emrl.clear();
-        }
-    }
-
-    osgViewer::CompositeViewer*     _viewer;
-    igcore::ImageGenerator*         _ig;
-};
 
 void OpenIG::initScene()
 {
@@ -1089,7 +1040,15 @@ void OpenIG::initViewer(osgViewer::CompositeViewer *viewer)
         {
            initScene();
         }
-        _viewer->addUpdateOperation(new UpdateEntitiesViewerOperation(_viewer,this));
+
+        osg::ref_ptr<osg::Uniform> fCoefUniform = new osg::Uniform("Fcoef", 0.0f);
+        viewer->getView(0)->getSceneData()->getOrCreateStateSet()->addUniform(fCoefUniform);
+        viewer->getView(0)->getCamera()->setPreDrawCallback(new SetFarPlaneUniformCallback(fCoefUniform.get()));
+
+        osg::StateSet *stateSet = viewer->getView(0)->getSceneData()->getOrCreateStateSet();
+        stateSet->setMode(GL_DEPTH_CLAMP, osg::StateAttribute::ON);
+        osg::Depth* depth = new osg::Depth(osg::Depth::LEQUAL);
+        stateSet->setAttribute(depth);
     }
 
 }
@@ -1103,29 +1062,13 @@ void OpenIG::setCameraPosition(const osg::Matrixd& mx, bool viewMatrix)
 {
     if (_viewer->getNumViews()==0) return;
 
-    osg::ref_ptr<osgGA::GUIEventAdapter> ea = new osgGA::GUIEventAdapter;
-    osg::ref_ptr<DymmuGUIActionAdapter> aa = new DymmuGUIActionAdapter;
-
-
     switch (viewMatrix)
     {
     case true:
          _viewer->getView(0)->getCamera()->setViewMatrix(mx);
-
-         if (_updateViewerCameraMainpulator && _viewer->getView(0)->getCameraManipulator())
-         {
-             _viewer->getView(0)->getCameraManipulator()->setByInverseMatrix(mx);
-             _viewer->getView(0)->getCameraManipulator()->init(*ea,*aa);
-         }
         break;
     case false:
          _viewer->getView(0)->getCamera()->setViewMatrix(osg::Matrixd::inverse(mx));
-
-         if (_updateViewerCameraMainpulator && _viewer->getView(0)->getCameraManipulator())
-         {
-             _viewer->getView(0)->getCameraManipulator()->setByMatrix(mx);
-             _viewer->getView(0)->getCameraManipulator()->init(*ea,*aa);
-         }
         break;
     }
 
@@ -1144,12 +1087,6 @@ void OpenIG::bindCameraToEntity(unsigned int id, const osg::Matrixd& mx)
         camera->setUserValue("bindOffset",mx);
         camera->setUserValue("bindTo",id);
         camera->setUserValue("bindToEntity",(bool)true);
-
-        if (_updateViewerCameraMainpulator && _viewer->getView(0)->getCameraManipulator())
-        {
-            _viewerCameraManipulator = _viewer->getView(0)->getCameraManipulator();
-            _viewer->getView(0)->setCameraManipulator(0,false);
-        }
     }
 }
 
@@ -1192,20 +1129,6 @@ void OpenIG::unbindCameraFromEntity()
         osg::ref_ptr<osg::Camera> camera = _viewer->getView(0)->getCamera();
 
         camera->setUserValue("bindToEntity",(bool)false);
-
-        if (_updateViewerCameraMainpulator && _viewerCameraManipulator.valid())
-        {
-            osg::ref_ptr<osgGA::GUIEventAdapter> ea = new osgGA::GUIEventAdapter;
-            osg::ref_ptr<DymmuGUIActionAdapter> aa = new DymmuGUIActionAdapter;
-
-            _viewer->getView(0)->setCameraManipulator(_viewerCameraManipulator,false);
-            _viewerCameraManipulator->setByInverseMatrix(_viewer->getView(0)->getCamera()->getViewMatrix());
-            _viewerCameraManipulator->setNode(0);
-            _viewerCameraManipulator->init(*ea,*aa);
-
-            _viewerCameraManipulator = 0;
-        }
-
     }
 }
 
@@ -1213,7 +1136,7 @@ void OpenIG::setFog(double visibility)
 {
     if (_fog.valid())
     {
-        _fog->setDensity(1.0/visibility);
+        _fog->setDensity(3.912/visibility);
         _fog->setColor(osg::Vec4(0.9,0.9,0.9,1.0));
     }
 
@@ -1385,21 +1308,6 @@ osg::Node* OpenIG::getScene()
 igcore::ImageGenerator::EntityMap& OpenIG::getEntityMap()
 {
     return _entities;
-}
-
-igcore::ImageGenerator::EntityMap& OpenIG::getEntitesToAddMap()
-{
-    return _entitiesToAdd;
-}
-
-igcore::ImageGenerator::EntityMap& OpenIG::getEntitiesToRemoveMap()
-{
-    return _entitiesToRemove;
-}
-
-igcore::ImageGenerator::EntityMap& OpenIG::getEntitiesToReloadMap()
-{
-    return _entitiesToReload;
 }
 
 osg::LightSource* OpenIG::getSunOrMoonLight()

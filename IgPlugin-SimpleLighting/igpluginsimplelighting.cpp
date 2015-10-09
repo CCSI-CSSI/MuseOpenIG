@@ -166,9 +166,8 @@ public:
         }
 
     protected:
-        igcore::ImageGenerator*     _ig;
-    };
-	
+        igcore::ImageGenerator*  _ig;
+	};
 
 	class UpdateTODBasedLightingUniformCallback : public osg::Uniform::Callback
 	{
@@ -179,7 +178,7 @@ public:
 			, _onNight(onNight)
 			, _tod(tod)
 		{
-
+			
 		}
 
 		virtual void operator () (osg::Uniform* u, osg::NodeVisitor*)
@@ -326,15 +325,17 @@ public:
 
         osg::Shader* shadowVertexShader = new osg::Shader( osg::Shader::VERTEX, ossvs.str());
 
-        osg::Shader* mainVertexShader = new osg::Shader( osg::Shader::VERTEX,
+        osg::Shader* mainVertexShader = new osg::Shader(osg::Shader::VERTEX,
             "#version 120                                                           \n"
             "#pragma import_defines(SIMPLELIGHTING,SHADOWING,ENVIRONMENTAL,AO)      \n"
             "varying vec3 normal;                                                   \n"
             "varying vec3 eyeVec;                                                   \n"
             "varying vec3 lightDirs[8];                                             \n"
-			"varying vec3 vertex_light_position;									\n"
+            "varying vec3 vertex_light_position;									\n"
+			"varying float flogz;													\n"
             "uniform mat4 osg_ViewMatrixInverse;									\n"
-            "uniform vec3 cameraPos;        										\n"            
+            "uniform vec3 cameraPos;        										\n"
+            "uniform float Fcoef;							    	     			\n"
             "mat3 getLinearPart( mat4 m )											\n"
             "{																		\n"
             "	mat3 result;														\n"
@@ -355,7 +356,7 @@ public:
             "}																		\n"
             "																		\n"
             "void environmentalMapping()											\n"
-            "{																		\n"            
+            "{																		\n"
             "	mat4 modelWorld4x4 = osg_ViewMatrixInverse * gl_ModelViewMatrix;	\n"
             "																		\n"
             "	mat3 modelWorld3x3 = getLinearPart( modelWorld4x4 );				\n"
@@ -368,12 +369,25 @@ public:
             "																		\n"
             "	gl_TexCoord[4].xyz = reflect( E, N );                               \n"
             "}																		\n"
-            "                                                                   \n"
-            "void DynamicShadow( in vec4 ecPosition );                          \n"
-            "                                                                   \n"
-            "void main()                                                        \n"
-            "{                                                                  \n"
-            "   gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;         \n"
+            "                                                                       \n"
+            "void DynamicShadow( in vec4 ecPosition );                              \n"
+            "                                                                       \n"
+            "void main()                                                            \n"
+            "{                                                                      \n"
+#if 0
+            "   gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;             \n"
+#else
+            "   vec4 worldVert = gl_Vertex;                                         \n"
+            "   vec4 clipVertex =  gl_ModelViewMatrix * worldVert;                  \n"
+            "   gl_ClipVertex = clipVertex;                                         \n"
+            "   gl_Position = gl_ProjectionMatrix * clipVertex;                     \n"
+            "   if (Fcoef > 0) {                                                    \n"
+            "       gl_Position.z = (log2(max(1e-6, 1.0 + gl_Position.w)) *         \n"
+            "            Fcoef - 1.0) * gl_Position.w;                              \n"
+            "   }                                                                   \n"
+			"	gl_ClipVertex = gl_ModelViewMatrix * gl_Vertex;					\n"
+			"	flogz = 1.0 + gl_Position.w;									\n"
+#endif
             "   normal = normalize( gl_NormalMatrix * gl_Normal );              \n"
             "   gl_TexCoord[0] = gl_TextureMatrix[0] *gl_MultiTexCoord0;        \n"
             "   vec3 vVertex = vec3(gl_ModelViewMatrix * gl_Vertex);            \n"          
@@ -396,49 +410,43 @@ public:
         );
 
 
-		osg::Shader* mainFragmentShader = new osg::Shader(osg::Shader::FRAGMENT,
-			"#version 120                                                           \n"
-			"#pragma import_defines(SIMPLELIGHTING,SHADOWING,ENVIRONMENTAL,AO,ENVIRONMENTAL_FACTOR,TEXTURING)\n"
-			"uniform sampler2D ambientOcclusionTexture;                             \n"
-			"uniform samplerCube environmentalMapTexture;                           \n"
-			"																		\n"
-			"uniform float ambientOcclusionFactor;                                  \n"
-			"uniform float shadowsFactor;                                           \n"
-			"																		\n"
-			"uniform float	todBasedLightBrightness;								\n"
-			"uniform bool	todBasedLightBrightnessEnabled;							\n"
-			"                                                                       \n"
-			"varying vec3 normal;                                                   \n"
-			"varying vec3 eyeVec;                                                   \n"
-			"varying vec3 lightDirs[8];                                             \n"
-			"varying vec3 vertex_light_position;									\n"			
-			"                                                                       \n"
-			"uniform bool lightsEnabled[8];                                         \n"
-			"                                                                       \n"
-			"const float cos_outer_cone_angle = 0.4; // 36 degrees                  \n"
-			"                                                                       \n"
-			"float DynamicShadow();                                                  \n"
-			"                                                                       \n"
-			"uniform sampler2D baseTexture;                                         \n"
-			"                                                                       \n"
-			"void computeFogColor(inout vec4 color)                                 \n"
-			"{                                                                      \n"
-			"    if (gl_FragCoord.w > 0.0)                                          \n"
-			"    {                                                                  \n"
-			"        const float LOG2 = 1.442695;									\n"
-			"        float z = gl_FragCoord.z / gl_FragCoord.w;                     \n"
-			"        float fogFactor = exp2( -gl_Fog.density *						\n"
-			"            gl_Fog.density *											\n"
-			"            z *														\n"
-			"            z *														\n"
-			"            LOG2 );													\n"
-			"        fogFactor = clamp(fogFactor, 0.0, 1.0);                        \n"
-			"                                                                       \n"
-			"        vec4 clr = color;                                              \n"
-			"        color = mix(gl_Fog.color, color, fogFactor );                  \n"
-			"        color.a = clr.a;                                               \n"
-			"    }                                                                  \n"
-			"}                                                                      \n"
+        osg::Shader* mainFragmentShader = new osg::Shader(osg::Shader::FRAGMENT,
+            "#version 120                                                           \n"
+            "#pragma import_defines(SIMPLELIGHTING,SHADOWING,ENVIRONMENTAL,AO,ENVIRONMENTAL_FACTOR,TEXTURING)\n"
+            "uniform sampler2D ambientOcclusionTexture;                             \n"
+            "uniform samplerCube environmentalMapTexture;                           \n"
+            "																		\n"
+            "uniform float ambientOcclusionFactor;                                  \n"
+            "uniform float shadowsFactor;                                           \n"
+            "																		\n"
+            "uniform float	todBasedLightBrightness;								\n"
+            "uniform bool	todBasedLightBrightnessEnabled;							\n"
+            "uniform float Fcoef;													\n"
+            "                                                                       \n"
+			"varying float flogz;													\n"
+            "varying vec3 normal;                                                   \n"
+            "varying vec3 eyeVec;                                                   \n"
+            "varying vec3 lightDirs[8];                                             \n"
+            "varying vec3 vertex_light_position;									\n"
+            "                                                                       \n"
+            "uniform bool lightsEnabled[8];                                         \n"
+            "                                                                       \n"
+            "const float cos_outer_cone_angle = 0.4; // 36 degrees                  \n"
+            "                                                                       \n"
+            "float DynamicShadow();                                                  \n"
+            "                                                                       \n"
+            "uniform sampler2D baseTexture;                                         \n"
+            "                                                                       \n"
+            "void computeFogColor(inout vec4 color)                                 \n"
+            "{                                                                      \n"
+            "   float fogExp = gl_Fog.density * length(eyeVec);                     \n"
+            "   float fogFactor = exp(-(fogExp * fogExp));                          \n"
+            "   fogFactor = clamp(fogFactor, 0.0, 1.0);                             \n"
+            "   vec4 clr = color;                                                   \n"
+            "   color = mix(gl_Fog.color, color, fogFactor);                        \n"
+            "   color.a = clr.a;                                                    \n"
+            "}                                                                      \n"
+
 			"void computeAmbientColor(inout vec4 color)                             \n"
 			"{                                                                      \n"
 			"	vec4 final_color =                                                  \n"
@@ -571,7 +579,7 @@ public:
             "		textureCube(environmentalMapTexture, v).rgb;                    \n"
             "																		\n"
             "   vec3 mixed_color =                                                  \n"
-            "       mix(cube_color, color.rgb, 1.0-ENVIRONMENTAL_FACTOR).rgb;        \n"
+            "       mix(cube_color, color.rgb, 1.0-ENVIRONMENTAL_FACTOR).rgb;       \n"
             "	color.rgb *= mixed_color;//vec4(mixed_color , color.a);             \n"
             "}																		\n"
             "void main()                                                            \n"
@@ -581,21 +589,21 @@ public:
 			"   color = texture2D( baseTexture, gl_TexCoord[0].xy );				\n"
 			"#endif																	\n"														
 			"#if !defined(TEXTURING)												\n"
-			"#if defined(SIMPLELIGHTING)                                            \n"
-			"   lighting(color);                                                    \n"
-			"#endif                                                                 \n"
+			"	#if defined(SIMPLELIGHTING)                                         \n"
+			"		lighting(color);                                                \n"
+			"	#endif                                                              \n"
             "   float shadow = DynamicShadow();                                     \n"
-            "#if defined(SHADOWING)                                                 \n"
-            "   color.rgb = mix( color.rgb * (1.0-shadowsFactor), color.rgb, shadow );\n"
-            "#endif                                                                 \n"            
+            "	#if defined(SHADOWING)                                              \n"
+            "		color.rgb = mix( color.rgb * (1.0-shadowsFactor), color.rgb, shadow );\n"
+            "	#endif                                                              \n"            
 			"#else																	\n"
 			"   float shadow = DynamicShadow();                                     \n"
-			"#if defined(SHADOWING)                                                 \n"
-			"   color.rgb = mix( color.rgb * (1.0-shadowsFactor), color.rgb, shadow );\n"
-			"#endif                                                                 \n"
-			"#if defined(SIMPLELIGHTING)                                            \n"
-			"   lighting(color);                                                    \n"
-			"#endif                                                                 \n"
+			"	#if defined(SHADOWING)                                              \n"
+			"		color.rgb = mix( color.rgb * (1.0-shadowsFactor), color.rgb, shadow );\n"
+			"	#endif                                                              \n"
+			"	#if defined(SIMPLELIGHTING)                                         \n"
+			"		lighting(color);                                                \n"
+			"	#endif                                                              \n"
 			"#endif																	\n"
             "#if defined(ENVIRONMENTAL)                                             \n"
             "   computeEnvironmentalMap(color);                                     \n"
@@ -603,7 +611,11 @@ public:
             "#if defined(AO)                                                        \n"
             "   computeAmbientOcclusion(color);                                     \n"
             "#endif                                                                 \n"
+			"#if defined(SIMPLELIGHTING) && defined(TEXTURING)                      \n"
+			"	lighting(color);                                                    \n"
+			"#endif                                                                 \n"
             "   gl_FragColor =  color;												\n"
+			//"	gl_FragDepth = log2(flogz) * Fcoef * 0.5;							\n"
             "}                                                                      \n"
         );
 
@@ -683,7 +695,6 @@ public:
 
 				osg::Uniform* todBasedLightingEnabledUniform = new osg::Uniform("todBasedLightBrightnessEnabled", (bool)true);
 				ss->addUniform(todBasedLightingEnabledUniform);
-
             }
         }
 

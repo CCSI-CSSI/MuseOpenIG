@@ -64,6 +64,8 @@ namespace iglib
 
 		void							setupTerrain(osg::Node& entity);
 		void							setupVehicle(unsigned int id, igcore::ImageGenerator::Entity& entity, const std::string& fileName);
+        inline void                     setFreeze(bool on)          { _freeze=on; }
+		inline bool						getIsFreezed() const		{ return _freeze;  }
 
 	private:
 		void					initPhysics(void);
@@ -77,6 +79,7 @@ namespace iglib
 		bool							initial_contact;
 		std::vector<Vehicle*>			vehicle_list;
 		bool							debug_mode;
+        bool                            _freeze;
 	};
 
 } // namespace

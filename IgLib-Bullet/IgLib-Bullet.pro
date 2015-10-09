@@ -36,7 +36,7 @@ unix {
         LIBS+=-L/usr/local/lib
         target.path = /usr/local/lib
     }
-    message(Libs will be installed into $$DESTDIR)
+    message($$TARGET Lib will be installed into $$DESTDIR)
 
     INSTALLS += target
 
@@ -50,19 +50,33 @@ unix {
     DEPENDPATH += /usr/local/lib64
 
     LIBS += -lLinearMath -lBulletCollision -lBulletDynamics -losgbCollision -losgbDynamics
-    LIBS += -lboost_filesystem -lboost_system
+    #
+    # Allow alternate boost library path to be set via ENV variable
+    #
+    BOOSTROOT = $$(BOOST_ROOT)
+    isEmpty(BOOSTROOT) {
+        message($$TARGET --  -- \"BOOST_ROOT env var\" not set...using system default paths to look for boost )
+        LIBS +=  -lboost_system -lboost_filesystem
+    }
+    else {
+        message($$TARGET --  -- \"BOOST_ROOT env var\" detected - set to: \"$$BOOSTROOT\")
+        LIBS += -L$$BOOSTROOT/stage/lib \
+                -lboost_system -lboost_filesystem
+        INCLUDEPATH += $$BOOSTROOT
+        DEPENDPATH  += $$BOOSTROOT
+    }
 
     # library version number files
     exists( "../openig_version.pri" ) {
 
 	include( "../openig_version.pri" )
-	isEmpty( VERSION ){ error( "bad or undefined VERSION variable inside file openig_version.pri" )
+        isEmpty( VERSION ){ error( "$$TARGET -- bad or undefined VERSION variable inside file openig_version.pri" )
 	} else {
-	message( "Set version info to: $$VERSION" )
+        message( "$$TARGET -- Set version info to: $$VERSION" )
 	}
 
     }
-    else { error( "could not find pri library version file openig_version.pri" ) }
+    else { error( "$$TARGET -- could not find pri library version file openig_version.pri" ) }
 
     # end of library version number files
 }
@@ -74,19 +88,19 @@ win32 {
 
     OSGROOT = $$(OSG_ROOT)
     isEmpty(OSGROOT) {
-        message(\"OpenSceneGraph\" not detected...)
+        message($$TARGET -- \"OpenSceneGraph\" not detected...)
     }
     else {
-        message(\"OpenSceneGraph\" detected in \"$$OSGROOT\")
+        message($$TARGET -- \"OpenSceneGraph\" detected in \"$$OSGROOT\")
         INCLUDEPATH += $$OSGROOT/include
         LIBS += -L$$OSGROOT/lib
     }
     OSGBUILD = $$(OSG_BUILD)
     isEmpty(OSGBUILD) {
-        message(\"OpenSceneGraph build\" not detected...)
+        message($$TARGET -- \"OpenSceneGraph build\" not detected...)
     }
     else {
-        message(\"OpenSceneGraph build\" detected in \"$$OSGBUILD\")
+        message($$TARGET -- \"OpenSceneGraph build\" detected in \"$$OSGBUILD\")
         DEPENDPATH += $$OSGBUILD/lib
         INCLUDEPATH += $$OSGBUILD/include
         LIBS += -L$$OSGBUILD/lib
@@ -96,7 +110,7 @@ win32 {
         OSGBULLETSROOT="C:\Program Files\osgBullet"
     }
     isEmpty(OSGBULLETSROOT) {
-        message(\"osgBullets\" not detected...)
+        message($$TARGET -- \"osgBullets\" not detected...)
     }
     else {
         message(\"osgBullets\" detected in \"$$OSGBULLETSROOT\")
@@ -109,11 +123,11 @@ win32 {
 
     BULLETSBUILD = $$(BULLETS_BUILD)
     isEmpty(BULLETSBUILD) {
-        message(\"Bullets build\" not detected...)
+        message($$TARGET -- \"Bullets build\" not detected...)
     }
     else {
-        message(\"Bullets build\" detected in \"$$BULLETSBUILD\")
-        DEPENDPATH += $$BULLETSBUILD
+        message($$TARGET -- \"Bullets build\" detected in \"$$BULLETSBUILD\")
+        DEPENDPATBulletLibH += $$BULLETSBUILD
         INCLUDEPATH += $$BULLETSBUILD\src
         LIBS += -L$$BULLETSBUILD\BUILD\lib\release
         LIBS += -lLinearMath -lBulletCollision -lBulletDynamics
@@ -121,17 +135,23 @@ win32 {
 
     BOOSTROOT = $$(BOOST_ROOT)
     isEmpty(BOOSTROOT) {
-        message(\"boost\" not detected...)
+        message($$TARGET -- \"boost\" not detected...)
     }
     else {
+        INCLUDEPATH += $$BOOSTROOT
         win32-g++ {
-        message(\"boost\" detected in \"$$BOOSTROOT\")
-        LIBS += -L$$BOOSTROOT\stage\lib -llibboost_filesystem
-        INCLUDEPATH += $$BOOSTROOT
+            message($$TARGET -- win32-g++ --\"boost\" detected in \"$$BOOSTROOT\")
+            LIBS += -L$$BOOSTROOT\stage\lib -llibboost_filesystem
         } else {
-        message(\"boost\" detected in \"$$BOOSTROOT\")
-        LIBS += -L$$BOOSTROOT\stage\lib -llibboost_filesystem
-        INCLUDEPATH += $$BOOSTROOT
+            message($$TARGET -- win32 -- \"boost\" detected in \"$$BOOSTROOT\")
+            LIBS += -L$$BOOSTROOT\stage\lib
+            CONFIG( debug,debug|release ){
+                message($$TARGET -- Boost using debug version of libraries )
+                LIBS += -llibboost_filesystem-vc120-mt-gd-1_58
+            }else{
+                message($$TARGET -- Boost using release version of libraries )
+                LIBS += -llibboost_filesystem-vc120-mt-1_58
+            }
         }
     }
 

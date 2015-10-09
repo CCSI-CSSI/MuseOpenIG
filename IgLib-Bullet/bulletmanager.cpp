@@ -53,7 +53,7 @@ void BulletManager::setupTerrain(osg::Node& entity)
 
 	if (!nodeDB.valid())
 	{
-        osg::notify(osg::NOTICE) << "BulletManager::setupTerrain:  Can't find node: " << entity.getName() << std::endl;
+		osg::notify(osg::FATAL) << "Can't find terrain node" << std::endl;
 		//exit(0);
 	}
 
@@ -77,9 +77,7 @@ void BulletManager::setupVehicle(unsigned int id, igcore::ImageGenerator::Entity
 	
 	if (!osgDB::fileExists(xmlFileName) && id < 1000)
 	{
-        osg::notify(osg::NOTICE) << "BulletManager::setupVehicle: Can't find vehicle xml file: " << xmlFileName << std::endl;
-        osg::notify(osg::NOTICE) << "BulletManager::setupVehicle: Attempting to use common.bullet.xml!!!" << std::endl;
-        xmlFileName = osgDB::getFilePath(fileName) + "common.bullet.xml";
+		xmlFileName = osgDB::getFilePath(fileName) + "/common.bullet.xml";
 		if (!osgDB::fileExists(xmlFileName)) return;
 	}
 		
@@ -97,6 +95,7 @@ void BulletManager::setupVehicle(unsigned int id, igcore::ImageGenerator::Entity
 			
 			entity->setMatrix(mx1);
 
+            (*vit)->id = id;
 			createVehicle((*vit), entity->getChild(0), osg::Vec4(0, 0, 1, (*vit)->heading));
 		}
 	}
@@ -110,7 +109,8 @@ BulletManager* BulletManager::instance()
 
 
 BulletManager::BulletManager()
-	: _ig(0)
+    : _ig(0),
+      _freeze(false)
 {
 
 }
@@ -308,42 +308,45 @@ void
 BulletManager::
 verifyContact( void )
 {
-   if( !initial_contact )
-   {
-       int numManifolds = dynamicsWorld->getDispatcher()->getNumManifolds();
+    if( !initial_contact )
+    {
+        int numManifolds = dynamicsWorld->getDispatcher()->getNumManifolds();
 
-       for (int i=0;i<numManifolds;i++)
-       {
-           btPersistentManifold* contactManifold =  dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+        for (int i=0;i<numManifolds;i++)
+        {
+            btPersistentManifold* contactManifold =  dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
 
-           if( !contactManifold->getNumContacts() )
-               continue;
+            if( !contactManifold->getNumContacts() )
+                continue;
 
-           btCollisionObject* colObj0 = (btCollisionObject*)contactManifold->getBody0();
-           btCollisionObject* colObj1 = (btCollisionObject*)contactManifold->getBody1();
+            btCollisionObject* colObj0 = (btCollisionObject*)contactManifold->getBody0();
+            btCollisionObject* colObj1 = (btCollisionObject*)contactManifold->getBody1();
 
-           osg::Node* node0 = (osg::Node*)colObj0->getUserPointer();
-           osg::Node* node1 = (osg::Node*)colObj1->getUserPointer();
+            osg::Node* node0 = (osg::Node*)colObj0->getUserPointer();
+            osg::Node* node1 = (osg::Node*)colObj1->getUserPointer();
 
-           if( node0 )
-           {
-               if( node0->getName() == "terrain" )
-                   initial_contact = true;
-           }
+            if( node0 )
+            {
+                if( node0->getName() == "terrain" )
+                    initial_contact = true;
+            }
 
-           if( node1 )
-           {
-               if( node1->getName() == "terrain" )
-                   initial_contact = true;
-           }
-       }
-   }
+            if( node1 )
+            {
+                if( node1->getName() == "terrain" )
+                    initial_contact = true;
+            }
+        }
+    }
 }
 
 void
 BulletManager::
 update( const double sim_time )
 {
+    if( _freeze )
+        return;
+
     dynamicsWorld->stepSimulation( sim_time );
 
     // check for a initial contact to the ground

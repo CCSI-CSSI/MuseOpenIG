@@ -283,7 +283,7 @@ public:
                 // manipulator. For now, only
                 // the trackball is implemented
                 osg::ref_ptr<osgGA::CameraManipulator> manip;
-                if (name == "trackball")
+                if (name.compare(0,9,"trackball") == 0)
                 {
                     // Set up the trackball
                     // manipulator with some
@@ -318,7 +318,7 @@ public:
 
                 }
                 else
-                if (name == "earth")
+                if( name.compare(0,5,"earth") )
                 {
                     osg::notify(osg::NOTICE) << "OpenIG: earth camera manipulator not implemented yet" << std::endl;
                 }
@@ -414,7 +414,7 @@ int main(int argc, char** argv)
     unsigned int screen_width, screen_height;
     wsi->getScreenResolution(osg::GraphicsContext::ScreenIdentifier(0), screen_width, screen_height);
 
-    double aspectratio = 1.0;
+    double aspectratio = 1.33;
     if (viewer->getNumViews()==0)
     {
         osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
@@ -427,8 +427,8 @@ int main(int argc, char** argv)
 #if 0
         traits->x = 10;
         traits->y = 10;
-        traits->width = screen_width;
-        traits->height = screen_height;
+		traits->width = 800;
+		traits->height = 405;
         traits->windowDecoration = true;
 #else
         traits->x = 0;
@@ -459,12 +459,13 @@ int main(int argc, char** argv)
         view->getCamera()->setGraphicsContext(gc.get());
         view->getCamera()->setViewport(new osg::Viewport(0,0, traits->width, traits->height));
         aspectratio = static_cast<double>(traits->width) / static_cast<double>(traits->height);
-        view->getCamera()->setProjectionMatrixAsPerspective(45, aspectratio, 1.0, 100000);
+        view->getCamera()->setProjectionMatrixAsPerspective(50, aspectratio, 1.0, 50000);
         view->getCamera()->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
         view->getCamera()->setCullingMode(osg::CullSettings::VIEW_FRUSTUM_CULLING);
-        view->setLightingMode(osgViewer::View::SKY_LIGHT);
+        //view->setLightingMode(osgViewer::View::SKY_LIGHT);
 
-        viewer->setThreadingModel(osgViewer::ViewerBase::DrawThreadPerContext);
+
+        viewer->setThreadingModel(osgViewer::ViewerBase::CullThreadPerCameraDrawThreadPerContext);
 
     }
 
@@ -498,6 +499,12 @@ int main(int argc, char** argv)
     // to the view scene data directly. This
     // way you can avoid the scene management
     ig->getViewer()->getView(0)->getSceneData()->asGroup()->addChild(createInfoHUD());
+
+    // Add this custom command from above
+    // the first argument is the name of
+    // the command, so we invoke it by
+    // 'manip'
+    igcore::Commands::instance()->addCommand("manip", new SetCameraManipulatorCommand(ig));
 
     // The scene can be defined in a startup script
     // using commands. Please have a look at the
@@ -564,16 +571,16 @@ int main(int argc, char** argv)
 
     // Now we show how to update
     // Light attributes, colors etc
-    igcore::LightAttributes attr;
-    attr._ambient = osg::Vec4(0,0,0,1);
-    attr._diffuse = osg::Vec4(1,1,1,1);
-    attr._brightness = 5;
-	attr._cloudBrightness = 0.1;
-    attr._constantAttenuation = 100;
-    attr._specular = osg::Vec4(0,0,0,1);
-    attr._spotCutoff = 30;
-    attr._enabled = true;
-    attr._dirtyMask = igcore::LightAttributes::ALL;
+    //igcore::LightAttributes attr;
+    //attr._ambient = osg::Vec4(0,0,0,1);
+    //attr._diffuse = osg::Vec4(1,1,1,1);
+    //attr._brightness = 5;
+    //attr._cloudBrightness = 0.1;
+    //attr._constantAttenuation = 100;
+    //attr._specular = osg::Vec4(0,0,0,1);
+    //attr._spotCutoff = 30;
+    //attr._enabled = true;
+    //attr._dirtyMask = igcore::LightAttributes::ALL;
     //ig->updateLightAttributes(NOSE_LANDING_GEAR_LIGHT_ID,attr);
 
     // add the Demo terrain to the scene the
@@ -590,12 +597,6 @@ int main(int argc, char** argv)
     //osg::ref_ptr<osgDB::Options> options = new osgDB::Options("-1.20639e+06,-5.099e+06,0");
     //osg::Matrixd terrainMx = osg::Matrixd::identity();
     //ig->addEntity(TERRAIN_ENTITY_ID,s_TerrainPath,terrainMx,options);
-
-    // Add this custom command from above
-    // the first argument is the name of
-    // the command, so we invoke it by
-    // 'manip'
-    igcore::Commands::instance()->addCommand("manip", new SetCameraManipulatorCommand(ig));        
 
     // Show our viewer
     viewer->realize();    
@@ -631,7 +632,7 @@ int main(int argc, char** argv)
     // The demo database is very small,
     // so let make the scene nicer with fog
     // The parameter is in meters
-    ig->setFog(5000);
+    //ig->setFog(5000);
 
     // By default the OpenIG Demo is setup
     // to use some experimental runway
@@ -642,7 +643,7 @@ int main(int argc, char** argv)
     // refer to the onscreen help on F7, and
     // launch the command line terminal at the
     // bottom of the screen with F8
-    ig->setTimeOfDay(17,0);
+    //ig->setTimeOfDay(17,0);
 
     // Now we have event processing in OpenIG
     // like the command line 'terminal' when
@@ -916,25 +917,6 @@ int main(int argc, char** argv)
                 }
             }
         }
-        // We have to wait for a one frame
-        // to happen to look for Entiies
-        // due to the delayed managment of
-        // Entities. Addition, removal, reloading
-        // of OpenIG Entities is happening
-        // in Viewer::Operation which is happening
-        // before the frame. Then the EntityMap
-        // is updated and it is safe to look up for
-        // Entities there
-        static bool firstFrame = true;
-        if (firstFrame)
-        {
-            firstFrame = false;
-
-            // We invoke our new command here
-            // to set the camera manipulator
-            // to look at the model at startup
-            igcore::Commands::instance()->exec("manip 1 trackball");
-        }
 
         // now we check for reset
         // if true, we set up stuff
@@ -982,6 +964,7 @@ int main(int argc, char** argv)
             // th players position/orientation to the first frame
 
             // breaks animations
+#if 1
             ig->resetAnimation(MODEL_ENTITY_ID,"breaks-up-left");
             ig->stopAnimation(MODEL_ENTITY_ID,"breaks-up-left");
             ig->resetAnimation(MODEL_ENTITY_ID,"breaks-up-right");
@@ -1007,7 +990,7 @@ int main(int argc, char** argv)
             ig->resetAnimation(MODEL_ENTITY_ID,"close-landing-gear-leg-right");
             ig->stopAnimation(MODEL_ENTITY_ID,"close-landing-gear-leg-right");
             ig->stopAnimation(MODEL_ENTITY_ID,"open-landing-gear-leg-right");
-
+#endif
         }
 
     }

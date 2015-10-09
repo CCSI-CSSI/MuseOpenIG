@@ -1,9 +1,9 @@
 cmake_minimum_required( VERSION 2.8.8 )
 project( openIG )
 
-set( OPENIG_VERSION 1.1.0 )
+set( OPENIG_VERSION 1.2.0 )
 set( OPENIG_MAJOR_VERSION 1 )
-set( OPENIG_MINOR_VERSION 1 )
+set( OPENIG_MINOR_VERSION 2 )
 set( OPENIG_SUB_VERSION 0 )
 
 set( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}" )
@@ -44,6 +44,7 @@ include( FindBulletHelper )
 include( FindOSGBullet )
 
 find_package(OpenGL)
+find_package(Triton)
 
 INCLUDE_DIRECTORIES(
     ${PROJECT_SOURCE_DIR}
@@ -76,10 +77,17 @@ ADD_SUBDIRECTORY( IgPlugin-TimeOfDayBasedMaterial )
 ADD_SUBDIRECTORY( IgPlugin-VDBOffset )
 ADD_SUBDIRECTORY( IgPlugin-FBXAnimation )
 ADD_SUBDIRECTORY( IgPlugin-OSGParticleEffects )
+ADD_SUBDIRECTORY( IgLib-Networking )
+ADD_SUBDIRECTORY( IgPlugin-Networking )
 
 IF( SILVERLINING_FOUND )
 ADD_SUBDIRECTORY( IgPlugin-SilverLining )
 ENDIF( SILVERLINING_FOUND )
+
+IF( TRITON_FOUND )
+ADD_SUBDIRECTORY( IgPlugin-Triton )
+ENDIF( TRITON_FOUND )
+
 
 IF( OSGEARTH_FOUND )
 INCLUDE_DIRECTORIES(

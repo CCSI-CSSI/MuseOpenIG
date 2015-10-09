@@ -109,7 +109,7 @@ public:
             if (entity.valid())
             {
                 osg::ref_ptr<osgGA::CameraManipulator> manip;
-                if (name == "trackball")
+                if (name.compare(0,9,"trackball") == 0)
                 {
                     osg::ref_ptr<CameraTrackballManipulator> tb = new CameraTrackballManipulator;
                     tb->setAutoComputeHomePosition(false);
@@ -131,7 +131,7 @@ public:
 
                 }
                 else
-                if (name == "earth")
+                if (name.compare(0,5,"earth"))
                 {
                     osg::notify(osg::NOTICE) << "OpenIG: earth camera manipulator not implemented yet" << std::endl;
                 }
@@ -222,6 +222,8 @@ int main(int argc, char** argv)
 
     osg::ref_ptr<openig::OpenIG> ig = new openig::OpenIG;
     ig->init(viewer.get(), "igdata/openig.xml");
+    igcore::Commands::instance()->addCommand("manip", new SetCameraManipulatorCommand(ig));
+
     if (argc > 1)
     {
         ig->loadScript(std::string(argv[1]));
@@ -230,7 +232,6 @@ int main(int argc, char** argv)
     {
         ig->loadScript(std::string("default.txt"));
     }
-    igcore::Commands::instance()->addCommand("manip", new SetCameraManipulatorCommand(ig));
 
     viewer->realize();    
 
@@ -268,18 +269,6 @@ int main(int argc, char** argv)
 
 
         ig->frame();
-
-        static bool firstFrame = true;
-        if (firstFrame)
-        {
-            firstFrame = false;
-
-            // We invoke our new command here
-            // to set the camera manipulator
-            // to look at the model at startup
-            igcore::Commands::instance()->exec("manip 1 trackball");
-        }
-
     }
 
     ig->cleanup();

@@ -134,6 +134,8 @@ void PluginHost::loadPlugins(const std::string& path, const std::string& configF
                 }
             }
         }
+		else
+			osg::notify(osg::ALWAYS) << "PluginCore -- FAILED to load plugin: " << pluginFileName << "!!!!!!!!" << std::endl;
     }
 }
 void PluginHost::unloadPlugins()

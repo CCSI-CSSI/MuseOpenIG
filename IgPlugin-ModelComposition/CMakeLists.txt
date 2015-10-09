@@ -1,4 +1,5 @@
 set( LIB_NAME IgPlugin-ModelComposition )
+set( TARGET_OTHER_FILES ConfigFiles/libIgPlugin-ModelComposition.so.xml )
 
 add_library( ${LIB_NAME} SHARED
     LightPointDrawable.h
@@ -7,7 +8,7 @@ add_library( ${LIB_NAME} SHARED
     LightPointDrawable.cpp
     LightPointSpriteDrawable.cpp
     igpluginmodelcomposition.cpp
-    libIgPlugin-ModelComposition.so.xml
+    ${TARGET_OTHER_FILES}
 )
 
 if (OPENGL_FOUND)
@@ -30,9 +31,9 @@ set_target_properties( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Plugin ${LIB_NAME}"
 include( PluginInstall REQUIRED )
 
 if (APPLE)
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/libIgPlugin-ModelComposition.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libIgPlugin-ModelComposition.dylib.xml)
+    install(FILES ${CMAKE_CURRENT_LIST_DIR}/ConfigFiles/libIgPlugin-ModelComposition.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libIgPlugin-ModelComposition.dylib.xml)
 elseif(WIN32)
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/libIgPlugin-ModelComposition.so.xml DESTINATION ${INSTALL_BINDIR} RENAME IgPlugin-ModelComposition.dll.xml)
+    install(FILES ${CMAKE_CURRENT_LIST_DIR}/ConfigFiles/libIgPlugin-ModelComposition.so.xml DESTINATION ${INSTALL_BINDIR} RENAME IgPlugin-ModelComposition.dll.xml)
 else()
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/libIgPlugin-ModelComposition.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libIgPlugin-ModelComposition.so.xml)
+    install(FILES ${CMAKE_CURRENT_LIST_DIR}/ConfigFiles/libIgPlugin-ModelComposition.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libIgPlugin-ModelComposition.so.xml)
 endif()

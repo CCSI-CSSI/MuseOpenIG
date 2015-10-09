@@ -24,6 +24,8 @@
 //#*****************************************************************************
 #include <iostream>
 
+#include <osg/CoordinateSystemNode>
+
 #include <osgViewer/CompositeViewer>
 
 #include <osgGA/TrackballManipulator>
@@ -38,6 +40,7 @@
 #include <OpenIG/openig.h>
 
 #include <IgCore/commands.h>
+#include <IgCore/mathematics.h>
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -82,14 +85,19 @@ public:
     }
 };
 
-
-struct OSGEarthReadFileCallback : public igcore::ImageGenerator::ReadNodeImplementationCallback
+osg::Matrixd toMatrix(double x, double y, double z, double h, double p, double r)
 {
-	virtual osg::Node* readNode(const std::string& fileName, const osgDB::Options* options = 0)
-	{
-		return 0;
-	}
-};
+	osg::Matrixd mxR;
+	mxR.makeRotate(osg::DegreesToRadians(r), osg::Vec3(1, 0, 0));
+	osg::Matrixd mxP;
+	mxP.makeRotate(osg::DegreesToRadians(p), osg::Vec3(0, 1, 0));
+	osg::Matrixd mxH;
+	mxH.makeRotate(osg::DegreesToRadians(-h), osg::Vec3(0, 0, 1));
+	osg::Matrixd mxT;
+	mxT.makeTranslate(osg::Vec3(x, y, z));
+
+	return (mxP*mxR*mxH*mxT);
+}
 
 int main(int argc, char** argv)
 {
@@ -110,11 +118,11 @@ int main(int argc, char** argv)
     {
         osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
 #if 0
-        traits->x = 10;
-        traits->y = 10;
-        traits->width = screen_width;
-        traits->height = screen_height;
-        traits->windowDecoration = true;
+		traits->x = 10;
+		traits->y = 10;
+		traits->width = 800;
+		traits->height = 405;
+		traits->windowDecoration = true;
 #else
         traits->x = 0;
         traits->y = 0;
@@ -146,8 +154,7 @@ int main(int argc, char** argv)
         aspectratio = static_cast<double>(traits->width) / static_cast<double>(traits->height);
 		view->getCamera()->setProjectionMatrixAsPerspective(45, aspectratio, 1.0, 100000);
         view->setLightingMode(osgViewer::View::SKY_LIGHT);
-
-        viewer->setThreadingModel(osgViewer::ViewerBase::DrawThreadPerContext);        
+		viewer->setThreadingModel(osgViewer::ViewerBase::DrawThreadPerContext);        
 
     }	
 
@@ -163,7 +170,9 @@ int main(int argc, char** argv)
         ig->loadScript(std::string("default.txt"));
     }
 
+#if 1
 	viewer->getView(0)->setCameraManipulator(new CameraManipulator());
+#endif
 	
     viewer->realize();    
 
@@ -192,8 +201,8 @@ int main(int argc, char** argv)
                 }
             }
         }
-#endif                
-       
+#endif	  
+						
         ig->frame();        
     }
 

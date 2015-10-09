@@ -97,6 +97,12 @@ void LightPointDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
     state.applyTextureMode(0,GL_TEXTURE_2D,false);    
     state.applyTextureMode(1,GL_TEXTURE_1D,false);
     state.applyTextureMode(1,GL_TEXTURE_2D,false);
+	state.applyTextureMode(2, GL_TEXTURE_2D, false);
+	state.applyTextureMode(3, GL_TEXTURE_2D, false);
+	state.applyTextureMode(4, GL_TEXTURE_2D, false);
+	state.applyTextureMode(5, GL_TEXTURE_2D, false);
+	state.applyTextureMode(6, GL_TEXTURE_2D, false);
+	state.applyTextureMode(7, GL_TEXTURE_2D, false);
 
     glHint(GL_POINT_SMOOTH_HINT,GL_NICEST);
 

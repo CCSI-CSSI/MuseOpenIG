@@ -131,6 +131,13 @@ stop( void )
 
 void
 Vehicle::
+clearBrakes( void )
+{
+    gBreakingForce = 0;
+}
+
+void
+Vehicle::
 setSteering( bool left, bool update )
 {
 	if (update)
@@ -154,6 +161,20 @@ setSteering( bool left, bool update )
 
 void
 Vehicle::
+setSteering( float steer )
+{
+    gVehicleSteering = steer;
+}
+
+void
+Vehicle::
+setBrakes(float brakes)
+{
+    gBreakingForce = brakes;
+}
+
+void
+Vehicle::
 reset( void )
 {
     // reset all vehicle variables
@@ -168,6 +189,14 @@ reset( void )
     resetSuspension();
 
     update();
+}
+
+void
+Vehicle::
+setInitialPosition( osg::Vec3 pos )
+{
+    init_tr.setIdentity();
+    init_tr.setOrigin( btVector3(pos.x(), pos.y(), pos.z() ) );
 }
 
 void

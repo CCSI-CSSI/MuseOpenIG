@@ -220,6 +220,11 @@ public:
     {
         osg::ref_ptr<osg::StateSet> ss = node.getOrCreateStateSet();
         osg::ref_ptr<osg::StateAttribute> sa = ss->getTextureAttribute(0,osg::StateAttribute::TEXTURE);
+
+		if (!sa.valid())
+		{
+			osg::notify(osg::NOTICE) << "0 index NULL texture" << std::endl;
+		}
         if (sa.valid())
         {
             osg::ref_ptr<osg::Texture2D> texture = dynamic_cast<osg::Texture2D*>(sa.get());
@@ -241,14 +246,14 @@ public:
                     }
 
                     FileNamesMapIterator itr = _images.find(simpleFileName);
-                    //osg::notify(osg::NOTICE) << "image to lookup: " << simpleFileName << std::endl;
+                    osg::notify(osg::NOTICE) << "image to lookup: " << simpleFileName << std::endl;
                     if ( itr == _images.end())
                     {
-                        //osg::notify(osg::NOTICE) << "\t not found!" << std::endl;
+                        osg::notify(osg::NOTICE) << "\t not found!" << std::endl;
                     }
                     else
                     {
-                        //osg::notify(osg::NOTICE) << "\t found!" << std::endl;
+                        osg::notify(osg::NOTICE) << "\t found!" << std::endl;
 
                         osg::ref_ptr<osg::Vec3Array>& positions= itr->second->_pos;
                         osg::ref_ptr<osg::Vec3Array>& scales = itr->second->_scale;

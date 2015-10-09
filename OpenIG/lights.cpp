@@ -66,6 +66,7 @@ void OpenIG::updateLightAttributes(unsigned int id, const LightAttributes& attri
 		if ((attribs._dirtyMask & LightAttributes::DIFFUSE) == LightAttributes::DIFFUSE) attr._diffuse = attribs._diffuse;
 		if ((attribs._dirtyMask & LightAttributes::BRIGHTNESS) == LightAttributes::BRIGHTNESS) attr._brightness = attribs._brightness;
 		if ((attribs._dirtyMask & LightAttributes::CLOUDBRIGHTNESS) == LightAttributes::CLOUDBRIGHTNESS) attr._cloudBrightness = attribs._cloudBrightness;
+		if ((attribs._dirtyMask & LightAttributes::WATERBRIGHTNESS) == LightAttributes::WATERBRIGHTNESS) attr._waterBrightness = attribs._waterBrightness;
 		if ((attribs._dirtyMask & LightAttributes::CONSTANTATTENUATION) == LightAttributes::CONSTANTATTENUATION) attr._constantAttenuation = attribs._constantAttenuation;
 		if ((attribs._dirtyMask & LightAttributes::ENABLED) == LightAttributes::ENABLED) attr._enabled = attribs._enabled;
 		if ((attribs._dirtyMask & LightAttributes::SPECULAR) == LightAttributes::SPECULAR) attr._specular = attribs._specular;

@@ -43,9 +43,11 @@ namespace igcore
 struct FogAttributes
 {
     double _visibility;
+    osg::Vec3 _fogColor;
 
-    FogAttributes(double visibility = 1000)
+    FogAttributes(double visibility = 1000, osg::Vec3 color = osg::Vec3(1,1,1))
         : _visibility(visibility)
+        , _fogColor(color)
     {
 
     }
@@ -59,6 +61,10 @@ struct FogAttributes
     {
         return _visibility;
     }
+
+    void setFogColor(osg::Vec3 color) { _fogColor = color;}
+    osg::Vec3 getFogColor() { return _fogColor;}
+
 };
 
 /*! This struct is used to pass data to the available plugins by using it with
@@ -97,6 +103,36 @@ struct TimeOfDayAttributes
         return _minutes;
     }
 };
+
+/*! This struct is used to pass data to the available plugins by using it with
+ * \ref igplugincore::PluginContext::Attribute
+ * \brief The AtmosphereAttributes struct
+ * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+ * \copyright (c)Compro Computer Services, Inc.
+ * \date      Sun Jan 11 2015
+ */
+struct AtmosphereAttributes
+{
+    void *_atmosphere;
+
+    AtmosphereAttributes(void *atmosphere)
+        : _atmosphere(atmosphere)
+    {
+
+    }
+
+    void setAtmosphere(void *atmosphere )
+    {
+        _atmosphere = atmosphere;
+    }
+
+    void *getAtmosphere() const
+    {
+        return _atmosphere;
+    }
+
+};
+
 
 /*! This struct is used to pass data to the available plugins by using it with
  * \ref igplugincore::PluginContext::Attribute
@@ -159,7 +195,10 @@ struct CLoudLayerAttributes
     double          _altitude;
     double          _density;
     double          _thickness;
+    double          _width;
+    double          _length;
 
+    bool            _infinite;
     bool            _add;
     bool            _remove;
     bool            _dirty;
@@ -170,6 +209,9 @@ struct CLoudLayerAttributes
         , _altitude(0.0)
         , _density(0.0)
         , _thickness(0.0)
+        , _width(50000)
+        , _length(50000)
+        , _infinite(true)
         , _add(false)
         , _remove(false)
         , _dirty(false)
@@ -196,6 +238,18 @@ struct CLoudLayerAttributes
     void setThickness(double thickness)
     {
         _thickness = thickness;
+    }
+    void setWidth(double width)
+    {
+        _width = width;
+    }
+    void setLength(double length)
+    {
+        _length = length;
+    }
+    void setInfinite(bool infinite)
+    {
+        _infinite = infinite;
     }
     void setFlags(bool add = false, bool remove = false)
     {
@@ -260,23 +314,27 @@ struct LightAttributes
     float           _spotCutoff;
     bool            _enabled;
 	float			_cloudBrightness;
+	float			_waterBrightness;
 	double			_lod;
 	double			_realLightLOD;
     unsigned int    _dirtyMask;
 
 	enum Mask
 	{
-		AMBIENT = 1,
-		DIFFUSE = 2,
-		SPECULAR = 4,
-		BRIGHTNESS = 8,
-		CONSTANTATTENUATION = 16,
-		SPOTCUTOFF = 32,
-		CLOUDBRIGHTNESS = 64,
-		LOD = 128,
-		REALLIGHTLOD = 256,
-		ENABLED = 512,
-		ALL = AMBIENT | DIFFUSE | SPECULAR | BRIGHTNESS | CLOUDBRIGHTNESS | CONSTANTATTENUATION | ENABLED | SPOTCUTOFF | LOD | REALLIGHTLOD
+		AMBIENT					= 1,
+		DIFFUSE					= 2,
+		SPECULAR				= 4,
+		BRIGHTNESS				= 8,
+		CONSTANTATTENUATION		= 16,
+		SPOTCUTOFF				= 32,
+		CLOUDBRIGHTNESS			= 64,
+		WATERBRIGHTNESS			= 128,
+		LOD						= 256,
+		REALLIGHTLOD			= 512,
+		ENABLED					= 1024,
+		ALL = AMBIENT | DIFFUSE | SPECULAR | BRIGHTNESS 
+			| CLOUDBRIGHTNESS | WATERBRIGHTNESS | CONSTANTATTENUATION 
+			| ENABLED | SPOTCUTOFF | LOD | REALLIGHTLOD
     };
 
     LightAttributes()
@@ -285,6 +343,7 @@ struct LightAttributes
         , _spotCutoff(20.f)
         , _enabled(true)
 		, _cloudBrightness(1.f)
+		, _waterBrightness(1.f)
         , _dirtyMask(0)
 		, _lod(0.0)
 		, _realLightLOD(0.0)

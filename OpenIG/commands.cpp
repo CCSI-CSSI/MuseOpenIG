@@ -446,7 +446,7 @@ public:
 			"     id - the id of the light source\n"
 			"     attrib - light attribute, can be one of these:\n"
 			"          ambient red green blue - the ambient comonent of the light source, followed by the color components\n"
-			"          diffuse red green blue brightness [optional:cloudbrightness] - the diffuse component, followed by a brightness\n"
+			"          diffuse red green blue brightness [optional:cloudbrightness] [optional:waterbrightness]- the diffuse component, followed by a brightness\n"
             "          speculat red green blue - the specular component\n"
             "          attenuation distance - the constant attenuation, in meters\n"
             "          spotcutsoff value - the spot cutsoff of the light source";
@@ -461,6 +461,7 @@ public:
             osg::Vec4f      specular(0.f,0.f,0.f,1.f);
             float           brightness = 0.f;
 			float           cloudbrightness = 0.f;
+			float			waterbrightness = 0.f;
             float           attenuation = 0.f;
             float           spotcutoff = 0.f;
             unsigned int    mask = 0x0;
@@ -486,17 +487,19 @@ public:
                 mask |= igcore::LightAttributes::DIFFUSE;
                 mask |= igcore::LightAttributes::BRIGHTNESS;
             }
-			if (attrib == "diffuse" && tokens.size() == 7)
+			if (attrib == "diffuse" && tokens.size() == 8)
 			{
 				diffuse.x() = atof(tokens.at(2).c_str());
 				diffuse.y() = atof(tokens.at(3).c_str());
 				diffuse.z() = atof(tokens.at(4).c_str());
 				brightness = atof(tokens.at(5).c_str());
 				cloudbrightness = atof(tokens.at(6).c_str());
+				waterbrightness = atof(tokens.at(7).c_str());
 
 				mask |= igcore::LightAttributes::DIFFUSE;
 				mask |= igcore::LightAttributes::BRIGHTNESS;
 				mask |= igcore::LightAttributes::CLOUDBRIGHTNESS;
+				mask |= igcore::LightAttributes::WATERBRIGHTNESS;
 			}
             if (attrib == "specular" && tokens.size() == 5)
             {
@@ -527,6 +530,7 @@ public:
             attr._constantAttenuation = attenuation;
             attr._spotCutoff = spotcutoff;
 			attr._cloudBrightness = cloudbrightness;
+			attr._waterBrightness = waterbrightness;
             attr._dirtyMask = mask;
 
             _ig->updateLightAttributes(id,attr);
@@ -597,7 +601,7 @@ public:
 
         if (tokens.size() == 1)
         {            
-            if (tokens.at(0) == "off")
+            if (tokens.at(0).compare(0,3,"off") == 0)
             {
                 _keypad->unbind();
 
@@ -1291,6 +1295,36 @@ protected:
 	openig::OpenIG* _ig;
 };
 
+class LoadConfigCommand : public igcore::Commands::Command
+{
+public:
+	LoadConfigCommand() {}
+
+	virtual const std::string getUsage() const
+	{
+		return "configfilename";
+	}
+
+	virtual const std::string getDescription() const
+	{
+		return  "loads config file\n"
+				"     configfilename ... the file name of the config file";
+	}
+
+	virtual int exec(const igcore::StringUtils::Tokens& tokens)
+	{
+		if (tokens.size() == 1)
+		{
+			igcore::Commands::instance()->loadScript(tokens.at(0));
+
+			return 0;
+		}
+
+		return -1;
+	}
+
+};
+
 void OpenIG::initCommands()
 {
     Commands::instance()->addCommand("addentity", new AddEntityCommand(this));
@@ -1318,4 +1352,5 @@ void OpenIG::initCommands()
 	Commands::instance()->addCommand("bindeffect", new BindEffectCommand(this));
 	Commands::instance()->addCommand("addeffect", new AddEffectCommand(this));
 	Commands::instance()->addCommand("cache", new CacheCommand(this));
+	Commands::instance()->addCommand("loadconfig", new LoadConfigCommand());
 }

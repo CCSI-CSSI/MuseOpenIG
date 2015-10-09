@@ -30,7 +30,7 @@ unix {
         DESTDIR = /usr/local/lib/igplugins
         target.path = /usr/local/lib/igplugins
     }
-    message(Libs will be installed into $$DESTDIR)
+    message($$TARGET Lib will be installed into $$DESTDIR)
 
     INSTALLS += target
 
@@ -46,13 +46,13 @@ unix {
     exists( "../openig_version.pri" ) {
 
 	include( "../openig_version.pri" )
-	isEmpty( VERSION ){ error( "bad or undefined VERSION variable inside file openig_version.pri" )
+        isEmpty( VERSION ){ error( "$$TARGET -- bad or undefined VERSION variable inside file openig_version.pri" )
 	} else {
-	message( "Set version info to: $$VERSION" )
+        message( "$$TARGET -- Set version info to: $$VERSION" )
 	}
 
     }
-    else { error( "could not find pri library version file openig_version.pri" ) }
+    else { error( "$$TARGET -- could not find pri library version file openig_version.pri" ) }
 
     # end of library version number files
 }
@@ -64,20 +64,20 @@ win32 {
 
     OSGROOT = $$(OSG_ROOT)
     isEmpty(OSGROOT) {
-        message(\"OpenSceneGraph\" not detected...)
+        message($$TARGET -- \"OpenSceneGraph\" not detected...)
     }
     else {
-        message(\"OpenSceneGraph\" detected in \"$$OSGROOT\")
+        message($$TARGET -- \"OpenSceneGraph\" detected in \"$$OSGROOT\")
         INCLUDEPATH += $$OSGROOT/include
             LIBS += -L$$OSGROOT/lib
     }
     isEmpty(OSGROOT) {
         OSGBUILD = $$(OSG_BUILD)
         isEmpty(OSGBUILD) {
-            message(\"OpenSceneGraph build\" not detected...)
+            message($$TARGET -- \"OpenSceneGraph build\" not detected...)
         }
         else {
-            message(\"OpenSceneGraph build\" detected in \"$$OSGBUILD\")
+            message($$TARGET -- \"OpenSceneGraph build\" detected in \"$$OSGBUILD\")
             DEPENDPATH += $$OSGBUILD/lib
             INCLUDEPATH += $$OSGBUILD/include
             LIBS += -L$$OSGBUILD/lib
@@ -89,10 +89,10 @@ win32 {
     }
     OSGEARTHROOT = $$(OSGEARTH_ROOT)
     isEmpty(OSGEARTHROOT) {
-        message(\"osgEarth\" not detected...)
+        message($$TARGET -- \"osgEarth\" not detected...)
     }
     else {
-        message(\"osgEarth\" detected in \"$$OSGEARTHROOT\")
+        message($$TARGET -- \"osgEarth\" detected in \"$$OSGEARTHROOT\")
         INCLUDEPATH += $$OSGEARTHROOT\include
         LIBS += -L$$OSGEARTHROOT
         LIBS += -L$$OSGEARTHROOT\lib
@@ -103,10 +103,10 @@ win32 {
     isEmpty(OSGEARTHROOT) {
         OSGEARTHBUILD = $$(OSGEARTH_BUILD)
         isEmpty(OSGEARTHBUILD) {
-            message(\"osgEarth build\" not detected...)
+            message($$TARGET -- \"osgEarth build\" not detected...)
         }
         else {
-            message(\"osgEarth build\" detected in \"$$OSGEARTHBUILD\")
+            message($$TARGET -- \"osgEarth build\" detected in \"$$OSGEARTHBUILD\")
             DEPENDPATH += $$OSGEARTHBUILD
             INCLUDEPATH += $$OSGBUILD\include
             LIBS += -L$$OSGEARTHBUILD\BUILD\lib\release
@@ -118,7 +118,7 @@ win32 {
     isEmpty (OPENIGBUILD) {
         OPENIGBUILD = $$IN_PWD/..
     }
-    message(\"openig build\" detected in \"$$OPENIGBUILD\")
+    message($$TARGET -- \"openig build\" detected in \"$$OPENIGBUILD\")
     DESTDIR = $$OPENIGBUILD/lib
     DLLDESTDIR = $$OPENIGBUILD/bin/igplugins
 

@@ -249,7 +249,7 @@ public:
 
                         program->setName("microshader");
 
-                        osg::Shader* mainVertexShader = new osg::Shader( osg::Shader::VERTEX,
+                        osg::Shader* mainVertexShader = new osg::Shader(osg::Shader::VERTEX,
                             "#version 120                                               \n"
                             "#extension GL_ARB_geometry_shader4 : enable                \n"
                             "                                                           \n"
@@ -264,6 +264,7 @@ public:
                             "   scale = Scale;                                          \n"
                             "   uv = UV;                                                \n"
                             "   gl_Position = gl_Vertex;                                \n"
+                            "   gl_Position.z = 0;                                      \n"
                             "}                                                          \n"
                         );
                         osg::Shader* mainFragmentShader = new osg::Shader( osg::Shader::FRAGMENT,
@@ -283,21 +284,12 @@ public:
                             "                                                                       \n"
                             "void computeFogColor(inout vec4 color)                                 \n"
                             "{                                                                      \n"
-                            "    if (gl_FragCoord.w > 0.0)                                          \n"
-                            "    {                                                                  \n"
-                            "        const float LOG2 = 1.442695;									\n"
-                            "        float z = gl_FragCoord.z / gl_FragCoord.w;                     \n"
-                            "        float fogFactor = exp2( -gl_Fog.density *						\n"
-                            "            gl_Fog.density *											\n"
-                            "            z *														\n"
-                            "            z *														\n"
-                            "            LOG2 );													\n"
-                            "        fogFactor = clamp(fogFactor, 0.0, 1.0);                        \n"
-                            "                                                                       \n"
-                            "        vec4 clr = color;                                              \n"
-                            "        color = mix(gl_Fog.color, color, fogFactor );                  \n"
-                            "        color.a = clr.a;                                               \n"
-                            "    }                                                                  \n"
+                            "   float fogExp = gl_Fog.density * length(eyeVec);                     \n"
+                            "   float fogFactor = exp(-(fogExp * fogExp));                          \n"
+                            "   fogFactor = clamp(fogFactor, 0.0, 1.0);                             \n"
+                            "   vec4 clr = color;                                                   \n"
+                            "   color = mix(gl_Fog.color, color, fogFactor);                        \n"
+                            "   color.a = clr.a;                                                    \n"
                             "}                                                                      \n"
                             "void computeAmbientColor(inout vec4 color)                             \n"
                             "{                                                                      \n"
@@ -402,9 +394,11 @@ public:
                             "}                                                          \n"
                         );
 
-                        osg::Shader* mainGeometryShader = new osg::Shader( osg::Shader::GEOMETRY,
+                        osg::Shader* mainGeometryShader = new osg::Shader(osg::Shader::GEOMETRY,
                             "#version 120                                               \n"
                             "#extension GL_ARB_geometry_shader4 : enable                \n"
+                            "                                                           \n"
+                            "uniform float Fcoef;                                       \n"
                             "                                                           \n"
                             "varying in vec3 scale[];                                   \n"
                             "varying in vec4 uv[];                                      \n"
@@ -429,6 +423,16 @@ public:
                             "                                                             \n"
                             "   eyeVec = -vVertex;                                      \n"
                             "}                                                          \n"
+
+                            "void Emit( in vec4 v, in vec4 offset, in vec2 tc)                   \n"
+                            "{                                                          \n"
+                            "   gl_Position = gl_ModelViewProjectionMatrix * (v + offset); \n"
+                            "   gl_Position.z = (log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0) * gl_Position.w;\n"
+                            "   gl_TexCoord[0].st = tc;                                 \n"
+                            "   setupVaryings(v);                                       \n"
+                            "   EmitVertex();                                           \n"
+                            "}                                                          \n"
+
                             "void main()                                                \n"
                             "{															\n"
                             "   float width_half = scale[0].y/2.0;                      \n"
@@ -436,16 +440,16 @@ public:
                             "                                                           \n"
                             "   vec4 v = gl_PositionIn[0];                              \n"
                             "                                                           \n"
-                            "   gl_Position = gl_ModelViewProjectionMatrix * (v + vec4(-width_half,0.0,0.0,0.0));  gl_TexCoord[0].st = vec2(uv[0].x,uv[0].y); setupVaryings(v); EmitVertex();     \n"
-                            "   gl_Position = gl_ModelViewProjectionMatrix * (v + vec4(width_half,0.0,0.0,0.0));  gl_TexCoord[0].st = vec2(uv[0].z,uv[0].y); setupVaryings(v); EmitVertex();      \n"
-                            "   gl_Position = gl_ModelViewProjectionMatrix * (v + vec4(-width_half,0.0,height,0.0));  gl_TexCoord[0].st = vec2(uv[0].x,uv[0].w); setupVaryings(v); EmitVertex();  \n"
-                            "   gl_Position = gl_ModelViewProjectionMatrix * (v + vec4(width_half,0.0, height,0.0));  gl_TexCoord[0].st = vec2(uv[0].z,uv[0].w); setupVaryings(v); EmitVertex();  \n"
+                            "   Emit(v, vec4(-width_half,0.0,0.0,0.0), vec2(uv[0].x,uv[0].y));      \n"
+                            "   Emit(v, vec4(width_half,0.0,0.0,0.0), vec2(uv[0].z,uv[0].y));       \n"
+                            "   Emit(v, vec4(-width_half,0.0,height,0.0), vec2(uv[0].x,uv[0].w));   \n"
+                            "   Emit(v, vec4(width_half,0.0, height,0.0), vec2(uv[0].z,uv[0].w));   \n"
                             "   EndPrimitive();                                         \n"
                             "                                                           \n"
-                            "   gl_Position = gl_ModelViewProjectionMatrix * (v + vec4(0.0,-width_half,0.0,0.0));  gl_TexCoord[0].st = vec2(uv[0].x,uv[0].y); setupVaryings(v); EmitVertex();     \n"
-                            "   gl_Position = gl_ModelViewProjectionMatrix * (v + vec4(0.0,width_half,0.0,0.0));  gl_TexCoord[0].st = vec2(uv[0].z,uv[0].y); setupVaryings(v); EmitVertex();      \n"
-                            "   gl_Position = gl_ModelViewProjectionMatrix * (v + vec4(0.0,-width_half,height,0.0));  gl_TexCoord[0].st = vec2(uv[0].x,uv[0].w); setupVaryings(v); EmitVertex();  \n"
-                            "   gl_Position = gl_ModelViewProjectionMatrix * (v + vec4(0.0,width_half,height,0.0));  gl_TexCoord[0].st = vec2(uv[0].z,uv[0].w); setupVaryings(v); EmitVertex();   \n"
+                            "   Emit(v, vec4(0.0,-width_half,0.0,0.0),  vec2(uv[0].x,uv[0].y));     \n"
+                            "   Emit(v, vec4(0.0,width_half,0.0,0.0), vec2(uv[0].z,uv[0].y));       \n"
+                            "   Emit(v, vec4(0.0,-width_half,height,0.0), vec2(uv[0].x,uv[0].w));   \n"
+                            "   Emit(v, vec4(0.0,width_half,height,0.0), vec2(uv[0].z,uv[0].w));    \n"
                             "   EndPrimitive();                                         \n"
                             "}                                                          \n"
                         );

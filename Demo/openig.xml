@@ -59,6 +59,6 @@
       <Plugin>
           <Order-Number>10</Order-Number>
           <Name>OSGParticleEffects</Name>
-      </Plugin>
+      </Plugin>    
   </ImageGenerator-Plugins-Config>
 </OpenIG-Config>  

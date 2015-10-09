@@ -35,6 +35,8 @@
 #include <osg/ref_ptr>
 #include <osg/FrontFace>
 #include <osg/Material>
+#include <osg/ClearNode>
+#include <osg/Depth>
 
 #include <osgDB/XmlParser>
 #include <osgDB/ReadFile>
@@ -42,6 +44,8 @@
 #include <osgViewer/CompositeViewer>
 
 #include <osgParticle/PrecipitationEffect>
+
+
 
 namespace igplugins
 {
@@ -109,8 +113,75 @@ protected:
         if (!viewer->getNumViews()) return;
         if (!viewer->getView(0)->getSceneData()) return;
 
+		osg::Node* sky = createSkyDome(context.getImageGenerator());
+		if (sky)
+		{
+			osg::Shader* mainVertexShader = new osg::Shader(osg::Shader::VERTEX,
+				"#version 120                                                       \n"
+				"varying vec3 eyeVec;                                               \n"
+#ifdef FRAGMENT_LEVEL_DEPTH
+				"varying float flogz;                                               \n"
+#endif
+				"                                                                   \n"
+				"uniform float Fcoef;							    	     		\n"
+				
+				"void main()                                                        \n"
+				"{                                                                  \n"
+				"   gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;         \n"
+				"   if (Fcoef > 0) {                                                \n"
+				"       gl_Position.z = (log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0) * gl_Position.w;\n"
+#ifdef FRAGMENT_LEVEL_DEPTH
+				"       flogz = 1.0 + gl_Position.w;						        \n"
+#endif
+				"   }                                                               \n"
+				"   gl_TexCoord[0] = gl_TextureMatrix[0] *gl_MultiTexCoord0;        \n"
+				"                                                                   \n"
+				"   eyeVec = -vec3(gl_ModelViewMatrix * gl_Vertex);                 \n"
+				"                                                                   \n"
+				"}                                                                  \n"
+				);
 
-        viewer->getView(0)->getSceneData()->asGroup()->addChild(createSkyDome(context.getImageGenerator()));
+			osg::Shader* mainFragmentShader = new osg::Shader(osg::Shader::FRAGMENT,
+				"#version 120                                                           \n"
+				"#extension GL_ARB_texture_rectangle : enable                           \n"
+				"varying vec3 eyeVec;                                                   \n"
+				"uniform sampler2D baseTexture;                                         \n"
+#ifdef FRAGMENT_LEVEL_DEPTH
+				"varying float flogz;                                                   \n"
+				"uniform float Fcoef;                                                   \n"
+#endif
+				"void computeFogColor(inout vec4 color)                                 \n"
+				"{                                                                      \n"
+				"   float fogExp = gl_Fog.density * length(eyeVec);                     \n"
+				"   float fogFactor = exp(-(fogExp * fogExp));                          \n"
+				"   fogFactor = clamp(fogFactor, 0.0, 1.0);                             \n"
+				"   vec4 clr = color;                                                   \n"
+				"   color = mix(gl_Fog.color, color, fogFactor);                        \n"
+				"   color.a = clr.a;                                                    \n"
+				"}                                                                      \n"
+				"void main()                                                            \n"
+				"{                                                                      \n"
+				"   vec4 color = texture2D( baseTexture, gl_TexCoord[0].xy );           \n"
+				"	computeFogColor(color);                                             \n"
+				"   gl_FragColor = color * gl_LightSource[0].diffuse;                   \n"
+#ifdef FRAGMENT_LEVEL_DEPTH
+				"   gl_FragDepth = log2(flogz) * Fcoef * 0.5;                           \n"
+#endif
+				"}                                                                      \n"
+				);
+
+			osg::Program* program = new osg::Program;
+			program->addShader(mainVertexShader);
+			program->addShader(mainFragmentShader);
+
+			osg::StateSet* ss = sky->getOrCreateStateSet();
+			ss->setAttributeAndModes(program,osg::StateAttribute::ON|osg::StateAttribute::PROTECTED);
+			ss->addUniform(new osg::Uniform("baseTexture",0));
+			ss->setRenderBinDetails(-10, "RenderBin");
+			ss->setAttributeAndModes(new osg::Depth(osg::Depth::ALWAYS, 0.0, 1.0, false));
+
+			context.getImageGenerator()->getScene()->asGroup()->addChild(sky);
+		}
 #else
         context.getImageGenerator()->getScene()->asGroup()->addChild(createSkyDome(context.getImageGenerator()));
 #endif
@@ -126,7 +197,7 @@ protected:
 
         osg::Vec3d eye = camera->getInverseViewMatrix().getTrans();
         double radius = osg::minimum((double)context.getImageGenerator()->getScene()->getBound().radius(),92600.0);
-        radius = osg::maximum(radius,1.0);
+		radius = osg::maximum(radius, 92600.0);
         osg::Vec3d scale(radius,radius,radius);
 
         if (_sky.valid())
@@ -141,18 +212,19 @@ protected:
                 {
                     _sky->setSunPosition((float)attr->getValue().getHour());
 
-                    if (!_precipitation.valid())
-                    {
-                        _precipitation = new osgParticle::PrecipitationEffect;
-                        context.getImageGenerator()->getViewer()->getView(0)->getSceneData()->asGroup()->addChild(_precipitation);
+					if (!_precipitation.valid())
+					{
+						_precipitation = new osgParticle::PrecipitationEffect;
+						context.getImageGenerator()->getViewer()->getView(0)->getSceneData()->asGroup()->addChild(_precipitation);
 
-                        _precipitation->snow(0);
-                        _precipitation->rain(0);
+						_precipitation->snow(0);
+						_precipitation->rain(0);
 
-                        _precipitation->setFog(context.getImageGenerator()->getFog());
-                    }
+						_precipitation->setFog(context.getImageGenerator()->getFog());
+					}
 
-                    _precipitation->getFog()->setColor(_sky->getSun()->getDiffuse());
+					_precipitation->getFog()->setColor(_sky->getSun()->getDiffuse());
+
                 }
             }
             {
@@ -160,35 +232,37 @@ protected:
                 igplugincore::PluginContext::Attribute<igcore::RainSnowAttributes> *attr = dynamic_cast<igplugincore::PluginContext::Attribute<igcore::RainSnowAttributes> *>(ref.get());
                 if (attr)
                 {
-                    if (!_precipitation.valid())
-                    {
-                        _precipitation = new osgParticle::PrecipitationEffect;
-                        context.getImageGenerator()->getViewer()->getView(0)->getSceneData()->asGroup()->addChild(_precipitation);
+					if (!_precipitation.valid())
+					{
+						_precipitation = new osgParticle::PrecipitationEffect;
+						context.getImageGenerator()->getViewer()->getView(0)->getSceneData()->asGroup()->addChild(_precipitation);
 
-                        _precipitation->snow(0);
-                        _precipitation->rain(0);
-                    }
+						_precipitation->snow(0);
+						_precipitation->rain(0);
+					}
 
-                    _precipitation->rain(attr->getValue().getFactor());
+					_precipitation->rain(attr->getValue().getFactor());
+
                 }
 
                 {
                     osg::ref_ptr<osg::Referenced> ref = context.getAttribute("Fog");
                     igplugincore::PluginContext::Attribute<igcore::FogAttributes> *attr = dynamic_cast<igplugincore::PluginContext::Attribute<igcore::FogAttributes> *>(ref.get());
-                    if (attr)
-                    {
-                        if (!_precipitation.valid())
-                        {
-                            _precipitation = new osgParticle::PrecipitationEffect;
-                            context.getImageGenerator()->getViewer()->getView(0)->getSceneData()->asGroup()->addChild(_precipitation);
+					if (attr)
+					{
+						if (!_precipitation.valid())
+						{
+							_precipitation = new osgParticle::PrecipitationEffect;
+							context.getImageGenerator()->getViewer()->getView(0)->getSceneData()->asGroup()->addChild(_precipitation);
 
-                            _precipitation->snow(0);
-                            _precipitation->rain(0);
+							_precipitation->snow(0);
+							_precipitation->rain(0);
 
-                            _precipitation->setFog(context.getImageGenerator()->getFog());
-                        }
+							_precipitation->setFog(context.getImageGenerator()->getFog());
+						}
 
-                        _precipitation->getFog()->setColor(_sky->getSun()->getDiffuse());                    }
+						_precipitation->getFog()->setColor(_sky->getSun()->getDiffuse());
+					}
                 }
 
                 {
@@ -196,30 +270,30 @@ protected:
                     igplugincore::PluginContext::Attribute<igcore::WindAttributes> *attr = dynamic_cast<igplugincore::PluginContext::Attribute<igcore::WindAttributes> *>(ref.get());
                     if (attr)
                     {
-                        if (!_precipitation.valid())
-                        {
-                            _precipitation = new osgParticle::PrecipitationEffect;
-                            context.getImageGenerator()->getViewer()->getView(0)->getSceneData()->asGroup()->addChild(_precipitation);
+						if (!_precipitation.valid())
+						{
+							_precipitation = new osgParticle::PrecipitationEffect;
+							context.getImageGenerator()->getViewer()->getView(0)->getSceneData()->asGroup()->addChild(_precipitation);
 
-                            _precipitation->snow(0);
-                            _precipitation->rain(0);
+							_precipitation->snow(0);
+							_precipitation->rain(0);
 
-                            _precipitation->setFog(context.getImageGenerator()->getFog());
-                        }
+							_precipitation->setFog(context.getImageGenerator()->getFog());
+						}
 
-                        float direction = attr->getValue()._direction+90.0;
-                        float speed = attr->getValue()._speed;
+						float direction = attr->getValue()._direction + 90.0;
+						float speed = attr->getValue()._speed;
 
-                        osg::Matrixd mx = igcore::Math::instance()->toMatrix(0,0,0,direction,0,0);
-                        osg::Quat q = mx.getRotate();
+						osg::Matrixd mx = igcore::Math::instance()->toMatrix(0, 0, 0, direction, 0, 0);
+						osg::Quat q = mx.getRotate();
 
-                        osg::Vec3 v(0,1,0);
-                        v = q * v;
-                        v.normalize();
+						osg::Vec3 v(0, 1, 0);
+						v = q * v;
+						v.normalize();
 
-                        v *= speed;
+						v *= speed;
 
-                        _precipitation->setWind(v);
+						_precipitation->setWind(v);
                     }
                 }
             }
@@ -228,18 +302,20 @@ protected:
                 igplugincore::PluginContext::Attribute<igcore::RainSnowAttributes> *attr = dynamic_cast<igplugincore::PluginContext::Attribute<igcore::RainSnowAttributes> *>(ref.get());
                 if (attr)
                 {
-                    if (!_precipitation.valid())
-                    {
-                        _precipitation = new osgParticle::PrecipitationEffect;
-                        context.getImageGenerator()->getViewer()->getView(0)->getSceneData()->asGroup()->addChild(_precipitation);
+					if (!_precipitation.valid())
+					{
+						_precipitation = new osgParticle::PrecipitationEffect;
+						context.getImageGenerator()->getViewer()->getView(0)->getSceneData()->asGroup()->addChild(_precipitation);
 
-                        _precipitation->snow(0);
-                        _precipitation->rain(0);
+						_precipitation->snow(0);
+						_precipitation->rain(0);
 
-                        _precipitation->setFog(context.getImageGenerator()->getFog());
-                    }
+						_precipitation->setFog(context.getImageGenerator()->getFog());
+					}
 
-                    _precipitation->snow(attr->getValue().getFactor());
+					_precipitation->snow(attr->getValue().getFactor());
+
+
                 }
             }
         }
@@ -267,12 +343,24 @@ protected:
             {
                 osg::notify(osg::NOTICE) << "SkyDome: failed to load sky model : " << fileName << std::endl;
             }
+#if 0
             _domeScale = new osg::MatrixTransform;
             _domeScale->setMatrix( osg::Matrix::scale( visibility, visibility, ceiling ) );
-            _domeScale->addChild( _dome );
+            //_domeScale->addChild( _dome );
+
             _domeTranslate = new osg::MatrixTransform;
-            _domeTranslate->addChild( _domeScale );
-            addChild( _domeTranslate );
+            _domeTranslate->addChild( _dome );
+
+			_domeScale->addChild(_domeTranslate);
+
+            addChild( _domeScale );
+#else
+			_domeMxt = new osg::MatrixTransform;
+			_domeMxt->setMatrix(osg::Matrix::scale(visibility, visibility, ceiling));
+			_domeMxt->addChild(_dome);
+
+			addChild(_domeMxt);
+#endif
 
 #if 1
             //osg::Material* material = dynamic_cast<osg::Material*>(skystate->getAttribute(osg::StateAttribute::MATERIAL));
@@ -309,12 +397,20 @@ protected:
 
         void setEye( osg::Vec3 eye )
         {
-            _domeTranslate->setMatrix( osg::Matrix::translate( eye.x(), eye.y(), 0.0 ) );
+            //_domeTranslate->setMatrix( osg::Matrix::translate( eye.x(), eye.y(), 0.0 ) );
+
+			osg::Vec3d s = _domeMxt->getMatrix().getScale();
+
+			_domeMxt->setMatrix(osg::Matrixd::scale(s)*osg::Matrixd::translate(eye));
         }
 
         void setScale( osg::Vec3 scale )
         {
-            _domeScale->setMatrix( osg::Matrix::scale( scale ) );
+            //_domeScale->setMatrix( osg::Matrix::scale( scale ) );
+
+			osg::Vec3d t = _domeMxt->getMatrix().getTrans();
+
+			_domeMxt->setMatrix(osg::Matrixd::scale(scale) * osg::Matrixd::translate(t));
         }
 
         void setSun()
@@ -480,6 +576,7 @@ protected:
         osg::ref_ptr<osg::MatrixTransform> _domeTranslate;
         osg::ref_ptr<osg::Node>             _dome;
         igcore::ImageGenerator*             _ig;
+		osg::ref_ptr<osg::MatrixTransform>	_domeMxt;
 
     };
 
@@ -487,11 +584,14 @@ protected:
     {
         _sky = new Sky(ig,_modelFileName);
         //_sky->getOrCreateStateSet()->setMode(GL_LIGHTING,osg::StateAttribute::OFF);
-        return _sky.get();
+
+		//osg::ClearNode* cn = new osg::ClearNode();
+		//cn->addChild(_sky);
+		return _sky;;
     }
 
     osg::ref_ptr<Sky>                               _sky;
-    osg::ref_ptr<osgParticle::PrecipitationEffect>  _precipitation;
+	osg::ref_ptr<osgParticle::PrecipitationEffect>  _precipitation;
 
     class SetFogCommand : public igcore::Commands::Command
     {

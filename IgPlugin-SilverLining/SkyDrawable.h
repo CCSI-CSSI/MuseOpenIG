@@ -1,5 +1,30 @@
 // Copyright (c) 2008-2012 Sundog Software, LLC. All rights reserved worldwide.
 
+//#******************************************************************************
+//#*
+//#*      Copyright (C) 2015  Compro Computer Services
+//#*      http://openig.compro.net
+//#*
+//#*      Source available at: https://github.com/CCSI-CSSI/MuseOpenIG
+//#*
+//#*      This software is released under the LGPL.
+//#*
+//#*   This software is free software; you can redistribute it and/or modify
+//#*   it under the terms of the GNU Lesser General Public License as published
+//#*   by the Free Software Foundation; either version 2.1 of the License, or
+//#*   (at your option) any later version.
+//#*
+//#*   This software is distributed in the hope that it will be useful,
+//#*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//#*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
+//#*   the GNU Lesser General Public License for more details.
+//#*
+//#*   You should have received a copy of the GNU Lesser General Public License
+//#*   along with this library; if not, write to the Free Software
+//#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+//#*
+//#*****************************************************************************
+
 #pragma once
 
 #include <osg/Drawable>
@@ -7,7 +32,12 @@
 #include <osg/Fog>
 #include <osgViewer/View>
 #include <osg/TexGen>
+
 #include <SilverLining.h>
+
+#include <IgCore/imagegenerator.h>
+
+#include <OpenIG/openig.h>
 
 namespace igplugins
 {
@@ -88,6 +118,52 @@ public:
     void            updateCloudLayer(int id, double altitude, double thickness, double density);
     void            removeAllCloudLayers();
 	void			setGeocentric(bool geocentric);	
+	void			setLightingParams(openig::OpenIG* ig);
+	void			setIG(openig::OpenIG* ig) { _openIG = ig; }
+    void            setLogDepthUniforms(SilverLining::Atmosphere *atmosphere, const osg::State* state, float fCoef) const;
+
+	struct SilverLiningParams
+	{
+		double			cloudsBaseLength;
+		double			cloudsBaseWidth;
+		bool			generateEnvironmentalMap;
+
+		enum Mask
+		{
+			CLOUDS_BASE_LENGTH = 0x1,
+			CLOUDS_BASE_WIDTH = 0x2,
+			ENVIRONMENTAL_MAP = 0x4,
+			ALL = CLOUDS_BASE_LENGTH | CLOUDS_BASE_WIDTH | ENVIRONMENTAL_MAP
+		};
+		
+        SilverLiningParams()
+            : cloudsBaseLength(50000)
+            , cloudsBaseWidth(50000)
+            , generateEnvironmentalMap(false)
+		{
+		}
+
+	};
+
+	void setSilverLiningParams(const SilverLiningParams& params, unsigned int mask = igplugins::SkyDrawable::SilverLiningParams::ALL)
+	{
+        if ((mask & SilverLiningParams::CLOUDS_BASE_LENGTH) == SilverLiningParams::CLOUDS_BASE_LENGTH)
+        {
+			_silverLiningParams.cloudsBaseLength = params.cloudsBaseLength;
+            //osg::notify(osg::NOTICE) << "setSilverLiningParams() cloud layer len: " << _silverLiningParams.cloudsBaseLength << std::endl;
+        }
+        if ((mask & SilverLiningParams::CLOUDS_BASE_WIDTH) == SilverLiningParams::CLOUDS_BASE_WIDTH)
+        {
+			_silverLiningParams.cloudsBaseWidth = params.cloudsBaseWidth;
+            //osg::notify(osg::NOTICE) << "setSilverLiningParams() cloud layer wid: " << _silverLiningParams.cloudsBaseWidth << std::endl;
+        }
+        if ((mask & SilverLiningParams::ENVIRONMENTAL_MAP) == SilverLiningParams::ENVIRONMENTAL_MAP)
+        {
+			_silverLiningParams.generateEnvironmentalMap = params.generateEnvironmentalMap;
+            //osg::notify(osg::NOTICE) << "setSilverLiningParams() cloud layer map: " << _silverLiningParams.generateEnvironmentalMap << std::endl;
+        }
+
+    }
 
 protected:
 	void setLighting(SilverLining::Atmosphere *atm) const;
@@ -135,6 +211,10 @@ protected:
     bool                                _enableCloudShadows;
 	bool								_geocentric;
 
+	SilverLining::Atmosphere*			_slatmosphere;
+	openig::OpenIG*						_openIG;
+	mutable float						_inCloudsFogDensity;
+
     struct CloudLayerInfo
     {
         int     _id;
@@ -142,7 +222,10 @@ protected:
         int     _handle;
         double  _altitude;
         double  _density;
-        double _thickness;
+        double	_thickness;
+        double _width;
+        double _length;
+        bool   _infinite;
         bool    _dirty;
         bool    _needReseed;
 
@@ -152,6 +235,9 @@ protected:
             , _altitude(0.0)
             , _density(0.0)
             , _thickness(0.0)
+            , _width(50000)
+            , _length(50000)
+            , _infinite(true)
             , _id(-1)
             , _dirty(false)
             , _needReseed(false)
@@ -175,6 +261,8 @@ protected:
     void addClouds(SilverLining::Atmosphere *atmosphere, const osg::Vec3d& position);
     void removeClouds(SilverLining::Atmosphere *atmosphere);
     void updateClouds(SilverLining::Atmosphere *atmosphere);
+
+	SilverLiningParams		_silverLiningParams;
 
 };
 

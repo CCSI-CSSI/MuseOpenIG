@@ -63,6 +63,8 @@
 #define LIGHT_CONST_ATTENUATION_SPOT_CUTOFF_ENABLED  4
 #define LIGHT_MAX                                    5
 
+//#define FRAGMENT_LEVEL_DEPTH
+
 namespace igplugins
 {
 
@@ -94,10 +96,22 @@ public:
         osg::Light::apply(state);
     }
 
+	void setLightSource(osg::LightSource* ls)
+	{
+		_ls = ls;
+	}
+
+	osg::LightSource* getLightSource() const
+	{
+		return _ls;
+	}
+
+
 
 protected:
-    bool            _enabled;
-    unsigned int    _id;
+    bool							_enabled;
+    unsigned int					_id;
+	osg::ref_ptr<osg::LightSource>	_ls;
 };
 
 class LightManager
@@ -130,6 +144,7 @@ public:
             _texture->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::NEAREST);            
             _texture->setUnRefImageDataAfterApply(false);
             _texture->setUseHardwareMipMapGeneration(false);
+			_texture->setResizeNonPowerOfTwoHint(false);
         }
 
 #if 0
@@ -261,7 +276,7 @@ public:
 			if (light->getUserData())
 			{
 				DummyLight* nclight = const_cast<DummyLight*>(light);
-				osg::LightSource* ls = dynamic_cast<osg::LightSource*>(nclight->getUserData());
+				osg::LightSource* ls = nclight->getLightSource();
 				if (ls)
 				{
 					osg::NodePath np;
@@ -472,7 +487,7 @@ public:
             {
                 unsigned int    id = atoi(tokens.at(0).c_str());
                 std::string     effect = tokens.at(1);
-                bool            on = tokens.at(2) == "on";
+                bool            on = (tokens.at(2).compare(0,2,"on") == 0);
 
                 if (_ig->getEntityMap().count(id)==0) return -1;
 
@@ -659,7 +674,7 @@ public:
         _lightImplementationCallback = new ComplexLightImplementationCallback(context.getImageGenerator());
         context.getImageGenerator()->setLightImplementationCallback(_lightImplementationCallback);
 
-        osg::Shader* mainVertexShader = new osg::Shader( osg::Shader::VERTEX,
+        osg::Shader* mainVertexShader = new osg::Shader(osg::Shader::VERTEX,
             "#version 120                                                       \n"
             "#pragma import_defines(SIMPLELIGHTING,SHADOWING,ENVIRONMENTAL,USER)\n"
             "                                                                   \n"
@@ -669,7 +684,11 @@ public:
             "                                                                   \n"
             "varying vec3 normal;                                               \n"
             "varying vec3 eyeVec;                                               \n"
+#ifdef FRAGMENT_LEVEL_DEPTH
+            "varying float flogz;                                               \n"
+#endif
             "                                                                   \n"
+            "uniform float Fcoef;							    	     		\n"
             "#ifdef ENVIRONMENTAL                                               \n"
             "uniform mat4 osg_ViewMatrixInverse;                                \n"
             "uniform vec3 cameraPos;        									\n"
@@ -720,6 +739,12 @@ public:
             "void main()                                                        \n"
             "{                                                                  \n"
             "   gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;         \n"
+            "   if (Fcoef > 0) {                                                \n"
+            "       gl_Position.z = (log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0) * gl_Position.w;\n"
+#ifdef FRAGMENT_LEVEL_DEPTH
+            "       flogz = 1.0 + gl_Position.w;						        \n"
+#endif
+            "   }                                                               \n"
             "   gl_TexCoord[0] = gl_TextureMatrix[0] *gl_MultiTexCoord0;        \n"
             "                                                                   \n"
             "   eyeVec = -vec3(gl_ModelViewMatrix * gl_Vertex);                 \n"
@@ -753,7 +778,7 @@ public:
             "}                                                                  \n"
         );
 
-        osg::Shader* mainFragmentShader = new osg::Shader( osg::Shader::FRAGMENT,
+        osg::Shader* mainFragmentShader = new osg::Shader(osg::Shader::FRAGMENT,
             "#version 120                                                           \n"
             "#pragma import_defines ( SIMPLELIGHTING, LIGHTING, SHADOWING, ENVIRONMENTAL, AO, USER, ENVIRONMENTAL_FACTOR )\n"
             "#extension GL_ARB_texture_rectangle : enable                           \n"
@@ -762,27 +787,22 @@ public:
             "const float cos_outer_cone_angle = 0.4; // 36 degrees                  \n"
             "varying vec3 normal;                                                   \n"
             "varying vec3 eyeVec;                                                   \n"
+#ifdef FRAGMENT_LEVEL_DEPTH
+            "varying float flogz;                                                   \n"
+            "uniform float Fcoef;                                                   \n"
+#endif
 			"																		\n"
 			"uniform float	todBasedLightBrightness;								\n"
 			"uniform bool	todBasedLightBrightnessEnabled;							\n"
             "                                                                       \n"
             "void computeFogColor(inout vec4 color)                                 \n"
             "{                                                                      \n"
-            "    if (gl_FragCoord.w > 0.0)                                          \n"
-            "    {                                                                  \n"
-            "        const float LOG2 = 1.442695;									\n"
-            "        float z = gl_FragCoord.z / gl_FragCoord.w;                     \n"
-            "        float fogFactor = exp2( -gl_Fog.density *						\n"
-            "            gl_Fog.density *											\n"
-            "            z *														\n"
-            "            z *														\n"
-            "            LOG2 );													\n"
-            "        fogFactor = clamp(fogFactor, 0.0, 1.0);                        \n"
-            "                                                                       \n"
-            "        vec4 clr = color;                                              \n"
-            "        color = mix(gl_Fog.color, color, fogFactor );                  \n"
-            "        color.a = clr.a;                                               \n"
-            "    }                                                                  \n"
+            "   float fogExp = gl_Fog.density * length(eyeVec);                     \n"
+            "   float fogFactor = exp(-(fogExp * fogExp));                          \n"
+            "   fogFactor = clamp(fogFactor, 0.0, 1.0);                             \n"
+            "   vec4 clr = color;                                                   \n"
+            "   color = mix(gl_Fog.color, color, fogFactor);                        \n"
+            "   color.a = clr.a;                                                    \n"
             "}                                                                      \n"
             "void computeAmbientColor(inout vec4 color)                             \n"
             "{                                                                      \n"
@@ -1036,6 +1056,9 @@ public:
             "#endif                                                                 \n"
             "	computeFogColor(color);                                             \n"
             "   gl_FragColor = color;                                               \n"
+#ifdef FRAGMENT_LEVEL_DEPTH
+            "   gl_FragDepth = log2(flogz) * Fcoef * 0.5;                           \n"
+#endif
             "}                                                                      \n"
         );
 
@@ -1239,7 +1262,9 @@ protected:
                 osg::Group* lightsGroup)
         {
             osg::LightSource* light = new osg::LightSource;
-            light->setLight(new DummyLight(id,true));
+			DummyLight* dl = new DummyLight(id, true);
+			dl->setLightSource(light);
+            light->setLight(dl);
             light->getLight()->setAmbient(definition._ambient);
             light->getLight()->setDiffuse(definition._diffuse*definition._brightness);
             light->getLight()->setSpecular(definition._specular);
@@ -1247,7 +1272,6 @@ protected:
             light->getLight()->setSpotCutoff(definition._spotCutoff);
             light->getLight()->setPosition(osg::Vec4(0,0,0,1));
             light->getLight()->setDirection(osg::Vec3(0,1,0));
-			light->getLight()->setUserData(light);
 
             if (id >=1 && id < 8)
             {

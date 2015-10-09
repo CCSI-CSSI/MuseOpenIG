@@ -19,21 +19,37 @@ SUBDIRS +=  IgCore \
     IgPlugin-RunwayLights \
     IgPlugin-FBXAnimation \
     IgPlugin-OSGParticleEffects \
+    IgLib-Networking \
+    IgPlugin-Networking \
     Demo
 
+OTHER_FILES += releasenotes.txt \
+               README.md \
+               INSTALL \
+               openig_version.pri \
+               CMakeLists.txt \
+               OpenIG_Environmental_Vars.reg \
+               LICENSE
 unix {
     exists( /usr/local/lib/libSilverLining* ){
-        message( "Configuring for build with SilverLining..." )
+        message( "Configuring for build with Sundog-Software's SilverLining..." )
         SUBDIRS += IgPlugin-SilverLining
     }else{
-        message( "SilverLining not found on the system. The plugin is not included in the build..." )
+        message( "Sundog-Software's SilverLining not found on the system. The SilverLining plugin is not included in the build..." )
+    }
+
+    exists( /usr/local/lib/libTriton* ){
+        message( "Configuring for build with Sundog-Software's Triton..." )
+        SUBDIRS += IgPlugin-Triton
+    }else{
+        message( "Sundog-Software's Triton not found on the system. The Triton plugin is not included in the build..." )
     }
 
     exists( /usr/local/lib/libCstShare* ){
         message( "Configuring for build with CstShare..." )
         SUBDIRS += IgPlugin-SLScene
     }else{
-        message( "CstShare not found on the system. The plugin is not included in the build..." )
+        message( "CstShare not found on the system. The SLScene plugin is not included in the build..." )
     }
 
     !mac:exists( /usr/local/lib/libBullet* ):exists( /usr/local/lib64/libosgb* ) {
@@ -43,7 +59,7 @@ unix {
         SUBDIRS += IG-Bullet
     }
     else{
-        !mac:message( "Bullets not found on the system. The application is not included in the build..." )
+        !mac:message( "Bullets not found on the system. The Bullets application is not included in the build..." )
     }
 
     mac:exists( /usr/local/lib/libBullet* ):exists( /usr/local/lib/libosgb* ) {
@@ -53,7 +69,7 @@ unix {
         SUBDIRS += IG-Bullet
     }
     else{
-        mac:message( "Bullets not found on the system. The application is not included in the build..." )
+        mac:message( "Bullets not found on the system. The Bullets application is not included in the build..." )
     }
 
     !mac:exists( /usr/local/lib64/libosgEarth* ){
@@ -61,7 +77,7 @@ unix {
         SUBDIRS += IgPlugin-OSGEarthSimpleLighting
         SUBDIRS += IG-Earth
     }else{
-        !mac:message( "osgEarth not found on the system. The application is not included in the build..." )
+        !mac:message( "osgEarth not found on the system. The osgEarth application is not included in the build..." )
     }
 
     mac:exists( /usr/local/lib/libosgEarth* ){
@@ -69,7 +85,7 @@ unix {
         SUBDIRS += IgPlugin-OSGEarthSimpleLighting
         SUBDIRS += IG-Earth
     }else{
-        mac:message( "osgEarth not found on the system. The application is not included in the build..." )
+        mac:message( "osgEarth not found on the system. The osgEarth application is not included in the build..." )
     }
 }
 
@@ -77,7 +93,7 @@ win32 {
     HAS_BULLET64=FALSE
     SLROOT = $$(SILVERLINING)
     isEmpty(SLROOT) {
-        message( "SilverLining not found on the system. The plugin is not included in the build..." )
+        message( "SilverLining not found on the system. The SilverLining plugin is not included in the build..." )
     }
     else {
         message( "Configuring for build with SilverLining..." )

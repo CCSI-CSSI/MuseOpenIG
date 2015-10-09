@@ -1,26 +1,34 @@
 #Linux/MacOS
+#add the entities to the OIG scene, 0 has to be the terrain
 addentity 2 /usr/local/database/model/radar/radar.FBX.(0.1,0.1,0.1).scale -50 50 42 0 90 0
 addentity 1 /usr/local/database/model/A320/a320.obj 0 0 45.9 105 0 0
 addentity 0 /usr/local/database/terrain/OPEN_IG_Demo_NO_UTM31N_r6_LW_/master.flt.osg 0 0 0 0 0 0 -1.20639e+06,-5.099e+06,0
 
 #Windows
+#add the entities to the OIG scene, 0 has to be the terrain
 #addentity 2 ..\data\model\radar\radar.FBX.(0.1,0.1,0.1).scale -50 50 42 0 90 0
 #addentity 1 ..\data\model\a320\a320.obj 0 0 45.9 105 0 0
 #addentity 0 ..\data\terrain\master.flt.osg 0 0 0 0 0 0 -1.20639e+06,-5.099e+06,0
 
+#Starts the radar entity(2) rotating
 playanim 2 fbx:"Take 001":LOOP
 
+#camera is controlled locally
+#by the keyboard
 manip 1 trackball
+#Set time of day to 5pm
 tod 17 0
+#set Visibility value to 5000 meters
 fog 5000
 
+#add a light source to the scene
 addlight 1 0 0 0 0 0 0
+#bind the lightsource to the A320 model, submodel 10090
 bindlight 1 10090
 
+#set the light source attributes
 updatelightattr 1 ambient 0 0 0
-updatelightattr 1 diffuse 1 1 1 7 0.5
+updatelightattr 1 diffuse 1 1 1 7 0.5 0.5
 updatelightattr 1 specular 0 0 0
 updatelightattr 1 attenuation 100
 updatelightattr 1 spotcutsoff 30
-
-

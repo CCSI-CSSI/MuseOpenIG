@@ -1,6 +1,10 @@
 set( APP_NAME openig-bullet )
 
-add_executable( ${APP_NAME} main.cpp )
+set( TARGET_SRC_FILES main.cpp )
+set( TARGET_OTHER_FILES default.txt openig.xml )
+
+add_executable( ${APP_NAME} ${TARGET_SRC_FILES}
+                ${TARGET_OTHER_FILES} )
 
 target_link_libraries( ${APP_NAME}
     ${OSG_LIBRARIES}

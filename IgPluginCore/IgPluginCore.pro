@@ -32,12 +32,11 @@ unix {
     !mac:contains(QMAKE_HOST.arch, x86_64):{
         DESTDIR = /usr/local/lib64
         target.path = /usr/local/lib64
-        message(Libs will be installed into /usr/local/lib64)
     } else {
         DESTDIR = /usr/local/lib
         target.path = /usr/local/lib
-        message(Libs will be installed into /usr/local/lib)
     }
+    message($$TARGET Lib will be installed into $$DESTDIR)
 
     INSTALLS += target
 
@@ -47,19 +46,32 @@ unix {
     INCLUDEPATH += /usr/lib64
     DEPENDPATH += /usr/lib64
 
-    LIBS += -lboost_filesystem -lboost_system
+    #
+    # Allow alternate boost library path to be set via ENV variable
+    #
+    BOOSTROOT = $$(BOOST_ROOT)
+    isEmpty(BOOSTROOT) {
+        message($$TARGET -- \"BOOST_ROOT env var\" not set...using system default paths to look for boost )
+        LIBS +=  -lboost_system -lboost_filesystem
+    }
+    else {
+        message($$TARGET -- \"BOOST_ROOT env var\" detected - set to: \"$$BOOSTROOT\")
+        LIBS += -L$$BOOSTROOT/stage/lib -lboost_system -lboost_filesystem
+        INCLUDEPATH += $$BOOSTROOT
+        DEPENDPATH  += $$BOOSTROOT
+    }
 
     # library version number files
     exists( "../openig_version.pri" ) {
 
 	include( "../openig_version.pri" )
-	isEmpty( VERSION ){ error( "bad or undefined VERSION variable inside file openig_version.pri" )
+        isEmpty( VERSION ){ error( "$$TARGET -- bad or undefined VERSION variable inside file openig_version.pri" )
 	} else {
-	message( "Set version info to: $$VERSION" )
+        message( "$$TARGET -- Set version info to: $$VERSION" )
 	}
 
     }
-    else { error( "could not find pri library version file openig_version.pri" ) }
+    else { error( "$$TARGET -- could not find pri library version file openig_version.pri" ) }
 
     # end of library version number files
 }
@@ -71,19 +83,19 @@ win32 {
 
     OSGROOT = $$(OSG_ROOT)
     isEmpty(OSGROOT) {
-        message(\"OpenSceneGraph\" not detected...)
+        message($$TARGET -- \"OpenSceneGraph\" not detected...)
     }
     else {
-        message(\"OpenSceneGraph\" detected in \"$$OSGROOT\")
+        message($$TARGET -- \"OpenSceneGraph\" detected in \"$$OSGROOT\")
         INCLUDEPATH += $$OSGROOT/include
         LIBS += -L$$OSGROOT/lib
     }
     OSGBUILD = $$(OSG_BUILD)
     isEmpty(OSGBUILD) {
-        message(\"OpenSceneGraph build\" not detected...)
+        message($$TARGET -- \"OpenSceneGraph build\" not detected...)
     }
     else {
-        message(\"OpenSceneGraph build\" detected in \"$$OSGBUILD\")
+        message($$TARGET -- \"OpenSceneGraph build\" detected in \"$$OSGBUILD\")
         DEPENDPATH += $$OSGBUILD/lib
         INCLUDEPATH += $$OSGBUILD/include
         LIBS += -L$$OSGBUILD/lib
@@ -91,23 +103,31 @@ win32 {
 
     BOOSTROOT = $$(BOOST_ROOT)
     isEmpty(BOOSTROOT) {
-        message(\"boost\" not detected...)
+        message($$TARGET -- \"boost\" not detected...)
     }
     else {
+        INCLUDEPATH += $$BOOSTROOT
         win32-g++ {
-        message(\"boost\" detected in \"$$BOOSTROOT\")
-        LIBS += -L$$BOOSTROOT\stage\lib -llibboost_filesystem -llibboost_system
-        INCLUDEPATH += $$BOOSTROOT
+            message($$TARGET -- win32-g++ --\"boost\" detected in \"$$BOOSTROOT\")
+            LIBS += -L$$BOOSTROOT\stage\lib -llibboost_filesystem -llibboost_system
         } else {
-        message(\"boost\" detected in \"$$BOOSTROOT\")
-        LIBS += -L$$BOOSTROOT\stage\lib -llibboost_filesystem -llibboost_system
-        INCLUDEPATH += $$BOOSTROOT
+            message($$TARGET -- win32 -- \"boost\" detected in \"$$BOOSTROOT\")
+            LIBS += -L$$BOOSTROOT\stage\lib
+            CONFIG( debug,debug|release ){
+                message($$TARGET -- Boost using debug version of libraries )
+                LIBS += -llibboost_filesystem-vc120-mt-gd-1_58 -llibboost_system-vc120-mt-gd-1_58
+            }else{
+                message($$TARGET -- Boost using release version of libraries )
+                LIBS += -llibboost_filesystem-vc120-mt-1_58 -llibboost_system-vc120-mt-1_58
+            }
         }
     }
+
     OPENIGBUILD = $$(OPENIG_BUILD)
     isEmpty (OPENIGBUILD) {
 	OPENIGBUILD = $$IN_PWD/..
     }
+    message($$TARGET -- \"openig build\" detected in \"$$OPENIGBUILD\")
     LIBS += -L$$OPENIGBUILD/lib
 
     DESTDIR = $$OPENIGBUILD/lib

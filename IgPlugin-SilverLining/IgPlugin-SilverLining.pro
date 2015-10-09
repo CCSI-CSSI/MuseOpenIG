@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       -= core gui
+QT -= core gui
 
 CONFIG += silent
 
@@ -27,7 +27,11 @@ HEADERS += \
 INCLUDEPATH += ../
 DEPENDPATH += ../
 
-LIBS += -losg -losgDB -losgViewer -lOpenThreads -lIgPluginCore -lIgCore
+LIBS += -losg -losgDB -losgViewer -lOpenThreads -lOpenIG -lIgPluginCore -lIgCore
+
+OTHER_FILES += \
+    $${PWD}/ConfigFiles/* \
+    $${PWD}/CmakeLists.txt
 
 unix {
     !mac:contains(QMAKE_HOST.arch, x86_64):{
@@ -37,7 +41,7 @@ unix {
         DESTDIR = /usr/local/lib/igplugins
         target.path = /usr/local/lib/igplugins
     }
-    message(Libs will be installed into $$DESTDIR)
+    message($$TARGET Lib will be installed into $$DESTDIR)
 
     INSTALLS += target
 
@@ -50,15 +54,34 @@ unix {
     INCLUDEPATH += /usr/local/include/Public_Headers
     DEPENDPATH += /usr/local/include/Public_Headers
 
-    LIBS += -lSilverLiningOpenGL -lboost_date_time
+    LIBS += -lSilverLiningOpenGL
 
-    FILE = $${PWD}/libIgPlugin-SilverLining.so.xml
+    #
+    # Allow alternate boost library path to be set via ENV variable
+    #
+    BOOSTROOT = $$(BOOST_ROOT)
+    isEmpty(BOOSTROOT) {
+        message($$TARGET -- \"BOOST_ROOT env var\" not set...using system default paths to look for boost )
+        LIBS +=  -lboost_date_time
+    }
+    else {
+        message($$TARGET -- \"BOOST_ROOT env var\" detected - set to: \"$$BOOSTROOT\")
+        LIBS += -L$$BOOSTROOT/stage/lib \
+                -lboost_date_time
+        INCLUDEPATH += $$BOOSTROOT
+        DEPENDPATH  += $$BOOSTROOT
+    }
+
+    FILE = $${PWD}/ConfigFiles/libIgPlugin-SilverLining.so.xml
     DDIR = $${DESTDIR}/libIgPlugin-SilverLining.so.xml
 
     mac: DDIR = $${DESTDIR}/libIgPlugin-SilverLining.dylib.xml
 
     QMAKE_POST_LINK =  test -d $$quote($$DESTDIR) || $$QMAKE_MKDIR $$quote($$DESTDIR) $$escape_expand(\\n\\t)
     QMAKE_POST_LINK += test -e $$quote($$DDIR) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DDIR) $$escape_expand(\\n\\t)
+
+    #remove the files we manually installed above when we do a make distclean....
+    QMAKE_DISTCLEAN += $${DESTDIR}/libIgPlugin-SilverLining.*.xml
 
     !mac: LIBS += -lGL -lGLU
     mac: LIBS += -framework openGL
@@ -67,38 +90,36 @@ unix {
     exists( "../openig_version.pri" ) {
 
 	include( "../openig_version.pri" )
-	isEmpty( VERSION ){ error( "bad or undefined VERSION variable inside file openig_version.pri" )
+        isEmpty( VERSION ){ error( "$$TARGET -- bad or undefined VERSION variable inside file openig_version.pri" )
 	} else {
-	message( "Set version info to: $$VERSION" )
+        message( "$$TARGET -- Set version info to: $$VERSION" )
 	}
 
     }
-    else { error( "could not find pri library version file openig_version.pri" ) }
+    else { error( "$$TARGET -- could not find pri library version file openig_version.pri" ) }
 
     # end of library version number files
 }
 
-OTHER_FILES += libIgPlugin-SilverLining.so.xml
-
 win32-g++:QMAKE_CXXFLAGS += -fpermissive -shared-libgcc -D_GLIBCXX_DLL
 
 win32 {
-    LIBS += -lopengl32 -lglu32 -lUser32 -llibboost_date_time
+    LIBS += -lopengl32 -lglu32 -lUser32
 
     OSGROOT = $$(OSG_ROOT)
     isEmpty(OSGROOT) {
-        message(\"OpenSceneGraph\" not detected...)
+        message($$TARGET -- \"OpenSceneGraph\" not detected...)
     }
     else {
-        message(\"OpenSceneGraph\" detected in \"$$OSGROOT\")
+        message($$TARGET -- \"OpenSceneGraph\" detected in \"$$OSGROOT\")
         INCLUDEPATH += $$OSGROOT/include
     }
     OSGBUILD = $$(OSG_BUILD)
     isEmpty(OSGBUILD) {
-        message(\"OpenSceneGraph build\" not detected...)
+        message($$TARGET -- \"OpenSceneGraph build\" not detected...)
     }
     else {
-        message(\"OpenSceneGraph build\" detected in \"$$OSGBUILD\")
+        message($$TARGET -- \"OpenSceneGraph build\" detected in \"$$OSGBUILD\")
         DEPENDPATH += $$OSGBUILD/lib
         INCLUDEPATH += $$OSGBUILD/include
         LIBS += -L$$OSGBUILD/lib
@@ -115,40 +136,46 @@ win32 {
 
     SLROOT = $$(SILVERLINING)
     isEmpty(SLROOT) {
-        message(\"SilverLining\" not detected...)
+        message($$TARGET -- \"SilverLining\" not detected...)
     }
     else {
-        message(\"SilverLining\" detected in \"$$SLROOT\")
+        message($$TARGET -- \"SilverLining\" detected in \"$$SLROOT\")
         INCLUDEPATH += $$quote(\"$$SLROOT\Public Headers\")
-        message($$INCLUDEPATH)
+        message($$TARGET -- $$INCLUDEPATH)
     }
     SLBUILD = $$(SILVERLINING_BUILD)
     isEmpty(SLBUILD) {
-        message(\"SilverLining build\" not detected...)
+        message($$TARGET -- \"SilverLining build\" not detected...)
     }
     else {
-        message(\"SilverLining build\" detected in \"$$SLBUILD\")
+        message($$TARGET -- \"SilverLining build\" detected in \"$$SLBUILD\")
         DEPENDPATH += $$SLBUILD
         LIBS += -L$$SLBUILD\lib\vc12\x64 -lSilverLining-MT-DLL
     }
 
     BOOSTROOT = $$(BOOST_ROOT)
     isEmpty(BOOSTROOT) {
-        message(\"boost\" not detected...)
+        message($$TARGET -- \"boost\" not detected...)
     }
     else {
+        INCLUDEPATH += $$BOOSTROOT
         win32-g++ {
-        message(\"boost\" detected in \"$$BOOSTROOT\")
-        LIBS += -L$$BOOSTROOT\stage\lib -llibboost_date_time
-        INCLUDEPATH += $$BOOSTROOT
+            message($$TARGET -- win32-g++ --\"boost\" detected in \"$$BOOSTROOT\")
+            LIBS += -L$$BOOSTROOT\stage\lib -lboost_date_time
         } else {
-        message(\"boost\" detected in \"$$BOOSTROOT\")
-        LIBS += -L$$BOOSTROOT\stage\lib -llibboost_date_time
-        INCLUDEPATH += $$BOOSTROOT
+            message($$TARGET -- win32 -- \"boost\" detected in \"$$BOOSTROOT\")
+            LIBS += -L$$BOOSTROOT\stage\lib
+            CONFIG( debug,debug|release ){
+                message($$TARGET -- Boost using debug version of libraries )
+                LIBS += -llibboost_date_time-vc120-mt-gd-1_58
+            }else{
+                message($$TARGET -- Boost using release version of libraries )
+                LIBS += -llibboost_date_time-vc120-mt-1_58
+            }
         }
     }
 
-    FILE = $${PWD}/libIgPlugin-SilverLining.so.windows.xml
+    FILE = $${PWD}/ConfigFiles/libIgPlugin-SilverLining.so.windows.xml
     DFILE = $${DLLDESTDIR}/IgPlugin-SilverLining.dll.xml
 
     FILE ~= s,/,\\,g
@@ -156,4 +183,8 @@ win32 {
 
     QMAKE_POST_LINK =  if not exist $$quote($$DLLDESTDIR) $$QMAKE_MKDIR $$quote($$DLLDESTDIR) $$escape_expand(\\n\\t)
     QMAKE_POST_LINK += if not exist $$quote($$DFILE) copy /y $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
+
+    #remove the files we manually installed above when we do a make distclean....
+    QMAKE_DISTCLEAN += $${DLLDESTDIR}/libIgPlugin-SilverLining.*.xml
+
 }

@@ -29,6 +29,8 @@
 #include <IgCore/attributes.h>
 #include <IgCore/commands.h>
 
+#include <OpenIG/openig.h>
+
 #include <osg/ref_ptr>
 #include <osg/ValueObject>
 
@@ -43,8 +45,6 @@
 #include "SkyDrawable.h"
 
 #define SKY_RENDER_BIN -10
-#define OCEAN_RENDER_BIN 7
-#define MODELS_RENDER_BIN 8
 #define CLOUDS_RENDER_BIN 24
 
 namespace igplugins
@@ -58,6 +58,8 @@ public:
 		, _lightBrightness_enable(true)
 		, _lightBrightness_day(1.f)
 		, _lightBrightness_night(1.f)
+        , _skyboxSize(100000)
+        , _skyboxSizeSet(true)
 	{
 
 	}
@@ -84,10 +86,10 @@ public:
 
 		virtual const std::string getDescription() const
 		{
-			return  "configures the SilverLining plugin\n"
-				"     mode - pne of these\n"
-				"        geocentric - if in geocentric mode\n"
-				"        flat - if in flat earth mode\n";
+            return  "configures the SilverLining plugin\n"
+                    "    mode - one of these:\n"
+                    "           geocentric - if in geocentric mode\n"
+                    "           flat       - if in flat earth mode\n";
 		}
 
         virtual int exec(const igcore::StringUtils::Tokens& tokens)
@@ -111,9 +113,90 @@ public:
 		SilverLiningPlugin* _plugin;
 	};
 
+    class SetSkyboxSizeCommand : public igcore::Commands::Command
+    {
+    public:
+        SetSkyboxSizeCommand(SilverLiningPlugin* plugin)
+            : _plugin(plugin)
+        {
+        }
+        virtual const std::string getUsage() const
+        {
+            return "skyboxsize";
+        }
+
+        virtual const std::string getDescription() const
+        {
+            return  "configures the SilverLining skybox size\n"
+                "    skyboxsize - any value that encompasses your scene size\n"
+                "                 it should be just a bit larger than the farclip\n"
+                "                 value that you are using on your scene: ie: 100000.01\n";
+        }
+
+        virtual int exec(const igcore::StringUtils::Tokens& tokens)
+        {
+            if (tokens.size() == 1 && _plugin != 0)
+            {
+                _plugin->_skyboxSize = atof(tokens.at(0).c_str());
+                _plugin->setSkyboxSize();
+
+                return 0;
+            }
+            return -1;
+        }
+
+    protected:
+        SilverLiningPlugin* _plugin;
+    };
+
+	class SetSilverLiningParamsCommand : public igcore::Commands::Command
+	{
+	public:
+		SetSilverLiningParamsCommand(SilverLiningPlugin* plugin)
+			: _plugin(plugin)
+		{
+		}
+		virtual const std::string getUsage() const
+		{
+			return "cloudsBaseLength cloudsBaseWidth";
+		}
+
+		virtual const std::string getDescription() const
+		{
+			return  "configures some SilverLining parameters\n"
+				"    cloudsBaseLength - the base length of the newely created cloud layers\n"
+				"    cloudsBaseWidth - the base width of the newely created cloud layers\n";
+
+		}
+
+		virtual int exec(const igcore::StringUtils::Tokens& tokens)
+		{
+			if (tokens.size() == 2 && _plugin != 0)
+			{
+				double cloudsBaseLength = atof(tokens.at(0).c_str());
+				double cloudsBaseWidth = atof(tokens.at(1).c_str());
+				
+				SkyDrawable::SilverLiningParams params;
+				params.cloudsBaseLength = cloudsBaseLength;
+				params.cloudsBaseWidth = cloudsBaseWidth;
+
+                int mask = igplugins::SkyDrawable::SilverLiningParams::CLOUDS_BASE_WIDTH | igplugins::SkyDrawable::SilverLiningParams::CLOUDS_BASE_LENGTH;
+                _plugin->_skyDrawable->setSilverLiningParams(params,mask);
+
+				return 0;
+			}
+			return -1;
+		}
+
+	protected:
+		SilverLiningPlugin* _plugin;
+	};
+
     virtual void config(const std::string& fileName)
     {
 		igcore::Commands::instance()->addCommand("silverlining", new SilverLiningCommand(this));
+        igcore::Commands::instance()->addCommand("setskyboxsize", new SetSkyboxSizeCommand(this));
+		igcore::Commands::instance()->addCommand("setsilverliningparams", new SetSilverLiningParamsCommand(this));
 
         osgDB::XmlNode* root = osgDB::readXmlFile(fileName);
         if (root == 0) return;
@@ -143,6 +226,11 @@ public:
 			{
 				_geocentric = child->contents == "yes";
 			}
+            if (child->name == "SilverLining-SkyBoxSize")
+            {
+                _skyboxSize = std::strtod(child->contents.c_str(),NULL);
+                _skyboxSizeSet = false;
+            }
         }
     }
 
@@ -156,20 +244,40 @@ public:
 		}
 	}
 	
+    void setSkyboxSize(void)
+    {
+
+        if (_skyDrawable.valid())
+        {
+            _skyboxSizeSet = true;
+            _skyDrawable->setSkyboxSize(_skyboxSize);
+            osg::notify(osg::NOTICE) << "SilverLining: setSkyboxSize() setting skyboxsize to: " << _skyboxSize << std::endl;
+        }
+    }
+
     virtual void init(igplugincore::PluginContext& context)
     {
         igcore::Commands::instance()->addCommand("addclouds",       new AddCloudLayerCommand(context.getImageGenerator()));
+        igcore::Commands::instance()->addCommand("updateclouds",    new UpdateCloudLayerCommand(context.getImageGenerator()));
         igcore::Commands::instance()->addCommand("removeclouds",    new RemoveCloudLayerCommand(context.getImageGenerator()));
         igcore::Commands::instance()->addCommand("removeallclouds", new RemoveAllCloudLayersCommand(context.getImageGenerator()));
         igcore::Commands::instance()->addCommand("fog",             new SetFogCommand(context.getImageGenerator()));
         igcore::Commands::instance()->addCommand("rain",            new RainCommand(context.getImageGenerator()));
         igcore::Commands::instance()->addCommand("snow",            new SnowCommand(context.getImageGenerator()));
 
-        initSilverLining(context.getImageGenerator());		
+        initSilverLining(context.getImageGenerator());
+
+        igcore::AtmosphereAttributes atmosphere((void*)ar);
+        context.addAttribute("SLAtmosphere", new igplugincore::PluginContext::Attribute<igcore::AtmosphereAttributes>(atmosphere));
     }
 
     virtual void update(igplugincore::PluginContext& context)
     {
+		
+        {
+            if(!_skyboxSizeSet)
+                setSkyboxSize();
+        }
         {
             osg::ref_ptr<osg::Referenced> ref = context.getAttribute("Rain");
             igplugincore::PluginContext::Attribute<igcore::RainSnowAttributes> *attr = dynamic_cast<igplugincore::PluginContext::Attribute<igcore::RainSnowAttributes> *>(ref.get());
@@ -234,6 +342,7 @@ public:
             if (itr->first == "RemoveAllCloudLayers" && _skyDrawable.valid())
             {
                 _skyDrawable->removeAllCloudLayers();
+				_cloudsDrawable->setEnvironmentMapDirty(true);
             }
             else
             if (attr && itr->first == "CloudLayer" && _skyDrawable.valid())
@@ -249,6 +358,7 @@ public:
                              attr->getValue().getAltitude(),
                              attr->getValue().getThickness(),
                              attr->getValue().getDensity());
+						_cloudsDrawable->setEnvironmentMapDirty(true);
                         break;
                     }
 
@@ -256,6 +366,7 @@ public:
                     {
                     case true:
                         _skyDrawable->removeCloudLayer(attr->getValue().getId());
+						_cloudsDrawable->setEnvironmentMapDirty(true);
                         //osg::notify(osg::NOTICE) << "remove cloud layer: " << attr->getValue().getId() << std::endl;
                         break;
                     }
@@ -267,11 +378,17 @@ public:
                             attr->getValue().getAltitude(),
                            attr->getValue().getThickness(),
                             attr->getValue().getDensity());
+						_cloudsDrawable->setEnvironmentMapDirty(true);
                     }
                 }
             }
 
         }
+
+		{
+			openig::OpenIG* ig = dynamic_cast<openig::OpenIG*>(context.getImageGenerator());
+			if (ig && this->_skyDrawable) this->_skyDrawable->setIG(ig);
+		}
     }
 
 	virtual void clean(igplugincore::PluginContext& context)
@@ -360,10 +477,13 @@ protected:
     std::string                     _path;
     osg::ref_ptr<SkyDrawable>       _skyDrawable;
     osg::ref_ptr<CloudsDrawable>    _cloudsDrawable;
+    AtmosphereReference             *ar;
 	bool							_geocentric;
 	bool							_lightBrightness_enable;
 	float							_lightBrightness_day;
 	float							_lightBrightness_night;
+    double                          _skyboxSize;
+    bool                            _skyboxSizeSet;
 
     const EnvMapUpdater* initSilverLining(igcore::ImageGenerator* ig)
     {
@@ -392,7 +512,7 @@ protected:
         // Remember to delete this object at shutdown.
         SilverLining::Atmosphere *atm = new SilverLining::Atmosphere(_userName.c_str(), _key.c_str());
 
-        AtmosphereReference *ar = new AtmosphereReference;
+        ar = new AtmosphereReference;
         ar->atmosphere = atm;
         viewer->getView(0)->getCamera()->setUserData(ar);
 
@@ -428,6 +548,12 @@ protected:
 			_lightBrightness_night
 		);
 
+        if (_skyDrawable.valid())
+        {
+            _skyboxSizeSet = true;
+            _skyDrawable->setSkyboxSize(_skyboxSize);
+        }
+
         return _cloudsDrawable.get();
     }
 
@@ -444,7 +570,7 @@ protected:
 
         virtual const std::string getDescription() const
         {
-            return  "add clouds layer based on Sundog's SilverLining plugin\n"
+            return  "add new cloud layer -- based on Sundog's SilverLining plugin\n"
                     "     id - the id of the cloud latyer across the scene\n"
                     "     type - from the available cloud types from SilverLining, from 0 to 9 respoding to:\n"
                     "          0 - CIRROCUMULUS\n"
@@ -459,7 +585,7 @@ protected:
                     "          9 - SANDSTORM\n"
                     "     altitude - in meters, the altitude of the layer\n"
                     "     thickness - the thickness of the layer\n"
-                    "     density - from 0.0-1.0, 1.0 most dense";
+                    "     density - from 0.0-1.0, 1.0 most dense\n";
         }
 
         virtual int exec(const igcore::StringUtils::Tokens& tokens)
@@ -473,6 +599,47 @@ protected:
                 double density      = atof(tokens.at(4).c_str());
 
                 _ig->addCloudLayer(id,type,altitude,thickness, density);
+
+                return 0;
+            }
+            return -1;
+        }
+
+    protected:
+        igcore::ImageGenerator* _ig;
+    };
+
+    class UpdateCloudLayerCommand : public igcore::Commands::Command
+    {
+    public:
+        UpdateCloudLayerCommand (igcore::ImageGenerator* ig)
+            : _ig(ig) {}
+
+        virtual const std::string getUsage() const
+        {
+            return "id type altitude thickness density";
+        }
+
+        virtual const std::string getDescription() const
+        {
+            return  "updates clouds layer settings -- based on Sundog's SilverLining plugin\n"
+                    "     id - the id of the cloud latyer across the scene\n"
+                    "     type - NOT Changeable!!!\n"
+                    "     altitude - in meters, the altitude of the layer\n"
+                    "     thickness - the thickness of the layer\n"
+                    "     density - from 0.0-1.0, 1.0 most dense\n";
+        }
+
+        virtual int exec(const igcore::StringUtils::Tokens& tokens)
+        {
+            if (tokens.size() == 4)
+            {
+                unsigned int id     = atoi(tokens.at(0).c_str());
+                double altitude     = atof(tokens.at(1).c_str());
+                double thickness    = atof(tokens.at(2).c_str());
+                double density      = atof(tokens.at(3).c_str());
+
+                _ig->updateCloudLayer(id, altitude,thickness, density);
 
                 return 0;
             }
