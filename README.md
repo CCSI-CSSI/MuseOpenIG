@@ -27,8 +27,15 @@ Additional Dependencies for V1.1.0 and later if you want to include any of these
 *  OSGEarth version 2.6, available on [GitHub](https://github.com/gwaldron/osgearth)
 *  MyGUI is a cross-platform library for creating graphical user interfaces (GUIs) for games and 3D applications.
    This is required if you want to use the UI-Plugin which provides a GUI interface for setting the
-   lighting parameters contained in the test terrain database directory/master.flt.osg.lighting.xml datafile. 
+   lighting parameters contained in the test terrain database directory/master.flt.osg.lighting.xml datafile.
    MyGUI is available on [GitHub](https://github.com/MyGUI/mygui)
+
+Additional Dependencies for V2.0.0 and later if you want to include any of the new Forward+ capabilities:
+---------------------------------------------------------------------------------------
+*  SunDog Software's SilverLining V4.042 & later -- Sky, 3D Cloud and Weather SDK
+   on http://sundog-soft.com/sds/features/real-time-3d-clouds/
+*  SunDog Software's Triton V3.51 & later-- Ocean and 3D Water SDK
+   on http://sundog-soft.com/sds/features/ocean-and-water-rendering-with-triton
 
 Hardware Dependancies
 --------------------------------------------------------------------------------------------------
