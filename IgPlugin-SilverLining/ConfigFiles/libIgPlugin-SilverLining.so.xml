@@ -1,7 +1,0 @@
-<OpenIG-Plugin-Config>
-    <SilverLining-License-UserName>Compro</SilverLining-License-UserName>
-    <SilverLining-License-Key>MuseOpenIG</SilverLining-License-Key>
-    <SilverLining-Resource-Path>/usr/local/SilverLining</SilverLining-Resource-Path>
-    <SilverLining-Geocentric>no</SilverLining-Geocentric>
-    <SilverLining-SkyBoxSize>50000</SilverLining-SkyBoxSize>
-</OpenIG-Plugin-Config>

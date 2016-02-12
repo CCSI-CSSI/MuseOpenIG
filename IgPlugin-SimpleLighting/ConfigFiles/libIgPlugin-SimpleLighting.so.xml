@@ -1,8 +1,0 @@
-<OpenIG-Plugin-Config>
-    <Material>
-        <Ambient>0.7 0.7 0.7 1.0</Ambient>
-        <Diffuse>0.6 0.6 0.6 1.0</Diffuse>
-        <Specular>0.6 0.6 0.6 1.0</Specular>
-        <Shininess>60</Shininess>
-    </Material>
-</OpenIG-Plugin-Config>
