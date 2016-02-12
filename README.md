@@ -25,6 +25,10 @@ Additional Dependencies for V1.1.0 and later if you want to include any of these
 *  osgWorks version 3.0.0, available on [GitHub](https://github.com/mccdo/osgworks)
 *  osgBullet version 3.0.0, available on [GitHub](https://github.com/mccdo/osgBullet)
 *  OSGEarth version 2.6, available on [GitHub](https://github.com/gwaldron/osgearth)
+*  MyGUI is a cross-platform library for creating graphical user interfaces (GUIs) for games and 3D applications.
+   This is required if you want to use the UI-Plugin which provides a GUI interface for setting the
+   lighting parameters contained in the test terrain database directory/master.flt.osg.lighting.xml datafile. 
+   MyGUI is available on [GitHub](https://github.com/MyGUI/mygui)
 
 Hardware Dependancies
 --------------------------------------------------------------------------------------------------
