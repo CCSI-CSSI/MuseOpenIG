@@ -1,0 +1,36 @@
+#Linux/MacOS
+#add the entities to the OIG scene, 0 has to be the terrain
+#addentity 0 /usr/local/database/model/bullet/RT_CITY_STOP_LIGHTS_002.osgb 0 0 0 0 0 0
+#addentity 1 /usr/local/database/model/bullet/mustang_yellow.osgb 0 0 0 0 0 0
+
+#Windows
+#add the entities to the OIG scene, 0 has to be the terrain
+#addentity 0 ..\data\model\bullet\RT_CITY_STOP_LIGHTS_002.osgb 0 0 0 0 0 0
+#addentity 1 ..\data\model\bullet\mustang_yellow.osgb 0 0 0 0 0 0
+
+#All platforms
+addentity 0 {$OPENIG_DATA_PATH;/usr/local/database;../data}/model/bullet/RT_CITY_STOP_LIGHTS_002.osgb 0 0 0 0 0 0
+addentity 1 {$OPENIG_DATA_PATH;/usr/local/database;../data}/model/bullet/mustang_yellow.osgb 0 0 0 0 0 0
+
+#for not in networking
+{$OPENIG_NETWORKING_MODE==NONE} manip 1 trackball
+
+#for MASTER
+{$OPENIG_NETWORKING_MODE==MASTER} manip 1 trackball
+
+#for SLAVE we turn off
+#local control so that we only move
+#the camera and the model
+#by the data coming in from 
+#the MASTER over the network
+#
+{$OPENIG_NETWORKING_MODE==SLAVE} manip 1 trackball off
+{$OPENIG_NETWORKING_MODE==SLAVE} bullet freeze
+
+#for both if you want to display stats
+#if you are the MASTER this only works in TCP mode transfers
+#
+netstats on
+
+fog 100000000
+tod 4 45

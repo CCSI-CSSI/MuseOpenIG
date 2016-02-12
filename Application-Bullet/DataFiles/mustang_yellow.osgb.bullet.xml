@@ -1,0 +1,31 @@
+<OpenIG-Bullets-Config>
+  <Vehicle>
+    <id>1</id>
+    <mass>800</mass>
+    <model>mustang_yellow.osgb</model>
+    <tire_model>tire.osgb</tire_model>
+    <pos x="53.0482" y="714.44" z="2"/>
+    <!--
+    <pos x="0" y="0" z="2"/>
+    -->
+    <heading>180</heading>
+    <front_wheel_pos x="0.9" y="1.45" z="0.75" />
+    <rear_wheel_pos x="0.9" y="1.26" z="0.75" />
+    <wheel_radius>0.375</wheel_radius>
+    <right_index>0</right_index>
+    <up_index>2</up_index>
+    <forward_index>1</forward_index>
+    <wheel_friction>5000</wheel_friction>
+    <suspension_rest_length>0.6</suspension_rest_length>
+    <suspension_stiffness>20</suspension_stiffness>
+    <suspension_damping>2.3</suspension_damping>
+    <suspension_compression>4.4</suspension_compression>
+    <roll_influence>0.1</roll_influence>
+    <steering_increment>0.02</steering_increment>
+    <steering_clamp>0.4</steering_clamp>
+    <wheel_direction_CS0 x="0" y="0" z="-1" />
+    <wheel_axle_CS x="1" y="0" z="0" />
+    <engine_force>1000</engine_force>
+    <brakes>100</brakes>
+  </Vehicle>
+</OpenIG-Bullets-Config>

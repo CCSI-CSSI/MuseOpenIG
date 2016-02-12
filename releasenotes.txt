@@ -1,3 +1,73 @@
+12 Feb 2016, version 2.0.0
+- added support for Normal Mapping
+
+- changed the headers for deployment for the SDK to include
+  OPENIG_SDK define. All client code that will use OpenIG from
+  the installed headers will need to include -DOPENIG_SDK
+
+- Refactored the whole code base to use nested namespaces.
+  different library names and few different classes
+
+  = namespaces =
+  * All the code is now under the namespace of OpenIG
+  * Core libs have nested namespace with the name of the library
+  * Library libs (Bullet, Networking and Graphics) libs have nested name of the 
+    name of the library under a common nested namespace OpenIG::Library
+  * Plugins libs are under nested namespace OpenIG::Plugins
+
+  = libs = 
+  IgCore is renamed to Core-Base (in the install SDK it is OpenIG-Base)
+  IgPluginCore is renamed to Core-PluginBase (in the install SDK it is OpenIG-PluginBase)
+  OpenIG is renamed to Core-OpenIG (in the install SDK it is OpenIG-Engine)
+
+  = plugins =
+  All plugins are being renames from IgPlugin-NameOfThePlugin to
+  OpenIG-Plugin-NameOfThePlugin. Also the default path for plugins
+  has been renamed from igplugins to plugins
+
+  = classes =
+  The only class that was renamed is the igcore::OpenIG class from the
+  old OpenIG lib. Now it is OpenIG::Engine, in the Core-OpenIG lib 
+  (OpenIG-Engine in the install SDK)
+
+  = examples =
+  The executables are following the name pattern of openig-demo-*
+
+- Minimal version of Sundog's SilverLining SDK is Version 4.040 January 12, 2016
+
+- Added USE_FORWARDPLUS_LIGHTING #define in SilverLining and Triton
+  fragment user shaders to turn on/off the F+ lighting on the clouds
+  and water
+
+- Added new IgPlugin-UI 
+  This plugin is in its early stages and its being designed
+  as a GUI interface for all of the xml datafiles that are
+  part of OpenIG's setup and control and not only.  This plug-in is
+  based on the opensource MyGui cross-platform set oflibraries.  
+  Available for download at:  https://github.com/MyGUI/mygui
+
+- Added Graphics library needed for the Forward+ lighting implementation
+
+- Added Forward+ lighting that is default for OpenIG since now.
+  Also it supports Sundog Softwares Silverlining and Triton SDK packages.
+  This involved removal of some of the previous lighting plug-ins
+  and replacing them all with the new IgPlugin-ForwardPlusLighting.
+  Plugins removed:
+  IgPlugin-Lighting  
+  IgPlugin-SimpleLighting
+
+- Added LightsControl plugin that supress the 
+  IgPlugin-RunwayLights and IgPlugin-RunwayControl plugins.
+  This plugin works with lights on a runway, convert the 
+  runway lights into F+ lights and manage multi-switches
+  on runwyas. 
+
+- Removed the IgPlugin-TimeOfDayBasedMaterial
+
+- Added Packet Factory singleton for cleaner and easier Packet
+  construction based on an opcode. Modified the Sample IgPlugin-Networking
+  to use this new feature
+
 11 Sep 2015, version 1.2.0
 - Added support for TCP/IP and UDP Network transfers between 
   a host and the OpenIG through the new library IgLib-Network

@@ -1,0 +1,59 @@
+<OpenIg-Model-Composition>        
+    <Shadow>CAST-AND-RECEIVE</Shadow>
+    <Shadowing>yes</Shadowing>
+    <Lighting>yes</Lighting>
+    <Texturing>no</Texturing>
+    <PreserveMaterial>yes</PreserveMaterial>
+
+    <Environmental>yes</Environmental>
+    <Environmental-Factor>0.1</Environmental-Factor>
+    <Environmental-Slot>2</Environmental-Slot>
+    <Environmental-Texture-Back>ely_snow/snow_bk.tga</Environmental-Texture-Back>
+    <Environmental-Texture-Front>ely_snow/snow_ft.tga</Environmental-Texture-Front>
+    <Environmental-Texture-Top>ely_snow/snow_up.tga</Environmental-Texture-Top>
+    <Environmental-Texture-Bottom>ely_snow/snow_dn.tga</Environmental-Texture-Bottom>
+    <Environmental-Texture-Left>ely_snow/snow_lf.tga</Environmental-Texture-Left>
+    <Environmental-Texture-Right>ely_snow/snow_rt.tga</Environmental-Texture-Right>
+
+  <Light>
+    <Name>Light1</Name>
+    <Color>1 1 1 1.0</Color>
+    <Position>-0.688 2.098 0.636</Position>
+    <Orientation>0 0 0</Orientation>
+    <Use-Real-Light>yes</Use-Real-Light>
+    <Brightness>7</Brightness>
+    <Real-Light-Offset>0.0 0 0.0</Real-Light-Offset>
+    <ConstAttenuation>100</ConstAttenuation>
+    <Animation-Pulses></Animation-Pulses>
+    <MinPixelSize>2</MinPixelSize>
+    <MaxPixelSize>2</MaxPixelSize>
+    <MinPixelSizeMultiplierForSprites>2</MinPixelSizeMultiplierForSprites>
+    <Radius>2</Radius>
+    <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
+    <StartRange>0</StartRange>
+    <EndRange>100</EndRange>
+    <SpotInnerAngle>50</SpotInnerAngle>
+    <SpotOuterAngle>72</SpotOuterAngle>
+  </Light>
+  <Light>
+    <Name>Light2</Name>
+    <Color>1 1 1 1.0</Color>
+    <Position>0.688 2.098 0.636</Position>
+    <Orientation>0 0 0</Orientation>
+    <Use-Real-Light>yes</Use-Real-Light>
+    <Brightness>7</Brightness>
+    <Real-Light-Offset>0.0 0 0.0</Real-Light-Offset>
+    <ConstAttenuation>100</ConstAttenuation>
+    <Animation-Pulses></Animation-Pulses>
+    <MinPixelSize>2</MinPixelSize>
+    <MaxPixelSize>2</MaxPixelSize>
+    <MinPixelSizeMultiplierForSprites>2</MinPixelSizeMultiplierForSprites>
+    <Radius>2</Radius>
+    <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
+    <StartRange>0</StartRange>
+    <EndRange>100</EndRange>
+    <SpotInnerAngle>50</SpotInnerAngle>
+    <SpotOuterAngle>72</SpotOuterAngle>
+  </Light>
+  
+</OpenIg-Model-Composition>

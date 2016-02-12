@@ -1,0 +1,6 @@
+<OpenIG-Plugin-Config>
+    <Pattern>OPEN_IG_Demo_NO_trees_</Pattern>
+    <Config-File>C:\Users\nick\Dev\database\PROJECTS_VDB_OIG_DEMO1\OPEN_IG_Demo_NO_trees\VegetationInfo.xml</Config-File>
+    <ForwardPlusEnabled>no</ForwardPlusEnabled>
+</OpenIG-Plugin-Config>
+

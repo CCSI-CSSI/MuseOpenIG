@@ -1,0 +1,12 @@
+<OpenIG-Plugin-Config>
+    <MediaRoot>/usr/local/database/Media</MediaRoot>
+    <!-- 
+    This is fast hack to have the UI across
+    the whole screen. OSG have issues of 
+    getting the screen resolution on 
+    multi-screen system. If set to 0
+    it will get it from the screen resolution
+    - ideal for single screen system
+    -->
+    <ScreenWidth>1600</ScreenWidth>
+</OpenIG-Plugin-Config>
