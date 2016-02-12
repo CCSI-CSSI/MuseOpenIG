@@ -1,6 +1,3 @@
-#Please HOLD OFF ANY checkouts until I have removed this line...a few files are still
-in the process of getting updated!!!!!!!!!!!!!!
-
 # Muse OpenIG V2.0.0
 The Muse OpenIG.  An opensource OpenSceneGraph based image generator application suite.
 
