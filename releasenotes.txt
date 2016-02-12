@@ -79,6 +79,12 @@ Updates in this release:
   construction based on an opcode. Modified the Sample IgPlugin-Networking
   to use this new feature
 
+- Updated Sundogs SilverLining to version 4.042 -- this revision is currently required
+  for use with our Forward+ lighting system and SilverLining clouds, etc..
+
+- Updated Sundogs Triton to version 3.51 -- this revision is currently required
+  for use with our Forward+ lighting system and Triton
+
 11 Sep 2015, version 1.2.0
 - Added support for TCP/IP and UDP Network transfers between 
   a host and the OpenIG through the new library IgLib-Network
