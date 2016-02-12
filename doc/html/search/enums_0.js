@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['mask',['Mask',['../structigcore_1_1_light_attributes.html#afbd6d3a8e3273ad9a5d6731de4536f26',1,'igcore::LightAttributes']]]
+  ['lighttype',['LightType',['../namespace_open_i_g_1_1_base.html#a4c81624bd5159e1b668c138242e0f86d',1,'OpenIG::Base']]]
 ];

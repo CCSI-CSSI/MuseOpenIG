@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['cloudbrightness',['CLOUDBRIGHTNESS',['../structigcore_1_1_light_attributes.html#afbd6d3a8e3273ad9a5d6731de4536f26a1949828f8c5168c1f1668322bc886d79',1,'igcore::LightAttributes']]],
-  ['constantattenuation',['CONSTANTATTENUATION',['../structigcore_1_1_light_attributes.html#afbd6d3a8e3273ad9a5d6731de4536f26a80cc808f87723556068b3b52cca710a8',1,'igcore::LightAttributes']]]
+  ['cloudbrightness',['CLOUDBRIGHTNESS',['../struct_open_i_g_1_1_base_1_1_light_attributes.html#aa6c7a573d9d54c46afc14cbde50bec64adacab039747f7fbd7095c828c267de91',1,'OpenIG::Base::LightAttributes']]],
+  ['constantattenuation',['CONSTANTATTENUATION',['../struct_open_i_g_1_1_base_1_1_light_attributes.html#aa6c7a573d9d54c46afc14cbde50bec64aa716f2331893b4a64d1156a971774e41',1,'OpenIG::Base::LightAttributes']]]
 ];

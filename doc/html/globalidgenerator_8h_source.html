@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.10"/>
-<title>OpenIG: IgCore/globalidgenerator.h Source File</title>
+<title>OpenIG: C:/Users/nick/Development/OpenIG-Bitbucket/Core-Base/globalidgenerator.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,11 +22,12 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr style="height: 56px;">
-  <td id="projectlogo"><img alt="Logo" src="openig_logo_233_67_72.png"/></td>
+  <td id="projectlogo"><img alt="Logo" src="openig_logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">OpenIG
-   &#160;<span id="projectnumber">v1.2.0</span>
+   &#160;<span id="projectnumber">2.0.0</span>
    </div>
+   <div id="projectbrief">An Open-Source Cross-Platform OpenSceneGraph based Image Generator</div>
   </td>
  </tr>
  </tbody>
@@ -64,6 +65,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="files.html"><span>File&#160;List</span></a></li>
+      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -82,7 +84,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_694ff5dfda91898e57a7d3eb9735b2eb.html">IgCore</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_03afdc99cb57c147418d8186cf7c037f.html">Core-Base</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -119,58 +121,62 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">#ifndef GLOBALIDGENERATOR_H</span></div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#define GLOBALIDGENERATOR_H</span></div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#include &lt;IgCore/export.h&gt;</span></div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">#include &lt;map&gt;</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#if defined(OPENOG_SDK)</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">    #include &lt;OpenIG-Base/export.h&gt;</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">#else</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">    #include &lt;Core-Base/export.h&gt;</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespaceigcore.html">igcore</a></div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;{</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;</div>
-<div class="line"><a name="l00050"></a><span class="lineno"><a class="line" href="classigcore_1_1_global_id_generator.html">   50</a></span>&#160;<span class="keyword">class </span>IGCORE_EXPORT <a class="code" href="classigcore_1_1_global_id_generator.html">GlobalIdGenerator</a></div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;{</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keyword">static</span> <a class="code" href="classigcore_1_1_global_id_generator.html">GlobalIdGenerator</a>*  instance();</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    <span class="keywordtype">void</span> initIdGroup(<span class="keyword">const</span> std::string&amp; group, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> base, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> size = 0);</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    <span class="keywordtype">bool</span> getNextId(<span class="keyword">const</span> std::string&amp; group, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>&amp; <span class="keywordtype">id</span>);</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    <span class="keywordtype">void</span> setAvailableIds(<span class="keyword">const</span> std::string&amp; group, <span class="keyword">const</span> std::vector&lt;unsigned int&gt;&amp; ids);</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    <a class="code" href="classigcore_1_1_global_id_generator.html">GlobalIdGenerator</a> ();</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    ~<a class="code" href="classigcore_1_1_global_id_generator.html">GlobalIdGenerator</a>();</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="preprocessor">#include &lt;map&gt;</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespace_open_i_g.html">OpenIG</a> {</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <span class="keyword">namespace </span>Base {</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;</div>
+<div class="line"><a name="l00054"></a><span class="lineno"><a class="line" href="class_open_i_g_1_1_base_1_1_global_id_generator.html">   54</a></span>&#160;        <span class="keyword">class </span>IGCORE_EXPORT <a class="code" href="class_open_i_g_1_1_base_1_1_global_id_generator.html">GlobalIdGenerator</a></div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        {</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;            <span class="keyword">static</span> <a class="code" href="class_open_i_g_1_1_base_1_1_global_id_generator.html">GlobalIdGenerator</a>*  instance();</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;            <span class="keywordtype">void</span> initIdGroup(<span class="keyword">const</span> std::string&amp; group, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> base, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> size = 0);</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;            <span class="keywordtype">bool</span> getNextId(<span class="keyword">const</span> std::string&amp; group, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>&amp; <span class="keywordtype">id</span>);</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;            <span class="keywordtype">void</span> setAvailableIds(<span class="keyword">const</span> std::string&amp; group, <span class="keyword">const</span> std::vector&lt;unsigned int&gt;&amp; ids);</div>
 <div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;</div>
-<div class="line"><a name="l00107"></a><span class="lineno"><a class="line" href="structigcore_1_1_global_id_generator_1_1_id_group.html">  107</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structigcore_1_1_global_id_generator_1_1_id_group.html">IdGroup</a></div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;    {</div>
-<div class="line"><a name="l00109"></a><span class="lineno"><a class="line" href="structigcore_1_1_global_id_generator_1_1_id_group.html#af5799ae680d384f44c39507cbd54a580">  109</a></span>&#160;        <span class="keyword">typedef</span> std::vector&lt;unsigned int&gt;   <a class="code" href="structigcore_1_1_global_id_generator_1_1_id_group.html#af5799ae680d384f44c39507cbd54a580">IDs</a>;</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;</div>
-<div class="line"><a name="l00111"></a><span class="lineno"><a class="line" href="structigcore_1_1_global_id_generator_1_1_id_group.html#a80b98d089d028c9f4835ad1d5f0fb280">  111</a></span>&#160;        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="structigcore_1_1_global_id_generator_1_1_id_group.html#a80b98d089d028c9f4835ad1d5f0fb280">_base</a>;</div>
-<div class="line"><a name="l00112"></a><span class="lineno"><a class="line" href="structigcore_1_1_global_id_generator_1_1_id_group.html#a02cc351d1defef467bf026e183c3aa81">  112</a></span>&#160;        IDs          <a class="code" href="structigcore_1_1_global_id_generator_1_1_id_group.html#a02cc351d1defef467bf026e183c3aa81">_ids</a>;</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;</div>
-<div class="line"><a name="l00114"></a><span class="lineno"><a class="line" href="structigcore_1_1_global_id_generator_1_1_id_group.html#a64283acc34931188205f924cc3d61258">  114</a></span>&#160;        <a class="code" href="structigcore_1_1_global_id_generator_1_1_id_group.html#a64283acc34931188205f924cc3d61258">IdGroup</a>() : _base(0) {}</div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;    };</div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;</div>
-<div class="line"><a name="l00117"></a><span class="lineno"><a class="line" href="classigcore_1_1_global_id_generator.html#ad3285364b53b40c78764623a972d731b">  117</a></span>&#160;    <span class="keyword">typedef</span> std::map&lt; std::string, IdGroup &gt;    <a class="code" href="classigcore_1_1_global_id_generator.html#ad3285364b53b40c78764623a972d731b">IdGroupMap</a>;</div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;</div>
-<div class="line"><a name="l00120"></a><span class="lineno"><a class="line" href="classigcore_1_1_global_id_generator.html#a7175a2cbd8b811e6c03d295a38fa32d6">  120</a></span>&#160;    IdGroupMap  <a class="code" href="classigcore_1_1_global_id_generator.html#a7175a2cbd8b811e6c03d295a38fa32d6">_groups</a>;</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;};</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;        <span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;            <a class="code" href="class_open_i_g_1_1_base_1_1_global_id_generator.html">GlobalIdGenerator</a>();</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;            ~<a class="code" href="class_open_i_g_1_1_base_1_1_global_id_generator.html">GlobalIdGenerator</a>();</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;</div>
+<div class="line"><a name="l00111"></a><span class="lineno"><a class="line" href="struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group.html">  111</a></span>&#160;            <span class="keyword">struct </span><a class="code" href="struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group.html">IdGroup</a></div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;            {</div>
+<div class="line"><a name="l00113"></a><span class="lineno"><a class="line" href="struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group.html#ab31e4cd861e738d82d77094105cbc61e">  113</a></span>&#160;                <span class="keyword">typedef</span> std::vector&lt;unsigned int&gt;   <a class="code" href="struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group.html#ab31e4cd861e738d82d77094105cbc61e">IDs</a>;</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;</div>
+<div class="line"><a name="l00115"></a><span class="lineno"><a class="line" href="struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group.html#a8f3dbb28cefaa70c135d9c52b3810967">  115</a></span>&#160;                <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group.html#a8f3dbb28cefaa70c135d9c52b3810967">_base</a>;</div>
+<div class="line"><a name="l00116"></a><span class="lineno"><a class="line" href="struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group.html#aae50902d39632b188a06f781b450a180">  116</a></span>&#160;                IDs          <a class="code" href="struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group.html#aae50902d39632b188a06f781b450a180">_ids</a>;</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;</div>
+<div class="line"><a name="l00118"></a><span class="lineno"><a class="line" href="struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group.html#a87c9b866506221ce1f83e1566855e8ed">  118</a></span>&#160;                <a class="code" href="struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group.html#a87c9b866506221ce1f83e1566855e8ed">IdGroup</a>() : _base(0) {}</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;            };</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;</div>
+<div class="line"><a name="l00121"></a><span class="lineno"><a class="line" href="class_open_i_g_1_1_base_1_1_global_id_generator.html#a130b67137a9088aa25ea8c5b1d3a6969">  121</a></span>&#160;            <span class="keyword">typedef</span> std::map&lt; std::string, IdGroup &gt;    <a class="code" href="class_open_i_g_1_1_base_1_1_global_id_generator.html#a130b67137a9088aa25ea8c5b1d3a6969">IdGroupMap</a>;</div>
 <div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;</div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;} <span class="comment">// namespace</span></div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;</div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;<span class="preprocessor">#endif // GLOBALIDGENERATOR_H</span></div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;</div>
-<div class="ttc" id="classigcore_1_1_global_id_generator_html"><div class="ttname"><a href="classigcore_1_1_global_id_generator.html">igcore::GlobalIdGenerator</a></div><div class="ttdoc">Handy singleton class for ID numbers management. </div><div class="ttdef"><b>Definition:</b> <a href="globalidgenerator_8h_source.html#l00050">globalidgenerator.h:50</a></div></div>
-<div class="ttc" id="structigcore_1_1_global_id_generator_1_1_id_group_html_a02cc351d1defef467bf026e183c3aa81"><div class="ttname"><a href="structigcore_1_1_global_id_generator_1_1_id_group.html#a02cc351d1defef467bf026e183c3aa81">igcore::GlobalIdGenerator::IdGroup::_ids</a></div><div class="ttdeci">IDs _ids</div><div class="ttdef"><b>Definition:</b> <a href="globalidgenerator_8h_source.html#l00112">globalidgenerator.h:112</a></div></div>
-<div class="ttc" id="structigcore_1_1_global_id_generator_1_1_id_group_html_af5799ae680d384f44c39507cbd54a580"><div class="ttname"><a href="structigcore_1_1_global_id_generator_1_1_id_group.html#af5799ae680d384f44c39507cbd54a580">igcore::GlobalIdGenerator::IdGroup::IDs</a></div><div class="ttdeci">std::vector&lt; unsigned int &gt; IDs</div><div class="ttdef"><b>Definition:</b> <a href="globalidgenerator_8h_source.html#l00109">globalidgenerator.h:109</a></div></div>
-<div class="ttc" id="structigcore_1_1_global_id_generator_1_1_id_group_html_a80b98d089d028c9f4835ad1d5f0fb280"><div class="ttname"><a href="structigcore_1_1_global_id_generator_1_1_id_group.html#a80b98d089d028c9f4835ad1d5f0fb280">igcore::GlobalIdGenerator::IdGroup::_base</a></div><div class="ttdeci">unsigned int _base</div><div class="ttdef"><b>Definition:</b> <a href="globalidgenerator_8h_source.html#l00111">globalidgenerator.h:111</a></div></div>
-<div class="ttc" id="classigcore_1_1_global_id_generator_html_ad3285364b53b40c78764623a972d731b"><div class="ttname"><a href="classigcore_1_1_global_id_generator.html#ad3285364b53b40c78764623a972d731b">igcore::GlobalIdGenerator::IdGroupMap</a></div><div class="ttdeci">std::map&lt; std::string, IdGroup &gt; IdGroupMap</div><div class="ttdef"><b>Definition:</b> <a href="globalidgenerator_8h_source.html#l00117">globalidgenerator.h:117</a></div></div>
-<div class="ttc" id="structigcore_1_1_global_id_generator_1_1_id_group_html"><div class="ttname"><a href="structigcore_1_1_global_id_generator_1_1_id_group.html">igcore::GlobalIdGenerator::IdGroup</a></div><div class="ttdoc">The IdGroup struct. Internal for ID management. </div><div class="ttdef"><b>Definition:</b> <a href="globalidgenerator_8h_source.html#l00107">globalidgenerator.h:107</a></div></div>
-<div class="ttc" id="structigcore_1_1_global_id_generator_1_1_id_group_html_a64283acc34931188205f924cc3d61258"><div class="ttname"><a href="structigcore_1_1_global_id_generator_1_1_id_group.html#a64283acc34931188205f924cc3d61258">igcore::GlobalIdGenerator::IdGroup::IdGroup</a></div><div class="ttdeci">IdGroup()</div><div class="ttdef"><b>Definition:</b> <a href="globalidgenerator_8h_source.html#l00114">globalidgenerator.h:114</a></div></div>
-<div class="ttc" id="classigcore_1_1_global_id_generator_html_a7175a2cbd8b811e6c03d295a38fa32d6"><div class="ttname"><a href="classigcore_1_1_global_id_generator.html#a7175a2cbd8b811e6c03d295a38fa32d6">igcore::GlobalIdGenerator::_groups</a></div><div class="ttdeci">IdGroupMap _groups</div><div class="ttdoc">name based std::map of IdGroup </div><div class="ttdef"><b>Definition:</b> <a href="globalidgenerator_8h_source.html#l00120">globalidgenerator.h:120</a></div></div>
-<div class="ttc" id="namespaceigcore_html"><div class="ttname"><a href="namespaceigcore.html">igcore</a></div><div class="ttdef"><b>Definition:</b> <a href="animation_8h_source.html#l00042">animation.h:42</a></div></div>
+<div class="line"><a name="l00124"></a><span class="lineno"><a class="line" href="class_open_i_g_1_1_base_1_1_global_id_generator.html#aa3add17a918bebd0a285284c812136ea">  124</a></span>&#160;            IdGroupMap  <a class="code" href="class_open_i_g_1_1_base_1_1_global_id_generator.html#aa3add17a918bebd0a285284c812136ea">_groups</a>;</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;        };</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;    } <span class="comment">// namespace</span></div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;} <span class="comment">// namespace</span></div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;</div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;<span class="preprocessor">#endif // GLOBALIDGENERATOR_H</span></div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;</div>
+<div class="ttc" id="namespace_open_i_g_html"><div class="ttname"><a href="namespace_open_i_g.html">OpenIG</a></div><div class="ttdef"><b>Definition:</b> <a href="animation_8h_source.html#l00047">animation.h:47</a></div></div>
+<div class="ttc" id="class_open_i_g_1_1_base_1_1_global_id_generator_html_aa3add17a918bebd0a285284c812136ea"><div class="ttname"><a href="class_open_i_g_1_1_base_1_1_global_id_generator.html#aa3add17a918bebd0a285284c812136ea">OpenIG::Base::GlobalIdGenerator::_groups</a></div><div class="ttdeci">IdGroupMap _groups</div><div class="ttdoc">name based std::map of IdGroup </div><div class="ttdef"><b>Definition:</b> <a href="globalidgenerator_8h_source.html#l00124">globalidgenerator.h:124</a></div></div>
+<div class="ttc" id="struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group_html_a8f3dbb28cefaa70c135d9c52b3810967"><div class="ttname"><a href="struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group.html#a8f3dbb28cefaa70c135d9c52b3810967">OpenIG::Base::GlobalIdGenerator::IdGroup::_base</a></div><div class="ttdeci">unsigned int _base</div><div class="ttdef"><b>Definition:</b> <a href="globalidgenerator_8h_source.html#l00115">globalidgenerator.h:115</a></div></div>
+<div class="ttc" id="class_open_i_g_1_1_base_1_1_global_id_generator_html"><div class="ttname"><a href="class_open_i_g_1_1_base_1_1_global_id_generator.html">OpenIG::Base::GlobalIdGenerator</a></div><div class="ttdoc">Handy singleton class for ID numbers management. </div><div class="ttdef"><b>Definition:</b> <a href="globalidgenerator_8h_source.html#l00054">globalidgenerator.h:54</a></div></div>
+<div class="ttc" id="struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group_html"><div class="ttname"><a href="struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group.html">OpenIG::Base::GlobalIdGenerator::IdGroup</a></div><div class="ttdoc">The IdGroup struct. Internal for ID management. </div><div class="ttdef"><b>Definition:</b> <a href="globalidgenerator_8h_source.html#l00111">globalidgenerator.h:111</a></div></div>
+<div class="ttc" id="struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group_html_aae50902d39632b188a06f781b450a180"><div class="ttname"><a href="struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group.html#aae50902d39632b188a06f781b450a180">OpenIG::Base::GlobalIdGenerator::IdGroup::_ids</a></div><div class="ttdeci">IDs _ids</div><div class="ttdef"><b>Definition:</b> <a href="globalidgenerator_8h_source.html#l00116">globalidgenerator.h:116</a></div></div>
+<div class="ttc" id="struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group_html_ab31e4cd861e738d82d77094105cbc61e"><div class="ttname"><a href="struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group.html#ab31e4cd861e738d82d77094105cbc61e">OpenIG::Base::GlobalIdGenerator::IdGroup::IDs</a></div><div class="ttdeci">std::vector&lt; unsigned int &gt; IDs</div><div class="ttdef"><b>Definition:</b> <a href="globalidgenerator_8h_source.html#l00113">globalidgenerator.h:113</a></div></div>
+<div class="ttc" id="class_open_i_g_1_1_base_1_1_global_id_generator_html_a130b67137a9088aa25ea8c5b1d3a6969"><div class="ttname"><a href="class_open_i_g_1_1_base_1_1_global_id_generator.html#a130b67137a9088aa25ea8c5b1d3a6969">OpenIG::Base::GlobalIdGenerator::IdGroupMap</a></div><div class="ttdeci">std::map&lt; std::string, IdGroup &gt; IdGroupMap</div><div class="ttdef"><b>Definition:</b> <a href="globalidgenerator_8h_source.html#l00121">globalidgenerator.h:121</a></div></div>
+<div class="ttc" id="struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group_html_a87c9b866506221ce1f83e1566855e8ed"><div class="ttname"><a href="struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group.html#a87c9b866506221ce1f83e1566855e8ed">OpenIG::Base::GlobalIdGenerator::IdGroup::IdGroup</a></div><div class="ttdeci">IdGroup()</div><div class="ttdef"><b>Definition:</b> <a href="globalidgenerator_8h_source.html#l00118">globalidgenerator.h:118</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

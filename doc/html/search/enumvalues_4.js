@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['enabled',['ENABLED',['../structigcore_1_1_light_attributes.html#afbd6d3a8e3273ad9a5d6731de4536f26a5fa9959fc96638f6c0347e861d220427',1,'igcore::LightAttributes']]]
+  ['enabled',['ENABLED',['../struct_open_i_g_1_1_base_1_1_light_attributes.html#aa6c7a573d9d54c46afc14cbde50bec64a2c0859b25c0f0ff475a90e7582cef0bb',1,'OpenIG::Base::LightAttributes']]]
 ];

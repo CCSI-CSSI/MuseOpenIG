@@ -1,9 +1,8 @@
 var searchData=
 [
-  ['pluginlibrariesmap',['PluginLibrariesMap',['../classigplugincore_1_1_plugin_host.html#aeca4c33f4638a335edf258c540f55d43',1,'igplugincore::PluginHost']]],
-  ['pluginlibrariesmapconstiterator',['PluginLibrariesMapConstIterator',['../classigplugincore_1_1_plugin_host.html#a1a30e70b15b9fb7d389d8733792bf038',1,'igplugincore::PluginHost']]],
-  ['pluginlibrariesmapiterator',['PluginLibrariesMapIterator',['../classigplugincore_1_1_plugin_host.html#ac3803199ce354c3e4a1706e6b63940ed',1,'igplugincore::PluginHost']]],
-  ['pluginsmap',['PluginsMap',['../classigplugincore_1_1_plugin_host.html#aca0e5934bac129ef0af498813520cd43',1,'igplugincore::PluginHost']]],
-  ['pluginsmapconstiterator',['PluginsMapConstIterator',['../classigplugincore_1_1_plugin_host.html#a6aeb83287881b6e679a9a9e8111fa626',1,'igplugincore::PluginHost']]],
-  ['pluginsmapiterator',['PluginsMapIterator',['../classigplugincore_1_1_plugin_host.html#aa7c080d85fd14bba107e178183645ab0',1,'igplugincore::PluginHost']]]
+  ['lightattributesmap',['LightAttributesMap',['../class_open_i_g_1_1_base_1_1_image_generator.html#ac1af3243c7d2fe41da6df37815a2e292',1,'OpenIG::Base::ImageGenerator']]],
+  ['lightentity',['LightEntity',['../class_open_i_g_1_1_engine.html#ada627d64f318c9296a021083dcc68fce',1,'OpenIG::Engine']]],
+  ['lightsmap',['LightsMap',['../class_open_i_g_1_1_engine.html#ace353cafeb7e0b416b6b48e25b2c0985',1,'OpenIG::Engine']]],
+  ['lightsmapconstiterator',['LightsMapConstIterator',['../class_open_i_g_1_1_engine.html#aafb1801c2b44990abf1e945d344885c2',1,'OpenIG::Engine']]],
+  ['lightsmapiterator',['LightsMapIterator',['../class_open_i_g_1_1_engine.html#acde3f6145835d1e34992c0721a5e9f57',1,'OpenIG::Engine']]]
 ];

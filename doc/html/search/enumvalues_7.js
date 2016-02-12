@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['specular',['SPECULAR',['../structigcore_1_1_light_attributes.html#afbd6d3a8e3273ad9a5d6731de4536f26ad23b07efd3a8a949a060f7f8ddee9f04',1,'igcore::LightAttributes']]],
-  ['spotcutoff',['SPOTCUTOFF',['../structigcore_1_1_light_attributes.html#afbd6d3a8e3273ad9a5d6731de4536f26a3238f57ef2145607bed7ce67c7c75656',1,'igcore::LightAttributes']]]
+  ['pathlist',['PathList',['../class_open_i_g_1_1_base_1_1_file_system.html#a086a9d70656c2407794b08e4d5f60a39a54c1a9d6f9365e134b0cf44e371581fb',1,'OpenIG::Base::FileSystem']]],
+  ['plugins',['Plugins',['../class_open_i_g_1_1_base_1_1_file_system.html#a086a9d70656c2407794b08e4d5f60a39a1307877ff19c7c6593a0ba93537c2099',1,'OpenIG::Base::FileSystem']]]
 ];

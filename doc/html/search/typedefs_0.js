@@ -1,9 +1,9 @@
 var searchData=
 [
-  ['animationsequencecallbacks',['AnimationSequenceCallbacks',['../namespaceigcore.html#a3257a39a8f3ccf9389d048f7dbe2c82e',1,'igcore']]],
-  ['animationsequencecallbacksconstiterator',['AnimationSequenceCallbacksConstIterator',['../namespaceigcore.html#a693179e06b552d1321c86c7dfe7078c1',1,'igcore']]],
-  ['animationsequencecallbacksiterator',['AnimationSequenceCallbacksIterator',['../namespaceigcore.html#a77fa064265526fa51ea120b4f1910ea1',1,'igcore']]],
-  ['attributemap',['AttributeMap',['../classigplugincore_1_1_plugin_context.html#a72ca6d55d195ad80809c3f72e7b12e5e',1,'igplugincore::PluginContext']]],
-  ['attributemapconstiterator',['AttributeMapConstIterator',['../classigplugincore_1_1_plugin_context.html#a6e17464e2b1020aa83792e7983dcc955',1,'igplugincore::PluginContext']]],
-  ['attributemapiterator',['AttributeMapIterator',['../classigplugincore_1_1_plugin_context.html#aea2c9f2176cf6a12969aad3a132c710c',1,'igplugincore::PluginContext']]]
+  ['animationsequencecallbacks',['AnimationSequenceCallbacks',['../namespace_open_i_g_1_1_base.html#a20bce030649f2b72e19f63554426a942',1,'OpenIG::Base']]],
+  ['animationsequencecallbacksconstiterator',['AnimationSequenceCallbacksConstIterator',['../namespace_open_i_g_1_1_base.html#ab740f00586e80f369440cd023a2b2374',1,'OpenIG::Base']]],
+  ['animationsequencecallbacksiterator',['AnimationSequenceCallbacksIterator',['../namespace_open_i_g_1_1_base.html#aa295eddfd108a0ebbccf5d739ae2e6b5',1,'OpenIG::Base']]],
+  ['attributemap',['AttributeMap',['../class_open_i_g_1_1_plugin_base_1_1_plugin_context.html#a6ed5958d6726eed533caa2fc5c3069ee',1,'OpenIG::PluginBase::PluginContext']]],
+  ['attributemapconstiterator',['AttributeMapConstIterator',['../class_open_i_g_1_1_plugin_base_1_1_plugin_context.html#af7dde47d489e78da8596a90983ae9474',1,'OpenIG::PluginBase::PluginContext']]],
+  ['attributemapiterator',['AttributeMapIterator',['../class_open_i_g_1_1_plugin_base_1_1_plugin_context.html#afbed737cc248b4a3ff3763a88280cdc2',1,'OpenIG::PluginBase::PluginContext']]]
 ];

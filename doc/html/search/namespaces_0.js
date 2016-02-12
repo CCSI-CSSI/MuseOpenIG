@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['igcore',['igcore',['../namespaceigcore.html',1,'']]],
-  ['igplugincore',['igplugincore',['../namespaceigplugincore.html',1,'']]]
+  ['base',['Base',['../namespace_open_i_g_1_1_base.html',1,'OpenIG']]],
+  ['openig',['OpenIG',['../namespace_open_i_g.html',1,'']]],
+  ['osg',['osg',['../namespaceosg.html',1,'']]],
+  ['pluginbase',['PluginBase',['../namespace_open_i_g_1_1_plugin_base.html',1,'OpenIG']]]
 ];

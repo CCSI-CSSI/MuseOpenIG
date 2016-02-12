@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['sequencesmap',['SequencesMap',['../structigcore_1_1_animations_1_1_animation.html#a0b9caaaa7d4c74c08f9e48742460a146',1,'igcore::Animations::Animation']]],
-  ['sequencesmapconstiterator',['SequencesMapConstIterator',['../structigcore_1_1_animations_1_1_animation.html#a75603e73f090845548f1396b5227489e',1,'igcore::Animations::Animation']]],
-  ['sequencesmapiterator',['SequencesMapIterator',['../structigcore_1_1_animations_1_1_animation.html#a501e2459f50173cdb593272fcc6405c6',1,'igcore::Animations::Animation']]]
+  ['runtimeanimations',['RuntimeAnimations',['../class_open_i_g_1_1_base_1_1_animations.html#a59b29fbcfba5f4acfc9bc8e10fc44116',1,'OpenIG::Base::Animations']]],
+  ['runtimeanimationsconstiterator',['RuntimeAnimationsConstIterator',['../class_open_i_g_1_1_base_1_1_animations.html#a7f9bcfb699d9e3249bd550de7d4289d5',1,'OpenIG::Base::Animations']]],
+  ['runtimeanimationsiterator',['RuntimeAnimationsIterator',['../class_open_i_g_1_1_base_1_1_animations.html#a404253708e41328643ee98d3edf86dc6',1,'OpenIG::Base::Animations']]]
 ];

@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.10"/>
-<title>OpenIG: IgCore/commands.h Source File</title>
+<title>OpenIG: C:/Users/nick/Development/OpenIG-Bitbucket/Core-Base/commands.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,11 +22,12 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr style="height: 56px;">
-  <td id="projectlogo"><img alt="Logo" src="openig_logo_233_67_72.png"/></td>
+  <td id="projectlogo"><img alt="Logo" src="openig_logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">OpenIG
-   &#160;<span id="projectnumber">v1.2.0</span>
+   &#160;<span id="projectnumber">2.0.0</span>
    </div>
+   <div id="projectbrief">An Open-Source Cross-Platform OpenSceneGraph based Image Generator</div>
   </td>
  </tr>
  </tbody>
@@ -64,6 +65,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="files.html"><span>File&#160;List</span></a></li>
+      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -82,7 +84,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_694ff5dfda91898e57a7d3eb9735b2eb.html">IgCore</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_03afdc99cb57c147418d8186cf7c037f.html">Core-Base</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -118,71 +120,84 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="preprocessor">#ifndef COMMANDS_H</span></div>
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">#define COMMANDS_H</span></div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">#include &lt;IgCore/stringutils.h&gt;</span></div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#include &lt;IgCore/export.h&gt;</span></div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">#include &lt;map&gt;</span></div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">#include &lt;osg/ref_ptr&gt;</span></div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="preprocessor">#include &lt;osg/Referenced&gt;</span></div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespaceigcore.html">igcore</a></div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;{</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;</div>
-<div class="line"><a name="l00047"></a><span class="lineno"><a class="line" href="classigcore_1_1_commands.html">   47</a></span>&#160;<span class="keyword">class </span>IGCORE_EXPORT <a class="code" href="classigcore_1_1_commands.html">Commands</a></div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;{</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <a class="code" href="classigcore_1_1_commands.html">Commands</a>();</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    ~<a class="code" href="classigcore_1_1_commands.html">Commands</a>();</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00073"></a><span class="lineno"><a class="line" href="classigcore_1_1_commands_1_1_command.html">   73</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classigcore_1_1_commands_1_1_command.html">Command</a> : <span class="keyword">public</span> osg::Referenced</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    {</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">int</span> exec(<span class="keyword">const</span> StringUtils::Tokens&amp; tokens) = 0;</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;        <span class="keyword">virtual</span> <span class="keyword">const</span> std::string getUsage() <span class="keyword">const</span> = 0;</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;        <span class="keyword">virtual</span> <span class="keyword">const</span> std::string getDescription() <span class="keyword">const</span> = 0;</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    };</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    <span class="keyword">static</span> <a class="code" href="classigcore_1_1_commands.html">Commands</a>*    instance();</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;    <span class="keywordtype">int</span>                 exec(<span class="keyword">const</span> std::string&amp; command);</div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;</div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;    <span class="keywordtype">void</span>                addCommand(<span class="keyword">const</span> std::string&amp; command, <a class="code" href="classigcore_1_1_commands_1_1_command.html">Command</a>* cmd);</div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;</div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;    <span class="keywordtype">void</span>                loadScript(<span class="keyword">const</span> std::string&amp; fileName);</div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;</div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;    <span class="keywordtype">void</span>                clear();</div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;</div>
-<div class="line"><a name="l00151"></a><span class="lineno"><a class="line" href="classigcore_1_1_commands.html#afddf15e62035f371fe24836ccb11a8a5">  151</a></span>&#160;    <span class="keyword">typedef</span> std::map&lt;std::string,osg::ref_ptr&lt;Command&gt; &gt;                    <a class="code" href="classigcore_1_1_commands.html#afddf15e62035f371fe24836ccb11a8a5">CommandsMap</a>;</div>
-<div class="line"><a name="l00152"></a><span class="lineno"><a class="line" href="classigcore_1_1_commands.html#afa3556c66d49e69c3fe84baf02688b00">  152</a></span>&#160;    <span class="keyword">typedef</span> std::map&lt;std::string,osg::ref_ptr&lt;Command&gt; &gt;::iterator          <a class="code" href="classigcore_1_1_commands.html#afa3556c66d49e69c3fe84baf02688b00">CommandsMapIterator</a>;</div>
-<div class="line"><a name="l00153"></a><span class="lineno"><a class="line" href="classigcore_1_1_commands.html#a349d8cd055031b1473a916e89e2221eb">  153</a></span>&#160;    <span class="keyword">typedef</span> std::map&lt;std::string,osg::ref_ptr&lt;Command&gt; &gt;::const_iterator    <a class="code" href="classigcore_1_1_commands.html#a349d8cd055031b1473a916e89e2221eb">CommandsMapConstIterator</a>;</div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;</div>
-<div class="line"><a name="l00162"></a><span class="lineno"><a class="line" href="classigcore_1_1_commands.html#accc2e8a1627d58b290140dc05496a5ea">  162</a></span>&#160;    <span class="keyword">const</span> CommandsMap&amp; <a class="code" href="classigcore_1_1_commands.html#accc2e8a1627d58b290140dc05496a5ea">getCommands</a>()<span class="keyword"> const</span></div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;<span class="keyword">    </span>{</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;        <span class="keywordflow">return</span> _commands;</div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;    }</div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;</div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00169"></a><span class="lineno"><a class="line" href="classigcore_1_1_commands.html#a5af5b4acee38ef68b6f8b7029b54c66f">  169</a></span>&#160;    CommandsMap     <a class="code" href="classigcore_1_1_commands.html#a5af5b4acee38ef68b6f8b7029b54c66f">_commands</a>;</div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;};</div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;} <span class="comment">// namespace</span></div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;</div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;<span class="preprocessor">#endif // COMMANDS_H</span></div>
-<div class="ttc" id="classigcore_1_1_commands_html_afddf15e62035f371fe24836ccb11a8a5"><div class="ttname"><a href="classigcore_1_1_commands.html#afddf15e62035f371fe24836ccb11a8a5">igcore::Commands::CommandsMap</a></div><div class="ttdeci">std::map&lt; std::string, osg::ref_ptr&lt; Command &gt; &gt; CommandsMap</div><div class="ttdef"><b>Definition:</b> <a href="commands_8h_source.html#l00151">commands.h:151</a></div></div>
-<div class="ttc" id="classigcore_1_1_commands_html_accc2e8a1627d58b290140dc05496a5ea"><div class="ttname"><a href="classigcore_1_1_commands.html#accc2e8a1627d58b290140dc05496a5ea">igcore::Commands::getCommands</a></div><div class="ttdeci">const CommandsMap &amp; getCommands() const </div><div class="ttdoc">Gives the current commands. </div><div class="ttdef"><b>Definition:</b> <a href="commands_8h_source.html#l00162">commands.h:162</a></div></div>
-<div class="ttc" id="classigcore_1_1_commands_html_afa3556c66d49e69c3fe84baf02688b00"><div class="ttname"><a href="classigcore_1_1_commands.html#afa3556c66d49e69c3fe84baf02688b00">igcore::Commands::CommandsMapIterator</a></div><div class="ttdeci">std::map&lt; std::string, osg::ref_ptr&lt; Command &gt; &gt;::iterator CommandsMapIterator</div><div class="ttdef"><b>Definition:</b> <a href="commands_8h_source.html#l00152">commands.h:152</a></div></div>
-<div class="ttc" id="classigcore_1_1_commands_html_a349d8cd055031b1473a916e89e2221eb"><div class="ttname"><a href="classigcore_1_1_commands.html#a349d8cd055031b1473a916e89e2221eb">igcore::Commands::CommandsMapConstIterator</a></div><div class="ttdeci">std::map&lt; std::string, osg::ref_ptr&lt; Command &gt; &gt;::const_iterator CommandsMapConstIterator</div><div class="ttdef"><b>Definition:</b> <a href="commands_8h_source.html#l00153">commands.h:153</a></div></div>
-<div class="ttc" id="classigcore_1_1_commands_html_a5af5b4acee38ef68b6f8b7029b54c66f"><div class="ttname"><a href="classigcore_1_1_commands.html#a5af5b4acee38ef68b6f8b7029b54c66f">igcore::Commands::_commands</a></div><div class="ttdeci">CommandsMap _commands</div><div class="ttdoc">name based std::map of commands added </div><div class="ttdef"><b>Definition:</b> <a href="commands_8h_source.html#l00169">commands.h:169</a></div></div>
-<div class="ttc" id="classigcore_1_1_commands_html"><div class="ttname"><a href="classigcore_1_1_commands.html">igcore::Commands</a></div><div class="ttdoc">The Commands singleton class. </div><div class="ttdef"><b>Definition:</b> <a href="commands_8h_source.html#l00047">commands.h:47</a></div></div>
-<div class="ttc" id="namespaceigcore_html"><div class="ttname"><a href="namespaceigcore.html">igcore</a></div><div class="ttdef"><b>Definition:</b> <a href="animation_8h_source.html#l00042">animation.h:42</a></div></div>
-<div class="ttc" id="classigcore_1_1_commands_1_1_command_html"><div class="ttname"><a href="classigcore_1_1_commands_1_1_command.html">igcore::Commands::Command</a></div><div class="ttdoc">The Command class. </div><div class="ttdef"><b>Definition:</b> <a href="commands_8h_source.html#l00073">commands.h:73</a></div></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">#if defined(OPENIG_SDK)</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">    #include &lt;OpenIG-Base/stringutils.h&gt;</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">    #include &lt;OpenIG-Base/export.h&gt;</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">#else</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">    #include &lt;<a class="code" href="stringutils_8h.html">Core-Base/stringutils.h</a>&gt;</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">    #include &lt;Core-Base/export.h&gt;</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="preprocessor">#include &lt;map&gt;</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="preprocessor">#include &lt;osg/ref_ptr&gt;</span></div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="preprocessor">#include &lt;osg/Referenced&gt;</span></div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespace_open_i_g.html">OpenIG</a> {</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keyword">namespace </span>Base {</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;</div>
+<div class="line"><a name="l00052"></a><span class="lineno"><a class="line" href="class_open_i_g_1_1_base_1_1_commands.html">   52</a></span>&#160;        <span class="keyword">class </span>IGCORE_EXPORT <a class="code" href="class_open_i_g_1_1_base_1_1_commands.html">Commands</a></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        {</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        <span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;            <a class="code" href="class_open_i_g_1_1_base_1_1_commands.html">Commands</a>();</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;            ~<a class="code" href="class_open_i_g_1_1_base_1_1_commands.html">Commands</a>();</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00078"></a><span class="lineno"><a class="line" href="class_open_i_g_1_1_base_1_1_commands_1_1_command.html">   78</a></span>&#160;            <span class="keyword">class </span><a class="code" href="class_open_i_g_1_1_base_1_1_commands_1_1_command.html">Command</a> : <span class="keyword">public</span> osg::Referenced</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;            {</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;            <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;                <span class="keyword">virtual</span> <span class="keywordtype">int</span> exec(<span class="keyword">const</span> <a class="code" href="class_open_i_g_1_1_base_1_1_string_utils.html#aa5c9169817d4790848d7962117c38b69">StringUtils::Tokens</a>&amp; tokens) = 0;</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;                <span class="keyword">virtual</span> <span class="keyword">const</span> std::string getUsage() <span class="keyword">const</span> = 0;</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;                <span class="keyword">virtual</span> <span class="keyword">const</span> std::string getDescription() <span class="keyword">const</span> = 0;</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;</div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;                <span class="keyword">virtual</span> <span class="keyword">const</span> std::string getArgumentsFormat() <span class="keyword">const</span> = 0;</div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;            };</div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;</div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;            <span class="keyword">static</span> <a class="code" href="class_open_i_g_1_1_base_1_1_commands.html">Commands</a>*    instance();</div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;            <span class="keywordtype">int</span>                 exec(<span class="keyword">const</span> std::string&amp; command);</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;            <span class="keywordtype">void</span>                addCommand(<span class="keyword">const</span> std::string&amp; command, <a class="code" href="class_open_i_g_1_1_base_1_1_commands_1_1_command.html">Command</a>* cmd);</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;</div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;            <span class="keywordtype">void</span>                loadScript(<span class="keyword">const</span> std::string&amp; fileName);</div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;            <span class="keywordtype">void</span>                clear();</div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;</div>
+<div class="line"><a name="l00176"></a><span class="lineno"><a class="line" href="class_open_i_g_1_1_base_1_1_commands.html#afda7ad298ab843ff2ce182e564a92fb7">  176</a></span>&#160;            <span class="keyword">typedef</span> osg::ref_ptr&lt;Command&gt;                                           <a class="code" href="class_open_i_g_1_1_base_1_1_commands.html#afda7ad298ab843ff2ce182e564a92fb7">CommandPtr</a>;</div>
+<div class="line"><a name="l00177"></a><span class="lineno"><a class="line" href="class_open_i_g_1_1_base_1_1_commands.html#a6c1f5769f88db0c91e77e0d65574f617">  177</a></span>&#160;            <span class="keyword">typedef</span> std::map&lt;std::string, osg::ref_ptr&lt;Command&gt; &gt;                   <a class="code" href="class_open_i_g_1_1_base_1_1_commands.html#a6c1f5769f88db0c91e77e0d65574f617">CommandsMap</a>;</div>
+<div class="line"><a name="l00178"></a><span class="lineno"><a class="line" href="class_open_i_g_1_1_base_1_1_commands.html#a206615bee58f2c5e15fe5c8fa0654e2e">  178</a></span>&#160;            <span class="keyword">typedef</span> std::map&lt;std::string, osg::ref_ptr&lt;Command&gt; &gt;::iterator         <a class="code" href="class_open_i_g_1_1_base_1_1_commands.html#a206615bee58f2c5e15fe5c8fa0654e2e">CommandsMapIterator</a>;</div>
+<div class="line"><a name="l00179"></a><span class="lineno"><a class="line" href="class_open_i_g_1_1_base_1_1_commands.html#a803b11e646146ec64bd60221d88e282e">  179</a></span>&#160;            <span class="keyword">typedef</span> std::map&lt;std::string, osg::ref_ptr&lt;Command&gt; &gt;::const_iterator   <a class="code" href="class_open_i_g_1_1_base_1_1_commands.html#a803b11e646146ec64bd60221d88e282e">CommandsMapConstIterator</a>;</div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;</div>
+<div class="line"><a name="l00188"></a><span class="lineno"><a class="line" href="class_open_i_g_1_1_base_1_1_commands.html#a90697a991a9b5ba80a9ae063ef0311f8">  188</a></span>&#160;            <span class="keyword">const</span> CommandsMap&amp; <a class="code" href="class_open_i_g_1_1_base_1_1_commands.html#a90697a991a9b5ba80a9ae063ef0311f8">getCommands</a>()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;<span class="keyword">            </span>{</div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;                <span class="keywordflow">return</span> _commands;</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;            }</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;</div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;            <span class="keywordtype">void</span> removeCommand(<span class="keyword">const</span> std::string&amp; command);</div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;        <span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00204"></a><span class="lineno"><a class="line" href="class_open_i_g_1_1_base_1_1_commands.html#a8297a7861178aed592e6cdc36e488df3">  204</a></span>&#160;            CommandsMap     <a class="code" href="class_open_i_g_1_1_base_1_1_commands.html#a8297a7861178aed592e6cdc36e488df3">_commands</a>;</div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;</div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;        };</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;    } <span class="comment">// namespace</span></div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;} <span class="comment">// namespace</span></div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;</div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;<span class="preprocessor">#endif // COMMANDS_H</span></div>
+<div class="ttc" id="namespace_open_i_g_html"><div class="ttname"><a href="namespace_open_i_g.html">OpenIG</a></div><div class="ttdef"><b>Definition:</b> <a href="animation_8h_source.html#l00047">animation.h:47</a></div></div>
+<div class="ttc" id="class_open_i_g_1_1_base_1_1_string_utils_html_aa5c9169817d4790848d7962117c38b69"><div class="ttname"><a href="class_open_i_g_1_1_base_1_1_string_utils.html#aa5c9169817d4790848d7962117c38b69">OpenIG::Base::StringUtils::Tokens</a></div><div class="ttdeci">std::vector&lt; std::string &gt; Tokens</div><div class="ttdef"><b>Definition:</b> <a href="stringutils_8h_source.html#l00066">stringutils.h:66</a></div></div>
+<div class="ttc" id="class_open_i_g_1_1_base_1_1_commands_html_afda7ad298ab843ff2ce182e564a92fb7"><div class="ttname"><a href="class_open_i_g_1_1_base_1_1_commands.html#afda7ad298ab843ff2ce182e564a92fb7">OpenIG::Base::Commands::CommandPtr</a></div><div class="ttdeci">osg::ref_ptr&lt; Command &gt; CommandPtr</div><div class="ttdef"><b>Definition:</b> <a href="commands_8h_source.html#l00176">commands.h:176</a></div></div>
+<div class="ttc" id="class_open_i_g_1_1_base_1_1_commands_html"><div class="ttname"><a href="class_open_i_g_1_1_base_1_1_commands.html">OpenIG::Base::Commands</a></div><div class="ttdoc">The Commands singleton class. </div><div class="ttdef"><b>Definition:</b> <a href="commands_8h_source.html#l00052">commands.h:52</a></div></div>
+<div class="ttc" id="class_open_i_g_1_1_base_1_1_commands_html_a803b11e646146ec64bd60221d88e282e"><div class="ttname"><a href="class_open_i_g_1_1_base_1_1_commands.html#a803b11e646146ec64bd60221d88e282e">OpenIG::Base::Commands::CommandsMapConstIterator</a></div><div class="ttdeci">std::map&lt; std::string, osg::ref_ptr&lt; Command &gt; &gt;::const_iterator CommandsMapConstIterator</div><div class="ttdef"><b>Definition:</b> <a href="commands_8h_source.html#l00179">commands.h:179</a></div></div>
+<div class="ttc" id="class_open_i_g_1_1_base_1_1_commands_html_a206615bee58f2c5e15fe5c8fa0654e2e"><div class="ttname"><a href="class_open_i_g_1_1_base_1_1_commands.html#a206615bee58f2c5e15fe5c8fa0654e2e">OpenIG::Base::Commands::CommandsMapIterator</a></div><div class="ttdeci">std::map&lt; std::string, osg::ref_ptr&lt; Command &gt; &gt;::iterator CommandsMapIterator</div><div class="ttdef"><b>Definition:</b> <a href="commands_8h_source.html#l00178">commands.h:178</a></div></div>
+<div class="ttc" id="stringutils_8h_html"><div class="ttname"><a href="stringutils_8h.html">stringutils.h</a></div></div>
+<div class="ttc" id="class_open_i_g_1_1_base_1_1_commands_html_a90697a991a9b5ba80a9ae063ef0311f8"><div class="ttname"><a href="class_open_i_g_1_1_base_1_1_commands.html#a90697a991a9b5ba80a9ae063ef0311f8">OpenIG::Base::Commands::getCommands</a></div><div class="ttdeci">const CommandsMap &amp; getCommands() const </div><div class="ttdoc">Gives the current commands. </div><div class="ttdef"><b>Definition:</b> <a href="commands_8h_source.html#l00188">commands.h:188</a></div></div>
+<div class="ttc" id="class_open_i_g_1_1_base_1_1_commands_1_1_command_html"><div class="ttname"><a href="class_open_i_g_1_1_base_1_1_commands_1_1_command.html">OpenIG::Base::Commands::Command</a></div><div class="ttdoc">The Command class. </div><div class="ttdef"><b>Definition:</b> <a href="commands_8h_source.html#l00078">commands.h:78</a></div></div>
+<div class="ttc" id="class_open_i_g_1_1_base_1_1_commands_html_a6c1f5769f88db0c91e77e0d65574f617"><div class="ttname"><a href="class_open_i_g_1_1_base_1_1_commands.html#a6c1f5769f88db0c91e77e0d65574f617">OpenIG::Base::Commands::CommandsMap</a></div><div class="ttdeci">std::map&lt; std::string, osg::ref_ptr&lt; Command &gt; &gt; CommandsMap</div><div class="ttdef"><b>Definition:</b> <a href="commands_8h_source.html#l00177">commands.h:177</a></div></div>
+<div class="ttc" id="class_open_i_g_1_1_base_1_1_commands_html_a8297a7861178aed592e6cdc36e488df3"><div class="ttname"><a href="class_open_i_g_1_1_base_1_1_commands.html#a8297a7861178aed592e6cdc36e488df3">OpenIG::Base::Commands::_commands</a></div><div class="ttdeci">CommandsMap _commands</div><div class="ttdoc">name based std::map of commands added </div><div class="ttdef"><b>Definition:</b> <a href="commands_8h_source.html#l00204">commands.h:204</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

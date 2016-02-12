@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['brightness',['BRIGHTNESS',['../structigcore_1_1_light_attributes.html#afbd6d3a8e3273ad9a5d6731de4536f26aa73d598bac8ecd3c7d98511dd8cf50c6',1,'igcore::LightAttributes']]]
+  ['brightness',['BRIGHTNESS',['../struct_open_i_g_1_1_base_1_1_light_attributes.html#aa6c7a573d9d54c46afc14cbde50bec64a7a627d93995759952f2223f6231bd3b3',1,'OpenIG::Base::LightAttributes']]]
 ];

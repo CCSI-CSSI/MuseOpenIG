@@ -1,7 +1,9 @@
 var searchData=
 [
-  ['openig',['OpenIG',['../classopenig_1_1_open_i_g.html',1,'openig']]],
-  ['openig',['openig',['../namespaceopenig.html',1,'openig'],['../classopenig_1_1_open_i_g.html#ab7b2711a136f97340f1285a4d0fd7984',1,'openig::OpenIG::OpenIG()']]],
-  ['openig_2eh',['openig.h',['../openig_8h.html',1,'']]],
-  ['operator_28_29',['operator()',['../classigcore_1_1_animation_sequence_playback_callback.html#a43fa312cdeb03054428bdb4adbac4411',1,'igcore::AnimationSequencePlaybackCallback']]]
+  ['mask',['Mask',['../struct_open_i_g_1_1_base_1_1_light_attributes.html#aa6c7a573d9d54c46afc14cbde50bec64',1,'OpenIG::Base::LightAttributes']]],
+  ['match',['match',['../class_open_i_g_1_1_base_1_1_file_system.html#aa6c2952819014acd84d8d35eb8d68dcb',1,'OpenIG::Base::FileSystem']]],
+  ['math',['Math',['../class_open_i_g_1_1_base_1_1_math.html#a8c00d667fe49b8a16aca804a03dcde8c',1,'OpenIG::Base::Math']]],
+  ['math',['Math',['../class_open_i_g_1_1_base_1_1_math.html',1,'OpenIG::Base']]],
+  ['mathematics_2eh',['mathematics.h',['../mathematics_8h.html',1,'']]],
+  ['minutes',['minutes',['../struct_open_i_g_1_1_base_1_1_time_of_day_attributes.html#a7e2117529384c71c383ef97fc807f5bd',1,'OpenIG::Base::TimeOfDayAttributes']]]
 ];

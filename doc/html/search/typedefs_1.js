@@ -1,9 +1,10 @@
 var searchData=
 [
-  ['commandsmap',['CommandsMap',['../classigcore_1_1_commands.html#afddf15e62035f371fe24836ccb11a8a5',1,'igcore::Commands']]],
-  ['commandsmapconstiterator',['CommandsMapConstIterator',['../classigcore_1_1_commands.html#a349d8cd055031b1473a916e89e2221eb',1,'igcore::Commands']]],
-  ['commandsmapiterator',['CommandsMapIterator',['../classigcore_1_1_commands.html#afa3556c66d49e69c3fe84baf02688b00',1,'igcore::Commands']]],
-  ['configmap',['ConfigMap',['../classigcore_1_1_configuration.html#ae9ce3eed4535333ddb23a17b25a0b128',1,'igcore::Configuration']]],
-  ['configmapconstiterator',['ConfigMapConstIterator',['../classigcore_1_1_configuration.html#ac59d0a65f6e77a45cb1ef5012634de1c',1,'igcore::Configuration']]],
-  ['configmapiterator',['ConfigMapIterator',['../classigcore_1_1_configuration.html#a7262ff0df6c716e785f8febb1ec39ba5',1,'igcore::Configuration']]]
+  ['commandptr',['CommandPtr',['../class_open_i_g_1_1_base_1_1_commands.html#afda7ad298ab843ff2ce182e564a92fb7',1,'OpenIG::Base::Commands']]],
+  ['commandsmap',['CommandsMap',['../class_open_i_g_1_1_base_1_1_commands.html#a6c1f5769f88db0c91e77e0d65574f617',1,'OpenIG::Base::Commands']]],
+  ['commandsmapconstiterator',['CommandsMapConstIterator',['../class_open_i_g_1_1_base_1_1_commands.html#a803b11e646146ec64bd60221d88e282e',1,'OpenIG::Base::Commands']]],
+  ['commandsmapiterator',['CommandsMapIterator',['../class_open_i_g_1_1_base_1_1_commands.html#a206615bee58f2c5e15fe5c8fa0654e2e',1,'OpenIG::Base::Commands']]],
+  ['configmap',['ConfigMap',['../class_open_i_g_1_1_base_1_1_configuration.html#aa55dcdbad177ba2572bf1b1f58921c49',1,'OpenIG::Base::Configuration']]],
+  ['configmapconstiterator',['ConfigMapConstIterator',['../class_open_i_g_1_1_base_1_1_configuration.html#a137a1d67c4d7e5c2841ff5642df20edf',1,'OpenIG::Base::Configuration']]],
+  ['configmapiterator',['ConfigMapIterator',['../class_open_i_g_1_1_base_1_1_configuration.html#a06811df6cee8b8c6d0fd5af0e0ebaae1',1,'OpenIG::Base::Configuration']]]
 ];

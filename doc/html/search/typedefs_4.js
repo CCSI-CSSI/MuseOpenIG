@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['lightentity',['LightEntity',['../classopenig_1_1_open_i_g.html#aabf9233ddd66509cf349f3d159ec9280',1,'openig::OpenIG']]],
-  ['lightsmap',['LightsMap',['../classopenig_1_1_open_i_g.html#a3565df917d4fa4eddb2d70c5ef13987d',1,'openig::OpenIG']]],
-  ['lightsmapconstiterator',['LightsMapConstIterator',['../classopenig_1_1_open_i_g.html#a3062d803f1f61c17c3875827ef07fad2',1,'openig::OpenIG']]],
-  ['lightsmapiterator',['LightsMapIterator',['../classopenig_1_1_open_i_g.html#a1f29de3c21afbccd88f98673d8585cf2',1,'openig::OpenIG']]]
+  ['idgroupmap',['IdGroupMap',['../class_open_i_g_1_1_base_1_1_global_id_generator.html#a130b67137a9088aa25ea8c5b1d3a6969',1,'OpenIG::Base::GlobalIdGenerator']]],
+  ['ids',['IDs',['../struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group.html#ab31e4cd861e738d82d77094105cbc61e',1,'OpenIG::Base::GlobalIdGenerator::IdGroup']]]
 ];

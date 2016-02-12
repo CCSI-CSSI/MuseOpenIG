@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['databaseread',['databaseRead',['../classigplugincore_1_1_plugin.html#ab68a5878e9e45481c176c406794aea8a',1,'igplugincore::Plugin']]],
-  ['databasereadinvisitoraftertraverse',['databaseReadInVisitorAfterTraverse',['../classigplugincore_1_1_plugin.html#ae2d441576522fa3303d4c013f5fb64e4',1,'igplugincore::Plugin']]],
-  ['databasereadinvisitorbeforetraverse',['databaseReadInVisitorBeforeTraverse',['../classigplugincore_1_1_plugin.html#a73c93155ef9a3941c67e7dd97716c1b3',1,'igplugincore::Plugin']]],
-  ['destroy',['destroy',['../classigcore_1_1_generic_implementation_callback.html#a119ed3a8403b4af3179cdab7b36eff23',1,'igcore::GenericImplementationCallback']]]
+  ['databaseread',['databaseRead',['../class_open_i_g_1_1_plugin_base_1_1_plugin.html#adfb0b3732a59b587227fe172d6df1158',1,'OpenIG::PluginBase::Plugin']]],
+  ['databasereadinvisitoraftertraverse',['databaseReadInVisitorAfterTraverse',['../class_open_i_g_1_1_plugin_base_1_1_plugin.html#aeb2dfd445eab843291dad6c6a265b04e',1,'OpenIG::PluginBase::Plugin']]],
+  ['databasereadinvisitorbeforetraverse',['databaseReadInVisitorBeforeTraverse',['../class_open_i_g_1_1_plugin_base_1_1_plugin.html#aa5e55246767439694bbdb96cd39b6314',1,'OpenIG::PluginBase::Plugin']]],
+  ['destroy',['destroy',['../class_open_i_g_1_1_base_1_1_generic_implementation_callback.html#a3074fc7f6a895b8a9cb475535af341a8',1,'OpenIG::Base::GenericImplementationCallback']]]
 ];
