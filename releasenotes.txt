@@ -1,4 +1,15 @@
 12 Feb 2016, version 2.0.0
+Known issues:
+
+Issue #2: F+ lights attached for entities are not computing the screen space direction/position properly when moving
+
+Issue #3: The CameraManipulator inherited from the TrackballManipulator can zoom out indefinitely
+
+Issue #4: F+ lighting system is not working properly with only the Sun or Moon light source present in the scene
+
+all three issues are scheduled to be fixed in release 2.0.1
+
+Updates in this release:
 - added support for Normal Mapping
 
 - changed the headers for deployment for the SDK to include
