@@ -1,12 +1,15 @@
-#version 130
+#version 120
 #pragma import_defines (USE_LOG_DEPTH_BUFFER)
 
-in vec3 eyeVec;
+varying vec3 eyeVec;
 
 #ifdef USE_LOG_DEPTH_BUFFER
-in float flogz;
+varying float flogz;
 uniform float Fcoef;
 #endif
+
+uniform bool ViewOptions_EO;
+uniform bool ViewOptions_IR;
 
 void applyFog(inout vec4 color)
 {
@@ -21,8 +24,18 @@ void applyFog(inout vec4 color)
 void main()
 {
 	vec4 color = gl_Color;
-	applyFog(color);
-	gl_FragColor = color;
+	applyFog(color);	
+
+	if (ViewOptions_EO || ViewOptions_IR)
+	{
+		//uses NTSC conversion weights
+		float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+		gl_FragColor = vec4(gray, gray, gray, color.a);
+	}	
+	else
+	{
+		gl_FragColor = color;
+	}
 #ifdef USE_LOG_DEPTH_BUFFER
 	gl_FragDepth = log2(flogz) * Fcoef * 0.5;
 #endif
