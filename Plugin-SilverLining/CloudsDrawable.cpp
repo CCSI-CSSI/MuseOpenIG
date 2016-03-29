@@ -48,6 +48,7 @@ using namespace OpenIG::Plugins;
 
 CloudsDrawable::CloudsDrawable()
         : osg::Drawable()
+		, _viewer(0)
         , _envMapDirty(false)
         , _pluginContext(0)
 		, _forwardPlusEnabled(false)
@@ -55,15 +56,18 @@ CloudsDrawable::CloudsDrawable()
     initialize();
 }
 
-CloudsDrawable::CloudsDrawable(osgViewer::View* view, OpenIG::Base::ImageGenerator* ig, bool forwardPlusEnabled)
+CloudsDrawable::CloudsDrawable(osgViewer::CompositeViewer* viewer, OpenIG::Base::ImageGenerator* ig, bool forwardPlusEnabled, bool logZEnabled)
         : osg::Drawable()
-        , _view(view)
+        , _viewer(viewer)
         , _ig(ig)
         , _envMapDirty(false)
         , _pluginContext(0)
 		, _forwardPlusEnabled(forwardPlusEnabled)
+		, _logZEnabled(logZEnabled)
 {
     initialize();
+
+	_logZEnabled = useLogZDepthBuffer();
 }
 
 // Set up our attributes and callbacks.
@@ -73,7 +77,8 @@ void CloudsDrawable::initialize()
     setUseVertexBufferObjects(false);
     setUseDisplayList(false);
 
-    if (_view) {
+    if (_viewer) {
+		
         SilverLiningCloudsUpdateCallback *updateCallback = new SilverLiningCloudsUpdateCallback;
         setUpdateCallback(updateCallback);
 
@@ -232,17 +237,17 @@ void CloudsDrawable::setUpShaders(SilverLining::Atmosphere *atmosphere, osg::Ren
 	ext->glUseProgram(0);
 }
 
-static bool useLogZDepthBuffer(void)
+bool CloudsDrawable::useLogZDepthBuffer() const
 {
 	std::string strLogZDepthBuffer = OpenIG::Base::Configuration::instance()->getConfig("LogZDepthBuffer","yes");
-	if (strLogZDepthBuffer.compare(0, 3, "yes") == 0)
-		return true;
+	if (strLogZDepthBuffer.compare(0, 3, "yes") == 0)		
+		return _logZEnabled;
 	else
 		return false;
 }
 
 void CloudsDrawable::initializeLogZDepthBuffer(osg::RenderInfo& renderInfo, std::vector<GLint>& userShaders) const
-{
+{	
 	static bool _logz_tried = false;
 	if (_logz_tried==true)
 	{
@@ -250,7 +255,7 @@ void CloudsDrawable::initializeLogZDepthBuffer(osg::RenderInfo& renderInfo, std:
 	}
 	_logz_tried = true;
 
-	std::string logZPreamble = useLogZDepthBuffer()? "#define USE_LOG_DEPTH_BUFFER\n" : "";
+	std::string logZPreamble = useLogZDepthBuffer()?  "#define USE_LOG_DEPTH_BUFFER\n" : "";
 
 	std::string resourcesPath = OpenIG::Base::FileSystem::path(OpenIG::Base::FileSystem::Resources, "../resources");
 
@@ -259,9 +264,13 @@ void CloudsDrawable::initializeLogZDepthBuffer(osg::RenderInfo& renderInfo, std:
 	std::string strSource = logZPreamble + OpenIG::Base::FileSystem::readFileIntoString(resourcesPath + "/shaders/logz_vs.glsl");
 
 	GLint shaderID = osg::ShaderUtils::compileShader(strSource, osg::Shader::VERTEX, ext);
-	if (shaderID==0)
+	if (shaderID == 0)
 	{
-		osg::notify(osg::ALWAYS)<<"SilverLining: error: shader compilation error: "<<std::endl;
+		shaderID = osg::ShaderUtils::compileShader(strSource, osg::Shader::VERTEX, ext);
+	}
+	if (shaderID == 0)
+	{
+		osg::notify(osg::ALWAYS)<<"SilverLining: error: shader compilation error: /shaders/logz_vs.glsl"<<std::endl;
 	}
 	else
 	{
@@ -272,9 +281,13 @@ void CloudsDrawable::initializeLogZDepthBuffer(osg::RenderInfo& renderInfo, std:
 	strSource = logZPreamble + OpenIG::Base::FileSystem::readFileIntoString(resourcesPath + "/shaders/logz_ps.glsl");
 
 	shaderID = osg::ShaderUtils::compileShader(strSource, osg::Shader::FRAGMENT, ext);
-	if (shaderID==0)
+	if (shaderID == 0)
 	{
-		osg::notify(osg::ALWAYS)<<"SilverLining: error: shader compilation error: "<<std::endl;
+		shaderID = osg::ShaderUtils::compileShader(strSource, osg::Shader::FRAGMENT, ext);
+	}
+	if (shaderID == 0)
+	{
+		osg::notify(osg::ALWAYS)<<"SilverLining: error: shader compilation error: /shaders/logz_ps.glsl"<<std::endl;
 	}
 	else
 	{
@@ -364,30 +377,46 @@ void CloudsDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 
     if (atmosphere)
     {		
+
 		std::vector<GLint> stdVecUserShaders;
+		bool compileShaders = false;
 
-		initializeLogZDepthBuffer(renderInfo, stdVecUserShaders);
-		initializeForwardPlus(atmosphere, renderInfo, stdVecUserShaders);
-
-		SL_VECTOR(unsigned int) vectorUserShaders;
-
-		if (stdVecUserShaders.empty()==false)
+		if (_logZEnabled)
 		{
-			SL_VECTOR(unsigned int) vectorUserShaders;
-			for(int i = 0; i < stdVecUserShaders.size(); ++i)
-			{
-				vectorUserShaders.push_back(stdVecUserShaders[i]);
-			}
-			atmosphere->ReloadShaders(vectorUserShaders);
+			initializeLogZDepthBuffer(renderInfo, stdVecUserShaders);
+			compileShaders = true;
+		}
+		if (_forwardPlusEnabled)
+		{
+			initializeForwardPlus(atmosphere, renderInfo, stdVecUserShaders);
+			compileShaders = true;
 		}
 
-		setUpShaders(atmosphere, renderInfo);
+		if (compileShaders)
+		{
+			SL_VECTOR(unsigned int) vectorUserShaders;
+
+			if (stdVecUserShaders.empty() == false)
+			{
+				SL_VECTOR(unsigned int) vectorUserShaders;
+				for (int i = 0; i < stdVecUserShaders.size(); ++i)
+				{
+					vectorUserShaders.push_back(stdVecUserShaders[i]);
+				}
+				atmosphere->ReloadShaders(vectorUserShaders);
+			}
+
+			setUpShaders(atmosphere, renderInfo);
+		}
 	 
         atmosphere->SetCameraMatrix(renderInfo.getCurrentCamera()->getViewMatrix().ptr());
         atmosphere->SetProjectionMatrix(renderInfo.getCurrentCamera()->getProjectionMatrix().ptr());
 
-		glPushAttrib(GL_DEPTH_BUFFER_BIT);
-		glEnable(GL_DEPTH_CLAMP);
+		if (_logZEnabled)
+		{
+			glPushAttrib(GL_DEPTH_BUFFER_BIT);
+			glEnable(GL_DEPTH_CLAMP);
+		}
 
 		//Change the TU from non-zero to zero, or zero to one to get around caching
 		int tu = state.getActiveTextureUnit();
@@ -398,7 +427,10 @@ void CloudsDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 		//Change the TU from non-zero to zero, or zero to one to get around caching
 		state.setActiveTextureUnit(tu);
 
-		glPopAttrib();
+		if (_logZEnabled)
+		{
+			glPopAttrib();
+		}
 
         if (_envMapDirty)
         {
@@ -431,6 +463,7 @@ osg::BoundingBox SilverLiningCloudsComputeBoundingBoxCallback::computeBound(cons
 {
     osg::BoundingBox box;
     
+	osg::Camera* camera = cameras.size() ? cameras.at(0) : 0;
     if (camera) 
     {
         AtmosphereReference *ar = dynamic_cast<AtmosphereReference *>( camera->getUserData() );

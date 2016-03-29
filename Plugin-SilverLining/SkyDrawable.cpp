@@ -36,6 +36,8 @@
 
 #include <Core-PluginBase/plugincontext.h>
 
+#include <Core-OpenIG/openig.h>
+
 #if(__APPLE__)
     #include <OpenGL/gl.h>
     #include <OpenGL/glu.h>
@@ -64,7 +66,7 @@ using namespace OpenIG::Plugins;
 
 SkyDrawable::SkyDrawable()
         : osg::Drawable()
-		, _view(0)
+		, _viewer(0)
         , _skyboxSize(100000)
 		, _cloudShadowTexgen(0)
         , _cloudShadowTextureWhiteSubstitute(0)
@@ -86,12 +88,15 @@ SkyDrawable::SkyDrawable()
 		, _inCloudsFogDensity(-1.f)
 		, _sunMoonBrightnessNight(1.f)
 		, _sunMoonBrightnessDay(1.f)
+		, cullCallback(0)
+		, updateCallback(0)
+		, computeBoundingBoxCallback(0)
 {
 }
 
-SkyDrawable::SkyDrawable(const std::string& path, osgViewer::View* view, osg::Light* light, osg::Fog* fog, bool geocentric)
+SkyDrawable::SkyDrawable(const std::string& path, osgViewer::CompositeViewer* viewer, osg::Light* light, osg::Fog* fog, bool geocentric)
         : osg::Drawable()
-        , _view(view)
+        , _viewer(viewer)
         , _skyboxSize(100000)
 		, _light(light)
 		, _fog(fog)
@@ -122,6 +127,9 @@ SkyDrawable::SkyDrawable(const std::string& path, osgViewer::View* view, osg::Li
 		, _inCloudsFogDensity(-1.f)
 		, _sunMoonBrightnessNight(1.f)
 		, _sunMoonBrightnessDay(1.f)
+		, cullCallback(0)
+		, updateCallback(0)
+		, computeBoundingBoxCallback(0)
 {    
     _cloudShadowTextureStage =  _cloudShadowTexgenStage = OpenIG::Base::Configuration::instance()->getConfig("Clouds-Shadows-Texture-Slot",6);
 
@@ -152,8 +160,24 @@ void SkyDrawable::initializeShadow()
     }
 
     _cloudShadowCoordMatrixUniform = new osg::Uniform( "cloudShadowCoordMatrix", osg::Matrixf() );
-    _view->getSceneData()->getOrCreateStateSet()->addUniform( _cloudShadowCoordMatrixUniform );
-    _view->getSceneData()->getOrCreateStateSet()->addUniform( new osg::Uniform( "cloudShadowTexture", (int)_cloudShadowTextureStage ) );
+
+	osgViewer::ViewerBase::Views views;
+	_viewer->getViews(views);
+
+	osgViewer::ViewerBase::Views::iterator itr = views.begin();
+	for (; itr != views.end(); ++itr)
+	{
+		osgViewer::View* view = *itr;
+
+		bool openIGScene = false;
+		if (view->getUserValue("OpenIG-Scene", openIGScene) && openIGScene)
+		{
+			view->getSceneData()->getOrCreateStateSet()->addUniform(_cloudShadowCoordMatrixUniform);
+			view->getSceneData()->getOrCreateStateSet()->addUniform(new osg::Uniform("cloudShadowTexture", (int)_cloudShadowTextureStage));
+			
+			break;
+		}
+	}
 }
 
 
@@ -163,19 +187,39 @@ void SkyDrawable::initializeDrawable()
     setUseVertexBufferObjects(false);
     setUseDisplayList(false);
 
-#if 1
+#if 0
     cullCallback = new SilverLiningCullCallback();
     setCullCallback(cullCallback);
 #endif
 
-    updateCallback = new SilverLiningUpdateCallback();
-    updateCallback->camera = _view->getCamera();
+#if 0
+	SilverLiningUpdateCallback::Cameras					camerasForUpdate;
+	SilverLiningSkyComputeBoundingBoxCallback::Cameras	camerasForComputeBoundingBox;
+
+	osgViewer::ViewerBase::Views views;
+	_viewer->getViews(views);
+
+	osgViewer::ViewerBase::Views::iterator itr = views.begin();
+	for (; itr != views.end(); ++itr)
+	{
+		osgViewer::View* view = *itr;
+
+		bool openIGScene = false;
+		if (view->getUserValue("OpenIG-Scene", openIGScene) && openIGScene)
+		{
+			camerasForUpdate.push_back(view->getCamera());			
+			camerasForComputeBoundingBox.push_back(view->getCamera());
+		}
+	}
+
+    updateCallback = new SilverLiningUpdateCallback(camerasForUpdate);    
     setUpdateCallback(updateCallback);
 
 #if 1
-    computeBoundingBoxCallback = new SilverLiningSkyComputeBoundingBoxCallback();
-    computeBoundingBoxCallback->camera = _view->getCamera();
+	computeBoundingBoxCallback = new SilverLiningSkyComputeBoundingBoxCallback(camerasForComputeBoundingBox);
     setComputeBoundingBoxCallback(computeBoundingBoxCallback);
+#endif
+
 #endif
 	
 }
@@ -392,15 +436,10 @@ void SkyDrawable::initializeSilverLining(AtmosphereReference *ar) const
 			t.SetTimeZone(CET);
             atmosphere->GetConditions()->SetTime(t);
 
-			atmosphere->EnableLensFlare(true);
+			atmosphere->EnableLensFlare(true);            
 
-            // Center the clouds around the camera's initial position
-            osg::Vec3d pos;
-			osg::Vec3d center;
-			osg::Vec3d up;
-			_view->getCamera()->getViewMatrixAsLookAt(pos,center,up);
-
-            cullCallback->atmosphere = atmosphere;
+			if (cullCallback)
+				cullCallback->atmosphere = atmosphere;
         }
     }
 }
@@ -727,6 +766,41 @@ void SkyDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
     {
         initializeSilverLining(ar);
 
+		osg::GL2Extensions* ext = osg::GL2Extensions::Get(renderInfo.getContextID(), true);
+		if (ext == 0)
+		{
+			return;
+		}
+
+		atmosphere->GetSkyShader();
+		GLint program = (GLint)atmosphere->GetSkyShader();
+		ext->glUseProgram(program);
+		GLint loc = ext->glGetUniformLocation(program, "ViewOptions_EO");
+		if (loc != -1)
+		{
+			osg::Camera* camera = renderInfo.getCurrentCamera();
+			osg::View* view = camera->getView();
+			unsigned int options = 0;
+			view->getUserValue("Options", options);
+
+			bool POD = options == OpenIG::Engine::EO;
+
+			ext->glUniform1i(loc, POD ? 1 : 0);
+		}
+		loc = ext->glGetUniformLocation(program, "ViewOptions_IR");
+		if (loc != -1)
+		{
+			osg::Camera* camera = renderInfo.getCurrentCamera();
+			osg::View* view = camera->getView();
+			unsigned int options = 0;
+			view->getUserValue("Options", options);
+
+			bool POD = options == OpenIG::Engine::IR;
+
+			ext->glUniform1i(loc, POD ? 1 : 0);
+		}
+		ext->glUseProgram(0);
+
         atmosphere->GetConditions()->SetPrecipitation(CloudLayer::NONE, 0);
         atmosphere->GetConditions()->SetPrecipitation(CloudLayer::RAIN, _rainFactor);
         atmosphere->GetConditions()->SetPrecipitation(CloudLayer::WET_SNOW, _snowFactor);
@@ -835,6 +909,8 @@ void SkyDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
         const_cast<SkyDrawable*>(this)->setShadow(atmosphere,renderInfo);
 		const_cast<SkyDrawable*>(this)->setLightingParams(_openIG);
 
+
+
     }
 
 
@@ -876,6 +952,10 @@ void SkyDrawable::setLogDepthUniforms(SilverLining::Atmosphere *atmosphere, cons
 void SilverLiningUpdateCallback::update(osg::NodeVisitor *nv, osg::Drawable* drawable)
 {
     SilverLining::Atmosphere *atmosphere = 0;
+
+	osg::Camera* camera = cameras.size() ? cameras.at(0) : 0;
+	if (!camera) return;
+
     AtmosphereReference *ar = dynamic_cast<AtmosphereReference *>(camera->getUserData());
     if (ar) {
         if (!ar->atmosphereInitialized) return;
@@ -894,6 +974,9 @@ void SilverLiningUpdateCallback::update(osg::NodeVisitor *nv, osg::Drawable* dra
 osg::BoundingBox SilverLiningSkyComputeBoundingBoxCallback::computeBound(const osg::Drawable& drawable) const
 {
     osg::BoundingBox box;
+
+	osg::Camera* camera = cameras.size() ? cameras.at(0) : 0;
+	if (!camera) return box;
 
     if (camera)
     {

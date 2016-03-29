@@ -67,22 +67,24 @@ namespace OpenIG {
 		// Our update callback just marks our bounds dirty each frame (since they move with the camera.)
 		struct SilverLiningUpdateCallback : public osg::Drawable::UpdateCallback
 		{
-			SilverLiningUpdateCallback() : camera(0) {}
+			typedef std::vector<osg::Camera*>			Cameras;
+			Cameras										cameras;
+			
+			SilverLiningUpdateCallback(const Cameras& cs) : cameras(cs) {}
 
-			virtual void update(osg::NodeVisitor*, osg::Drawable* drawable);
-
-			osg::Camera *camera;
+			virtual void update(osg::NodeVisitor*, osg::Drawable* drawable);			
 		};
 
 		// We also hook in with a bounding box callback to tell OSG how big our skybox is, plus the
 		// atmospheric limb if applicable.
 		struct SilverLiningSkyComputeBoundingBoxCallback : public osg::Drawable::ComputeBoundingBoxCallback
 		{
-			SilverLiningSkyComputeBoundingBoxCallback() : camera(0) {}
+			typedef std::vector<osg::Camera*>			Cameras;
+			Cameras										cameras;
+
+			SilverLiningSkyComputeBoundingBoxCallback(const Cameras& cs) : cameras(cs) {}
 
 			virtual osg::BoundingBox computeBound(const osg::Drawable&) const;
-
-			osg::Camera *camera;
 		};
 
 		// The SkyDrawable wraps SilverLining to handle updates, culling, and drawing of the skybox - and works together with a CloudsDrawable
@@ -93,7 +95,7 @@ namespace OpenIG {
 		{
 		public:
 			SkyDrawable();
-			SkyDrawable(const std::string& path, osgViewer::View* view, osg::Light* light, osg::Fog* fog, bool geocentric = false);
+			SkyDrawable(const std::string& path, osgViewer::CompositeViewer* viewer, osg::Light* light, osg::Fog* fog, bool geocentric = false);
 
 			virtual bool isSameKindAs(const Object* obj) const {
 				return dynamic_cast<const SkyDrawable*>(obj) != NULL;
@@ -166,6 +168,16 @@ namespace OpenIG {
 
 			}
 
+			void setLight(osg::LightSource* light)
+			{
+				if (light) _light = light->getLight();
+			}
+
+			void setFog(osg::Fog* fog)
+			{
+				_fog = fog;
+			}
+
 		protected:
 			void setLighting(SilverLining::Atmosphere *atm) const;
 			void setShadow(SilverLining::Atmosphere *atm, osg::RenderInfo & renderInfo);
@@ -173,7 +185,7 @@ namespace OpenIG {
 			void initializeDrawable();
 			void initializeShadow();
 
-			osg::ref_ptr<osgViewer::View>   _view;
+			osg::ref_ptr<osgViewer::CompositeViewer>   _viewer;
 			double                          _skyboxSize;
 			osg::ref_ptr<osg::Light>        _light;
 			osg::ref_ptr<osg::Fog>          _fog;

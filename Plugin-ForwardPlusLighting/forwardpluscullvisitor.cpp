@@ -23,76 +23,26 @@
 //#*
 //#*****************************************************************************
 #include "forwardpluscullvisitor.h"
+#include "forwardplusengine.h"
 
 using namespace OpenIG::Plugins;
 
-ForwardPlusCullVisitor::ForwardPlusCullVisitor()
+ForwardPlusCullVisitor::ForwardPlusCullVisitor(ForwardPlusEngine* engine)
 	: osgUtil::CullVisitor()
-	, _searchedProgram(false)
+	, _fpEngine(engine)
 {
 
 }
 
-void ForwardPlusCullVisitor::addShadersToLinkWithMain(osg::ref_ptr<osg::Shader> shader)
-{
-	if (shader.valid()==false)
+void ForwardPlusCullVisitor::apply(osg::LightSource& node)
+{	
+	if (!isCulled(node))
 	{
-		return;
-	}
-	_shadersToLink.push_back(shader);
-}
+		_fpEngine->apply(&node);
+	}		
 
-void ForwardPlusCullVisitor::findProgramIfNotFound(void)
-{
-	osg::ref_ptr<osgUtil::StateGraph> sg = getCurrentStateGraph();
-	if (sg.valid()==false)
+	if (node.getLight()->getLightNum() == 0)
 	{
-		return;
+		osgUtil::CullVisitor::apply(node);
 	}
-
-	const osg::StateSet* ss = sg->getStateSet();
-	if (ss==0)
-	{
-		return;
-	}
-	const osg::StateAttribute* attr = ss->getAttribute(osg::StateAttribute::PROGRAM);
-
-	if (attr==0)
-	{
-		return;
-	}
-
-	const osg::Program* program = dynamic_cast<const osg::Program*>(attr);
-	if (program==0)
-	{
-		return;
-	}
-	osg::Program* nonConstProgram = const_cast<osg::Program*>(program);
-	_program = nonConstProgram;
-
-	// Hack to mark successful processing
-	if (program->getNumShaders()!=4)
-	{
-		return;
-	}
-
-	for(VectorShaders::const_iterator it = _shadersToLink.begin(); it != _shadersToLink.end(); ++it)
-	{
-		osg::Shader* shader = (*it).get();
-		if (shader==0)
-		{
-			continue;
-		}
-		_program->addShader(shader);
-	}
-
-	_program->dirtyProgram();
-
-	_searchedProgram = true;
-}
-
-void ForwardPlusCullVisitor::apply(osg::Group& node)
-{
-	//findProgramIfNotFound();
-	osgUtil::CullVisitor::apply(node);
 }

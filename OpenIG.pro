@@ -11,6 +11,7 @@ SUBDIRS +=  Library-Graphics \
             Utility-oigconv \
             Plugin-GPUVegetation \
             Plugin-LightsControl \
+            Plugin-SimpleLighting \
             Plugin-ForwardPlusLighting \
             Plugin-VDBOffset \
             Plugin-ModelComposition \
@@ -105,6 +106,14 @@ unix {
     }else{
         mac:message( "MyGUI not found on the Mac system. The Plug-UI is not included in the build..." )
     }
+
+##mersive
+    !mac:exists( /mersive/lib/libMersive* ) {
+         message( "Configuring for build with Mersive ..." )
+         SUBDIRS += Plugin-Mersive
+    }else{
+         mac:message( "Mersive not found on the Mac system.  The Mersive Plugin is not included in the build..." )
+    }
 }
 
 win32 {
@@ -181,3 +190,14 @@ win32 {
         SUBDIRS += Plugin-UI
     }
 }
+
+# library version number files
+exists( "/usr/local/muse/amx/openig_version.pri" ){
+
+include( "/usr/local/muse/amx/openig_version.pri" )
+isEmpty( VERSION ){ error( "bad or undefined VERSION variable inside file /usr/local/muse/amx/openig_version.pri" ) }
+
+}
+else { error( "could not find pri library version file /usr/local/muse/amx/openig_version.pri" ) }
+
+# end of library version number files

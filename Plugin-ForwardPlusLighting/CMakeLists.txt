@@ -4,6 +4,7 @@ set( LIB_NAME OpenIG-Plugin-ForwardPlusLighting )
 set (HEADER_FILES
 	dummylight.h
 	forwardpluscullvisitor.h
+	forwardplusengine.h
 	forwardpluslightimplementationcallback.h
 	osgtofputils.h
 	lightmanagerstateattribute.h
@@ -12,18 +13,20 @@ set (HEADER_FILES
 set (SOURCE_FILES 
 	dummylight.cpp
 	forwardpluscullvisitor.cpp
+	forwardplusengine.cpp
 	forwardpluslightimplementationcallback.cpp
 	igpluginforwardpluslighting.cpp
 	lightmanagerstateattribute.cpp
 )
 
 FILE (GLOB SHADER_FILES 
-	./shaders/forwardplus_vs.glsl
-	./shaders/forwardplus_ps.glsl
-	./shaders/forwardplus_math.glsl
-	./shaders/forwardplus_preamble.glsl
-	./shaders/shadow_vs.glsl
-	./shaders/shadow_ps.glsl
+	../Resources/shaders/forwardplus_vs.glsl
+	../Resources/shaders/forwardplus_ps.glsl
+	../Resources/shaders/forwardplus_math.glsl
+	../Resources/shaders/forwardplus_preamble.glsl
+	../Resources/shaders/shadow_vs.glsl
+	../Resources/shaders/shadow_ps.glsl
+	../Resources/shaders/lighting_math.glsl
 )
 
 SOURCE_GROUP(Shaders FILES ${SHADER_FILES})
@@ -68,17 +71,19 @@ endif()
 
 SET(INSTALL_BINDIR bin)
 if (WIN32)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/shaders/forwardplus_vs.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/shaders/forwardplus_ps.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/shaders/forwardplus_math.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/shaders/forwardplus_preamble.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/shaders/shadow_vs.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/shaders/shadow_ps.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
+	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_vs.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
+	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_ps.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
+	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_math.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
+	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_preamble.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
+	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/shadow_vs.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
+	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/shadow_ps.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
+	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/lighting_math.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
 else()
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/shaders/forwardplus_vs.glsl DESTINATION /usr/local/openig/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/shaders/forwardplus_ps.glsl DESTINATION /usr/local/openig/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/shaders/forwardplus_math.glsl DESTINATION /usr/local/openig/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/shaders/forwardplus_preamble.glsl DESTINATION /usr/local/openig/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/shaders/shadow_vs.glsl DESTINATION /usr/local/openig/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/shaders/shadow_ps.glsl DESTINATION /usr/local/openig/resources/shaders)
+	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_vs.glsl DESTINATION /usr/local/openig/resources/shaders)
+	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_ps.glsl DESTINATION /usr/local/openig/resources/shaders)
+	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_math.glsl DESTINATION /usr/local/openig/resources/shaders)
+	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_preamble.glsl DESTINATION /usr/local/openig/resources/shaders)
+	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/shadow_vs.glsl DESTINATION /usr/local/openig/resources/shaders)
+	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/shadow_ps.glsl DESTINATION /usr/local/openig/resources/shaders)
+	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/lighting_math.glsl DESTINATION /usr/local/openig/resources/shaders)
 endif()

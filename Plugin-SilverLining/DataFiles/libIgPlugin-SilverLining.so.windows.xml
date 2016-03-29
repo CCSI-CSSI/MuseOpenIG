@@ -5,4 +5,5 @@
     <SilverLining-Geocentric>no</SilverLining-Geocentric>
     <SilverLining-SkyBoxSize>50000</SilverLining-SkyBoxSize>
     <SilverLining-ForwardPlusEnabled>no</SilverLining-ForwardPlusEnabled>
+    <LogZDepthBuffer>no</LogZDepthBuffer>
 </OpenIG-Plugin-Config>

@@ -50,6 +50,7 @@
 #include <osgViewer/api/Win32/GraphicsHandleWin32>
 #endif
 
+
 // Let make some info HUD for the keyboard bindings
 // based on the osghud example
 osg::Node* createInfoHUD(OpenIG::Engine* ig)
@@ -213,15 +214,24 @@ class CameraTrackballManipulator : public osgGA::TrackballManipulator
 {
 public:
     CameraTrackballManipulator(bool& resetDemo, OpenIG::Base::ImageGenerator* ig)
-        : osgGA::TrackballManipulator()
-        , playbackOn(false)
-        , reset(resetDemo)
-        , startOfPauseTime(0.0)
-        , openIG(ig)
-        , fixedUpMode(false)
-    {
+		: osgGA::TrackballManipulator()
+		, playbackOn(false)
+		, reset(resetDemo)
+		, startOfPauseTime(0.0)
+		, openIG(ig)
+		, fixedUpMode(false)
+	{
+	}
+	// NOTE: It is still setting it. That's why we use EventHandler
+	// and we wrap this Camera Manipulator
 
-    }
+	// We are not going to set the ViewMatrix from the CameraManipulator
+	// we are setting it in the OpenIG::Engine::frame as it is bind
+	// to an entity	
+	//virtual void updateCamera(osg::Camera& camera)
+	//{
+		// Do nothing here		
+	//}
 
     virtual bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& us)
     {
@@ -335,6 +345,109 @@ protected:
 	osg::Vec3&	_offset;
 };
 
+// For geocentric VDB we set the local 0,0,0 in lat,lon
+// via this command. Later this is used for constructing
+// a Matrix that will transform us in the ECEF mode
+// And this is our Matrix
+static osg::Matrixd	s_GeoZeroMatrix;
+class SetGeocentricZeroCommand : public OpenIG::Base::Commands::Command
+{
+public:
+	// Convinient method for the onscreen
+	// help. This one is a must
+	virtual const std::string getUsage() const
+	{
+		return "latitude longitude";
+	}
+
+	virtual const std::string getArgumentsFormat() const
+	{
+		return	"D:D";
+	}
+
+	// Convinient method for the onscreen
+	// help. This one is a must too
+	virtual const std::string getDescription() const
+	{
+		return  "sets the local zero in geographics coordinates\n"
+			"     latitude - in degrees\n"
+			"     longitude - in degrees";			
+	}
+
+	// This method is called when you invoke a command in the
+	// terminal, call a command through the Commands class
+	// tokens is std::vector<std::string> holding the arguments
+	// provided
+	virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)
+	{
+		if (tokens.size() == 2)
+		{
+			double lat = atof(tokens.at(0).c_str());
+			double lon = atof(tokens.at(1).c_str());
+
+			osg::EllipsoidModel em;
+			em.computeLocalToWorldTransformFromLatLongHeight(osg::DegreesToRadians(lat), osg::DegreesToRadians(lon), 0.0, s_GeoZeroMatrix);
+		}
+		return -1;
+	}
+};
+
+// We use the camera manipulator in a tricky way. Actually
+// we take the Trackball matrix and set it as an offset
+// bellow against the model, then OpenIG computes the 
+// right view matrix. As per osg design, the side effect
+// of this is that we end up with two different ViewMatrices:
+// one local to the model from the trackball, and one for
+// the scene. Because of this we wrap the camera manipulator
+// into EventHandler to process the events and avoid setting
+// the camera view matrix based on the local trackball view matrix
+struct DummyActionAdapter : public osgGA::GUIActionAdapter
+{
+	virtual void requestRedraw() {}
+	
+	virtual void requestContinuousUpdate(bool needed = true) {}
+	
+	virtual void requestWarpPointer(float x, float y) {}
+};
+struct CameraManipulatorEventHandler : public osgGA::EventHandler
+{
+	CameraManipulatorEventHandler(osg::ref_ptr<osgGA::CameraManipulator>& cm)
+		: cameraManipulator(cm)
+	{
+
+	}
+
+	virtual bool handle(osgGA::Event* event, osg::Object* object, osg::NodeVisitor* nv)
+	{
+		osg::ref_ptr<osgGA::GUIEventAdapter> ea = dynamic_cast<osgGA::GUIEventAdapter*>(event);
+		if (ea.valid() && cameraManipulator.valid())
+		{
+			DummyActionAdapter us;
+			cameraManipulator->handle(*ea, us);
+
+			switch (ea->getEventType())
+			{
+				case(osgGA::GUIEventAdapter::FRAME) :
+				{
+					static bool firstFrame = true;
+					if (firstFrame)
+					{
+						firstFrame = false;
+						cameraManipulator->home(0.0);
+					}
+				}
+				break;
+				default:
+					break;
+			}
+		}
+		return false;
+	}
+
+	osg::observer_ptr<osgGA::CameraManipulator>	cameraManipulator;
+};
+
+
 // By default, OpenIG have only one Camera Manipulator
 // which is the keypad manipulator - binds the numeric
 // keypad to move the camera, or entities if it is bound
@@ -444,10 +557,7 @@ public:
                 // to the camera. We have to do this through
                 // the OpenIG Camera binding and update
                 if (manip.valid())
-                {
-                    // We set the Camera Manipulator
-                    _ig->getViewer()->getView(0)->setCameraManipulator(manip,true);
-
+                {                    
                     // Bind the camera to the a320
                     // Entity. We can provide offset here
                     // good if you would like to have pilot-view
@@ -466,6 +576,9 @@ public:
                     // update the OpenIG camera since
                     // it is bound to an Entity
                     s_CameraManipulator = manip;
+
+					// We set the Camera Manipulator
+					_ig->getViewer()->getView(0)->addEventHandler(new CameraManipulatorEventHandler(s_CameraManipulator));
 
                     osg::notify(osg::NOTICE) << "IG: " << name << " bound to entity " << id << std::endl;
                 }
@@ -776,7 +889,7 @@ struct UpdateWheelUpdateCallback : public osg::NodeCallback
 			hat.computeIntersections(terrain);
 			if (hat.getNumPoints())
 			{
-				if (hat.getHeightAboveTerrain(hat.getNumPoints() - 1) > 0.6 /* this is some offset */)
+				if (hat.getHeightAboveTerrain(hat.getNumPoints() - 1) > 0.6 )
 					inTheAir = true;
 				else
 					inTheAir = false;
@@ -1081,7 +1194,7 @@ int main(int argc, char** argv)
         view->getCamera()->setProjectionMatrixAsPerspective(50, aspectratio, 1.0, 50000);
         view->getCamera()->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
         view->getCamera()->setCullingMode(osg::CullSettings::VIEW_FRUSTUM_CULLING);
-		viewer->setThreadingModel(osgViewer::ViewerBase::CullThreadPerCameraDrawThreadPerContext);
+		viewer->setThreadingModel(osgViewer::ViewerBase::CullDrawThreadPerContext);
 
     }
 
@@ -1124,6 +1237,7 @@ int main(int argc, char** argv)
     // Add custom commands we have for this demo
     OpenIG::Base::Commands::instance()->addCommand("manip", new SetCameraManipulatorCommand(ig));
 	OpenIG::Base::Commands::instance()->addCommand("fpo", new FlightPathOffsetCommand(s_Offset));
+	OpenIG::Base::Commands::instance()->addCommand("geozero", new SetGeocentricZeroCommand);
 
     // The scene can be defined in a startup script
     // using commands. Please have a look at the
@@ -1344,7 +1458,7 @@ int main(int argc, char** argv)
 			mx = osg::Matrixd::translate(s_Offset) * mx;
 
 			// and update the model
-            ig->updateEntity(MODEL_ENTITY_ID,mx);
+			ig->updateEntity(MODEL_ENTITY_ID, mx*s_GeoZeroMatrix);
         }
     }
 
@@ -1401,7 +1515,7 @@ int main(int argc, char** argv)
         // We update the OpenIG camera
         // based on the Trackball manipulators
         // camera only if we set it using our
-        // custom command from above
+        // custom command from above		
         if (s_CameraManipulator.valid() && ig->isCameraBoundToEntity())
         {			
 			ig->bindCameraUpdate(s_CameraManipulator->getMatrix());
@@ -1431,7 +1545,7 @@ int main(int argc, char** argv)
 			mx = osg::Matrixd::translate(s_Offset) * mx;
 
 			// and update the model
-			ig->updateEntity(MODEL_ENTITY_ID, mx);
+			ig->updateEntity(MODEL_ENTITY_ID, mx*s_GeoZeroMatrix);
 		}
 
         // We hard code here something. Let make
@@ -1555,7 +1669,7 @@ int main(int argc, char** argv)
 			mx = osg::Matrixd::translate(s_Offset) * mx;
 
             // And we update the model
-            ig->updateEntity(MODEL_ENTITY_ID,mx);            
+			ig->updateEntity(MODEL_ENTITY_ID, mx*s_GeoZeroMatrix);
         }
 
         // only if playback
@@ -1670,7 +1784,7 @@ int main(int argc, char** argv)
 			mx = osg::Matrixd::translate(s_Offset) * mx;
 
             // And we update our model.
-            ig->updateEntity(MODEL_ENTITY_ID,mx);
+			ig->updateEntity(MODEL_ENTITY_ID, mx*s_GeoZeroMatrix);
 
             // update this
             s_PlaybackStartTime = 0;
@@ -1736,13 +1850,6 @@ int main(int argc, char** argv)
 
     // Here the mandatory cleanup
     ig->cleanup();
-
-    // There is problem with how windows manages
-    // the referenced pointers accross dlls and there
-    // is crash on exit - this is Windows only, Linux
-    // and Mac are fine. So till fixed we kill it this
-    // way. Nick.
-    exit(-1);
+	ig = NULL;
 
 }
-

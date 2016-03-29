@@ -396,8 +396,8 @@ int main(int argc, char** argv)
 
         traits->x = 0;
         traits->y = 0;
-        traits->width = screen_width;
-        traits->height = screen_height;
+		traits->width = screen_width;
+		traits->height = screen_height;
         traits->windowDecoration = false;
         traits->doubleBuffer = true;
         traits->screenNum = 0;
@@ -426,7 +426,7 @@ int main(int argc, char** argv)
         view->getCamera()->setCullingMode(osg::CullSettings::VIEW_FRUSTUM_CULLING);
         view->setLightingMode(osgViewer::View::SKY_LIGHT);
 
-        viewer->setThreadingModel(osgViewer::ViewerBase::DrawThreadPerContext);
+		viewer->setThreadingModel(osgViewer::ViewerBase::CullDrawThreadPerContext);
 
     }
 
@@ -565,13 +565,7 @@ int main(int argc, char** argv)
 
     // Here the mandatory cleanup
     ig->cleanup();
-
-    // There is problem with how windows manages
-    // the referenced pointers accross dlls and there
-    // is crash on exit - this is Windows only, Linux
-    // and Mac are fine. So till fixed we kill it this
-    // way. Nick.
-    exit(-1);
+	ig = NULL;
 
 }
 

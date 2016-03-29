@@ -84,9 +84,13 @@ void TritonDrawable::initializeLogZDepthBuffer(osg::RenderInfo& renderInfo, std:
 	std::string strSource = logZPreamble + OpenIG::Base::FileSystem::readFileIntoString(resourcesPath + "/shaders/logz_vs.glsl");
 
 	GLint shaderID = osg::ShaderUtils::compileShader(strSource, osg::Shader::VERTEX, ext);
-	if (shaderID==0)
+	if (shaderID == 0)
 	{
-		osg::notify(osg::ALWAYS)<<"Triton: error: shader compilation error: "<<std::endl;
+		shaderID = osg::ShaderUtils::compileShader(strSource, osg::Shader::VERTEX, ext);
+	}
+	if (shaderID == 0)
+	{
+		osg::notify(osg::ALWAYS)<<"Triton: error: shader compilation error: /shaders/logz_vs.glsl"<<std::endl;
 	}
 	else
 	{
@@ -97,9 +101,13 @@ void TritonDrawable::initializeLogZDepthBuffer(osg::RenderInfo& renderInfo, std:
 	strSource = logZPreamble + OpenIG::Base::FileSystem::readFileIntoString(resourcesPath + "/shaders/logz_ps.glsl");
 
 	shaderID = osg::ShaderUtils::compileShader(strSource, osg::Shader::FRAGMENT, ext);
-	if (shaderID==0)
+	if (shaderID == 0)
 	{
-		osg::notify(osg::ALWAYS)<<"Triton: error: shader compilation error: "<<std::endl;
+		shaderID = osg::ShaderUtils::compileShader(strSource, osg::Shader::FRAGMENT, ext);
+	}
+	if (shaderID == 0)
+	{
+		osg::notify(osg::ALWAYS)<<"Triton: error: shader compilation error: /shaders/logz_ps.glsl"<<std::endl;
 	}
 	else
 	{

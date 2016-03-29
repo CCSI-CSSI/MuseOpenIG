@@ -38,7 +38,7 @@ void Engine::initEffects()
 	if (_effectsRoot.valid()) return;
 
 	_effectsRoot = new osg::Group;
-	getScene()->asGroup()->addChild(_effectsRoot);
+	if (getScene() && getScene()->asGroup()) getScene()->asGroup()->addChild(_effectsRoot);
 }
 
 void Engine::addEffect(unsigned int id, const std::string& name, const osg::Matrixd& mx, const std::string& attributes)

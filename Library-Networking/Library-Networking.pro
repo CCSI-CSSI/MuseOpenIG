@@ -65,14 +65,14 @@ unix {
     isEmpty(BOOSTROOT) {
         message($$TARGET --  -- \"BOOST_ROOT env var\" not set...using system default paths to look for boost )
         !mac:LIBS +=  -lboost_system -lboost_thread
-         mac:LIBS += -lboost_system-mt -lboost_thread-mt
+         mac:LIBS += -lboost_system -lboost_thread
     }
     else {
         message($$TARGET --  -- \"BOOST_ROOT env var\" detected - set to: \"$$BOOSTROOT\")
         !mac:LIBS += -L$$BOOSTROOT/stage/lib \
                 -lboost_system -l boost_thread
          mac:LIBS += -L$$BOOSTROOT/lib \
-                     -lboost_system-mt -lboost_thread-mt
+                     -lboost_system -lboost_thread
         INCLUDEPATH += $$BOOSTROOT
         DEPENDPATH  += $$BOOSTROOT
     }

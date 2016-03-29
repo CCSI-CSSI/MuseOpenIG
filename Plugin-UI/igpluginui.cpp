@@ -293,7 +293,7 @@ public:
 			std::string command = _commandTextBox->getCaption();
 			std::string arguments = _commandArgumentsEditBox->getOnlyText();
 
-			if (!command.empty() && !arguments.empty())
+			if (!command.empty())
 			{
 				std::ostringstream oss;
 				oss << command << " " << arguments;
@@ -1548,6 +1548,10 @@ public:
 	virtual void clean(PluginBase::PluginContext& context)
 	{		
 		_mygui->cleanup();
+		_mygui = NULL;
+
+		_geode = NULL;
+		_camera = NULL;
 	}
 
 protected:

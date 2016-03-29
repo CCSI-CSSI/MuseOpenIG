@@ -52,12 +52,12 @@ unix {
     BOOSTROOT = $$(BOOST_ROOT)
     isEmpty(BOOSTROOT) {
        !build_pass:message($$basename(_PRO_FILE_) -- \"BOOST_ROOT env var\" not set...using system default paths to look for boost )
-        LIBS +=  -lboost_date_time -lboost_thread
+        LIBS +=  -lboost_date_time -lboost_thread -lboost_system
     }
     else {
         !build_pass:message($$basename(_PRO_FILE_) -- \"BOOST_ROOT env var\" detected - set to: \"$$BOOSTROOT\")
         LIBS += -L$$BOOSTROOT/stage/lib \
-                -lboost_date_time -lboost_thread
+                -lboost_date_time -lboost_thread -lboost_system
         INCLUDEPATH += $$BOOSTROOT
         DEPENDPATH  += $$BOOSTROOT
     }
@@ -80,7 +80,8 @@ unix {
     QMAKE_POST_LINK =  test -d $$quote($$DESTDIR) || $$QMAKE_MKDIR $$quote($$DESTDIR) $$escape_expand(\\n\\t)
     QMAKE_POST_LINK += test -e $$quote($$DDIR) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DDIR) $$escape_expand(\\n\\t)
 
-    SFILES   = $$files($${PWD}/shaders/*.glsl)
+    SFILES   = $$files($${PWD}/../Resources/shaders/forwardplus*.glsl)
+    SFILES  += $$files($${PWD}/../Resources/shaders/shadow_*.glsl)
     SDESTDIR = /usr/local/openig/resources/shaders/
 
 #   Get the filename(only) list for distclean to remove only the files added from this plugin

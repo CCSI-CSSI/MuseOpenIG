@@ -42,7 +42,7 @@ unix {
     BOOSTROOT = $$(BOOST_ROOT)
     isEmpty(BOOSTROOT) {
        !build_pass:message($$basename(_PRO_FILE_) -- \"BOOST_ROOT env var\" not set...using system default paths to look for boost )
-        LIBS +=  -lboost_date_time -lboost_thread
+        LIBS +=  -lboost_date_time -lboost_thread -lboost_filesystem -lboost_system
     }
     else {
         !build_pass:message($$basename(_PRO_FILE_) -- \"BOOST_ROOT env var\" detected - set to: \"$$BOOSTROOT\")

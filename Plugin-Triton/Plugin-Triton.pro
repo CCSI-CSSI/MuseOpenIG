@@ -57,6 +57,22 @@ unix {
 
     LIBS += -lTriton -lfftss
 
+   #
+   # Allow an alternate boost library path to be set via ENV variable
+   #
+   BOOSTROOT = $$(BOOST_ROOT)
+   isEmpty(BOOSTROOT) {
+      !build_pass:message($$basename(_PRO_FILE_) -- \"BOOST_ROOT env var\" not set...using system default paths to look for boost )
+       LIBS +=  -lboost_thread -lboost_system -lboost_filesystem
+   }
+   else {
+       !build_pass:message($$basename(_PRO_FILE_) -- \"BOOST_ROOT env var\" detected - set to: \"$$BOOSTROOT\")
+       LIBS += -L$$BOOSTROOT/stage/lib \
+               -lboost_thread -lboost_system -lboost_filesystem
+       INCLUDEPATH += $$BOOSTROOT
+       DEPENDPATH  += $$BOOSTROOT
+   }
+
     FILE = $${PWD}/DataFiles/libIgPlugin-Triton.so.xml
     DDIR = $${DESTDIR}/libOpenIG-Plugin-Triton.so.xml
 
@@ -74,33 +90,45 @@ unix {
 
     TPATH = $$(TRITON_PATH)
     isEmpty(TPATH){
-        message(TRITON_PATH not set in your environment, cannot install the OIG Triton shaders properly!!!!)
+        message(TRITON_PATH not set in your environment -- cannot install the OIG Triton shaders properly!!!!)
     } else {
-        SFILES   = $$files($${PWD}/DataFiles/user*.glsl)
-        SDESTDIR = $$(TRITON_PATH)/Resources/
+        SFILES   = $$files($${PWD}/../Resources/shaders/Triton/user*.glsl)
+        for(file,SFILES) {
+            exists( $$file ) {
+                SDESTDIR = $$(TRITON_PATH)/Resources/
 
-        #Get the filename(only) list for distclean to remove only the files added from this plugin
-        for(var,SFILES) {
-            distfiles += $$SDESTDIR/$$basename(var)
+                #Get the filename(only) list for distclean to remove only the files added from this plugin
+                #for(var,SFILES) {
+                #    distfiles += $$SDESTDIR/$$basename(var)
+                #}
+                #Do we want to delete these files or not??  Probably better to find a way to restore original files instead
+                #so will need to modify this area to save original files before copying ours and overwriting the original ones.
+                #message(Will remove -- $$distfiles -- during distclean)
+                #QMAKE_DISTCLEAN += $$distfiles
+
+                QMAKE_POST_LINK += test -d $$quote($$SDESTDIR) || $$QMAKE_MKDIR $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
+                exists($$SDESTDIR) {
+                    QMAKE_POST_LINK += cp $$file $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
+                    !build_pass:message(Installing the OIG Triton shader -- $$file -- into $$SDESTDIR)
+                } else {
+                    message(Unable to install files into missing directory: $$SDESTDIR!!!!!!!!!!)
+                }
+            }
         }
-        #Do we want to delete these files or not??  Probably better to find a way to restore original files instead
-        #so will need to modify this area to save original files before copying ours and overwriting the original ones.
-        #message(Will remove -- $$distfiles -- during distclean)
-        #QMAKE_DISTCLEAN += $$distfiles
 
-        !build_pass:message(Installing the OIG Triton shaders -- $$SFILES -- into $$SDESTDIR)
-        QMAKE_POST_LINK += test -d $$quote($$SDESTDIR) || $$QMAKE_MKDIR $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
-        QMAKE_POST_LINK += cp $$SFILES $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
+        SFILES   = $${PWD}/../Resources/shaders/Triton/forward_plus_triton_ps.glsl
+        exists( $$SFILES ){
+            SDESTDIR = /usr/local/openig/resources/shaders/
+            distfiles += $$SDESTDIR
 
-        SFILES   = $${PWD}/DataFiles/forward_plus_triton_ps.glsl
-        SDESTDIR = /usr/local/openig/resources/shaders/forward_plus_triton_ps.glsl
-        distfiles += $$SDESTDIR
+            !build_pass:message(Installing the OIG F+ Triton shader -- $$SFILES -- into $$SDESTDIR)
+            QMAKE_POST_LINK += test -d $$quote($$dirname(SDESTDIR)) || $$QMAKE_MKDIR $$quote($$dirname(SDESTDIR)) $$escape_expand(\\n\\t)
+            QMAKE_POST_LINK += $$QMAKE_COPY $$SFILES $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
 
-        !build_pass:message(Installing the OIG F+ SilverLining shader -- $$SFILES -- into $$SDESTDIR)
-        QMAKE_POST_LINK += test -d $$quote($$dirname(SDESTDIR)) || $$QMAKE_MKDIR $$quote($$dirname(SDESTDIR)) $$escape_expand(\\n\\t)
-        QMAKE_POST_LINK += $$QMAKE_COPY $$SFILES $$quote($$dirname(SDESTDIR)) $$escape_expand(\\n\\t)
-
-        QMAKE_DISTCLEAN += $$distfiles
+            QMAKE_DISTCLEAN += $$distfiles
+        } else {
+            message(Unable to install the OIG F+ Triton shader!!!!!!!!!!!!!!!!)
+        }
     }
 
     # library version number files

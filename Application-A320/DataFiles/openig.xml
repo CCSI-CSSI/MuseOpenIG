@@ -13,7 +13,7 @@
   <Shadowed-GPU-Vegetation>no</Shadowed-GPU-Vegetation>
   <ForwardPlusLightsLODCulling>yes</ForwardPlusLightsLODCulling>
   <ForwardPlusLightsDefaultLODRange>500</ForwardPlusLightsDefaultLODRange>
-  <LogZDepthBuffer>yes</LogZDepthBuffer>
+  <LogZDepthBuffer>no</LogZDepthBuffer>
   <GroupLightsBasedOnXMLDefinition>yes</GroupLightsBasedOnXMLDefinition>
   <ImageGenerator-Plugins-Config>
     <Plugin>

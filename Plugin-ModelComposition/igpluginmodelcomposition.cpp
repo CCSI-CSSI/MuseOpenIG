@@ -35,6 +35,7 @@
 #include <Core-Base/texturecache.h>
 
 #include <Core-OpenIG/renderbins.h>
+#include <Core-OpenIG/openig.h>
 
 #include <osg/Version>
 #include <osg/ValueObject>
@@ -701,7 +702,7 @@ protected:
 		osg::ref_ptr<osg::Texture2D> spriteTexture = _textureCache.get(def._spriteTexture);
 
         osg::StateSet* stateSet = new osg::StateSet();
-        stateSet->setRenderBinDetails(SPRITE_LIGHT_POINTS_RENDER_BIN,"DepthSortedBin");
+		stateSet->setRenderBinDetails(MOVING_SPRITE_LIGHT_POINTS_RENDER_BIN, "DepthSortedBin");
 
         // Turn off our lighting. We will use our own shader, primarily because we use logarithmic depth buffer,
         // but also because we could have an optional sprite texture
@@ -882,8 +883,28 @@ protected:
 		// Setup the light point
 		osg::ref_ptr<osgSim::LightPointNode> lpn = new osgSim::LightPointNode;
 
+		// Let find if we have foward+ available
+		// if not, no sprites either, till fixed
+		bool forwardPlusPluginAvailable = false;
+
+		// Look up for the F+ plugin
+		OpenIG::Engine* openIG = dynamic_cast<OpenIG::Engine*>(context.getImageGenerator());
+		if (openIG)
+		{
+			const OpenIG::PluginBase::PluginHost::PluginsMap& plugins = openIG->getPlugins();
+			OpenIG::PluginBase::PluginHost::PluginsMap::const_iterator itr = plugins.begin();
+			for (; itr != plugins.end(); ++itr)
+			{
+				if (itr->second->getName() == "ForwardPlusLighting")
+				{
+					forwardPlusPluginAvailable = true;
+					break;
+				}
+			}
+		}
+
         //lpn->setPointSprite();
-        if (light._spriteTexture!=std::string(""))
+		if (light._spriteTexture != std::string("") && forwardPlusPluginAvailable)
         {
             setUpSpriteStateSet(*lpn, light, context.getImageGenerator());
         }
@@ -923,12 +944,13 @@ protected:
             la.spotCutoff = 20;
 
             // PPP: 
-            la.fStartRange     = light._fStartRange;
-            la.fEndRange       = light._fEndRange;
-            la.fSpotInnerAngle = light._fSpotInnerAngle;
-            la.fSpotOuterAngle = light._fSpotOuterAngle;
+            la.fStartRange		= light._fStartRange;
+            la.fEndRange		= light._fEndRange;
+            la.fSpotInnerAngle	= light._fSpotInnerAngle;
+            la.fSpotOuterAngle	= light._fSpotOuterAngle;
 
-            la.lightType       = lightType;
+            la.lightType		= lightType;
+			la.cullingActive	= false;
 
             la.dirtyMask = OpenIG::Base::LightAttributes::ALL;
 
@@ -946,7 +968,7 @@ protected:
                     light._orientation.z())
             );
             context.getImageGenerator()->updateLightAttributes(_autoLightId,la);
-            context.getImageGenerator()->bindLightToEntity(_autoLightId,entityId);
+            context.getImageGenerator()->bindLightToEntity(_autoLightId++,entityId);
         }
     }
 

@@ -1,12 +1,29 @@
-12 Feb 2016, version 2.0.0
+29 Mar 2016, version 2.0.1
+
 Known issues:
-
-Issue #2: F+ lights attached for entities are not computing the screen space direction/position properly when moving
-
 Issue #3: The CameraManipulator inherited from the TrackballManipulator can zoom out indefinitely
-
 Issue #4: F+ lighting system is not working properly with only the Sun or Moon light source present in the scene
+          Work around is to have at least one F+ light in the scene			
+These issues are scheduled to be fixed in one of the next release
 
+Updates in this release:
+- Added new Mersive(tm), blending and warping support via the new Plugin-Mersive
+- Refactored and faster F+, also fix for the F+ lights artifacts
+- Support for multiple views and sharing the OpenIG scene across these views
+- Added back the SimpleLighting plugin - might be handy for MacOS users
+  since we are still working on F+ to make it run on MacOS which seams to
+  be an OSG issue	
+- Along with the SimpleLighting plugin added support for simple 'psudo'
+  sensors for EO and IR (really very simple implementation of these)
+- Fixed the RenderBins of lights with sprites and clouds
+
+
+12 Feb 2016, version 2.0.0
+
+Known issues:
+Issue #2: F+ lights attached for entities are not computing the screen space direction/position properly when moving
+Issue #3: The CameraManipulator inherited from the TrackballManipulator can zoom out indefinitely
+Issue #4: F+ lighting system is not working properly with only the Sun or Moon light source present in the scene
 all three issues are scheduled to be fixed in release 2.0.1
 
 Updates in this release:

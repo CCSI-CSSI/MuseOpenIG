@@ -55,11 +55,12 @@ namespace OpenIG {
 		// We also hook in with a bounding box callback to tell OSG how big our cloud volumes are
 		struct SilverLiningCloudsComputeBoundingBoxCallback : public osg::Drawable::ComputeBoundingBoxCallback
 		{
-			SilverLiningCloudsComputeBoundingBoxCallback() : camera(0) {}
+			typedef std::vector<osg::Camera*>			Cameras;
+			Cameras										cameras;
+
+			SilverLiningCloudsComputeBoundingBoxCallback(const Cameras& cs) : cameras(cs) {}
 
 			virtual osg::BoundingBox computeBound(const osg::Drawable&) const;
-
-			osg::Camera *camera;
 		};
 
 		// Define an interface for a class that gives us an enviroment map.
@@ -86,7 +87,7 @@ namespace OpenIG {
 		{
 		public:
 			CloudsDrawable();
-			CloudsDrawable(osgViewer::View* view, OpenIG::Base::ImageGenerator* ig, bool forwardPlusEnabled);
+			CloudsDrawable(osgViewer::CompositeViewer* viewer, OpenIG::Base::ImageGenerator* ig, bool forwardPlusEnabled, bool logZEnabled);
 
 			virtual bool isSameKindAs(const Object* obj) const {
 				return dynamic_cast<const CloudsDrawable*>(obj) != NULL;
@@ -124,18 +125,19 @@ namespace OpenIG {
 
 		protected:
 			void initialize();
+			bool useLogZDepthBuffer() const;
 
-			osgViewer::View*                _view;
-			mutable OpenThreads::Mutex      _mutex;
-			OpenIG::Base::ImageGenerator*         _ig;
-			bool                            _envMapDirty;
-			OpenIG::PluginBase::PluginContext*    _pluginContext;
-			bool							_lightBrightness_enable;
-			float							_lightBrightness_day;
-			float							_lightBrightness_night;
-			unsigned int                    _todHour;
-
-			bool _forwardPlusEnabled;
+			osgViewer::CompositeViewer*			_viewer;
+			mutable OpenThreads::Mutex			_mutex;
+			OpenIG::Base::ImageGenerator*       _ig;
+			bool								_envMapDirty;
+			OpenIG::PluginBase::PluginContext*  _pluginContext;
+			bool								_lightBrightness_enable;
+			float								_lightBrightness_day;
+			float								_lightBrightness_night;
+			unsigned int						_todHour;
+			bool								_forwardPlusEnabled;
+			bool								_logZEnabled;
 		private:
 			void setUpShaders(SilverLining::Atmosphere *atmosphere, osg::RenderInfo& renderInfo) const;
 			void initializeForwardPlus(SilverLining::Atmosphere *atmosphere, osg::RenderInfo& renderInfo, std::vector<GLint>& vecUserShaders) const;

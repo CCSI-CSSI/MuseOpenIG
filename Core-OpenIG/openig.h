@@ -71,11 +71,14 @@ public:
      * \date      Fri Jan 16 2015
      */
 	Engine();
+
+protected:
     /*!
      * \brief Destructor
      */
 	virtual ~Engine();
 
+public:
     /*!
      * \brief Load a script with commands on startup
      * \param fileName The sctipt file name
@@ -94,6 +97,30 @@ public:
      */
     virtual std::string version();
 
+	/*!
+	* \brief		OpenIG specific flags for how to setup the Viewer
+	* \author		Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \copyright	(c)Compro Computer Services, Inc.
+    * \date			Sun Jan 11 2015
+	*/
+	enum SetupFlags
+	{
+		None				= 0x00,
+		WithTerminal		= 0x01,
+		WithSplashScreen	= 0x02,
+		WithOnscreenHelp	= 0x04,
+		Standard			= WithTerminal | WithSplashScreen | WithOnscreenHelp
+	};
+
+	/*!
+	* \brief		Call this before \see init. It will setup OpenIG
+	* \param		The mask based on the \see SetupFlags
+	* \author		Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	* \copyright	(c)Compro Computer Services, Inc.
+	* \date			Sun Jan 11 2015
+	*/
+	virtual void setupInitFlags(unsigned int mask);
+
     /*! Should be called immediatelly after making an instance. Here the setup of the
      *  scene and other things happen. By default \ref openig::OpenIG scene is
      *  osgShadow::ShadowedScene with LightSpacePerspective shadow map technique.
@@ -105,12 +132,55 @@ public:
      *  \param xmlFileName  The file name of the xml configuration file.
      *                      Defaults to openig.xml, on Windows in bin/igdata
      *                      MacOS and Linux in /usr/local/bin/igdata
+	 *	\param ids			List of Views to which we let OpenIG render. If empty
+	 *						it will use all the Views with no SceneData associated
      *  \return             Nothing
      *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
      *  \copyright (c)Compro Computer Services, Inc.
      *  \date      Sun Jan 11 2015
      */
-    virtual void init(osgViewer::CompositeViewer* viewer, const std::string& xmlFileName = "openig.xml");
+	virtual void init(osgViewer::CompositeViewer* viewer, const std::string& xmlFileName = "openig.xml", const ViewIdentifiers& ids = ViewIdentifiers());
+
+	/*!	This is to let the user setup a View with OpenIG with some
+	*	sepcifics for the rendering, like OTW, Sensor etc. Possibly
+	*	to be extended as we go
+	*  \brief Setup a View with OpenIG with rendering options
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Thu Feb 25 2016
+	*/
+	enum ViewType
+	{		
+		OTW				= 1,
+		EO				= 2,
+		IR				= 3
+	};
+
+	/*!	This is to let the user setup a View with OpenIG dynamicaly
+	*	if not set with \see init
+	*  \brief Setup a View with OpenIG
+	*  \param view			Your View. 	
+	*  \param option		The View option, OTW, EO, IR ... probably will 
+	*						be extending
+	*  \return				Nothing
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Sat Feb 20 2016
+	*/
+	virtual void initView(osgViewer::View* view, ViewType options = OTW);
+
+	/*!	Setup the view option for a view
+	*  \brief Setup the view option for a view
+	*  \param view			Your View.
+	*  \param option		The View option, OTW, EO, IR ... probably will
+	*						be extending
+	*  \return				Nothing
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Sat Feb 27 2016
+	*/
+	virtual void setViewType(osgViewer::View* view, ViewType options);
+
 
     /*! Call it before destruction
      *  \brief Performs cleanup.
@@ -178,6 +248,26 @@ public:
 	*  \date      Mon Jun 16 2015
 	*/
 	virtual ReadNodeImplementationCallback* getReadNodeImplementationCallback();
+
+	/*! Sets a user read file callback. Please avoid setting the ReadFileCallback
+	*	when using OpenIG - it has internal one. Set it through this method if you
+	*	have one, it will work together with the OpenIG internal one	
+	*  \brief Sets user ReadFileCallback
+	*  \param cb The callback
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Thu Mar 17 2016
+	*/
+	virtual void setReadFileCallback(osgDB::Registry::ReadFileCallback* cb);
+
+	/*! Gets the user ReadFileCallback
+	*  \brief Gets the user ReadFileCallback
+	*  \return The callback
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Thu Mar 17 2016
+	*/
+	virtual osgDB::Registry::ReadFileCallback* getReadFileCallback();
 
 
     /*! \ref OpenIG is using IDs for everything in the
@@ -477,7 +567,7 @@ public:
      *  \copyright (c)Compro Computer Services, Inc.
      *  \date      Sun Jan 11 2015
      */
-    virtual void setCameraPosition(const osg::Matrixd& mx, bool viewMatrix = false);
+	virtual void setCameraPosition(const osg::Matrixd& mx, bool viewMatrix = false, unsigned int cameraID = 0);
 
     /*! Binds the camera to an \ref Entity. Then as the \ref Entity is moving, the Camera
      *  is movving along with. The given Matrix is the local offset
@@ -488,7 +578,7 @@ public:
      *  \copyright (c)Compro Computer Services, Inc.
      *  \date      Sun Jan 11 2015
      */
-    virtual void bindCameraToEntity(unsigned int id, const osg::Matrixd& mx);
+	virtual void bindCameraToEntity(unsigned int id, const osg::Matrixd& mx, unsigned int cameraID = 0);
 
     /*! Updates the camera if it is bound to an \ref Entity with new position and
      *  orientation through Matrix. Might be handy to use \ref OpenIG::Base::Math methods
@@ -499,7 +589,7 @@ public:
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
-    virtual void bindCameraUpdate(const osg::Matrixd& mx);
+	virtual void bindCameraUpdate(const osg::Matrixd& mx, unsigned int cameraID = 0);
 
     /*! Unbinds the Camera from an \ref Entity if it is already bound
      * \brief Unbinds the Camera from an \ref Entity
@@ -507,7 +597,7 @@ public:
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
-    virtual void unbindCameraFromEntity();
+	virtual void unbindCameraFromEntity(unsigned int cameraID = 0);
 
     /*! Checks if the Camera is bound to an \ref Entity
      * \brief Checks if the Camera is bound to an \ref Entity
@@ -516,7 +606,7 @@ public:
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
-    virtual bool isCameraBoundToEntity();
+	virtual bool isCameraBoundToEntity(unsigned int cameraID = 0);
 
     /*! Sets for fixed up Cametra orientation or not. When is set with false,
      *  and is bound to an \ref Entity it follows the \ref Entity orientation,
@@ -530,7 +620,7 @@ public:
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
-	virtual void bindCameraSetFixedUp(bool fixedUp, bool freezeOrientation = false);
+	virtual void bindCameraSetFixedUp(bool fixedUp, bool freezeOrientation = false, unsigned int cameraID = 0);
 
     /*! Sets fog in the scene. The \ref openig::OpenIG is adding a Fog attribute in the scene
      *  and it is up to plugins to implement it's appearance. Example is the \ref LightingPlugin which
@@ -951,7 +1041,7 @@ protected:
     EntityMap                                       _entities;
 
     /*! \brief  Handle of the viewer you have passed in \ref init */
-    osg::ref_ptr<osgViewer::CompositeViewer>        _viewer;
+    osg::observer_ptr<osgViewer::CompositeViewer>        _viewer;
     /*! \brief  Handle of the sun/moon light source with reserved ID of 0*/
     osg::ref_ptr<osg::LightSource>                  _sunOrMoonLight;
     /*! \brief  Handle of Fog attribute */
@@ -1004,17 +1094,25 @@ protected:
 	EntityCache													_entityCache;
 
 	/*! \brief The files to be cached*/
-	OpenIG::Base::StringUtils::StringList								_filesToBeCached;
+	OpenIG::Base::StringUtils::StringList						_filesToBeCached;
+
+	/*! \brief setup mask*/
+	unsigned int												_setupMask;
+
+	/*! \brief user ReadFileCallback*/
+	osg::ref_ptr<osgDB::Registry::ReadFileCallback>				_userReadFileCallback;
 	
     /*!
      * \brief Init the viewer. It calls \ref initScene and add the
      * ViewerOperation for managing the Entity maps. See \ref OpenIG::Base::ImageGenerator::addEntity
      * \param viewer Instance of osgViewer::CompositeViewer
+	 * \param ids			List of Views to which we let OpenIG render. If empty
+	 *						it will use all the Views with no SceneData associated
      * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jan 16 2015
      */
-    void initViewer(osgViewer::CompositeViewer* viewer);
+	void initViewer(osgViewer::CompositeViewer* viewer, const ViewIdentifiers& ids = ViewIdentifiers());
 
     /*! Peforms init on the onscreen command line terminal. It is bound to F8
      * \brief Peforms init on the onscreen command line terminal
@@ -1046,7 +1144,8 @@ protected:
      * \brief Init the scene
      * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
      * \copyright (c)Compro Computer Services, Inc.
-     * \date      Fri Jan 16 2015
+     * \date      Fri Feb 19 2016
+	 * \param	  view - view to init the scene, If NULL provided then default to view(0)
      */
     void initScene();
 

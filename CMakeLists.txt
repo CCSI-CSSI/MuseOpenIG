@@ -42,6 +42,8 @@ include( FindSilverLiningHelper )
 include( FindOsgEarthHelper )
 include( FindBulletHelper )
 include( FindOSGBullet )
+include( FindCstShare )
+include( FindMersive )
 
 find_package(OpenGL)
 find_package(Triton)
@@ -75,10 +77,18 @@ ADD_SUBDIRECTORY( Plugin-FBXAnimation )
 ADD_SUBDIRECTORY( Plugin-OSGParticleEffects )
 ADD_SUBDIRECTORY( Plugin-LightsControl )
 ADD_SUBDIRECTORY( Plugin-Networking )
+ADD_SUBDIRECTORY( Plugin-SimpleLighting)
 
 ADD_SUBDIRECTORY( Library-Graphics )
 ADD_SUBDIRECTORY( Library-Networking )
 
+IF( MERSIVE_FOUND )
+ ADD_SUBDIRECTORY( Plugin-Mersive )
+ENDIF( MERSIVE_FOUND )
+
+IF( CSTSHARE_FOUND )
+    ADD_SUBDIRECTORY( Plugin-Muse )
+ENDIF( CSTSHARE_FOUND )
 
 IF( SILVERLINING_FOUND )
 	ADD_SUBDIRECTORY( Plugin-SilverLining )
@@ -87,7 +97,6 @@ ENDIF( SILVERLINING_FOUND )
 IF( TRITON_FOUND )
 	ADD_SUBDIRECTORY( Plugin-Triton )
 ENDIF( TRITON_FOUND )
-
 
 IF( OSGEARTH_FOUND )
 	INCLUDE_DIRECTORIES(

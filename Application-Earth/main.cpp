@@ -207,13 +207,6 @@ int main(int argc, char** argv)
     }
 
     ig->cleanup();
-
-    // There is problem with the how windows manages
-    // the referenced pointers accross dlls and there
-    // is crash on exit - this is Windows only, Linux
-    // and Mac are fine. So till fixed we kill it this
-    // way. Nick.
-    exit(-1);
-
+	ig = NULL;
 }
 

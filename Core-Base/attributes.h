@@ -338,6 +338,7 @@ namespace OpenIG {
 			LightType       lightType;
 
 			osg::Object::DataVariance	dataVariance;
+			bool						cullingActive;
 
 			enum Mask
 			{
@@ -370,12 +371,15 @@ namespace OpenIG {
 				, lod(0.0)
 				, realLightLOD(0.0)
 				// PPP: Parameters I added
+				// ------------------------
 				, fStartRange(0)
 				, fEndRange(0)
 				, fSpotInnerAngle(0)
 				, fSpotOuterAngle(0)
 				, lightType(LT_UNKNOWN)
+				// -----------------------
 				, dataVariance(osg::Object::DYNAMIC)
+				, cullingActive(true)
 			{
 
 			}

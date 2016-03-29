@@ -38,188 +38,7 @@
 
     <Lighting>yes</Lighting>
 
-    <Light>
-        <Name>TailNavigationLightWhite</Name>
-        <Color>1.0 1.0 1.0 1.0</Color>
-        <Position>-0.03 -22.18 1.062</Position>
-        <Orientation>0 45 0</Orientation>
-        <Real-Light-Offset>0 -1 0.4</Real-Light-Offset>
-        <MinPixelSize>2</MinPixelSize>
-        <MaxPixelSize>2</MaxPixelSize>
-    </Light>
-    <Light>
-        <Name>RightNavigationLightGreen</Name>
-        <Color>0.0 1.0 0.0 1.0</Color>
-        <Position>16.7 -5.14 0.446</Position>
-        <Orientation>0 0 0</Orientation>
-        <Real-Light-Offset>0 -1 0.4</Real-Light-Offset>
-        <MinPixelSize>2</MinPixelSize>
-        <MaxPixelSize>2</MaxPixelSize>
-        <MinPixelSizeMultiplierForSprites>10</MinPixelSizeMultiplierForSprites>
-        <!--If radius is not specified, its 1 by default-->
-        <Radius>2</Radius>
-        <SpriteTexture>textures/lensflare_green_alpha_2.dds</SpriteTexture>
-        <StartRange>0</StartRange>
-        <EndRange>0.7</EndRange>
-        <SpotInnerAngle>60</SpotInnerAngle>
-        <SpotOuterAngle>80</SpotOuterAngle>
-    </Light>
-    <Light>
-        <Name>LeftNavigationLightRed</Name>
-        <Color>1.0 0.0 0.0 1.0</Color>
-        <Position>-16.7 -5.14 0.446</Position>
-        <Orientation>0 0 0</Orientation>
-        <Real-Light-Offset>0 -1 0.4</Real-Light-Offset>
-        <MinPixelSize>2</MinPixelSize>
-        <MaxPixelSize>2</MaxPixelSize>
-        <MinPixelSizeMultiplierForSprites>10</MinPixelSizeMultiplierForSprites>
-        <Radius>3</Radius>
-        <SpriteTexture>textures/lensflare_red_alpha_3.dds</SpriteTexture>
-        <StartRange>0</StartRange>
-        <EndRange>0.7</EndRange>
-        <SpotInnerAngle>60</SpotInnerAngle>
-        <SpotOuterAngle>80</SpotOuterAngle>
-    </Light>
-    <Light>
-        <Name>UpperAnticolisionRed</Name>
-        <Color>20.0 0.0 0.0 1.0</Color>
-        <Position>0 0.205 2.34</Position>
-        <Orientation>0 -90 0</Orientation>
-        <Use-Real-Light>yes</Use-Real-Light>
-        <Real-Light-Offset>0 0 0.4</Real-Light-Offset>
-        <Animation-Pulses>0.25 1 0 0 1, 1.5 0 0 0 1</Animation-Pulses>
-        <Brightness>0.7</Brightness>
-        <ConstAttenuation>3</ConstAttenuation>
-        <MinPixelSize>2</MinPixelSize>
-        <MaxPixelSize>5</MaxPixelSize>
-        <MinPixelSizeMultiplierForSprites>10</MinPixelSizeMultiplierForSprites>
-        <Radius>5</Radius>
-        <SpriteTexture>textures/lensflare_red_alpha_3.dds</SpriteTexture>
-        <StartRange>0</StartRange>
-        <EndRange>0.7</EndRange>
-        <SpotInnerAngle>60</SpotInnerAngle>
-        <SpotOuterAngle>80</SpotOuterAngle>
-    </Light>
-    <Light>
-        <Name>LowerAnticolisionRed</Name>
-        <Color>20.0 0.0 0.0 1.0</Color>
-        <Position>0 1 -2.214</Position>
-        <Orientation>0 90 0</Orientation>
-        <Use-Real-Light>yes</Use-Real-Light>
-        <Real-Light-Offset>0 0 -0.4</Real-Light-Offset>
-        <Animation-Pulses>0.25 1 0 0 1, 1.5 0 0 0 1</Animation-Pulses>
-        <Brightness>1</Brightness>
-        <ConstAttenuation>3</ConstAttenuation>
-        <MinPixelSize>2</MinPixelSize>
-        <MaxPixelSize>5</MaxPixelSize>
-        <MinPixelSizeMultiplierForSprites>10</MinPixelSizeMultiplierForSprites>
-        <Radius>5</Radius>
-        <SpriteTexture>textures/lensflare_red_alpha_3.dds</SpriteTexture>
-        <StartRange>0</StartRange>
-        <EndRange>0.7</EndRange>
-        <SpotInnerAngle>60</SpotInnerAngle>
-        <SpotOuterAngle>80</SpotOuterAngle>
-    </Light>
-    <Light>
-        <Name>WingStrobeLightWhiteLeft</Name>
-        <Color>50.0 50.0 50.0 1.0</Color>
-        <Position>-16.89 -5.33 0.456</Position>
-        <Orientation>-120 0 0</Orientation>
-        <Use-Real-Light>yes</Use-Real-Light>
-        <Brightness>0.1</Brightness>
-        <ConstAttenuation>10</ConstAttenuation>
-        <Real-Light-Offset>-1 0 0.5</Real-Light-Offset>
-        <Animation-Pulses>0.5 1 1 1 1, 1.5 0 0 0 1,0.2 1 1 1 1, 0.2 0 0 0 1,0.2 1 1 1 1, 1.5 0 0 0 1,0.5 1 1 1 1, 1.5 0 0 0 1</Animation-Pulses>
-        <MinPixelSize>3</MinPixelSize>
-        <MaxPixelSize>5</MaxPixelSize>
-        <MinPixelSizeMultiplierForSprites>6.67</MinPixelSizeMultiplierForSprites>
-        <Radius>5</Radius>
-        <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
-        <StartRange>0</StartRange>
-        <EndRange>7</EndRange>
-        <SpotInnerAngle>120</SpotInnerAngle>
-        <SpotOuterAngle>150</SpotOuterAngle>
-    </Light>
-    <Light>
-        <Name>WingStrobeLightWhiteRight</Name>
-        <Color>50.0 50.0 50.0 1.0</Color>
-        <Position>16.89 -5.33 0.456</Position>
-        <Orientation>120 0 0</Orientation>
-        <Use-Real-Light>yes</Use-Real-Light>
-        <Brightness>0.1</Brightness>
-        <Real-Light-Offset>1.0 0 0.5</Real-Light-Offset>
-        <ConstAttenuation>10</ConstAttenuation>
-        <Animation-Pulses>0.5 1 1 1 1, 1.5 0 0 0 1,0.2 1 1 1 1, 0.2 0 0 0 1,0.2 1 1 1 1, 1.5 0 0 0 1,0.5 1 1 1 1, 1.5 0 0 0 1</Animation-Pulses>
-        <MinPixelSize>3</MinPixelSize>
-        <MaxPixelSize>5</MaxPixelSize>
-        <MinPixelSizeMultiplierForSprites>6.67</MinPixelSizeMultiplierForSprites>
-        <Radius>5</Radius>
-        <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
-        <StartRange>0</StartRange>
-        <EndRange>7</EndRange>
-        <SpotInnerAngle>120</SpotInnerAngle>
-        <SpotOuterAngle>150</SpotOuterAngle>
-    </Light>
-    <Light>
-        <Name>TailStrobeLightWhite</Name>
-        <Color>50.0 50.0 50.0 1.0</Color>
-        <Position>0.03 -22.18 1.062</Position>
-        <Orientation>0 0 0</Orientation>
-        <Brightness>0.1</Brightness>
-        <Use-Real-Light>yes</Use-Real-Light>
-        <Real-Light-Offset>0 -1 0.4</Real-Light-Offset>
-        <Animation-Pulses>0.5 1 1 1 1, 1.5 0 0 0 1,0.2 1 1 1 1, 0.2 0 0 0 1,0.2 1 1 1 1, 1.5 0 0 0 1,0.5 1 1 1 1, 1.5 0 0 0 1</Animation-Pulses>
-        <ConstAttenuation>3</ConstAttenuation>
-        <MinPixelSize>3</MinPixelSize>
-        <MaxPixelSize>5</MaxPixelSize>
-        <MinPixelSizeMultiplierForSprites>6.67</MinPixelSizeMultiplierForSprites>
-        <Radius>5</Radius>
-        <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
-        <StartRange>0</StartRange>
-        <EndRange>7</EndRange>
-        <SpotInnerAngle>120</SpotInnerAngle>
-        <SpotOuterAngle>150</SpotOuterAngle>
-    </Light>
-  <Light>
-    <Name>LeftWingLight</Name>
-    <Color>1.0 1.0 1.0 1.0</Color>
-    <Position>-2.416 1.45113 -1.41805</Position>
-    <Orientation>0 -15 0</Orientation>
-    <Use-Real-Light>yes</Use-Real-Light>
-    <Brightness>1</Brightness>
-    <Real-Light-Offset>0.0 0 0.0</Real-Light-Offset>
-    <ConstAttenuation>40</ConstAttenuation>
-    <Animation-Pulses></Animation-Pulses>
-    <MinPixelSize>7</MinPixelSize>
-    <MaxPixelSize>8</MaxPixelSize>
-    <MinPixelSizeMultiplierForSprites>2.86</MinPixelSizeMultiplierForSprites>
-    <Radius>9.5</Radius>
-    <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
-    <StartRange>0</StartRange>
-    <EndRange>7</EndRange>
-    <SpotInnerAngle>-120</SpotInnerAngle>
-    <SpotOuterAngle>-150</SpotOuterAngle>
-  </Light>
-  <Light>
-    <Name>RightWingLight</Name>
-    <Color>1.0 1.0 1.0 1.0</Color>
-    <Position>2.40799 1.60269 -1.48508</Position>
-    <Orientation>0 -15 0</Orientation>
-    <Use-Real-Light>yes</Use-Real-Light>
-    <Brightness>1</Brightness>
-    <Real-Light-Offset>0.0 0 0.0</Real-Light-Offset>
-    <ConstAttenuation>40</ConstAttenuation>
-    <Animation-Pulses></Animation-Pulses>
-    <MinPixelSize>7</MinPixelSize>
-    <MaxPixelSize>8</MaxPixelSize>
-    <MinPixelSizeMultiplierForSprites>2.86</MinPixelSizeMultiplierForSprites>
-    <Radius>9.5</Radius>
-    <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
-    <StartRange>0</StartRange>
-    <EndRange>7</EndRange>
-    <SpotInnerAngle>120</SpotInnerAngle>
-    <SpotOuterAngle>150</SpotOuterAngle>
-  </Light>
+    
 
     <Sub-model>
         <File>slats_r1.ive</File>
@@ -1830,6 +1649,189 @@
             </Sequence>-->
 
         </Animation>
+
+  <Light>
+    <Name>TailNavigationLightWhite</Name>
+    <Color>1.0 1.0 1.0 1.0</Color>
+    <Position>-0.03 -22.18 1.062</Position>
+    <Orientation>0 45 0</Orientation>
+    <Real-Light-Offset>0 -1 0.4</Real-Light-Offset>
+    <MinPixelSize>2</MinPixelSize>
+    <MaxPixelSize>2</MaxPixelSize>
+  </Light>
+  <Light>
+    <Name>RightNavigationLightGreen</Name>
+    <Color>0.0 1.0 0.0 1.0</Color>
+    <Position>16.7 -5.14 0.446</Position>
+    <Orientation>0 0 0</Orientation>
+    <Real-Light-Offset>0 -1 0.4</Real-Light-Offset>
+    <MinPixelSize>2</MinPixelSize>
+    <MaxPixelSize>2</MaxPixelSize>
+    <MinPixelSizeMultiplierForSprites>10</MinPixelSizeMultiplierForSprites>
+    <!--If radius is not specified, its 1 by default-->
+    <Radius>2</Radius>
+    <SpriteTexture>textures/lensflare_green_alpha_2.dds</SpriteTexture>
+    <StartRange>0</StartRange>
+    <EndRange>0.7</EndRange>
+    <SpotInnerAngle>60</SpotInnerAngle>
+    <SpotOuterAngle>80</SpotOuterAngle>
+  </Light>
+  <Light>
+    <Name>LeftNavigationLightRed</Name>
+    <Color>1.0 0.0 0.0 1.0</Color>
+    <Position>-16.7 -5.14 0.446</Position>
+    <Orientation>0 0 0</Orientation>
+    <Real-Light-Offset>0 -1 0.4</Real-Light-Offset>
+    <MinPixelSize>2</MinPixelSize>
+    <MaxPixelSize>2</MaxPixelSize>
+    <MinPixelSizeMultiplierForSprites>10</MinPixelSizeMultiplierForSprites>
+    <Radius>3</Radius>
+    <SpriteTexture>textures/lensflare_red_alpha_3.dds</SpriteTexture>
+    <StartRange>0</StartRange>
+    <EndRange>0.7</EndRange>
+    <SpotInnerAngle>60</SpotInnerAngle>
+    <SpotOuterAngle>80</SpotOuterAngle>
+  </Light>
+  <Light>
+    <Name>UpperAnticolisionRed</Name>
+    <Color>20.0 0.0 0.0 1.0</Color>
+    <Position>0 0.205 2.34</Position>
+    <Orientation>0 -90 0</Orientation>
+    <Use-Real-Light>yes</Use-Real-Light>
+    <Real-Light-Offset>0 0 0.4</Real-Light-Offset>
+    <Animation-Pulses>0.25 1 0 0 1, 1.5 0 0 0 1</Animation-Pulses>
+    <Brightness>0.7</Brightness>
+    <ConstAttenuation>3</ConstAttenuation>
+    <MinPixelSize>2</MinPixelSize>
+    <MaxPixelSize>5</MaxPixelSize>
+    <MinPixelSizeMultiplierForSprites>10</MinPixelSizeMultiplierForSprites>
+    <Radius>5</Radius>
+    <SpriteTexture>textures/lensflare_red_alpha_3.dds</SpriteTexture>
+    <StartRange>0</StartRange>
+    <EndRange>0.7</EndRange>
+    <SpotInnerAngle>60</SpotInnerAngle>
+    <SpotOuterAngle>80</SpotOuterAngle>
+  </Light>
+  <Light>
+    <Name>LowerAnticolisionRed</Name>
+    <Color>20.0 0.0 0.0 1.0</Color>
+    <Position>0 1 -2.214</Position>
+    <Orientation>0 90 0</Orientation>
+    <Use-Real-Light>yes</Use-Real-Light>
+    <Real-Light-Offset>0 0 -0.4</Real-Light-Offset>
+    <Animation-Pulses>0.25 1 0 0 1, 1.5 0 0 0 1</Animation-Pulses>
+    <Brightness>1</Brightness>
+    <ConstAttenuation>3</ConstAttenuation>
+    <MinPixelSize>2</MinPixelSize>
+    <MaxPixelSize>5</MaxPixelSize>
+    <MinPixelSizeMultiplierForSprites>10</MinPixelSizeMultiplierForSprites>
+    <Radius>5</Radius>
+    <SpriteTexture>textures/lensflare_red_alpha_3.dds</SpriteTexture>
+    <StartRange>0</StartRange>
+    <EndRange>0.7</EndRange>
+    <SpotInnerAngle>60</SpotInnerAngle>
+    <SpotOuterAngle>80</SpotOuterAngle>
+  </Light>
+  <Light>
+    <Name>WingStrobeLightWhiteLeft</Name>
+    <Color>50.0 50.0 50.0 1.0</Color>
+    <Position>-16.89 -5.33 0.456</Position>
+    <Orientation>-120 0 0</Orientation>
+    <Use-Real-Light>yes</Use-Real-Light>
+    <Brightness>0.1</Brightness>
+    <ConstAttenuation>10</ConstAttenuation>
+    <Real-Light-Offset>-1 0 0.5</Real-Light-Offset>
+    <Animation-Pulses>0.5 1 1 1 1, 1.5 0 0 0 1,0.2 1 1 1 1, 0.2 0 0 0 1,0.2 1 1 1 1, 1.5 0 0 0 1,0.5 1 1 1 1, 1.5 0 0 0 1</Animation-Pulses>
+    <MinPixelSize>3</MinPixelSize>
+    <MaxPixelSize>5</MaxPixelSize>
+    <MinPixelSizeMultiplierForSprites>6.67</MinPixelSizeMultiplierForSprites>
+    <Radius>5</Radius>
+    <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
+    <StartRange>0</StartRange>
+    <EndRange>7</EndRange>
+    <SpotInnerAngle>120</SpotInnerAngle>
+    <SpotOuterAngle>150</SpotOuterAngle>
+  </Light>
+  <Light>
+    <Name>WingStrobeLightWhiteRight</Name>
+    <Color>50.0 50.0 50.0 1.0</Color>
+    <Position>16.89 -5.33 0.456</Position>
+    <Orientation>120 0 0</Orientation>
+    <Use-Real-Light>yes</Use-Real-Light>
+    <Brightness>0.1</Brightness>
+    <Real-Light-Offset>1.0 0 0.5</Real-Light-Offset>
+    <ConstAttenuation>10</ConstAttenuation>
+    <Animation-Pulses>0.5 1 1 1 1, 1.5 0 0 0 1,0.2 1 1 1 1, 0.2 0 0 0 1,0.2 1 1 1 1, 1.5 0 0 0 1,0.5 1 1 1 1, 1.5 0 0 0 1</Animation-Pulses>
+    <MinPixelSize>3</MinPixelSize>
+    <MaxPixelSize>5</MaxPixelSize>
+    <MinPixelSizeMultiplierForSprites>6.67</MinPixelSizeMultiplierForSprites>
+    <Radius>5</Radius>
+    <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
+    <StartRange>0</StartRange>
+    <EndRange>7</EndRange>
+    <SpotInnerAngle>120</SpotInnerAngle>
+    <SpotOuterAngle>150</SpotOuterAngle>
+  </Light>
+  <Light>
+    <Name>TailStrobeLightWhite</Name>
+    <Color>50.0 50.0 50.0 1.0</Color>
+    <Position>0.03 -22.18 1.062</Position>
+    <Orientation>0 0 0</Orientation>
+    <Brightness>0.1</Brightness>
+    <Use-Real-Light>yes</Use-Real-Light>
+    <Real-Light-Offset>0 -1 0.4</Real-Light-Offset>
+    <Animation-Pulses>0.5 1 1 1 1, 1.5 0 0 0 1,0.2 1 1 1 1, 0.2 0 0 0 1,0.2 1 1 1 1, 1.5 0 0 0 1,0.5 1 1 1 1, 1.5 0 0 0 1</Animation-Pulses>
+    <ConstAttenuation>3</ConstAttenuation>
+    <MinPixelSize>3</MinPixelSize>
+    <MaxPixelSize>5</MaxPixelSize>
+    <MinPixelSizeMultiplierForSprites>6.67</MinPixelSizeMultiplierForSprites>
+    <Radius>5</Radius>
+    <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
+    <StartRange>0</StartRange>
+    <EndRange>7</EndRange>
+    <SpotInnerAngle>120</SpotInnerAngle>
+    <SpotOuterAngle>150</SpotOuterAngle>
+  </Light>
+  <Light>
+    <Name>LeftWingLight</Name>
+    <Color>1.0 1.0 1.0 1.0</Color>
+    <Position>-2.416 1.45113 -1.41805</Position>
+    <Orientation>0 -15 0</Orientation>
+    <Use-Real-Light>yes</Use-Real-Light>
+    <Brightness>1</Brightness>
+    <Real-Light-Offset>0.0 0 0.0</Real-Light-Offset>
+    <ConstAttenuation>40</ConstAttenuation>
+    <Animation-Pulses></Animation-Pulses>
+    <MinPixelSize>7</MinPixelSize>
+    <MaxPixelSize>8</MaxPixelSize>
+    <MinPixelSizeMultiplierForSprites>2.86</MinPixelSizeMultiplierForSprites>
+    <Radius>9.5</Radius>
+    <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
+    <StartRange>0</StartRange>
+    <EndRange>7</EndRange>
+    <SpotInnerAngle>-120</SpotInnerAngle>
+    <SpotOuterAngle>-150</SpotOuterAngle>
+  </Light>
+  <Light>
+    <Name>RightWingLight</Name>
+    <Color>1.0 1.0 1.0 1.0</Color>
+    <Position>2.40799 1.60269 -1.48508</Position>
+    <Orientation>0 -15 0</Orientation>
+    <Use-Real-Light>yes</Use-Real-Light>
+    <Brightness>1</Brightness>
+    <Real-Light-Offset>0.0 0 0.0</Real-Light-Offset>
+    <ConstAttenuation>40</ConstAttenuation>
+    <Animation-Pulses></Animation-Pulses>
+    <MinPixelSize>7</MinPixelSize>
+    <MaxPixelSize>8</MaxPixelSize>
+    <MinPixelSizeMultiplierForSprites>2.86</MinPixelSizeMultiplierForSprites>
+    <Radius>9.5</Radius>
+    <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
+    <StartRange>0</StartRange>
+    <EndRange>7</EndRange>
+    <SpotInnerAngle>120</SpotInnerAngle>
+    <SpotOuterAngle>150</SpotOuterAngle>
+  </Light>
 
 
 </OpenIg-Model-Composition>

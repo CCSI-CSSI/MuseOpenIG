@@ -30,6 +30,7 @@
 
 #include <Core-PluginBase/plugin.h>
 #include <Core-PluginBase/plugincontext.h>
+#include <Core-PluginBase/pluginhost.h>
 
 #include <Core-Base/attributes.h>
 #include <Core-Base/globalidgenerator.h>
@@ -40,6 +41,7 @@
 #include <Core-Base/texturecache.h>
 
 #include <Core-OpenIG/renderbins.h>
+#include <Core-OpenIG/openig.h>
 
 #include <osg/Node>
 #include <osg/ValueObject>
@@ -429,6 +431,27 @@ namespace OpenIG { namespace Plugins {
             // Our custom command for multiswictes
             OpenIG::Base::Commands::instance()->addCommand("ms", new MultiSwitchCommand(_ig,_multiSwitches));
 			OpenIG::Base::Commands::instance()->addCommand("mse", new MultiSwitchExtendedCommand(_ig, _activeSwtichSets));
+
+			// Let find if we have foward+ available
+			// if not, no sprites either, till fixed
+			OpenIG::Plugins::LightsControlPlugin::forwardPlusPluginAvailable = false;
+
+			// Look up for the F+ plugin
+			OpenIG::Engine* openIG = dynamic_cast<OpenIG::Engine*>(_ig);
+			if (openIG)
+			{
+				const OpenIG::PluginBase::PluginHost::PluginsMap& plugins = openIG->getPlugins();
+				OpenIG::PluginBase::PluginHost::PluginsMap::const_iterator itr = plugins.begin();
+				for (; itr != plugins.end(); ++itr)
+				{
+					if (itr->second->getName() == "ForwardPlusLighting")
+					{
+						OpenIG::Plugins::LightsControlPlugin::forwardPlusPluginAvailable = true;
+						break;
+					}
+				}
+			}
+
         }
 
         // More on multiswitches. If the ms command is used in
@@ -1135,6 +1158,7 @@ namespace OpenIG { namespace Plugins {
 							// dont render these lights in the
 							// Height map
 							matchedLpn->setNodeMask(0x4);
+							matchedLpn->setCullingActive(true);
 						}
 						else
 						{
@@ -1168,6 +1192,7 @@ namespace OpenIG { namespace Plugins {
 					++itr)
 				{
 					osg::ref_ptr<osgSim::LightPointNode> lpn = *itr;
+					lpn->setCullingActive(true);
 
 					const std::string xmlName = getLpnNameBasedOnXMLDefinition(lpn);
 					if (!xmlName.empty())
@@ -1201,6 +1226,8 @@ namespace OpenIG { namespace Plugins {
 				{
 					const std::string		name = itr->first;
 					osgSim::LightPointNode*	lpn = itr->second;
+
+					lpn->setCullingActive(true);
 
 					// Get the parent list
 					osg::Node::ParentList& lpnParents = parents[name];
@@ -1489,13 +1516,13 @@ namespace OpenIG { namespace Plugins {
 
     protected:
         OpenIG::Base::ImageGenerator*				_ig;
-        PagedLODWithLightPointNodeListMap	_plodLightPointNodes;
-        OpenThreads::Mutex					_mutex;
-        std::string							_xmlFile;
+        PagedLODWithLightPointNodeListMap			_plodLightPointNodes;
+        OpenThreads::Mutex							_mutex;
+        std::string									_xmlFile;
 		OpenIG::Base::StringUtils::StringList		_tiles;
 		
-		typedef std::map<std::string, bool >	ValidTiles;
-		ValidTiles								_validTiles;
+		typedef std::map<std::string, bool >		ValidTiles;
+		ValidTiles									_validTiles;
 
 	public:
         struct LightPointDefinition
@@ -1516,6 +1543,8 @@ namespace OpenIG { namespace Plugins {
 
         typedef std::map< std::string, LightPointDefinition >	LightPointDefinitions;
         static LightPointDefinitions definitions;
+
+		static bool	forwardPlusPluginAvailable;
 
 	protected:
         void readXML(const std::string&  xmlFile)
@@ -1642,7 +1671,7 @@ namespace OpenIG { namespace Plugins {
                 for (; itr != _defs.end(); ++itr)
                 {
                     LightPointDefinition& def = itr->second;
-                    const std::string name = itr->first;
+                    const std::string name = itr->first;					
 
                     // This is our light definition based on the name
                     if (lpn->getName().substr(0, osg::minimum(lpn->getName().length(), name.length())) == name)
@@ -1696,6 +1725,7 @@ namespace OpenIG { namespace Plugins {
 									else
 									if (def.fplus && fplusLight)
 										_ig.updateLightAttributes(lightId, la);									
+
 								}
 							}
 						}
@@ -1767,7 +1797,8 @@ namespace OpenIG { namespace Plugins {
 
             void setUpSpriteStateSet(osgSim::LightPointNode* lpn, LightPointDefinition& def)
             {
-                if (def.sprites==false)
+
+				if (def.sprites == false || !OpenIG::Plugins::LightsControlPlugin::forwardPlusPluginAvailable)
                 {
                     setUpLightPointStateSet(lpn, def);
                     return;
@@ -1802,17 +1833,18 @@ namespace OpenIG { namespace Plugins {
 					it->second->addUniform(new osg::Uniform("spriteDimensions", vSpriteDimensions), osg::StateAttribute::ON | osg::StateAttribute::PROTECTED);
 
                     lpn->setStateSet(it->second);
+
                     return;
                 }
 
                 osg::StateSet* stateSet = new osg::StateSet();
-                stateSet->setRenderBinDetails(SPRITE_LIGHT_POINTS_RENDER_BIN,"DepthSortedBin");
+				stateSet->setRenderBinDetails(GROUND_SPRITE_LIGHT_POINTS_RENDER_BIN, "DepthSortedBin");
 
                 // Turn off our lighting. We will use our own shader, primarily because we use logarithmic depth buffer,
                 // but also because we could have an optional sprite texture
                 stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF|osg::StateAttribute::PROTECTED|osg::StateAttribute::OVERRIDE);
 
-                osg::StateAttribute::OverrideValue val = osg::StateAttribute::ON|osg::StateAttribute::PROTECTED;
+				osg::StateAttribute::OverrideValue val = osg::StateAttribute::ON | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE;
 
                 stateSet->setTextureAttributeAndModes(0,texture,val);
                 stateSet->addUniform(new osg::Uniform("spriteTexture",0), val);
@@ -1827,7 +1859,7 @@ namespace OpenIG { namespace Plugins {
                 stateSet->addUniform(new osg::Uniform("spriteDimensions", vSpriteDimensions), val);
 
                 stateSet->setDefine("MODULATE_WITH_VERTEX_COLOR");
-                //stateSet->setDefine("WEIGHTED_HOT_SPOT");
+                stateSet->setDefine("WEIGHTED_HOT_SPOT");
 
                 stateSet->setAttributeAndModes(_spriteProgram, val);
 
@@ -2067,6 +2099,7 @@ OpenIG::Plugins::LightsControlPlugin::TOD						OpenIG::Plugins::LightsControlPlu
 OpenIG::Plugins::LightsControlPlugin::TOD						OpenIG::Plugins::LightsControlPlugin::offTOD;
 OpenThreads::Mutex												OpenIG::Plugins::LightsControlPlugin::lightMutex;
 OpenIG::Plugins::LightsControlPlugin::LightPointDefinitions		OpenIG::Plugins::LightsControlPlugin::definitions;
+bool															OpenIG::Plugins::LightsControlPlugin::forwardPlusPluginAvailable = false;
 
 #if defined(_MSC_VER) || defined(__MINGW32__)
 //  Microsoft

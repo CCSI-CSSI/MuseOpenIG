@@ -35,6 +35,7 @@ THE SOFTWARE.
 #endif
 
 #include <map>
+#include <iostream>
 #include <boost/any.hpp>
 
 namespace OpenIG {

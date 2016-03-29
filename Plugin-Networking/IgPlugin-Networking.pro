@@ -49,8 +49,8 @@ unix {
        !build_pass:message($$basename(_PRO_FILE_) --  \"BOOST_ROOT env var\" not set...using system default paths to look for boost )
         !mac:LIBS +=  -lboost_system -lboost_filesystem -lboost_date_time \
                       -lboost_regex  -lboost_thread     -lboost_chrono
-         mac:LIBS += -lboost_system-mt -lboost_filesystem-mt -lboost_date_time-mt \
-                      -lboost_regex-mt  -lboost_thread-mt     -lboost_chrono-mt
+         mac:LIBS += -lboost_system -lboost_filesystem -lboost_date_time \
+                      -lboost_regex  -lboost_thread     -lboost_chrono
     }
     else {
         !build_pass:message($$basename(_PRO_FILE_) --  \"BOOST_ROOT env var\" detected - set to: \"$$BOOSTROOT\")
@@ -58,8 +58,8 @@ unix {
                 -lboost_system -lboost_filesystem -lboost_date_time \
                 -lboost_regex  -lboost_thread     -lboost_chrono
          mac:LIBS += -L$$BOOSTROOT/lib \
-                      -lboost_system-mt -lboost_filesystem-mt -lboost_date_time-mt \
-                      -lboost_regex-mt  -lboost_thread-mt     -lboost_chrono-mt
+                      -lboost_system -lboost_filesystem -lboost_date_time \
+                      -lboost_regex  -lboost_thread     -lboost_chrono
         INCLUDEPATH += $$BOOSTROOT
         DEPENDPATH  += $$BOOSTROOT
     }

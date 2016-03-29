@@ -1,7 +1,7 @@
-# Muse OpenIG V2.0.0
+# Muse OpenIG V2.0.1
 The Muse OpenIG.  An opensource OpenSceneGraph based image generator application suite.
 
-# Now features a Forward Plus lighting system, as its default lighting method!!!
+#       Now features a Forward Plus lighting system, as its default lighting method!!!
 
 Documentation, sample datasets and Binary Downloads for some platforms available at: http://openig.compro.net
 

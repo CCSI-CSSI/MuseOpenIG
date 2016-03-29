@@ -37,6 +37,22 @@ unix {
     }
     !build_pass:message($$basename(_PRO_FILE_) Lib will be installed into $$DESTDIR)
 
+    #
+    # Allow alternate boost library path to be set via ENV variable
+    #
+    BOOSTROOT = $$(BOOST_ROOT)
+    isEmpty(BOOSTROOT) {
+       !build_pass:message($$basename(_PRO_FILE_) -- \"BOOST_ROOT env var\" not set...using system default paths to look for boost )
+        LIBS +=  -lboost_date_time -lboost_thread -lboost_filesystem -lboost_system
+    }
+    else {
+        !build_pass:message($$basename(_PRO_FILE_) -- \"BOOST_ROOT env var\" detected - set to: \"$$BOOSTROOT\")
+        LIBS += -L$$BOOSTROOT/stage/lib \
+                -lboost_system -lboost_filesystem -lboost_thread
+        INCLUDEPATH += $$BOOSTROOT
+        DEPENDPATH  += $$BOOSTROOT
+    }
+
     FILE = $${PWD}/DataFiles/libIgPlugin-ModelComposition.so.xml
     DDIR = $${DESTDIR}/libOpenIG-Plugin-ModelComposition.so.xml
     mac: DDIR = $${DESTDIR}/libOpenIG-Plugin-ModelComposition.dylib.xml

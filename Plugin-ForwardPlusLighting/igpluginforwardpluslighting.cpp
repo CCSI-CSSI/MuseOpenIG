@@ -78,6 +78,7 @@
 
 #include "dummylight.h"
 #include "forwardpluscullvisitor.h"
+#include "forwardplusengine.h"
 #include "forwardpluslightimplementationcallback.h"
 #include "osgtofputils.h"
 
@@ -345,7 +346,7 @@ namespace OpenIG {
 				}
 			}
 
-			void replaceCullVisitor(OpenIG::PluginBase::PluginContext& context)
+			void replaceCullVisitor(OpenIG::PluginBase::PluginContext& context, ForwardPlusEngine* fpEngine)
 			{
 				// We set here our new CullVisitor
 				// that will find out our ShadowedScene
@@ -363,8 +364,8 @@ namespace OpenIG {
 					return;
 				}
 
-#if 0
-				sv->setCullVisitor(new ForwardPlusCullVisitor());
+#if 1
+				sv->setCullVisitor(new ForwardPlusCullVisitor(fpEngine));
 				osg::notify(osg::NOTICE) << "ForwardPlusLighting: default CullVisitor replaced in SceneView 0" << std::endl;
 #endif
 			}
@@ -494,20 +495,18 @@ namespace OpenIG {
 			}
 
 			virtual void init(OpenIG::PluginBase::PluginContext& context)
-			{
-				replaceCullVisitor(context);
-
-				OpenIG::Base::GlobalIdGenerator::instance()->initIdGroup("Real-Lights", 10000, 4000);
-
-				_lightImplementationCallback = new ForwardPlusLightImplementationCallback(context.getImageGenerator());
+			{				
+				ForwardPlusLightImplementationCallback* cb = new ForwardPlusLightImplementationCallback(context.getImageGenerator());
+				_lightImplementationCallback = cb;
 				context.getImageGenerator()->setLightImplementationCallback(_lightImplementationCallback);
 
+				replaceCullVisitor(context, cb->getFPEngine());
 				setupShaders(context);
 
+				OpenIG::Base::GlobalIdGenerator::instance()->initIdGroup("Real-Lights", 10000, 4000);
 				OpenIG::Base::Commands::instance()->addCommand("effects", new EffectsCommand(context.getImageGenerator()));
 			}
-
-
+			
 			virtual void update(OpenIG::PluginBase::PluginContext& context)
 			{
 				// PPP: TO DO
@@ -585,7 +584,7 @@ namespace OpenIG {
 				_xmlFileObserverThreadRunning = false;
 			}
 
-			osg::ref_ptr<OpenIG::Base::LightImplementationCallback> _lightImplementationCallback;
+			osg::ref_ptr<OpenIG::Base::LightImplementationCallback> _lightImplementationCallback;			
 			unsigned int                                            _maxNumLightsPerPixel;
 			unsigned int                                            _cloudsShadowsTextureSlot;
 			osg::ref_ptr<osg::Material>                             _sceneMaterial;

@@ -39,8 +39,8 @@ namespace OpenIG {
 		class AtmosphereReference : public osg::Referenced
 		{
 		public:
-			SilverLining::Atmosphere *atmosphere;
-			bool atmosphereInitialized;
+			SilverLining::Atmosphere	*atmosphere;
+			bool						atmosphereInitialized;
 
 			AtmosphereReference() : atmosphereInitialized(false), atmosphere(0) {}
 		};

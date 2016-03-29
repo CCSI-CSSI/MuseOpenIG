@@ -60,6 +60,7 @@ namespace OpenIG {
 			SilverLiningPlugin()
 				: _geocentric(false)
 				, _forwardPlusEnabled(false)
+				, _logZEnabled(false)
 				, _lightBrightness_enable(true)
 				, _lightBrightness_day(1.f)
 				, _lightBrightness_night(1.f)
@@ -257,6 +258,10 @@ namespace OpenIG {
 					{
 						_forwardPlusEnabled = child->contents == "yes";
 					}
+					if (child->name == "LogZDepthBuffer")
+					{
+						_logZEnabled = child->contents == "yes";
+					}
 				}
 			}
 
@@ -299,6 +304,8 @@ namespace OpenIG {
 
 			virtual void update(OpenIG::PluginBase::PluginContext& context)
 			{
+				initSilverLining(context.getImageGenerator());
+
 				// Here we check if the XML has changed. If so, reload and update
 				_xmlAccessMutex.lock();
 				if (_xmlLastCheckedTime != _xmlLastWriteTime)
@@ -313,117 +320,144 @@ namespace OpenIG {
 					if (!_skyboxSizeSet)
 						setSkyboxSize();
 				}
-		{
-			osg::ref_ptr<osg::Referenced> ref = context.getAttribute("Rain");
-			OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::RainSnowAttributes> *attr = dynamic_cast<OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::RainSnowAttributes> *>(ref.get());
-			if (attr && _skyDrawable.valid())
 			{
-				_skyDrawable->setRain(attr->getValue().getFactor());
-			}
-		}
-		{
-			osg::ref_ptr<osg::Referenced> ref = context.getAttribute("Snow");
-			OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::RainSnowAttributes> *attr = dynamic_cast<OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::RainSnowAttributes> *>(ref.get());
-			if (attr && _skyDrawable.valid())
-			{
-				_skyDrawable->setSnow(attr->getValue().getFactor());
-			}
-		}
-		{
-			osg::ref_ptr<osg::Referenced> ref = context.getAttribute("Fog");
-			OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::FogAttributes> *attr = dynamic_cast<OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::FogAttributes> *>(ref.get());
-			if (attr && _skyDrawable.valid())
-			{
-				_skyDrawable->setVisibility(attr->getValue().getVisibility());
-			}
-		}
-		{
-			osg::ref_ptr<osg::Referenced> ref = context.getAttribute("Wind");
-			OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::WindAttributes> *attr = dynamic_cast<OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::WindAttributes> *>(ref.get());
-			if (attr && _skyDrawable.valid())
-			{
-				_skyDrawable->setWind(attr->getValue().speed, attr->getValue().direction);
-			}
-		}
-
-		{
-			osg::ref_ptr<osg::Referenced> ref = context.getAttribute("TOD");
-			OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::TimeOfDayAttributes> *attr = dynamic_cast<OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::TimeOfDayAttributes> *>(ref.get());
-			if (attr && _skyDrawable.valid())
-			{
-				_skyDrawable->setTimeOfDay(
-					attr->getValue().getHour(),
-					attr->getValue().getMinutes());
-
-				_cloudsDrawable->setEnvironmentMapDirty(true);
-				_cloudsDrawable->setPluginContext(&context);
-				_cloudsDrawable->setTOD(attr->getValue().getHour());
-			}
-
-		}
-
-		OpenIG::PluginBase::PluginContext::AttributeMapIterator itr = context.getAttributes().begin();
-		for (; itr != context.getAttributes().end(); ++itr)
-		{
-			osg::ref_ptr<osg::Referenced> ref = itr->second;
-			OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::CLoudLayerAttributes> *attr = dynamic_cast<OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::CLoudLayerAttributes> *>(ref.get());
-
-			// This is cleaner way of dealing with
-			// PluginContext attributes but the Mac
-			// compiler doesn't like it. It works ok
-			// on Linux though
-			// osg::ref_ptr<OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::CLoudLayerAttributes> > attr = itr->second;
-
-			if (itr->first == "RemoveAllCloudLayers" && _skyDrawable.valid())
-			{
-				_skyDrawable->removeAllCloudLayers();
-				_cloudsDrawable->setEnvironmentMapDirty(true);
-			}
-			else
-				if (attr && itr->first == "CloudLayer" && _skyDrawable.valid())
+				osg::ref_ptr<osg::Referenced> ref = context.getAttribute("Rain");
+				OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::RainSnowAttributes> *attr = dynamic_cast<OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::RainSnowAttributes> *>(ref.get());
+				if (attr && _skyDrawable.valid())
 				{
-					if (attr->getValue().isDirty())
-					{
-						switch (attr->getValue().getAddFlag())
-						{
-						case true:
-							_skyDrawable->addCloudLayer(
-								attr->getValue().getId(),
-								attr->getValue().getType(),
-								attr->getValue().getAltitude(),
-								attr->getValue().getThickness(),
-								attr->getValue().getDensity());
-							_cloudsDrawable->setEnvironmentMapDirty(true);
-							break;
-						}
+					_skyDrawable->setRain(attr->getValue().getFactor());
+				}
+			}
+			{
+				osg::ref_ptr<osg::Referenced> ref = context.getAttribute("Snow");
+				OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::RainSnowAttributes> *attr = dynamic_cast<OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::RainSnowAttributes> *>(ref.get());
+				if (attr && _skyDrawable.valid())
+				{
+					_skyDrawable->setSnow(attr->getValue().getFactor());
+				}
+			}
+			{
+				osg::ref_ptr<osg::Referenced> ref = context.getAttribute("Fog");
+				OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::FogAttributes> *attr = dynamic_cast<OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::FogAttributes> *>(ref.get());
+				if (attr && _skyDrawable.valid())
+				{
+					_skyDrawable->setVisibility(attr->getValue().getVisibility());
+				}
+			}
+			{
+				osg::ref_ptr<osg::Referenced> ref = context.getAttribute("Wind");
+				OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::WindAttributes> *attr = dynamic_cast<OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::WindAttributes> *>(ref.get());
+				if (attr && _skyDrawable.valid())
+				{
+					_skyDrawable->setWind(attr->getValue().speed, attr->getValue().direction);
+				}
+			}
 
-						switch (attr->getValue().getRemoveFlag())
-						{
-						case true:
-							_skyDrawable->removeCloudLayer(attr->getValue().getId());
-							_cloudsDrawable->setEnvironmentMapDirty(true);
-							//osg::notify(osg::NOTICE) << "remove cloud layer: " << attr->getValue().getId() << std::endl;
-							break;
-						}
+			{
+				osg::ref_ptr<osg::Referenced> ref = context.getAttribute("TOD");
+				OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::TimeOfDayAttributes> *attr = dynamic_cast<OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::TimeOfDayAttributes> *>(ref.get());
+				if (attr && _skyDrawable.valid())
+				{
+					_skyDrawable->setTimeOfDay(
+						attr->getValue().getHour(),
+						attr->getValue().getMinutes());
 
-						if (!attr->getValue().getAddFlag() && !attr->getValue().getRemoveFlag())
-						{
-							_skyDrawable->updateCloudLayer(
-								attr->getValue().getId(),
-								attr->getValue().getAltitude(),
-								attr->getValue().getThickness(),
-								attr->getValue().getDensity());
-							_cloudsDrawable->setEnvironmentMapDirty(true);
-						}
-					}
+					_cloudsDrawable->setEnvironmentMapDirty(true);
+					_cloudsDrawable->setPluginContext(&context);
+					_cloudsDrawable->setTOD(attr->getValue().getHour());
 				}
 
-		}
+			}
 
-		{
-			OpenIG::Engine* ig = dynamic_cast<OpenIG::Engine*>(context.getImageGenerator());
-			if (ig && this->_skyDrawable) this->_skyDrawable->setIG(ig);
-		}
+			OpenIG::PluginBase::PluginContext::AttributeMapIterator itr = context.getAttributes().begin();
+			for (; itr != context.getAttributes().end(); ++itr)
+			{
+				osg::ref_ptr<osg::Referenced> ref = itr->second;
+				OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::CLoudLayerAttributes> *attr = dynamic_cast<OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::CLoudLayerAttributes> *>(ref.get());
+
+				// This is cleaner way of dealing with
+				// PluginContext attributes but the Mac
+				// compiler doesn't like it. It works ok
+				// on Linux though
+				// osg::ref_ptr<OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::CLoudLayerAttributes> > attr = itr->second;
+
+				if (itr->first == "RemoveAllCloudLayers" && _skyDrawable.valid())
+				{
+					_skyDrawable->removeAllCloudLayers();
+					_cloudsDrawable->setEnvironmentMapDirty(true);
+				}
+				else
+					if (attr && itr->first == "CloudLayer" && _skyDrawable.valid())
+					{
+						if (attr->getValue().isDirty())
+						{
+							switch (attr->getValue().getAddFlag())
+							{
+							case true:
+								_skyDrawable->addCloudLayer(
+									attr->getValue().getId(),
+									attr->getValue().getType(),
+									attr->getValue().getAltitude(),
+									attr->getValue().getThickness(),
+									attr->getValue().getDensity());
+								_cloudsDrawable->setEnvironmentMapDirty(true);
+								break;
+							}
+
+							switch (attr->getValue().getRemoveFlag())
+							{
+							case true:
+								_skyDrawable->removeCloudLayer(attr->getValue().getId());
+								_cloudsDrawable->setEnvironmentMapDirty(true);
+								//osg::notify(osg::NOTICE) << "remove cloud layer: " << attr->getValue().getId() << std::endl;
+								break;
+							}
+
+							if (!attr->getValue().getAddFlag() && !attr->getValue().getRemoveFlag())
+							{
+								_skyDrawable->updateCloudLayer(
+									attr->getValue().getId(),
+									attr->getValue().getAltitude(),
+									attr->getValue().getThickness(),
+									attr->getValue().getDensity());
+								_cloudsDrawable->setEnvironmentMapDirty(true);
+							}
+						}
+					}
+
+				}
+
+				{
+					OpenIG::Engine* ig = dynamic_cast<OpenIG::Engine*>(context.getImageGenerator());
+					if (ig && this->_skyDrawable) this->_skyDrawable->setIG(ig);
+				}
+
+				// Instantiate an Atmosphere and associate it with this camera. If you have multiple cameras
+				// in multiple contexts, be sure to instantiate seperate Atmosphere objects for each.
+				// Remember to delete this object at shutdown.
+				if (!ar) ar = new AtmosphereReference;
+				if (!ar->atmosphere)
+				{
+					SilverLining::Atmosphere *atm = new SilverLining::Atmosphere(_userName.c_str(), _key.c_str());
+					ar->atmosphere = atm;
+				}
+
+				osgViewer::ViewerBase::Views views;
+				context.getImageGenerator()->getViewer()->getViews(views);
+
+				osgViewer::ViewerBase::Views::iterator vitr = views.begin();
+				for (; vitr != views.end(); ++vitr)
+				{
+					osgViewer::View* view = *vitr;
+
+					bool openIGScene = false;
+					if (view->getUserValue("OpenIG-Scene", openIGScene) && openIGScene)
+					{
+						if (!view->getCamera()->getUserData())
+							view->getCamera()->setUserData(ar);
+					}
+
+				}
 			}
 
 			virtual void clean(OpenIG::PluginBase::PluginContext& context)
@@ -436,13 +470,53 @@ namespace OpenIG {
 				}
 				_xmlFileObserverThread.reset();
 
-				osgViewer::CompositeViewer* viewer = context.getImageGenerator()->getViewer();
-				AtmosphereReference *ar = dynamic_cast<AtmosphereReference*>(viewer->getView(0)->getCamera()->getUserData());
-				if (ar && ar->atmosphere)
+				OpenIG::Base::Commands::instance()->removeCommand("silverlining");
+				OpenIG::Base::Commands::instance()->removeCommand("setskyboxsize");
+				OpenIG::Base::Commands::instance()->removeCommand("setsilverliningparams");
+				OpenIG::Base::Commands::instance()->removeCommand("addclouds");
+				OpenIG::Base::Commands::instance()->removeCommand("updateclouds");
+				OpenIG::Base::Commands::instance()->removeCommand("removeclouds");
+				OpenIG::Base::Commands::instance()->removeCommand("removeallclouds");
+				OpenIG::Base::Commands::instance()->removeCommand("fog");
+				OpenIG::Base::Commands::instance()->removeCommand("rain");
+				OpenIG::Base::Commands::instance()->removeCommand("snow");
+
+				if (_cloudsGeode->getNumParents() != 0)
 				{
-					delete ar->atmosphere;
+					_skyGeode->getParent(0)->removeChild(_skyGeode);
+					_cloudsGeode->getParent(0)->removeChild(_cloudsGeode);					
 				}
 
+				_skyGeode = NULL;
+				_cloudsGeode = NULL;
+
+				_skyDrawable = NULL;
+				_cloudsDrawable = NULL;
+
+				osgViewer::CompositeViewer* viewer = context.getImageGenerator()->getViewer();
+
+				osgViewer::ViewerBase::Views views;
+				viewer->getViews(views);
+
+				osgViewer::ViewerBase::Views::iterator itr = views.begin();
+				for (; itr != views.end(); ++itr)
+				{
+					osgViewer::View* view = *itr;
+
+					bool openIGScene = false;
+					if (view->getUserValue("OpenIG-Scene", openIGScene) && openIGScene)
+					{
+						AtmosphereReference *ar = dynamic_cast<AtmosphereReference*>(view->getCamera()->getUserData());
+						if (ar && ar->atmosphere)
+						{
+							if (ar->referenceCount() == 1)
+							{
+								delete ar->atmosphere;
+							}
+						}
+						view->getCamera()->setUserData(0);
+					}
+				}	
 			}
 
 			void readXML(const std::string& xmlFileName)
@@ -552,6 +626,7 @@ namespace OpenIG {
 			AtmosphereReference             *ar;
 			bool							_geocentric;
 			bool							_forwardPlusEnabled;
+			bool							_logZEnabled;
 			bool							_lightBrightness_enable;
 			float							_lightBrightness_day;
 			float							_lightBrightness_night;
@@ -560,6 +635,8 @@ namespace OpenIG {
 			std::string						_xmlFileName;
 			float							_sunMoonBrightness_day;
 			float							_sunMoonBrightness_night;
+			osg::ref_ptr<osg::Geode>		_skyGeode;
+			osg::ref_ptr<osg::Geode>		_cloudsGeode;
 
 			boost::shared_ptr<boost::thread>	_xmlFileObserverThread;
 			volatile bool						_xmlThreadIsRunning;
@@ -571,8 +648,20 @@ namespace OpenIG {
 
 			const EnvMapUpdater* initSilverLining(OpenIG::Base::ImageGenerator* ig)
 			{
-				if (_cloudsDrawable.valid() && _skyDrawable.valid()) return _cloudsDrawable.get();
-				if (ig == 0) return 0;
+				if (_cloudsDrawable.valid() && _skyDrawable.valid())
+				{
+					if (_cloudsGeode->getNumParents() == 0 && ig->getScene() && ig->getScene()->asGroup())
+					{
+						ig->getScene()->asGroup()->addChild(_skyGeode);
+						ig->getScene()->asGroup()->addChild(_cloudsGeode);
+
+						_skyDrawable->setLight(ig->getSunOrMoonLight());
+						_skyDrawable->setFog(ig->getFog());
+					}					
+					return _cloudsDrawable.get();
+				}
+
+				if (ig == 0) return 0;				
 
 				osgViewer::CompositeViewer* viewer = ig->getViewer();
 
@@ -583,13 +672,7 @@ namespace OpenIG {
 					return 0;
 
 				if (viewer->getNumViews() == 0)
-					return 0;
-
-				// No need for OSG to clear the color buffer, the sky will fill it for you.
-				viewer->getView(0)->getCamera()->setClearMask(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-				// configure the near/far so we don't clip things that are up close
-				viewer->getView(0)->getCamera()->setNearFarRatio(0.00002);
+					return 0;								
 
 				// Instantiate an Atmosphere and associate it with this camera. If you have multiple cameras
 				// in multiple contexts, be sure to instantiate seperate Atmosphere objects for each.
@@ -598,33 +681,55 @@ namespace OpenIG {
 
 				ar = new AtmosphereReference;
 				ar->atmosphere = atm;
-				viewer->getView(0)->getCamera()->setUserData(ar);
+
+				osgViewer::ViewerBase::Views views;
+				viewer->getViews(views);
+
+				osgViewer::ViewerBase::Views::iterator itr = views.begin();
+				for (; itr != views.end(); ++itr)
+				{
+					osgViewer::View* view = *itr;
+
+					bool openIGScene = false;
+					if (view->getUserValue("OpenIG-Scene", openIGScene) && openIGScene)
+					{
+						view->getCamera()->setUserData(ar);
+						// No need for OSG to clear the color buffer, the sky will fill it for you.
+						view->getCamera()->setClearMask(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+						// configure the near/far so we don't clip things that are up close
+						view->getCamera()->setNearFarRatio(0.00002);
+					}
+					
+				}				
 
 				// Add the sky (calls Atmosphere::DrawSky and handles initialization once you're in
 				// the rendering thread)
-				osg::Geode *skyGeode = new osg::Geode;
-				_skyDrawable = new SkyDrawable(_path, viewer->getView(0), sunOrMoonLight->getLight(), fog, _geocentric);
+				_skyGeode = new osg::Geode;
+				_skyDrawable = new SkyDrawable(_path, viewer, sunOrMoonLight ? sunOrMoonLight->getLight() : 0, fog, _geocentric);
 
 				// ***IMPORTANT!**** Check that the path to the resources folder for SilverLining in SkyDrawable.cpp
 				// SkyDrawable::initializeSilverLining matches with where you installed SilverLining.
 
-				skyGeode->addDrawable(_skyDrawable);
-				skyGeode->setCullingActive(false); // The skybox is always visible.
+				_skyGeode->addDrawable(_skyDrawable);
+				_skyGeode->setCullingActive(false); // The skybox is always visible.
 
-				skyGeode->getOrCreateStateSet()->setRenderBinDetails(SKY_RENDER_BIN, "RenderBin");
+				_skyGeode->getOrCreateStateSet()->setRenderBinDetails(SKY_RENDER_BIN, "RenderBin");
 				//skyGeode->getOrCreateStateSet()->setAttributeAndModes( new osg::Depth( osg::Depth::LEQUAL, 0.0, 1.0, false ) );
 
 				// Add the clouds (note, you need this even if you don't have clouds in your scene - it calls
 				// Atmosphere::DrawObjects() which also draws precipitation, lens flare, etc.)
-				osg::Geode *cloudsGeode = new osg::Geode;
-				_cloudsDrawable = new CloudsDrawable(viewer->getView(0), ig, _forwardPlusEnabled);
-				cloudsGeode->addDrawable(_cloudsDrawable);
-				cloudsGeode->getOrCreateStateSet()->setRenderBinDetails(CLOUDS_RENDER_BIN, "RenderBin");
-				cloudsGeode->setCullingActive(false);
+				_cloudsGeode = new osg::Geode;
+				_cloudsDrawable = new CloudsDrawable(viewer, ig, _forwardPlusEnabled, _logZEnabled);
+				_cloudsGeode->addDrawable(_cloudsDrawable);
+				_cloudsGeode->getOrCreateStateSet()->setRenderBinDetails(CLOUDS_RENDER_BIN, "DepthSortedBin");
+				_cloudsGeode->setCullingActive(false);
 
 				// Add our sky and clouds into the scene.
-				ig->getScene()->asGroup()->addChild(skyGeode);
-				ig->getScene()->asGroup()->addChild(cloudsGeode);
+				if (ig->getScene() && ig->getScene()->asGroup())
+				{
+					ig->getScene()->asGroup()->addChild(_skyGeode);
+					ig->getScene()->asGroup()->addChild(_cloudsGeode);
+				}
 
 				_cloudsDrawable->setLightingBrightness(
 					_lightBrightness_enable,

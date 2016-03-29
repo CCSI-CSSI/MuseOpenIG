@@ -29,6 +29,8 @@
 
 #include <Core-Base/attributes.h>
 
+#include <Library-Graphics/Light.h>
+
 #include <osg/Group>
 #include <osg/LightSource>
 #include <osg/observer_ptr>
@@ -66,28 +68,45 @@ namespace OpenIG {
 		typedef boost::unordered_map<unsigned int, OpenIG::Library::Graphics::Light* > FPLightMap;
 		typedef boost::unordered_map<unsigned int, OpenIG::Library::Graphics::Light* >::iterator FPLightMapIterator;
 
+		class ForwardPlusEngine;
+
 		class ForwardPlusLightImplementationCallback : public OpenIG::Base::LightImplementationCallback
 		{
 		public:
 			ForwardPlusLightImplementationCallback(OpenIG::Base::ImageGenerator* ig);
 			~ForwardPlusLightImplementationCallback();
 
-			virtual osg::Referenced* createLight(unsigned int id, const OpenIG::Base::LightAttributes& definition, osg::Group* lightsGroup);
-			virtual void updateLight(unsigned int id, const OpenIG::Base::LightAttributes& definition);
+			virtual osg::Referenced*	createLight(unsigned int id, const OpenIG::Base::LightAttributes& definition, osg::Group* lightsGroup);
+			virtual void				updateLight(unsigned int id, const OpenIG::Base::LightAttributes& definition);
+			ForwardPlusEngine*			getFPEngine() { return _fpEngine;  }
+
 		protected:
-			OpenIG::Base::ImageGenerator*         _ig;
-			osg::observer_ptr<osg::Group>   _lightsGroup;
-			osg::ref_ptr<osg::Group>        _dummyGroup;
+			OpenIG::Base::ImageGenerator*					_ig;
+			osg::observer_ptr<osg::Group>					_lightsGroup;
+			osg::ref_ptr<osg::Group>						_dummyGroup;
+			OpenIG::Library::Graphics::LightManager*		_lightManager;
+			LightSourcesMap									_lightSourcesMap;
+			FPLightMap										_fplights;
+			OpenIG::Library::Graphics::LightData*			_lightData;
+			OpenIG::Library::Graphics::TileSpaceLightGrid*	_tileSpaceLightGrid;
+			osg::ref_ptr<LightManagerStateAttribute>		_lightManagerStateAttribute;
+			ForwardPlusEngine*								_fpEngine;
 
-			OpenIG::Library::Graphics::LightManager*   _lightManager;
-			LightSourcesMap _lightSourcesMap;
-			FPLightMap      _fplights;
+			void setInitialOSGLightParameters(
+						osg::Light* light, 
+						const OpenIG::Base::LightAttributes& definition, 
+						const osg::Vec4d& pos, 
+						const osg::Vec3f& dir
+			);
 
-			OpenIG::Library::Graphics::LightData*      _lightData;
+			void updateOSGLightParameters(
+						osg::Light* light, 
+						const OpenIG::Base::LightAttributes& definition
+			);
 
-			OpenIG::Library::Graphics::TileSpaceLightGrid* _tileSpaceLightGrid;
-
-			osg::ref_ptr<LightManagerStateAttribute> _lightManagerStateAttribute;
+			OpenIG::Library::Graphics::LightType toFPLightType(
+						OpenIG::Base::LightType lightType
+			);
 		};
 	}
 }

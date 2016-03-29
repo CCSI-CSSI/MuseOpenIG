@@ -11,7 +11,7 @@ SOURCES += main.cpp
 include(DataFiles/deployment.pri)
 qtcAddDeployment()
 
-LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgGA -lOpenIG-Engine -lOpenIG-Base
+LIBS += -losg -losgDB -losgText -losgViewer -lOpenThreads -losgGA -lOpenIG-Engine -lOpenIG-Base
 
 INCLUDEPATH += ../
 DEPENDPATH += ../

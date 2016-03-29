@@ -13,7 +13,7 @@
   <Shadowed-GPU-Vegetation>no</Shadowed-GPU-Vegetation>
   <ForwardPlusLightsLODCulling>yes</ForwardPlusLightsLODCulling>
   <ForwardPlusLightsDefaultLODRange>500</ForwardPlusLightsDefaultLODRange>
-  <LogZDepthBuffer>yes</LogZDepthBuffer>
+  <LogZDepthBuffer>no</LogZDepthBuffer>
   <GroupLightsBasedOnXMLDefinition>yes</GroupLightsBasedOnXMLDefinition>
   <ImageGenerator-Plugins-Config>
     <Plugin>
@@ -26,7 +26,7 @@
     </Plugin>
     <Plugin>
       <Order-Number>-1</Order-Number>
-      <Name>ForwardPlusLighting</Name>
+      <Name>SimpleLighting</Name>
     </Plugin>
     <Plugin>
       <Order-Number>2</Order-Number>

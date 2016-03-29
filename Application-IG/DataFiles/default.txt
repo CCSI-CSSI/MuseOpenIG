@@ -7,7 +7,9 @@ playanim 2 fbx:"Take 001":LOOP
 ms SBSC_Active 0
 
 manip 1 trackball
-tod 4 45
+tod 9 0
 fog 500000
+
+bindcamera 1 10 30 0 -200 0 0 1
 
 

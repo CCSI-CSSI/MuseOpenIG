@@ -27,32 +27,25 @@
 #include <osgUtil/CullVisitor>
 #include <osg/Program>
 #include <osg/Shader>
+#include <osg/LightSource>
 
 #include <vector>
 #include <string>
+#include <map>
 
 namespace OpenIG {
 	namespace Plugins {
 
+		class ForwardPlusEngine;
 		class ForwardPlusCullVisitor : public osgUtil::CullVisitor
 		{
 		public:
-			ForwardPlusCullVisitor();
-			virtual void apply(osg::Group& node);
+			ForwardPlusCullVisitor(ForwardPlusEngine* engine);
+			
+			virtual void	apply(osg::LightSource& node);											
 
-			void addShadersToLinkWithMain(osg::ref_ptr<osg::Shader> shader);
-		private:
-			osg::ref_ptr<osg::Program> _program;
-			void findProgramIfNotFound(void);
-			bool _searchedProgram;
-
-			typedef std::vector< osg::ref_ptr<osg::Shader> > VectorShaders;
-			VectorShaders _shadersToLink;
-
-
-			typedef std::vector<std::string> VectorString;
-
-			VectorString _programsWithShadersNamedAs;
+		protected:
+			ForwardPlusEngine*	_fpEngine;
 		};
 	}
 }

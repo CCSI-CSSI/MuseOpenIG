@@ -107,6 +107,8 @@ unix {
     }
     else { error( "$$TARGET -- could not find pri library version file openig_version.pri" ) }
 
+    mac: LIBS += -framework openGL
+
     # end of library version number files
 }
 

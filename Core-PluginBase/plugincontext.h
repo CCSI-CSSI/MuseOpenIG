@@ -28,12 +28,13 @@
 #if defined(OPENIG_SDK)
 	#include <OpenIG-PluginBase/export.h>
 	#include <OpenIG-Base/imagegenerator.h>
+    #include <OpenIG-Base/igcore.h>
 #else
 	#include <Core-PluginBase/export.h>
 	#include <Core-Base/imagegenerator.h>
+    #include <Core-Base/igcore.h>
 #endif
 
-#include <Core-Base/igcore.h>
 
 #include <map>
 

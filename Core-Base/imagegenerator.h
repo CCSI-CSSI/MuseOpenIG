@@ -44,6 +44,8 @@
 #include <osg/LightSource>
 #include <osg/Program>
 
+#include <osgDB/ReadFile>
+
 #include <osgViewer/CompositeViewer>
 
 #include <map>
@@ -89,6 +91,17 @@ namespace OpenIG {
 			 */
 			virtual std::string version() = 0;
 
+			/*!
+			* \brief	One might want to have the Image Generator only
+			*			in some views, so this typedef holds the IDs of
+			*			the views - an ID is the order of the View in
+			*			it's parent CompositeViewer			
+			* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			* \copyright (c)Compro Computer Services, Inc.
+			* \date      Fri Feb 19 2016
+			*/
+			typedef std::vector<unsigned int>			ViewIdentifiers;
+
 			/*! Should be called immediatelly after making an instance. Here the setup of the
 			 *  scene and other things happen. By default \ref openig::OpenIG scene is
 			 *  osgShadow::ShadowedScene with LightSpacePerspective shadow map technique.
@@ -100,12 +113,14 @@ namespace OpenIG {
 			 *  \param xmlFileName  The file name of the xml configuration file.
 			 *                      Defaults to openig.xml, on Windows in bin/igdata
 			 *                      MacOS and Linux in /usr/local/bin/igdata
+			 *	\param ids			List of Views to which we let OpenIG render. If empty
+			 *						it will use all the Views with no SceneData associated
 			 *  \return             Nothing
 			 *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
 			 *  \copyright (c)Compro Computer Services, Inc.
 			 *  \date      Sun Jan 11 2015
 			 */
-			virtual void init(osgViewer::CompositeViewer* viewer, const std::string& xmlFileName = "openig.xml") = 0;
+			virtual void init(osgViewer::CompositeViewer* viewer, const std::string& xmlFileName = "openig.xml", const ViewIdentifiers& ids = ViewIdentifiers()) = 0;
 
 			/*! Call it before destruction
 			 *  \brief Performs cleanup.
@@ -154,6 +169,26 @@ namespace OpenIG {
 			*  \date      Mon Jun 16 2015
 			*/
 			virtual ReadNodeImplementationCallback* getReadNodeImplementationCallback() = 0;
+			/*! Sets a user read file callback. Please avoid setting the ReadFileCallback
+			*	when using OpenIG - it has internal one. Set it through this method if you
+			*	have one, it will work together with the OpenIG internal one
+			*  \brief Sets user ReadFileCallback
+			*  \param cb The callback
+			*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			*  \copyright (c)Compro Computer Services, Inc.
+			*  \date      Thu Mar 17 2016
+			*/
+			virtual void setReadFileCallback(osgDB::Registry::ReadFileCallback* cb) = 0;
+
+			/*! Gets the user ReadFileCallback
+			*  \brief Gets the user ReadFileCallback
+			*  \return The callback
+			*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			*  \copyright (c)Compro Computer Services, Inc.
+			*  \date      Thu Mar 17 2016
+			*/
+			virtual osgDB::Registry::ReadFileCallback* getReadFileCallback() = 0;
+
 
 			/*! It calls viewer->frame() and performs internal calling of plugins hooks
 			 *  like, update, preFrame, postFrame. This method mimics the viewer->frame()
@@ -396,7 +431,7 @@ namespace OpenIG {
 			 *  \copyright (c)Compro Computer Services, Inc.
 			 *  \date      Sun Jan 11 2015
 			 */
-			virtual void setCameraPosition(const osg::Matrixd& mx, bool viewMatrix = false) = 0;
+			virtual void setCameraPosition(const osg::Matrixd& mx, bool viewMatrix = false, unsigned int cameraID = 0) = 0;
 
 			/*! Binds the camera to an \ref Entity. Then as the \ref Entity is moving, the Camera
 			 *  is movving along with. The given Matrix is the local offset
@@ -407,7 +442,7 @@ namespace OpenIG {
 			 *  \copyright (c)Compro Computer Services, Inc.
 			 *  \date      Sun Jan 11 2015
 			 */
-			virtual void bindCameraToEntity(unsigned int id, const osg::Matrixd& mx) = 0;
+			virtual void bindCameraToEntity(unsigned int id, const osg::Matrixd& mx, unsigned int cameraID = 0) = 0;
 
 			/*! Updates the camera if it is bound to an \ref Entity with new position and
 			 *  orientation through Matrix. Might be handy to use \ref OpenIG::Base::Math methods
@@ -418,7 +453,7 @@ namespace OpenIG {
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
-			virtual void bindCameraUpdate(const osg::Matrixd& mx) = 0;
+			virtual void bindCameraUpdate(const osg::Matrixd& mx, unsigned int cameraID = 0) = 0;
 
 			/*! Unbinds the Camera from an \ref Entity if it is already bound
 			 * \brief Unbinds the Camera from an \ref Entity
@@ -426,7 +461,7 @@ namespace OpenIG {
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
-			virtual void unbindCameraFromEntity() = 0;
+			virtual void unbindCameraFromEntity(unsigned int cameraID = 0) = 0;
 
 			/*! Checks if the Camera is bound to an \ref Entity
 			 * \brief Checks if the Camera is bound to an \ref Entity
@@ -435,7 +470,7 @@ namespace OpenIG {
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
-			virtual bool isCameraBoundToEntity() = 0;
+			virtual bool isCameraBoundToEntity(unsigned int cameraID = 0) = 0;
 
 			/*! Sets for fixed up Cametra orientation or not. When is set with false,
 			 *  and is bound to an \ref Entity it follows the \ref Entity orientation,
@@ -449,7 +484,7 @@ namespace OpenIG {
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
-			virtual void bindCameraSetFixedUp(bool fixedUp, bool freezeOrientation = false) = 0;
+			virtual void bindCameraSetFixedUp(bool fixedUp, bool freezeOrientation = false, unsigned int cameraID = 0) = 0;
 
 			// Animation
 			/*! Plays animation on an \ref Entity. At present it uses the internal simple animation handling

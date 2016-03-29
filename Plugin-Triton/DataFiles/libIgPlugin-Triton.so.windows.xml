@@ -8,5 +8,5 @@
     <Triton-BelowWaterVisibility>3</Triton-BelowWaterVisibility>
     <Triton-EnvironmentalMapping>yes</Triton-EnvironmentalMapping>
     <Triton-PlanarReflectionBlend>1</Triton-PlanarReflectionBlend>
-    <Triton-ForwardPlusEnabled>no</Triton-ForwardPlusEnabled>
+    <Triton-ForwardPlusEnabled>yes</Triton-ForwardPlusEnabled>
 </OpenIG-Plugin-Config>

@@ -222,12 +222,12 @@ public:
 
 	virtual const std::string getUsage() const
 	{
-		return "id x y z heading pitch roll";
+		return "id x y z heading pitch roll (optional:View ID, defaulted to 0)";
 	}
 
 	virtual const std::string getArgumentsFormat() const
 	{
-		return "I:D:D:D:D:D:D";
+		return "I:D:D:D:D:D:D:D";
 	}
 
 	virtual const std::string getDescription() const
@@ -239,12 +239,13 @@ public:
 			"     z - the z position of the camera\n"
 			"     heading - the heading of the camera in degrees\n"
 			"     pitch - the pitch of the camera in degrees\n"
-			"     roll - the roll of the camera in degrees";
+			"     roll - the roll of the camera in degrees\n"
+			"	  view id - the id of the view in multi-view setup";
 	}
 
 	virtual int exec(const StringUtils::Tokens& tokens)
 	{
-		if (tokens.size() == 7)
+		if (tokens.size() >= 7)
 		{
 			unsigned int    id = atoi(tokens.at(0).c_str());
 			double          x = atof(tokens.at(1).c_str());
@@ -253,10 +254,16 @@ public:
 			double          h = atof(tokens.at(4).c_str());
 			double          p = atof(tokens.at(5).c_str());
 			double          r = atof(tokens.at(6).c_str());
+			
+			unsigned int viewID = 0;
+			if (tokens.size() == 8)
+			{
+				viewID = atoi(tokens.at(7).c_str());
+			}
 
 			osg::Matrixd offset = Math::instance()->toMatrix(x,y,z,h,p+90,r);
 
-			_ig->bindCameraToEntity(id,offset);
+			_ig->bindCameraToEntity(id,offset,viewID);
 
 			return 0;
 		}
@@ -951,6 +958,47 @@ protected:
 	OpenIG::Base::ImageGenerator* _ig;
 };
 
+class EnableLightCommand : public Commands::Command
+{
+public:
+	EnableLightCommand(ImageGenerator* ig)
+		: _ig(ig) {}
+
+	virtual const std::string getUsage() const
+	{
+		return "id on/off";
+	}
+
+	virtual const std::string getArgumentsFormat() const
+	{
+		return "I:{on;off}";
+	}
+
+	virtual const std::string getDescription() const
+	{
+		return  "enable/disable light\n"
+			"     id - the id of the light source\n"
+			"	  on/off - on to enable, off to disable";
+	}
+
+	virtual int exec(const StringUtils::Tokens& tokens)
+	{
+		if (tokens.size() == 2)
+		{
+			unsigned int id = atoi(tokens.at(0).c_str());
+			bool enable = tokens.at(1) == "on";
+
+			_ig->enableLight(id, enable);
+
+			return 0;
+		}
+
+		return -1;
+	}
+protected:
+	OpenIG::Base::ImageGenerator* _ig;
+};
+
 class RemoveLightCommand : public Commands::Command
 {
 public:
@@ -1540,6 +1588,7 @@ void Engine::initCommands()
 	Commands::instance()->addCommand("unbindlightfromcamera", new UnbindLightFromCameraCommand(this));
 	Commands::instance()->addCommand("updatelight", new UpdateLightCommand(this));
 	Commands::instance()->addCommand("removelight", new RemoveLightCommand(this));
+	Commands::instance()->addCommand("enablelight", new EnableLightCommand(this));
 	Commands::instance()->addCommand("bind", new BindEntityCommand(this));
 	Commands::instance()->addCommand("unbind", new UnbindEntityCommand(this));
 	Commands::instance()->addCommand("offset", new OffsetCommand(this));

@@ -3,8 +3,9 @@ set( TARGET_OTHER_FILES DataFiles/libIgPlugin-Triton.so.xml
                         DataFiles/libIgPlugin-Triton.so.windows.xml )
 
 FILE (GLOB SHADER_FILES 
-	DataFiles/user-functions.glsl
-	DataFiles/user-vert-functions.glsl
+	../Resources/shaders/Triton/user-functions.glsl
+	../Resources/shaders/Triton/user-vert-functions.glsl
+	../Resources/shaders/Triton/forward_plus_triton_ps.glsl
 )
 
 SOURCE_GROUP(Shaders FILES ${SHADER_FILES})
@@ -55,13 +56,13 @@ else()
 endif()
 
 #if(WIN32)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/user-functions.glsl DESTINATION $ENV{TRITON_PATH}/Resources)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/user-vert-functions.glsl DESTINATION $ENV{TRITON_PATH}/Resources)
+	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/Triton/user-functions.glsl DESTINATION $ENV{TRITON_PATH}/Resources)
+	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/Triton/user-vert-functions.glsl DESTINATION $ENV{TRITON_PATH}/Resources)
 #endif()
 
 if(WIN32)
     SET(INSTALL_BINDIR bin)
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/forward_plus_triton_ps.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
+    install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/Triton/forward_plus_triton_ps.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
 else()
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/forward_plus_triton_ps.glsl DESTINATION /usr/local/openig/resources/shaders)
+    install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/Triton/forward_plus_triton_ps.glsl DESTINATION /usr/local/openig/resources/shaders)
 endif()

@@ -4,6 +4,10 @@ set( _IgPluginMuse
     igpluginmuse.cpp
 )
 
+include_directories(
+    /usr/local/muse/core/inc
+)
+
 add_library( ${LIB_NAME} SHARED
     ${_IgPluginMuse}
 )
@@ -24,7 +28,7 @@ endif()
 
 set_target_properties( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
 set_target_properties( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Plugin ${LIB_NAME}" )
+set_target_properties( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Plugin MUSE" )
 
 include( PluginInstall REQUIRED )
 

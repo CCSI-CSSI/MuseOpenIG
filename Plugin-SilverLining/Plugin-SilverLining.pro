@@ -30,7 +30,6 @@ DEPENDPATH += ../
 LIBS += -losg -losgDB -losgViewer -lOpenThreads\
         -lOpenIG-Engine -lOpenIG-Base -lOpenIG-PluginBase
 
-OTHER_FILES += CMakeLists.txt
 DISTFILES += CMakeLists.txt
 
 OTHER_FILES += \
@@ -91,38 +90,51 @@ unix {
     !mac: LIBS += -lGL -lGLU
     mac: LIBS += -framework openGL
 
-    SPATH = $$(SILVERLINING_PATH)
-    isEmpty(SPATH){
-        message(SILVERLINING_PATH not set in your environment -- cannot install the OIG SilverLining shaders properly!!!!)
-    } else {
-        SFILES   = $$files($${PWD}/DataFiles/UserFunctions*.glsl)
-        SDESTDIR = $$SPATH/Resources/Shaders/
+#    SPATH = $$(SILVERLINING_PATH)
+#    isEmpty(SPATH){
+#        message(SILVERLINING_PATH not set in your environment -- cannot install the OIG SilverLining shaders properly!!!!)
+#    } else {
+#        SFILES   = $$files($${PWD}/../Resources/shaders/SilverLining/WithSimpleLighting/UserFunctions*.glsl)
+#        for(file,SFILES) {
+#            exists( $$file ) {
+#                SDESTDIR = $$SPATH/Resources/Shaders/
+#                #Do we want to delete these files or not??  Probably better to find a way to restore original files instead
+#                #so will need to modify this area to save original files before copying ours and overwriting the original ones.
+#                #message(Will remove -- $$distfiles -- during distclean)
 
-        #Do we want to delete these files or not??  Probably better to find a way to restore original files instead
-        #so will need to modify this area to save original files before copying ours and overwriting the original ones.
-        #message(Will remove -- $$distfiles -- during distclean)
+#                #Get the filename(only) list for distclean to remove only the files added from this plugin
+#                #for(var,SFILES) {
+#                #    distfiles += $$SDESTDIR/$$basename(var)
+#                #}
+#                #QMAKE_DISTCLEAN += $$distfiles
+#                PDIR =  $$PWD/DataFiles/
 
-        #Get the filename(only) list for distclean to remove only the files added from this plugin
-        #for(var,SFILES) {
-        #    distfiles += $$SDESTDIR/$$basename(var)
-        #}
-        #QMAKE_DISTCLEAN += $$distfiles
-        PDIR =  $$PWD/DataFiles/
+#                QMAKE_POST_LINK += test -d $$quote($$SDESTDIR) || $$QMAKE_MKDIR $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
+#                exists($$SDESTDIR) {
+#                    QMAKE_POST_LINK += cp $$file $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
+#                    !build_pass:message(Installing the OIG SilverLining shaders -- $$file -- into $$SDESTDIR)
+#                } else {
+#                    message(Unable to install files into missing directory: $$SDESTDIR!!!!!!!!!!)
+#                }
+#            } else {
+#                message(Unable to install the OIG SilverLining UserFunctions* Shaders!!!!!!!!!!)
+#            }
+#        }
 
-        !build_pass:message(Installing the OIG SilverLining shaders -- $$files($$PDIR/User*.glsl) -- into $$SDESTDIR)
-        QMAKE_POST_LINK += test -d $$quote($$SDESTDIR) || $$QMAKE_MKDIR $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
-        QMAKE_POST_LINK += cp $$PDIR/User*.glsl $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
+#        SFILES   = $${PWD}/../Resources/shaders/SilverLining/WithForwardPlusAndLogZ/forward_plus_sl_ps.glsl
+#        exists( $$SFILES ){
+#            SDESTDIR = /usr/local/openig/resources/shaders/
+#            distfiles += $$SDESTDIR
 
-        SFILES   = $${PWD}/DataFiles/forward_plus_sl_ps.glsl
-        SDESTDIR = /usr/local/openig/resources/shaders/forward_plus_sl_ps.glsl
-        distfiles += $$SDESTDIR
+#            !build_pass:message(Installing the OIG F+ SilverLining shader -- $$files($$SFILES) -- into $$quote($$SDESTDIR))
+#            QMAKE_POST_LINK += test -d $$quote($$dirname(SDESTDIR)) || $$QMAKE_MKDIR $$quote($$dirname(SDESTDIR)) $$escape_expand(\\n\\t)
+#            QMAKE_POST_LINK += $$QMAKE_COPY $$SFILES $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
 
-        !build_pass:message(Installing the OIG F+ SilverLining shader -- $$files($$PDIR/forward*.glsl) -- into $$quote($$dirname(SDESTDIR)))
-        QMAKE_POST_LINK += test -d $$quote($$dirname(SDESTDIR)) || $$QMAKE_MKDIR $$quote($$dirname(SDESTDIR)) $$escape_expand(\\n\\t)
-        QMAKE_POST_LINK += $$QMAKE_COPY $$PDIR/forward*.glsl $$quote($$dirname(SDESTDIR)) $$escape_expand(\\n\\t)
-
-        QMAKE_DISTCLEAN += $$distfiles
-    }
+#            QMAKE_DISTCLEAN += $$distfiles
+#        } else {
+#            message(Unable to install the OIG F+ SilverLining shader!!!!!!!!!!!!!!!!)
+#        }
+#    }
 
     # library version number files
     exists( "../openig_version.pri" ) {
