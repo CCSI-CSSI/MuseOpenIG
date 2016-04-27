@@ -36,7 +36,6 @@ add_library( ${LIB_NAME} SHARED
 	${SOURCE_FILES}
 	${SHADER_FILES}
 	Plugin-ForwardPlusLighting.pro
-	IgPlugin-ForwardPlusLighting_resource.rc
 	DataFiles/libIgPlugin-ForwardPlusLighting.so.xml
 )
 
