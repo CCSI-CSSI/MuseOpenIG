@@ -49,7 +49,4 @@ Additional Dependencies for V2.0.0 and later if you want to include any of the n
 Hardware Dependancies
 --------------------------------------------------------------------------------------------------
 * NVidia GPU -- fully supported
-* ATI GPU    -- partially supported, some features such as shadows are not fully functional as
-                we do not have AT hardware to fully test against.  Any help in this area would
-                be greatly appreciated.  Just fork our repo, make your changes and resubmit them
-                back to us for approval/inclusion.
+* ATI GPU    -- fully supported as of the V2.0.0 release
