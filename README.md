@@ -3,12 +3,12 @@ The Muse OpenIG.  An opensource OpenSceneGraph based image generator application
 Documentation, sample datasets and Binary Downloads for some platforms available at: http://openig.compro.net
 
 #  New CIGI plugin -- Sample code demonstrates how to implement the CIGI protocol with OpenIG.
-   Sample code provided in the source code under the Simulation directory.  This sample code
-   shows some basic commands set-up and integrated for an OpenIG IG, a Host system and a terrain-query server.
-   The rest is left up to the user to determine how far you need to extend the CIGI command structure.
-   It is all based on the Boeing CIGI Class Library.  Boeing also provides a CIGI Host Emulator application
-   for Windows based systems and we have integrated it with our Application-Earth OSGEarth test application.
-   So lots of CIGI sample code for you to use if you need CIGI on your IG system.
+   This new OpenIG plugin is based on and uses Boeing's CIGI Class Library.  Boeing also provides a 
+   CIGI Host Emulator application for Windows based systems and we have integrated 
+   it with our Application-Earth OSGEarth test application to give you a very basic working example
+   to use as a starting point for your CIGI implementation.  The emulator is not available as part
+   of OpenIG but can be downloaded separately at: [Boeing Emulator](http://cigi.sourceforge.net/products.php)
+   along with their CIGI Class Library and associated documentation.
 
 # Since V2.0.0 -- Features a Forward Plus lighting system plugin, as its default lighting method!!!
 -----------------------------------------------------------------------------------------------------------------
