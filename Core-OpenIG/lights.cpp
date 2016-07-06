@@ -46,9 +46,7 @@ void Engine::createSunMoonLight()
 }
 
 void Engine::addLight(unsigned int id, const LightAttributes& lightAttributes, const osg::Matrixd& mx)
-{
-    removeLight(id);
-	
+{	
     osg::ref_ptr<osg::MatrixTransform> mxt = new osg::MatrixTransform;
     mxt->setMatrix(mx);
 
@@ -63,6 +61,15 @@ void Engine::addLight(unsigned int id, const LightAttributes& lightAttributes, c
             mxt->addChild(light);
         }
     }
+}
+
+void Engine::setLightUserData(unsigned int id, osg::Referenced* data)
+{
+	LightsMapIterator itr = _lights.find(id);
+	if (itr != _lights.end() && _lightImplementationCallback.valid())
+	{
+		_lightImplementationCallback->setLightUserData(id, data);
+	}
 }
 
 void Engine::updateLightAttributes(unsigned int id, const LightAttributes& definition)
@@ -126,6 +133,11 @@ void Engine::removeLight(unsigned int id)
         {
             pl[i]->removeChild(light);
         }
+
+		if (_lightImplementationCallback.valid())
+		{
+			_lightImplementationCallback->deleteLight(id);
+		}
 
         _lightsGroup->removeChild(light);
         _lights.erase(itr);

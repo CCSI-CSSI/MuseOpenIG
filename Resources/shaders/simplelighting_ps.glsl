@@ -201,6 +201,6 @@ void main()
 		gl_FragColor = vec4( gray, gray, gray, alpha);
 	}
 #if defined(USE_LOG_DEPTH_BUFFER)
-	//gl_FragDepth = log2(flogz) * Fcoef * 0.5;
+	gl_FragDepth = log2(flogz) * Fcoef * 0.5;
 #endif
 }

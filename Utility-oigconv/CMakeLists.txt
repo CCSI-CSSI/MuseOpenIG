@@ -4,6 +4,7 @@ add_executable( ${APP_NAME} oigconv.cpp OrientationConverter.cpp OrientationConv
 
 target_link_libraries( ${APP_NAME}
     ${OSG_LIBRARIES}
+	OpenIG-Base
 )
 
 install(

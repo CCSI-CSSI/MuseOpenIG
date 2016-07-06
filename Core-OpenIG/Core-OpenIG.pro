@@ -13,8 +13,7 @@ TEMPLATE = lib
 
 DEFINES += OPENIG_LIBRARY
 
-SOURCES += \
-            commands.cpp\
+SOURCES +=  commands.cpp\
             help.cpp\
             keypad.cpp\
             lights.cpp\
@@ -74,11 +73,11 @@ unix {
     # library version number files
     exists( "../openig_version.pri" ) {
 
-	include( "../openig_version.pri" )
+    include( "../openig_version.pri" )
         isEmpty( VERSION ){ error( "$$TARGET -- bad or undefined VERSION variable inside file openig_version.pri" )
-	} else {
+    } else {
         message( "$$TARGET -- Set version info to: $$VERSION" )
-	}
+    }
 
     }
     else { error( "$$TARGET -- could not find pri library version file openig_version.pri" ) }

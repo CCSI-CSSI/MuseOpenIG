@@ -1,0 +1,59 @@
+IF(NOT EXISTS "@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt")
+    MESSAGE(FATAL_ERROR "Cannot find install manifest: \"@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt\"")
+ENDIF()
+
+FILE(READ "@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt" files)
+STRING(REGEX REPLACE "\n" ";" files "${files}")
+
+FOREACH(file ${files})
+    MESSAGE(STATUS "Uninstalling \"${file}\"")
+	GET_FILENAME_COMPONENT(dir_path ${file} PATH)
+    IF(EXISTS "${file}")
+        EXEC_PROGRAM(
+            "@CMAKE_COMMAND@" ARGS "-E remove \"${file}\""
+            OUTPUT_VARIABLE rm_out
+            RETURN_VALUE rm_retval
+            )
+        IF(NOT "${rm_retval}" STREQUAL 0)
+            MESSAGE(FATAL_ERROR "Problem when removing \"${file}\"")
+        ENDIF()
+    ELSEIF(IS_SYMLINK "${file}")
+        EXEC_PROGRAM(
+            "@CMAKE_COMMAND@" ARGS "-E remove \"${file}\""
+            OUTPUT_VARIABLE rm_out
+            RETURN_VALUE rm_retval
+            )
+        IF(NOT "${rm_retval}" STREQUAL 0)
+            MESSAGE(FATAL_ERROR "Problem when removing \"${file}\"")
+        ENDIF()
+    ELSE()
+        MESSAGE(STATUS "File \"${file}\" does not exist.")
+    ENDIF()
+	SET(dir_list ${dir_list} ${dir_path})
+	GET_FILENAME_COMPONENT(parent_dir_path ${dir_path} DIRECTORY)
+	SET(dir_list ${dir_list} ${parent_dir_path})
+ENDFOREACH()
+
+LIST(REMOVE_DUPLICATES dir_list)
+LIST(SORT dir_list)
+LIST(REVERSE dir_list)
+FOREACH(folder IN LISTS dir_list)
+	FILE(GLOB files_and_folders "${folder}/*")
+	FOREACH(file_or_folder IN LISTS files_and_folders)
+		LIST(FIND files_and_folders ${file_or_folder} index)
+		LIST(FIND dir_list ${file_or_folder} openig_index)
+		IF ((NOT ${index} EQUAL -1) AND (NOT ${file_or_folder} STREQUAL ".") AND (NOT ${file_or_folder} EQUAL ".."))
+			GET_FILENAME_COMPONENT(ext ${file_or_folder} EXT)       
+			IF (NOT ext STREQUAL ".log")
+				GET_FILENAME_COMPONENT(parent_dir_path ${file_or_folder} DIRECTORY)
+				SET(non_opeinig_folder_or_file_list ${non_opeinig_folder_or_file_list} ${parent_dir_path})
+			ENDIF()
+		ENDIF()
+	ENDFOREACH()
+	LIST(FIND non_opeinig_folder_or_file_list ${folder} folder_index)
+	IF( ${folder_index} EQUAL -1 )
+		FILE(REMOVE_RECURSE ${folder})
+	ENDIF()
+ENDFOREACH()
+
+

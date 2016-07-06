@@ -22,6 +22,8 @@
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
 //#*****************************************************************************
+//#*	author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+//#*	copyright(c)Compro Computer Services, Inc.
 #include <iostream>
 #include <fstream>
 
@@ -95,7 +97,7 @@ osg::Node* createInfoHUD()
 
     text->setFont(timesFont);
     text->setPosition(osg::Vec3(20,30,1));
-    text->setText("Bullet demo");
+    text->setText("Bullet physics demo. Use the arrow keys");
     text->setAlignment(osgText::TextBase::LEFT_BOTTOM_BASE_LINE);
     text->setColor(osg::Vec4(0,0,1,1));
     text->setCharacterSize(20);

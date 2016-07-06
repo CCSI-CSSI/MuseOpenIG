@@ -1,10 +1,10 @@
 cmake_minimum_required( VERSION 2.8.8 )
 project( OpenIG )
 
-set( OPENIG_VERSION 2.0.0 )
+set( OPENIG_VERSION 2.0.2 )
 set( OPENIG_MAJOR_VERSION 2 )
 set( OPENIG_MINOR_VERSION 0 )
-set( OPENIG_SUB_VERSION 0 )
+set( OPENIG_SUB_VERSION 2 )
 
 set( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}" )
 
@@ -15,6 +15,9 @@ if( WIN32 )
 else()
     set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY} )
 endif()
+
+set(DEF_INSTALL_CMAKE_DIR cmake)
+set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH "Installation directory for CMake files")
 
 IF( WIN32 AND MSVC )
     OPTION( OPENIG_WIN32_USE_MP "Build with multiple processes (/MP option; VS 2005 and above)." ON )
@@ -44,9 +47,19 @@ include( FindBulletHelper )
 include( FindOSGBullet )
 include( FindCstShare )
 include( FindMersive )
+#include( FindJRMSensors )
+include( FindCCL )
 
 find_package(OpenGL)
 find_package(Triton)
+#To enable CUDA GPU culling, you must uncomment the next line
+#and ensure that you have set the XML directive: "UseGPUAcceleration"
+#to "yes" in your OpenIG openig.xml config/setup file.
+#
+#find_package(CUDA)
+
+#If you plan to use Intel TBB, set TBB_ROOT_DIR as appropriate
+#find_package(TBB)
 
 INCLUDE_DIRECTORIES(
     ${PROJECT_SOURCE_DIR}
@@ -60,7 +73,6 @@ ADD_SUBDIRECTORY( Core-Base )
 ADD_SUBDIRECTORY( Core-PluginBase )
 ADD_SUBDIRECTORY( Core-OpenIG )
 
-ADD_SUBDIRECTORY( Application-IG )
 ADD_SUBDIRECTORY( Application-A320 )
 
 ADD_SUBDIRECTORY( Utility-veggen )
@@ -81,6 +93,7 @@ ADD_SUBDIRECTORY( Plugin-SimpleLighting)
 
 ADD_SUBDIRECTORY( Library-Graphics )
 ADD_SUBDIRECTORY( Library-Networking )
+ADD_SUBDIRECTORY( Library-Protocol )
 
 IF( MERSIVE_FOUND )
  ADD_SUBDIRECTORY( Plugin-Mersive )
@@ -95,8 +108,16 @@ IF( SILVERLINING_FOUND )
 ENDIF( SILVERLINING_FOUND )
 
 IF( TRITON_FOUND )
-	ADD_SUBDIRECTORY( Plugin-Triton )
+    ADD_SUBDIRECTORY( Plugin-Triton )
 ENDIF( TRITON_FOUND )
+
+IF( JRMSENSORS_FOUND )
+    ADD_SUBDIRECTORY( Plugin-JRMSensors )
+ENDIF( JRMSENSORS_FOUND )
+
+IF( CCL_FOUND )
+	ADD_SUBDIRECTORY( Plugin-CIGI )
+ENDIF( CCL_FOUND )
 
 IF( OSGEARTH_FOUND )
 	INCLUDE_DIRECTORIES(
@@ -121,6 +142,26 @@ IF(MYGUI_INCLUDE_DIR AND MYGUI_LIBRARY)
 ENDIF(MYGUI_INCLUDE_DIR AND MYGUI_LIBRARY)
 
 install(EXPORT openig-targets DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+export(PACKAGE OpenIG)
+
+#file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_INCLUDE_DIR}")
+set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
+
+configure_file(OpenIGConfig.cmake.in "${PROJECT_BINARY_DIR}/OpenIGConfig.cmake" @ONLY)
+set(CONF_INCLUDE_DIRS "\${OPENIG_CMAKE_DIR}/${REL_INCLUDE_DIR}")
+
+configure_file(OpenIGConfig.cmake.in "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/OpenIGConfig.cmake" @ONLY)
+
+configure_file(OpenIGConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/OpenIGConfigVersion.cmake" @ONLY)
+ 
+
+install(FILES
+  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/OpenIGConfig.cmake"
+  "${PROJECT_BINARY_DIR}/OpenIGConfigVersion.cmake"
+  DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+ 
+install(EXPORT openig-targets DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
 
 CONFIGURE_FILE(
   "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/cmake_uninstall.cmake.in"

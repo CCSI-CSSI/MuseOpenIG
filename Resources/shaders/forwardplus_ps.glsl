@@ -3,6 +3,7 @@
 uniform float DepthOffset;
 uniform sampler2D baseTexture;
 uniform float todBasedLightBrightness;
+uniform float todBasedEnvironmentalLightingFactor;
 
 in vec4 vPositionProj;
 in vec3 eyeVec;
@@ -127,8 +128,8 @@ void main()
 #endif
 
 #ifdef SHADOWING
-	float fShadowFactor = computeShadowFactor();
-	cDiffuseColor.rgb = mix( cDiffuseColor.rgb*(1.0-shadowsFactor),cDiffuseColor.rgb,fShadowFactor);
+	float fShadowFactor = computeShadowFactor();	
+	cDiffuseColor.rgb = mix(cDiffuseColor.rgb*0.5, cDiffuseColor.rgb, fShadowFactor);
 #endif
 	vec4 fColor = compute_forward_plus_lighting(cDiffuseColor, gl_FrontMaterial.specular, gl_FrontMaterial.shininess
 										 , vPositionEyeSpace, vNormalEyeSpaceN, vEyePosition
@@ -139,7 +140,13 @@ void main()
 #ifdef ENVIRONMENTAL
     vec4 fReflectColor = computeEnvironmentalMap(); 
 	//fColor.rgb = mix(fColor.xyz,fReflectColor.xyz,ENVIRONMENTAL_FACTOR).xyz;
-	fColor.rgb = ((1.0-ENVIRONMENTAL_FACTOR)*fColor.rgb + ENVIRONMENTAL_FACTOR*fReflectColor.rgb);
+#if 0
+	// This suppose to be the proper way	fColor.rgb = ((1.0-ENVIRONMENTAL_FACTOR)*fColor.rgb + ENVIRONMENTAL_FACTOR*fReflectColor.rgb);
+#else
+	// But I like it this way better. Nick
+	vec3 mixed_color = mix(fReflectColor.rgb, fColor.rgb, 1.0-ENVIRONMENTAL_FACTOR).rgb;
+	fColor.rgb *= mixed_color * todBasedEnvironmentalLightingFactor;
+#endif
 #endif
 
 	float fFogFactor = computeFogFactor();

@@ -5,16 +5,18 @@
   <ShadowedScene-baseTexUnit>0</ShadowedScene-baseTexUnit>
   <ShadowedScene-shadowTexUnit>1</ShadowedScene-shadowTexUnit>
   <Default-diffuse-texture-slot>0</Default-diffuse-texture-slot>
-  <Clouds-Shadows-Texture-Slot>6</Clouds-Shadows-Texture-Slot>
+  <Clouds-Shadows-Texture-Slot>4</Clouds-Shadows-Texture-Slot>
   <Enable-Clouds-Shadows>yes</Enable-Clouds-Shadows>
   <Shadows-Factor>0.3</Shadows-Factor>
   <Lighting-Implementation-Texture-Slot>5</Lighting-Implementation-Texture-Slot>
   <SplashScreen></SplashScreen>
   <Shadowed-GPU-Vegetation>no</Shadowed-GPU-Vegetation>
   <ForwardPlusLightsLODCulling>yes</ForwardPlusLightsLODCulling>
-  <ForwardPlusLightsDefaultLODRange>500</ForwardPlusLightsDefaultLODRange>
-  <LogZDepthBuffer>no</LogZDepthBuffer>
-  <GroupLightsBasedOnXMLDefinition>yes</GroupLightsBasedOnXMLDefinition>
+  <ForwardPlusLightsDefaultLODRange>1000</ForwardPlusLightsDefaultLODRange>
+  <LogZDepthBuffer>yes</LogZDepthBuffer>
+  <UseGPUAcceleration>no</UseGPUAcceleration>
+  <UseMultipleCPUCores>yes</UseMultipleCPUCores>
+  <GroupLightsBasedOnXMLDefinition>no</GroupLightsBasedOnXMLDefinition>
   <ImageGenerator-Plugins-Config>
     <Plugin>
       <Order-Number>-3</Order-Number>

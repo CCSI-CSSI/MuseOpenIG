@@ -8,7 +8,9 @@ least QT5.x or GCC 4.8.3
 
 For MacOSX we have tested this on Xcode 6.x and 7 releases,
 using the Clang build system for both QT5.x and CMake.
-
+Alsl for MacOSX, due to limitations in OpenSceneGraph
+the ForwardPlusLighting plugin does not work, at least
+as of OSG 3.4.0 and 3.5.3 developer release.
 
 Here is a list of the Environmental variables that are
 needed on the system before you can successfully build

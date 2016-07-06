@@ -38,9 +38,6 @@ add_library( ${LIB_NAME} SHARED
 	${SHADER_FILES_ORIGINAL}
 )
 
-
-
-
 include_directories(
         ${OPENSCENEGRAPH_INCLUDE_DIR}
         ${OPENGL_INCLUDE_DIR}
@@ -71,14 +68,15 @@ else()
     install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-SilverLining.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libOpenIG-Plugin-SilverLining.so.xml)
 endif()
 
-#Shaders for F+ and LogZ
-#if(WIN32)
-#    install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/SilverLining/WithForwardPlusAndLogZ/UserFunctions-frag.glsl DESTINATION $ENV{SILVERLINING_PATH}/Resources/Shaders)
-#    install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/SilverLining/WithForwardPlusAndLogZ/UserFunctions.glsl DESTINATION $ENV{SILVERLINING_PATH}/Resources/Shaders)
-#endif()
+#Shaders for F+ and LogZ on Windows and Linux, currently we do not support F+ on the APPLE
+if(NOT APPLE)
+    install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/SilverLining/WithForwardPlusAndLogZ/UserFunctions-frag.glsl DESTINATION $ENV{SILVERLINING_PATH}/Resources/Shaders)
+    install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/SilverLining/WithForwardPlusAndLogZ/UserFunctions.glsl DESTINATION $ENV{SILVERLINING_PATH}/Resources/Shaders)
+endif()
 
-#Original SL shaders
-if(WIN32)
+#Original SL shaders are supported on APPLE, WIN32 and Linux
+#for now we will install these on the APPLE by default until F+ is supported there
+if(APPLE)
     install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/SilverLining/Original/UserFunctions-frag.glsl DESTINATION $ENV{SILVERLINING_PATH}/Resources/Shaders)
     install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/SilverLining/Original/UserFunctions.glsl DESTINATION $ENV{SILVERLINING_PATH}/Resources/Shaders)
 endif()

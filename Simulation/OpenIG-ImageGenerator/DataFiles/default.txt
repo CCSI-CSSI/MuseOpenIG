@@ -1,0 +1,8 @@
+#All platforms
+addentity 1 ./model/mustang_yellow.osgb 0 0 0 0 0 
+addentity 0 {$OPENIG_DATA_PATH/terrain;/data/OIG/OIG_DEMO_SC_7_NT_;../data/terrain}/master.flt.osg 0 0 0 0 0 0
+
+tod 12 0
+fog 500000
+
+bindcamera 1 2 5 0.5 160 -10 0

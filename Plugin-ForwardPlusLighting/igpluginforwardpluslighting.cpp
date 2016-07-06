@@ -106,7 +106,7 @@ namespace OpenIG {
 
 			virtual std::string getDescription() { return "Implements scene lighting using Forward+"; }
 
-			virtual std::string getVersion() { return "2.0.0"; }
+			virtual std::string getVersion() { return "2.0.1"; }
 
 			virtual std::string getAuthor() { return "ComPro, Poojan"; }
 

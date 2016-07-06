@@ -1,5 +1,5 @@
 #define SELF_SHADOW_STAGE 1
-#define CLOUDS_SHADOW_STAGE 6
+#define CLOUDS_SHADOW_STAGE 4
 uniform mat4 cloudShadowCoordMatrix;                                                      
 void DynamicShadow( in vec4 ecPosition )                                                  
 {                                                                                         

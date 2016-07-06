@@ -33,4 +33,4 @@ addentity 1 {$OPENIG_DATA_PATH;/usr/local/database;../data}/model/bullet/mustang
 netstats on
 
 fog 100000000
-tod 4 45
+tod 18 0

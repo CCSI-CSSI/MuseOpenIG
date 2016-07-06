@@ -22,6 +22,8 @@
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
 //#*****************************************************************************
+//#*	author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+//#*	copyright(c)Compro Computer Services, Inc.
 #include <iostream>
 
 #include <osg/CoordinateSystemNode>
@@ -149,8 +151,7 @@ int main(int argc, char** argv)
         aspectratio = static_cast<double>(traits->width) / static_cast<double>(traits->height);
 		view->getCamera()->setProjectionMatrixAsPerspective(45, aspectratio, 1.0, 100000);
         view->setLightingMode(osgViewer::View::SKY_LIGHT);
-		viewer->setThreadingModel(osgViewer::ViewerBase::DrawThreadPerContext);        
-
+		viewer->setThreadingModel(osgViewer::ViewerBase::DrawThreadPerContext);
     }	
 
 	// Add the Windowsing handler to F10
@@ -170,7 +171,7 @@ int main(int argc, char** argv)
         ig->loadScript(std::string("default.txt"));
     }
 
-#if 1
+#if 0
 	viewer->getView(0)->setCameraManipulator(new CameraManipulator());
 #endif
 	

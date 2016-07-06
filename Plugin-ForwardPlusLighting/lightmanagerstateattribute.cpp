@@ -155,7 +155,7 @@ void LightManagerStateAttribute::set(OpenIG::Library::Graphics::LightManager*	 l
 	_lightData = new LightData(341, FORMAT_R32G32B32A32_FLOAT);
 	Vector2_uint32 tileSize(32, 32);
 	_tileSpaceLightGrid = new TileSpaceLightGrid(tileSize);
-	_tileSpaceLightGrid->SetScreenAreaCullSize(tileSize*2);
+	_tileSpaceLightGrid->SetScreenAreaCullSize(tileSize/2);
 }
 
 int LightManagerStateAttribute::compare(const StateAttribute& sa) const

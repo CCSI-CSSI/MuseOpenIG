@@ -70,21 +70,38 @@ namespace OpenIG {
 			terrain, you may need to pass in the inverse view matrix in order to
 			be able to derive world coordinates from vertex coordinates. */
 		const char *HeightMapVertSource = {
+			"#pragma import_defines (USE_LOG_DEPTH_BUFFER)\n"
+			"#ifdef USE_LOG_DEPTH_BUFFER\n"
+			"	uniform float Fcoef;\n"
+			"	varying float flogz;\n"
+			"#endif\n"
 			"varying float height;\n"
 			"void main()\n"
 			"{\n"
 			"   vec4 worldVert = gl_Vertex;\n"
 			"   height = worldVert.z;\n"
 			"   gl_Position = gl_ModelViewProjectionMatrix * worldVert;\n"
+			"#ifdef USE_LOG_DEPTH_BUFFER\n"
+			"	gl_Position.z = (log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0) * gl_Position.w;\n"
+			"	flogz = 1.0 + gl_Position.w;\n"
+			"#endif\n"
 			"   gl_ClipVertex = gl_ModelViewMatrix * worldVert;\n"
 			"}\n"
 		};
 
 		const char *HeightMapFragSource = {
+			"#pragma import_defines (USE_LOG_DEPTH_BUFFER)\n"
+			"#ifdef USE_LOG_DEPTH_BUFFER\n"
+			"	uniform float Fcoef;\n"
+			"	varying float flogz;\n"
+			"#endif\n"
 			"varying float height;\n"
 			"void main()\n"
 			"{\n"
 			"   gl_FragColor = vec4(height, height, height, 1.0);\n"
+			"#ifdef USE_LOG_DEPTH_BUFFER\n"
+			"	gl_FragDepth = log2(flogz) * Fcoef * 0.5;\n"
+			"#endif\n"
 			"}\n"
 		};
 
@@ -96,6 +113,7 @@ namespace OpenIG {
 			TritonPlugin()
 				: _geocentric(false)
 				, _forwardPlusEnabled(false)
+				, _logZEnabled(false)
 				, _heightMapEnabled(false)
 				, _heightMapHUDEnabled(false)
 				, _heightMapcamera(NULL)
@@ -307,6 +325,10 @@ namespace OpenIG {
 					{
 						_forwardPlusEnabled = child->contents == "yes";
 					}
+					if (child->name == "Triton-LogZEnabled")
+					{
+						_logZEnabled = child->contents == "yes";
+					}
 				}
 			}
 
@@ -414,7 +436,7 @@ namespace OpenIG {
 				return hudCamera;
 			}
 
-			osg::Camera* createHeightMapCamera(osg::Camera* mainCamera, osg::Node* model)
+			osg::Camera* createHeightMapCamera(osg::Camera* mainCamera, osg::Node* model, bool enableZLog)
 			{
 				_heightMap = new osg::Texture2D();
 				_heightMap->setTextureSize(TEXTURE_SIZE, TEXTURE_SIZE);
@@ -477,6 +499,9 @@ namespace OpenIG {
 				heightMapProgram->addShader(new osg::Shader(osg::Shader::FRAGMENT, HeightMapFragSource));
 
 				osg::StateSet *stateSet = _heightMapcamera->getOrCreateStateSet();
+
+				if (enableZLog)
+					stateSet->setDefine("USE_LOG_DEPTH_BUFFER");
 				stateSet->setAttributeAndModes(heightMapProgram.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
 
 				return _heightMapcamera.get();
@@ -568,6 +593,21 @@ namespace OpenIG {
 					}
 				}
 				{
+					osg::ref_ptr<osg::Referenced> ref = context.getAttribute("Fog");
+					OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::FogAttributes> *attr = dynamic_cast<OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::FogAttributes> *>(ref.get());
+					if (attr &&  _tritonDrawable->getEnvironment())
+					{
+						osg::Vec3 fogColor = attr->getValue().getFogColor();
+
+						context.getOrCreateValueObject()->getUserValue("SilverLining-Atmosphere-HorizonColor", fogColor);
+
+						Triton::Vector3 _fogColor(fogColor.x(), fogColor.y(), fogColor.z());
+
+						_tritonDrawable->getEnvironment()->SetAboveWaterVisibility(attr->getValue().getVisibility(), _fogColor);
+
+					}
+				}
+				{
 					osg::ref_ptr<osg::Referenced> ref = context.getAttribute("Wind");
 					OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::WindAttributes> *attr = dynamic_cast<OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::WindAttributes> *>(ref.get());
 					if (attr &&  _tritonDrawable->getEnvironment())
@@ -630,7 +670,10 @@ namespace OpenIG {
 					if (_heightMapEnabled)
 					{
 						context.getImageGenerator()->getViewer()->getView(0)->getSceneData()->asGroup()->addChild(
-							createHeightMapCamera(context.getImageGenerator()->getViewer()->getView(0)->getCamera(), group));
+							createHeightMapCamera(context.getImageGenerator()->getViewer()->getView(0)->getCamera(), 
+							group,
+							_logZEnabled)
+						);
 
 						_tritonDrawable->setHeightMapCamera(_heightMapcamera.get());
 						_tritonDrawable->setHeightMap(_heightMap.get());
@@ -734,6 +777,7 @@ namespace OpenIG {
 			std::string                     _path;
 			bool							_geocentric;
 			bool							_forwardPlusEnabled;
+			bool							_logZEnabled;
 			osg::ref_ptr<osg::Camera>		_heightMapcamera;
 			osg::ref_ptr<osg::Texture2D>	_heightMap, _depthMap;
 			bool							_heightMapEnabled;
@@ -742,7 +786,7 @@ namespace OpenIG {
 			double                          _belowWaterVisibility;
 			bool							_environmentalMapping;
 			osg::ref_ptr<osg::Group>		_reflectedSubGraph;
-			OpenIG::Base::ImageGenerator*			_ig;
+			OpenIG::Base::ImageGenerator*	_ig;
 			float							_planarReflectionBlend;
 
 			typedef std::map<unsigned int, bool >			ReflectedGraphEntitiesMap;
@@ -840,7 +884,7 @@ namespace OpenIG {
 				else
 					lod->setRange(0, 0, 50000);
 
-				_tritonDrawable = new TritonDrawable(_path, _userName, _key, _geocentric, _forwardPlusEnabled);
+				_tritonDrawable = new TritonDrawable(_path, _userName, _key, _geocentric, _forwardPlusEnabled, _logZEnabled);
 
 				tritonGeode->addDrawable(_tritonDrawable);
 				ig->getViewer()->getView(0)->getSceneData()->asGroup()->addChild(lod);

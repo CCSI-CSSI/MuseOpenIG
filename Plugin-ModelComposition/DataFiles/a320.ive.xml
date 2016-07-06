@@ -9,7 +9,7 @@
     <Ambient-Occlusion-Factor>1.0</Ambient-Occlusion-Factor>
 
     <Environmental>yes</Environmental>
-    <Environmental-Factor>0.1</Environmental-Factor>
+    <Environmental-Factor>0.17</Environmental-Factor>
     <Environmental-Slot>2</Environmental-Slot>
     <Environmental-Texture-Back>ely_snow/snow_bk.tga</Environmental-Texture-Back>
     <Environmental-Texture-Front>ely_snow/snow_ft.tga</Environmental-Texture-Front>
@@ -20,17 +20,17 @@
 
     <Material>
         <Name>Day</Name>
-        <Ambient>0.7 0.7 0.7 1.0</Ambient>
-        <Diffuse>0.6 0.6 0.6 1.0</Diffuse>
-        <Specular>0.6 0.6 0.6 1.0</Specular>
-        <Shininess>60</Shininess>
+        <Ambient>0.5 0.5 0.5 1.0</Ambient>
+        <Diffuse>0.5 0.5 0.5 1.0</Diffuse>
+        <Specular>0.0 0.0 0.0 1.0</Specular>
+        <Shininess>0</Shininess>
     </Material>
     <Material>
         <Name>Night</Name>
-        <Ambient>1.0 1.0 1.0 1.0</Ambient>
-        <Diffuse>1.0 1.0 1.0 1.0</Diffuse>
-        <Specular>0.0 0.0 0.0 1.0</Specular>
-        <Shininess>0</Shininess>
+        <Ambient>2.0 2.0 2.0 1.0</Ambient>
+        <Diffuse>2.0 2.0 2.0 1.0</Diffuse>
+        <Specular>5.0 5.0 5.0 1.0</Specular>
+        <Shininess>500</Shininess>
     </Material>
 
     <Shadow>CAST</Shadow>
@@ -587,10 +587,15 @@
                     <Limits>(0,0)(0,0)(0,0.145)(0,0)(0,0)(0,0)</Limits>
                     <Sub-model>
                         <File>landgear_wheels_l.ive</File>
-                                                <Name>Landing-Gear-Left-Wheels</Name>
+                        <Name>Landing-Gear-Left-Wheels</Name>
                         <Position>0 0.17 0</Position>
                         <Orientation>-6 0 0</Orientation>
                         <Limits>(0,0)(0,0)(0,0)(0,0)(0,360)(0,0)</Limits>
+                        <Environmental>no</Environmental>
+                        <Ambient>0.5 0.5 0.5 1.0</Ambient>
+                        <Diffuse>0.5 0.5 0.5 1.0</Diffuse>
+                        <Specular>0.0 0.0 0.0 1.0</Specular>
+                        <Shininess>0</Shininess>
                     </Sub-model>
 
                     <Sub-model>
@@ -680,10 +685,15 @@
 
                     <Sub-model>
                             <File>landgear_wheels_r.ive</File>
-                                                        <Name>Landing-Gear-Right-Wheels</Name>
+                            <Name>Landing-Gear-Right-Wheels</Name>
                             <Position>0 0 0.017</Position>
                             <Orientation>6 0 0</Orientation>
                             <Limits>(0,0)(0,0)(0,0)(0,0)(0,360)(0,0)</Limits>
+                            <Environmental>no</Environmental>
+                            <Ambient>0.5 0.5 0.5 1.0</Ambient>
+                            <Diffuse>0.5 0.5 0.5 1.0</Diffuse>
+                            <Specular>0.0 0.0 0.0 1.0</Specular>
+                            <Shininess>0</Shininess>
                     </Sub-model>
 
                     <Sub-model>
@@ -715,7 +725,7 @@
           <Position>-0.155104 0.176578 -0.202274</Position>
           <Orientation>0 0 0</Orientation>
           <Use-Real-Light>yes</Use-Real-Light>
-          <Brightness>7</Brightness>
+          <Brightness>4</Brightness>
           <Real-Light-Offset>0.0 0 0.0</Real-Light-Offset>
           <ConstAttenuation>100</ConstAttenuation>
           <Animation-Pulses></Animation-Pulses>
@@ -745,9 +755,9 @@
           <Radius>2</Radius>
           <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
           <StartRange>0</StartRange>
-          <EndRange>7</EndRange>
-          <SpotInnerAngle>120</SpotInnerAngle>
-          <SpotOuterAngle>150</SpotOuterAngle>
+          <EndRange>0</EndRange>
+          <SpotInnerAngle>0</SpotInnerAngle>
+          <SpotOuterAngle>0</SpotOuterAngle>
         </Light>
         <Light>
           <Name>Light3</Name>
@@ -765,9 +775,9 @@
           <Radius>2</Radius>
           <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
           <StartRange>0</StartRange>
-          <EndRange>7</EndRange>
-          <SpotInnerAngle>120</SpotInnerAngle>
-          <SpotOuterAngle>150</SpotOuterAngle>
+          <EndRange>0</EndRange>
+          <SpotInnerAngle>0</SpotInnerAngle>
+          <SpotOuterAngle>0</SpotOuterAngle>
         </Light>
       <Light>
         <Name>Light4</Name>
@@ -785,9 +795,9 @@
         <Radius>3</Radius>
         <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
         <StartRange>0</StartRange>
-        <EndRange>7</EndRange>
-        <SpotInnerAngle>120</SpotInnerAngle>
-        <SpotOuterAngle>150</SpotOuterAngle>
+        <EndRange>0</EndRange>
+        <SpotInnerAngle>0</SpotInnerAngle>
+        <SpotOuterAngle>0</SpotOuterAngle>
       </Light>
       
         <Sub-model>
@@ -816,6 +826,11 @@
                                                 <Position>0 -0.002 0.023</Position>
                                                 <Orientation>0 0 0</Orientation>
                                                 <Limits>(0,0)(0,0)(0,0)(0,0)(0,360)(0,0)</Limits>
+                                                <Environmental>no</Environmental>                                                 
+                                                <Ambient>0.5 0.5 0.5 1.0</Ambient>
+                                                <Diffuse>0.5 0.5 0.5 1.0</Diffuse>
+                                                <Specular>0.0 0.0 0.0 1.0</Specular>
+                                                <Shininess>0</Shininess>
                                         </Sub-model>
                                         <Sub-model>
                                                         <File>landgear_torquelink_n2.ive</File>
@@ -1694,18 +1709,18 @@
   </Light>
   <Light>
     <Name>UpperAnticolisionRed</Name>
-    <Color>20.0 0.0 0.0 1.0</Color>
+    <Color>1.0 0.0 0.0 1.0</Color>
     <Position>0 0.205 2.34</Position>
     <Orientation>0 -90 0</Orientation>
     <Use-Real-Light>yes</Use-Real-Light>
     <Real-Light-Offset>0 0 0.4</Real-Light-Offset>
     <Animation-Pulses>0.25 1 0 0 1, 1.5 0 0 0 1</Animation-Pulses>
-    <Brightness>0.7</Brightness>
+    <Brightness>0.5</Brightness>
     <ConstAttenuation>3</ConstAttenuation>
     <MinPixelSize>2</MinPixelSize>
-    <MaxPixelSize>5</MaxPixelSize>
+    <MaxPixelSize>2</MaxPixelSize>
     <MinPixelSizeMultiplierForSprites>10</MinPixelSizeMultiplierForSprites>
-    <Radius>5</Radius>
+    <Radius>3</Radius>
     <SpriteTexture>textures/lensflare_red_alpha_3.dds</SpriteTexture>
     <StartRange>0</StartRange>
     <EndRange>0.7</EndRange>
@@ -1714,18 +1729,18 @@
   </Light>
   <Light>
     <Name>LowerAnticolisionRed</Name>
-    <Color>20.0 0.0 0.0 1.0</Color>
+    <Color>1.0 0.0 0.0 1.0</Color>
     <Position>0 1 -2.214</Position>
     <Orientation>0 90 0</Orientation>
     <Use-Real-Light>yes</Use-Real-Light>
     <Real-Light-Offset>0 0 -0.4</Real-Light-Offset>
     <Animation-Pulses>0.25 1 0 0 1, 1.5 0 0 0 1</Animation-Pulses>
-    <Brightness>1</Brightness>
+    <Brightness>0.5</Brightness>
     <ConstAttenuation>3</ConstAttenuation>
     <MinPixelSize>2</MinPixelSize>
-    <MaxPixelSize>5</MaxPixelSize>
+    <MaxPixelSize>2</MaxPixelSize>
     <MinPixelSizeMultiplierForSprites>10</MinPixelSizeMultiplierForSprites>
-    <Radius>5</Radius>
+    <Radius>3</Radius>
     <SpriteTexture>textures/lensflare_red_alpha_3.dds</SpriteTexture>
     <StartRange>0</StartRange>
     <EndRange>0.7</EndRange>
@@ -1734,11 +1749,11 @@
   </Light>
   <Light>
     <Name>WingStrobeLightWhiteLeft</Name>
-    <Color>50.0 50.0 50.0 1.0</Color>
+    <Color>1.0 1.0 1.0 1.0</Color>
     <Position>-16.89 -5.33 0.456</Position>
     <Orientation>-120 0 0</Orientation>
     <Use-Real-Light>yes</Use-Real-Light>
-    <Brightness>0.1</Brightness>
+    <Brightness>1</Brightness>
     <ConstAttenuation>10</ConstAttenuation>
     <Real-Light-Offset>-1 0 0.5</Real-Light-Offset>
     <Animation-Pulses>0.5 1 1 1 1, 1.5 0 0 0 1,0.2 1 1 1 1, 0.2 0 0 0 1,0.2 1 1 1 1, 1.5 0 0 0 1,0.5 1 1 1 1, 1.5 0 0 0 1</Animation-Pulses>
@@ -1748,17 +1763,17 @@
     <Radius>5</Radius>
     <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
     <StartRange>0</StartRange>
-    <EndRange>7</EndRange>
+    <EndRange>5</EndRange>
     <SpotInnerAngle>120</SpotInnerAngle>
     <SpotOuterAngle>150</SpotOuterAngle>
   </Light>
   <Light>
     <Name>WingStrobeLightWhiteRight</Name>
-    <Color>50.0 50.0 50.0 1.0</Color>
+    <Color>1.0 1.0 1.0 1.0</Color>
     <Position>16.89 -5.33 0.456</Position>
     <Orientation>120 0 0</Orientation>
     <Use-Real-Light>yes</Use-Real-Light>
-    <Brightness>0.1</Brightness>
+    <Brightness>1</Brightness>
     <Real-Light-Offset>1.0 0 0.5</Real-Light-Offset>
     <ConstAttenuation>10</ConstAttenuation>
     <Animation-Pulses>0.5 1 1 1 1, 1.5 0 0 0 1,0.2 1 1 1 1, 0.2 0 0 0 1,0.2 1 1 1 1, 1.5 0 0 0 1,0.5 1 1 1 1, 1.5 0 0 0 1</Animation-Pulses>
@@ -1768,16 +1783,16 @@
     <Radius>5</Radius>
     <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
     <StartRange>0</StartRange>
-    <EndRange>7</EndRange>
+    <EndRange>5</EndRange>
     <SpotInnerAngle>120</SpotInnerAngle>
     <SpotOuterAngle>150</SpotOuterAngle>
   </Light>
   <Light>
     <Name>TailStrobeLightWhite</Name>
-    <Color>50.0 50.0 50.0 1.0</Color>
+    <Color>1.0 1.0 1.0 1.0</Color>
     <Position>0.03 -22.18 1.062</Position>
     <Orientation>0 0 0</Orientation>
-    <Brightness>0.1</Brightness>
+    <Brightness>0.5</Brightness>
     <Use-Real-Light>yes</Use-Real-Light>
     <Real-Light-Offset>0 -1 0.4</Real-Light-Offset>
     <Animation-Pulses>0.5 1 1 1 1, 1.5 0 0 0 1,0.2 1 1 1 1, 0.2 0 0 0 1,0.2 1 1 1 1, 1.5 0 0 0 1,0.5 1 1 1 1, 1.5 0 0 0 1</Animation-Pulses>
@@ -1788,7 +1803,7 @@
     <Radius>5</Radius>
     <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
     <StartRange>0</StartRange>
-    <EndRange>7</EndRange>
+    <EndRange>5</EndRange>
     <SpotInnerAngle>120</SpotInnerAngle>
     <SpotOuterAngle>150</SpotOuterAngle>
   </Light>
@@ -1798,7 +1813,7 @@
     <Position>-2.416 1.45113 -1.41805</Position>
     <Orientation>0 -15 0</Orientation>
     <Use-Real-Light>yes</Use-Real-Light>
-    <Brightness>1</Brightness>
+    <Brightness>0.5</Brightness>
     <Real-Light-Offset>0.0 0 0.0</Real-Light-Offset>
     <ConstAttenuation>40</ConstAttenuation>
     <Animation-Pulses></Animation-Pulses>
@@ -1808,9 +1823,9 @@
     <Radius>9.5</Radius>
     <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
     <StartRange>0</StartRange>
-    <EndRange>7</EndRange>
-    <SpotInnerAngle>-120</SpotInnerAngle>
-    <SpotOuterAngle>-150</SpotOuterAngle>
+    <EndRange>10</EndRange>
+    <SpotInnerAngle>50</SpotInnerAngle>
+    <SpotOuterAngle>120</SpotOuterAngle>
   </Light>
   <Light>
     <Name>RightWingLight</Name>
@@ -1818,7 +1833,7 @@
     <Position>2.40799 1.60269 -1.48508</Position>
     <Orientation>0 -15 0</Orientation>
     <Use-Real-Light>yes</Use-Real-Light>
-    <Brightness>1</Brightness>
+    <Brightness>0.5</Brightness>
     <Real-Light-Offset>0.0 0 0.0</Real-Light-Offset>
     <ConstAttenuation>40</ConstAttenuation>
     <Animation-Pulses></Animation-Pulses>
@@ -1828,9 +1843,9 @@
     <Radius>9.5</Radius>
     <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
     <StartRange>0</StartRange>
-    <EndRange>7</EndRange>
-    <SpotInnerAngle>120</SpotInnerAngle>
-    <SpotOuterAngle>150</SpotOuterAngle>
+    <EndRange>10</EndRange>
+    <SpotInnerAngle>50</SpotInnerAngle>
+    <SpotOuterAngle>120</SpotOuterAngle>
   </Light>
 
 

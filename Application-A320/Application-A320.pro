@@ -29,7 +29,7 @@ DISTFILES += CMakeLists.txt \
              DataFiles/flightpath.path
 
 LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgGA -losgText -losgUtil -losgSim\
-        -lOpenIG-Engine -lOpenIG-Base -lOpenIG-PluginBase
+        -lOpenIG-Engine -lOpenIG-Base -lOpenIG-PluginBase -lOpenIG-Graphics
 
 unix {
     LIBS += -L/usr/local/lib64
@@ -52,12 +52,12 @@ unix {
     BOOSTROOT = $$(BOOST_ROOT)
     isEmpty(BOOSTROOT) {
         !build_pass:message($$basename(_PRO_FILE_) -- \"BOOST_ROOT env var\" not set...using system default paths to look for boost )
-        LIBS +=  -lboost_system -lboost_filesystem
+        LIBS +=  -lboost_system -lboost_filesystem -lboost_thread
     }
     else {
         !build_pass:message($$basename(_PRO_FILE_) -- \"BOOST_ROOT env var\" detected - set to: \"$$BOOSTROOT\")
         LIBS += -L$$BOOSTROOT/stage/lib \
-                -lboost_system -lboost_filesystem
+                -lboost_system -lboost_filesystem -lboost_thread
         INCLUDEPATH += $$BOOSTROOT
         DEPENDPATH  += $$BOOSTROOT
     }
@@ -124,7 +124,7 @@ win32 {
     else {
         !build_pass:message(\"$$basename(_PRO_FILE_) OpenSceneGraph\" detected in \"$$OSGROOT\")
         INCLUDEPATH += $$OSGROOT/include
-        LIBS += -L$$OSGBUILD/lib
+        LIBS += -L$$OSGROOT/lib
     }
     OSGBUILD = $$(OSG_BUILD)
     isEmpty(OSGBUILD) {

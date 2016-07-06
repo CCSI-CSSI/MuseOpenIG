@@ -1,11 +1,7 @@
-#Linux/MacOS -- add terrain entity/model 0
-#addentity 0 /usr/local/database/earth/boston.earth 0 0 0 0 0 0
-
-#Windows
-#addentity 0 ..\data\earth\boston.earth 0 0 0 0 0 0
-
 #All platforms
 addentity 0 {$OPENIG_DATA_PATH;/usr/local/database;../data}/earth/boston.earth 0 0 0 0 0 0
+addentity 1 {$OPENIG_DATA_PATH;/usr/local/database;../data}/model/f18/f18.ive 0 0 10 0 0 0
+
 
 #Set SunDogs Silverling computations
 #to use geocentric mode

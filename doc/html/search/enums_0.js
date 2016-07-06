@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['lighttype',['LightType',['../namespace_open_i_g_1_1_base.html#a4c81624bd5159e1b668c138242e0f86d',1,'OpenIG::Base']]]
+  ['animationstatus',['AnimationStatus',['../class_open_i_g_1_1_base_1_1_image_generator.html#aac729739f7a77d7bbdd93711d5abe9e1',1,'OpenIG::Base::ImageGenerator']]]
 ];

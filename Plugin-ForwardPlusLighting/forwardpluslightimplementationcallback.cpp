@@ -44,6 +44,7 @@
 
 #include <osgDB/ReadFile>
 #include <osg/Texture2D>
+#include <osgSim/LightPointNode>
 
 #include <OpenThreads/Mutex>
 #include <OpenThreads/ScopedLock>
@@ -145,6 +146,24 @@ void ForwardPlusLightImplementationCallback::updateOSGLightParameters(osg::Light
 	{
 		light->setUserValue("enabled", definition.enabled);
 	}
+	if ((definition.dirtyMask & OpenIG::Base::LightAttributes::ENABLED) == OpenIG::Base::LightAttributes::ENABLED)
+	{
+		light->setUserValue("enabled", definition.enabled);
+
+		osg::DummyLight* dl = dynamic_cast<osg::DummyLight*>(light);
+		if (dl && dl->getLightSource())
+		{
+			osgSim::LightPointNode* lpn = dynamic_cast<osgSim::LightPointNode*>(dl->getLightSource()->getUserData());
+			if (lpn)
+			{
+				for (size_t i = 0; i < lpn->getNumLightPoints(); ++i)
+				{
+					osgSim::LightPoint& lp = lpn->getLightPoint(i);
+					lp._on = definition.enabled;
+				}
+			}
+		}
+	}
 }
 
 OpenIG::Library::Graphics::LightType ForwardPlusLightImplementationCallback::toFPLightType(OpenIG::Base::LightType lightType)
@@ -194,9 +213,22 @@ osg::Referenced* ForwardPlusLightImplementationCallback::createLight(unsigned in
 {
 	// special case, light ID==0, the sun/moon light
 	if (id == 0)
-	{		
+	{
+		osg::Node* root = _ig->getViewer()->getView(0)->getSceneData();
+		if (root->getCullCallback() == NULL)
+		{
+			root->setCullCallback(new ForwardPlusEngineCullCallback(_fpEngine));
+		}
+
+		if (_lightManagerStateAttribute.valid() == false)
+		{
+			_lightManagerStateAttribute = new LightManagerStateAttribute();
+			_lightManagerStateAttribute->set(_lightManager, _fpEngine->getFPCamera(), _fpEngine->getFPViewport(), _ig->getScene()->asGroup(), _ig);
+			osg::StateSet* stateset = _ig->getScene()->asGroup()->getOrCreateStateSet();
+			stateset->setAttribute(_lightManagerStateAttribute, osg::StateAttribute::ON);
+		}
 		return 0;
-	}	
+	}
 
 	osg::DummyLight* osgLight = new osg::DummyLight(id);
 	osgLight->setUserValue("id", id);
@@ -249,6 +281,18 @@ osg::Referenced* ForwardPlusLightImplementationCallback::createLight(unsigned in
 	return lightSource;
 }
 
+void ForwardPlusLightImplementationCallback::setLightUserData(unsigned int id, osg::Referenced* data)
+{
+	LightSourcesMap::iterator itr = _lightSourcesMap.find(id);
+	if (itr == _lightSourcesMap.end())
+	{
+		return;
+	}
+
+	osg::LightSource* lightSource = itr->second;
+	lightSource->setUserData(data);
+}
+
 void ForwardPlusLightImplementationCallback::updateLight(unsigned int id, const OpenIG::Base::LightAttributes& definition)
 {
 	LightSourcesMap::iterator itr = _lightSourcesMap.find(id);
@@ -264,4 +308,22 @@ void ForwardPlusLightImplementationCallback::updateLight(unsigned int id, const 
 
 	// PPP: The original code didn't really update the light parameters that were set above, but just set the light id and then updated
 	// based upon the raw DummyLight parameters. So we are not going to do anything for now
+}
+
+void ForwardPlusLightImplementationCallback::deleteLight(unsigned int id)
+{
+	LightSourcesMap::iterator itr = _lightSourcesMap.find(id);
+	if (itr == _lightSourcesMap.end())
+	{
+		return;
+	}
+	_lightSourcesMap.erase(itr);
+
+	FPLightMap::iterator fpitr = _fplights.find(id);
+	if (fpitr != _fplights.end())
+	{
+		Light* pFPLight = fpitr->second;
+		_lightManager->DestroyLight(pFPLight);
+		_fplights.erase(fpitr);
+	}
 }

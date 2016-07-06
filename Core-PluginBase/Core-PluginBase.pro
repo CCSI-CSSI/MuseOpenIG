@@ -4,26 +4,24 @@
 #
 #-------------------------------------------------
 
-QT       -= core gui
+QT     -= core gui
 
 CONFIG += silent
 
 TARGET = OpenIG-PluginBase
-TEMPLATE = lib
+TEMPLATE =  lib
 
-DEFINES += IGPLUGINCORE_LIBRARY
+DEFINES +=  IGPLUGINCORE_LIBRARY
 
-SOURCES += \
-    pluginhost.cpp
+SOURCES +=  pluginhost.cpp
 
-HEADERS += \
-    config.h\
-    export.h\
-    igplugincore.h\
-    plugin.h\
-    plugincontext.h\
-    pluginhost.h\
-    pluginoperation.h
+HEADERS +=  config.h\
+            export.h\
+            igplugincore.h\
+            plugin.h\
+            plugincontext.h\
+            pluginhost.h\
+            pluginoperation.h
 
 INCLUDEPATH += ../
 DEPENDPATH += ../
@@ -82,11 +80,11 @@ unix {
     # library version number files
     exists( "../openig_version.pri" ) {
 
-	include( "../openig_version.pri" )
+    include( "../openig_version.pri" )
         isEmpty( VERSION ){ error( "$$TARGET -- bad or undefined VERSION variable inside file openig_version.pri" )
-	} else {
+    } else {
         message( "$$TARGET -- Set version info to: $$VERSION" )
-	}
+    }
 
     }
     else { error( "$$TARGET -- could not find pri library version file openig_version.pri" ) }
@@ -94,11 +92,9 @@ unix {
     # end of library version number files
 }
 
-win32-g++:QMAKE_CXXFLAGS += -fpermissive -shared-libgcc -D_GLIBCXX_DLL
+win32-g++:QMAKE_CXXFLAGS += -fpermissive -shared-libgcc -D_GLIBCXX_DLL -march=i686
 
 win32 {
-    win32-g++:QMAKE_CXXFLAGS += -march=i686
-
     OSGROOT = $$(OSG_ROOT)
     isEmpty(OSGROOT) {
         message($$TARGET -- \"OpenSceneGraph\" not detected...)
@@ -143,7 +139,7 @@ win32 {
 
     OPENIGBUILD = $$(OPENIG_BUILD)
     isEmpty (OPENIGBUILD) {
-	OPENIGBUILD = $$IN_PWD/..
+    OPENIGBUILD = $$IN_PWD/..
     }
     message($$TARGET -- \"openig build\" detected in \"$$OPENIGBUILD\")
     LIBS += -L$$OPENIGBUILD/lib

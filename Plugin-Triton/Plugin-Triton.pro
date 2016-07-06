@@ -158,6 +158,7 @@ win32 {
     else {
         !build_pass:message($$basename(_PRO_FILE_) -- \"OpenSceneGraph\" detected in \"$$OSGROOT\")
         INCLUDEPATH += $$OSGROOT/include
+        LIBS += -L$$OSGROOT/lib
     }
     OSGBUILD = $$(OSG_BUILD)
     isEmpty(OSGBUILD) {
@@ -240,7 +241,7 @@ win32 {
     isEmpty(TPATH){
         message(TRITON_PATH not set in your environment, cannot install the OIG Triton shaders properly!!!!)
     } else {
-        SFILES   = $$files($${PWD}/DataFiles/user*.glsl)
+        SFILES   = $$files(..\Resources\shaders\Triton\user*.glsl)
         SDESTDIR = $$(TRITON_PATH)/Resources/
         SFILES  ~= s,/,\\,g
         SDESTDIR  ~= s,/,\\,g
@@ -254,21 +255,21 @@ win32 {
 #            distfiles += $$SDESTDIR\\$$basename(var)
 #        }
 
-        PDIR =  $$PWD/DataFiles/
+        PDIR =  $$PWD
         PDIR  ~= s,/,\\,g
 
-        !build_pass:message(Installing the OIG Triton shaders -- $$files($$PDIR\user*.glsl) -- into $$SDESTDIR)
+        #!build_pass:message(Installing the OIG Triton shaders -- $$files($$PDIR\user*.glsl) -- into $$SDESTDIR)
         QMAKE_POST_LINK += test -d $$quote($$SDESTDIR) || $$QMAKE_MKDIR $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
-        QMAKE_POST_LINK += $$QMAKE_COPY $$PDIR\user*.glsl $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
+        QMAKE_POST_LINK += xcopy /y $${PDIR}\..\Resources\shaders\Triton\user*.glsl $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
 
-        SFILES   = $${PWD}/DataFiles/forward_plus_triton_ps.glsl
+        SFILES   = $${PDIR}\..\Resources\shaders\Triton\forward_plus_triton_ps.glsl
         SDESTDIR = $$OPENIGBUILD/bin/resources/shaders/forward_plus_triton_ps.glsl
 
         SFILES    ~= s,/,\\,g
         SDESTDIR  ~= s,/,\\,g
         distfiles += $$SDESTDIR
 
-        !build_pass:message(Installing the OIG F+ SilverLining shader -- $$SFILES -- into $$quote($$dirname(SDESTDIR)))
+        #!build_pass:message(Installing the OIG F+ SilverLining shader -- $$SFILES -- into $$quote($$dirname(SDESTDIR)))
         QMAKE_POST_LINK += test -d $$quote($$dirname(SDESTDIR)) || $$QMAKE_MKDIR $$quote($$dirname(SDESTDIR)) $$escape_expand(\\n\\t)
         QMAKE_POST_LINK += $$QMAKE_COPY $$SFILES $$quote($$dirname(SDESTDIR)) $$escape_expand(\\n\\t)
 

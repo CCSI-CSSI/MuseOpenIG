@@ -33,6 +33,7 @@
 #include <sstream>
 
 #include <Core-Base/configuration.h>
+#include <Core-Base/glerrorutils.h>
 
 #include <Core-PluginBase/plugincontext.h>
 
@@ -51,14 +52,17 @@
 #include <osg/GL2Extensions>
 #include <osg/Texture2D>
 #include <osg/ValueObject>
+#include <osg/io_utils>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 
 #include <Library-Graphics/OIGMath.h>
 
+#include <Core-Base/shaderutils.h>
+
 #define UPDATE_DISTANCE_SQ (500.0 * 500.0)
-#define CLOUD_SHADOW_TEXTURE 6
+#define CLOUD_SHADOW_TEXTURE 4
 #define M_PER_NMI           1852.000001 /* No. of meters in a nautical mile   */
 
 using namespace SilverLining;
@@ -66,31 +70,32 @@ using namespace OpenIG::Plugins;
 
 SkyDrawable::SkyDrawable()
         : osg::Drawable()
-		, _viewer(0)
+        , _viewer(0)
         , _skyboxSize(100000)
-		, _cloudShadowTexgen(0)
+        , _cloudShadowTexgen(0)
         , _cloudShadowTextureWhiteSubstitute(0)
         , _cloudShadowTextureStage(CLOUD_SHADOW_TEXTURE)
         , _cloudShadowTexgenStage(CLOUD_SHADOW_TEXTURE)
-		, _shadowTexHandle(0)
+        , _shadowTexHandle(0)
         , _cloudShadowsEnabled(false)
         , _init_shadows_once(false)
         , _needsShadowUpdate(true)
         , _cloudReflections(false)
+        , _tz(0)
         , _rainFactor(0.0)
         , _snowFactor(0.0)
         , _removeAllCloudLayers(false)
-        , _todDirty(false)        
+        , _todDirty(false)
         , _enableCloudShadows(true)
-		, _geocentric(false)
-		, _slatmosphere(0)
-		, _openIG(0)
-		, _inCloudsFogDensity(-1.f)
-		, _sunMoonBrightnessNight(1.f)
-		, _sunMoonBrightnessDay(1.f)
-		, cullCallback(0)
-		, updateCallback(0)
-		, computeBoundingBoxCallback(0)
+        , _geocentric(false)
+        , _slatmosphere(0)
+        , _openIG(0)
+        , _inCloudsFogDensity(-1.f)
+        , _sunMoonBrightnessNight(1.f)
+        , _sunMoonBrightnessDay(1.f)
+        , cullCallback(0)
+        , updateCallback(0)
+        , computeBoundingBoxCallback(0)
 {
 }
 
@@ -98,20 +103,23 @@ SkyDrawable::SkyDrawable(const std::string& path, osgViewer::CompositeViewer* vi
         : osg::Drawable()
         , _viewer(viewer)
         , _skyboxSize(100000)
-		, _light(light)
-		, _fog(fog)
+        , _light(light)
+        , _fog(fog)
         , _path(path)
-		, _cloudShadowTexgen(0)
+        , _cloudShadowTexgen(0)
         , _cloudShadowTextureWhiteSubstitute(0)
         , _cloudShadowTextureStage(CLOUD_SHADOW_TEXTURE)
         , _cloudShadowTexgenStage(CLOUD_SHADOW_TEXTURE)
-		, _shadowTexHandle(0)
-        , _todHour(12)
-        , _todMinutes(0)
+        , _shadowTexHandle(0)
+        , _todHour(4)
+        , _todMinutes(43)
         , _cloudShadowsEnabled(false)
         , _init_shadows_once(false)
         , _needsShadowUpdate(true)
         , _cloudReflections(false)
+        , _month(5)
+        , _day(23)
+        , _year(2016)
         , _rainFactor(0.0)
         , _snowFactor(0.0)
         , _removeAllCloudLayers(false)
@@ -121,32 +129,32 @@ SkyDrawable::SkyDrawable(const std::string& path, osgViewer::CompositeViewer* vi
         , _windDirty(false)
         , _windVolumeHandle(0)
         , _enableCloudShadows(true)
-		, _geocentric(geocentric)
-		, _slatmosphere(0)
-		, _openIG(0)
-		, _inCloudsFogDensity(-1.f)
-		, _sunMoonBrightnessNight(1.f)
-		, _sunMoonBrightnessDay(1.f)
-		, cullCallback(0)
-		, updateCallback(0)
-		, computeBoundingBoxCallback(0)
-{    
+        , _geocentric(geocentric)
+        , _slatmosphere(0)
+        , _openIG(0)
+        , _inCloudsFogDensity(-1.f)
+        , _sunMoonBrightnessNight(1.f)
+        , _sunMoonBrightnessDay(1.f)
+        , cullCallback(0)
+        , updateCallback(0)
+        , computeBoundingBoxCallback(0)
+{
     _cloudShadowTextureStage =  _cloudShadowTexgenStage = OpenIG::Base::Configuration::instance()->getConfig("Clouds-Shadows-Texture-Slot",6);
 
     const std::string value = OpenIG::Base::Configuration::instance()->getConfig("Enable-Clouds-Shadows","yes");
     _enableCloudShadows =  value == "yes";
 
     initializeDrawable();
-	initializeShadow();
+    initializeShadow();
 }
 
 void SkyDrawable::initializeShadow()
 {
-	{ // Create white fake texture for use if no cloud layer casting shadows is present
+    { // Create white fake texture for use if no cloud layer casting shadows is present
        osg::Image * image = new osg::Image;
        image->allocateImage( 1, 1, 1, GL_LUMINANCE, GL_UNSIGNED_BYTE );
        image->data()[0] = 0xFF;
-        
+
        _cloudShadowTextureWhiteSubstitute = new osg::Texture2D( image );
        _cloudShadowTextureWhiteSubstitute->setWrap(osg::Texture2D::WRAP_S,osg::Texture2D::REPEAT);
        _cloudShadowTextureWhiteSubstitute->setWrap(osg::Texture2D::WRAP_T,osg::Texture2D::REPEAT);
@@ -156,28 +164,28 @@ void SkyDrawable::initializeShadow()
 
     { // Create cloud shadow casting texgen
        _cloudShadowTexgen = new osg::TexGen();
-       _cloudShadowTexgen->setMode( osg::TexGen::EYE_LINEAR ); 
+       _cloudShadowTexgen->setMode( osg::TexGen::EYE_LINEAR );
     }
 
     _cloudShadowCoordMatrixUniform = new osg::Uniform( "cloudShadowCoordMatrix", osg::Matrixf() );
 
-	osgViewer::ViewerBase::Views views;
-	_viewer->getViews(views);
+    osgViewer::ViewerBase::Views views;
+    _viewer->getViews(views);
 
-	osgViewer::ViewerBase::Views::iterator itr = views.begin();
-	for (; itr != views.end(); ++itr)
-	{
-		osgViewer::View* view = *itr;
+    osgViewer::ViewerBase::Views::iterator itr = views.begin();
+    for (; itr != views.end(); ++itr)
+    {
+        osgViewer::View* view = *itr;
 
-		bool openIGScene = false;
-		if (view->getUserValue("OpenIG-Scene", openIGScene) && openIGScene)
-		{
-			view->getSceneData()->getOrCreateStateSet()->addUniform(_cloudShadowCoordMatrixUniform);
-			view->getSceneData()->getOrCreateStateSet()->addUniform(new osg::Uniform("cloudShadowTexture", (int)_cloudShadowTextureStage));
-			
-			break;
-		}
-	}
+        bool openIGScene = false;
+        if (view->getUserValue("OpenIG-Scene", openIGScene) && openIGScene)
+        {
+            view->getSceneData()->getOrCreateStateSet()->addUniform(_cloudShadowCoordMatrixUniform);
+            view->getSceneData()->getOrCreateStateSet()->addUniform(new osg::Uniform("cloudShadowTexture", (int)_cloudShadowTextureStage));
+
+            break;
+        }
+    }
 }
 
 
@@ -193,85 +201,104 @@ void SkyDrawable::initializeDrawable()
 #endif
 
 #if 0
-	SilverLiningUpdateCallback::Cameras					camerasForUpdate;
-	SilverLiningSkyComputeBoundingBoxCallback::Cameras	camerasForComputeBoundingBox;
+    SilverLiningUpdateCallback::Cameras					camerasForUpdate;
+    SilverLiningSkyComputeBoundingBoxCallback::Cameras	camerasForComputeBoundingBox;
 
-	osgViewer::ViewerBase::Views views;
-	_viewer->getViews(views);
+    osgViewer::ViewerBase::Views views;
+    _viewer->getViews(views);
 
-	osgViewer::ViewerBase::Views::iterator itr = views.begin();
-	for (; itr != views.end(); ++itr)
-	{
-		osgViewer::View* view = *itr;
+    osgViewer::ViewerBase::Views::iterator itr = views.begin();
+    for (; itr != views.end(); ++itr)
+    {
+        osgViewer::View* view = *itr;
 
-		bool openIGScene = false;
-		if (view->getUserValue("OpenIG-Scene", openIGScene) && openIGScene)
-		{
-			camerasForUpdate.push_back(view->getCamera());			
-			camerasForComputeBoundingBox.push_back(view->getCamera());
-		}
-	}
+        bool openIGScene = false;
+        if (view->getUserValue("OpenIG-Scene", openIGScene) && openIGScene)
+        {
+            camerasForUpdate.push_back(view->getCamera());
+            camerasForComputeBoundingBox.push_back(view->getCamera());
+        }
+    }
 
-    updateCallback = new SilverLiningUpdateCallback(camerasForUpdate);    
+    updateCallback = new SilverLiningUpdateCallback(camerasForUpdate);
     setUpdateCallback(updateCallback);
 
 #if 1
-	computeBoundingBoxCallback = new SilverLiningSkyComputeBoundingBoxCallback(camerasForComputeBoundingBox);
+    computeBoundingBoxCallback = new SilverLiningSkyComputeBoundingBoxCallback(camerasForComputeBoundingBox);
     setComputeBoundingBoxCallback(computeBoundingBoxCallback);
 #endif
 
 #endif
-	
+
 }
 
 void SkyDrawable::setSunMoonBrightness(float day, float night)
 {
-	_sunMoonBrightnessDay = day;
-	_sunMoonBrightnessNight = night;
+    _sunMoonBrightnessDay = day;
+    _sunMoonBrightnessNight = night;
 }
 
 void SkyDrawable::setLightingParams(OpenIG::Engine* ig)
 {
-	OpenIG::PluginBase::PluginContext& context = ig->getPluginContext();
+    OpenIG::PluginBase::PluginContext& context = ig->getPluginContext();
 
-	if (_slatmosphere && _light && ig)
-	{		
-		osg::Vec4 diffuse = _light->getDiffuse();
-		osg::Vec4 position = _light->getPosition();
+    if (_slatmosphere && _light && ig)
+    {
+        osg::Vec4 diffuse = _light->getDiffuse();
+        osg::Vec4 position = _light->getPosition();
 
-		osg::Vec3 sunOrMoonColor;
-		_slatmosphere->GetSunOrMoonColor(&sunOrMoonColor.x(), &sunOrMoonColor.y(), &sunOrMoonColor.z());
+        osg::Vec3 sunOrMoonColor;
+        _slatmosphere->GetSunOrMoonColor(&sunOrMoonColor.x(), &sunOrMoonColor.y(), &sunOrMoonColor.z());
 
-		osg::Vec3 ambient;
-		_slatmosphere->GetAmbientColor(&ambient.x(), &ambient.y(), &ambient.z());
+        sunOrMoonColor.x() = osg::minimum(1.f, sunOrMoonColor.x());
+        sunOrMoonColor.y() = osg::minimum(1.f, sunOrMoonColor.y());
+        sunOrMoonColor.z() = osg::minimum(1.f, sunOrMoonColor.z());
 
-		osg::Vec3 sunOrMoonPosition;
-		if (_geocentric)
-			_slatmosphere->GetSunPositionGeographic(&sunOrMoonPosition.x(), &sunOrMoonPosition.y(), &sunOrMoonPosition.z());
-		else
-			_slatmosphere->GetSunOrMoonPosition(&sunOrMoonPosition.x(), &sunOrMoonPosition.y(), &sunOrMoonPosition.z());
+        osg::Vec3 ambient;
+        _slatmosphere->GetAmbientColor(&ambient.x(), &ambient.y(), &ambient.z());
+        ambient.x() = osg::minimum(1.f, ambient.x());
+        ambient.y() = osg::minimum(1.f, ambient.y());
+        ambient.z() = osg::minimum(1.f, ambient.z());
 
-		osg::Vec3 horizonColor;		
-		_slatmosphere->GetHorizonColor(0, &horizonColor.x(), &horizonColor.y(), &horizonColor.z());
+        //std::cout << ambient.x() << ", " << ambient.y() << ", " << ambient.z() << std::endl;
 
-		osg::Vec3 fogColor;
-		if (_fog)
-		{
-			fogColor = osg::Vec3(_fog->getColor().x(), _fog->getColor().y(), _fog->getColor().z());
-		}
+        osg::Vec3 sunOrMoonPosition;
+        if (_geocentric)
+            _slatmosphere->GetSunPositionGeographic(&sunOrMoonPosition.x(), &sunOrMoonPosition.y(), &sunOrMoonPosition.z());
+        else
+            _slatmosphere->GetSunOrMoonPosition(&sunOrMoonPosition.x(), &sunOrMoonPosition.y(), &sunOrMoonPosition.z());
 
-		context.getOrCreateValueObject()->setUserValue("SilverLining-Light-Diffuse",diffuse);
-		context.getOrCreateValueObject()->setUserValue("SilverLining-Light-Position", position);
-		context.getOrCreateValueObject()->setUserValue("SilverLining-Atmosphere-SunOrMoonColor", sunOrMoonColor);
-		context.getOrCreateValueObject()->setUserValue("SilverLining-Atmosphere-SunOrMoonPosition", sunOrMoonPosition);
-		context.getOrCreateValueObject()->setUserValue("SilverLining-Atmosphere-Ambient", ambient);
-		context.getOrCreateValueObject()->setUserValue("SilverLining-Atmosphere-HorizonColor", horizonColor);		
-		context.getOrCreateValueObject()->setUserValue("SilverLining-Atmosphere-FogColor", fogColor);
-		context.getOrCreateValueObject()->setUserValue("SilverLining-Atmosphere-InClouds-FogDensity", _inCloudsFogDensity);
+        osg::Vec3 horizonColor;
+        _slatmosphere->GetHorizonColor(0, &horizonColor.x(), &horizonColor.y(), &horizonColor.z());
 
-		//std::cout << "SL position: " << sunOrMoonPosition.x() << "," << sunOrMoonPosition.y() << "," << sunOrMoonPosition.z() << std::endl;
-	}
+        osg::Vec3 fogColor;
+        if (_fog)
+        {
+            fogColor = osg::Vec3(_fog->getColor().x(), _fog->getColor().y(), _fog->getColor().z());
+        }
+
+        context.getOrCreateValueObject()->setUserValue("SilverLining-Light-Diffuse", diffuse);
+        context.getOrCreateValueObject()->setUserValue("SilverLining-Light-Position", position);
+        context.getOrCreateValueObject()->setUserValue("SilverLining-Atmosphere-SunOrMoonColor", sunOrMoonColor);
+        context.getOrCreateValueObject()->setUserValue("SilverLining-Atmosphere-SunOrMoonPosition", sunOrMoonPosition);
+        context.getOrCreateValueObject()->setUserValue("SilverLining-Atmosphere-Ambient", ambient);
+        context.getOrCreateValueObject()->setUserValue("SilverLining-Atmosphere-HorizonColor", horizonColor);
+        context.getOrCreateValueObject()->setUserValue("SilverLining-Atmosphere-FogColor", fogColor);
+        context.getOrCreateValueObject()->setUserValue("SilverLining-Atmosphere-InClouds-FogDensity", _inCloudsFogDensity);
+
+        //std::cout << "SL position: " << sunOrMoonPosition.x() << "," << sunOrMoonPosition.y() << "," << sunOrMoonPosition.z() << std::endl;
+    }
 }
+void SkyDrawable::resetLighting(SilverLining::Atmosphere *atmosphere) const
+{
+#if 0
+	if (atmosphere)
+	{
+		atmosphere->GetConditions()->SetFog(_originalInsideFogSettings.a(), _originalInsideFogSettings.r(), _originalInsideFogSettings.g(), _originalInsideFogSettings.b());
+	}
+#endif
+}
+
 
 void SkyDrawable::setLighting(SilverLining::Atmosphere *atmosphere) const
 {
@@ -286,17 +313,17 @@ void SkyDrawable::setLighting(SilverLining::Atmosphere *atmosphere) const
         float ra, ga, ba, rd, gd, bd, x, y, z;
         atmosphere->GetAmbientColor(&ra, &ga, &ba);
         atmosphere->GetSunOrMoonColor(&rd, &gd, &bd);
-		if (_geocentric)
-		{
-			atmosphere->GetSunPositionGeographic(&x, &y, &z);
-			light->setConstantAttenuation(1.f / 100000000);
-		}
-		else
-		{
-			atmosphere->GetSunOrMoonPosition(&x, &y, &z);
-		}
+        if (_geocentric)
+        {
+            atmosphere->GetSunPositionGeographic(&x, &y, &z);
+            light->setConstantAttenuation(1.f / 100000000);
+        }
+        else
+        {
+            atmosphere->GetSunOrMoonPosition(&x, &y, &z);
+        }
 
-		float sunMoonFactor = 1.f;
+        float sunMoonFactor = 1.f;
 
         direction = osg::Vec3(x, y, z);
         ambient = osg::Vec4(ra, ga, ba, 1.0);
@@ -305,16 +332,17 @@ void SkyDrawable::setLighting(SilverLining::Atmosphere *atmosphere) const
 
         light->setAmbient(ambient);
         light->setDiffuse(diffuse);
-		light->setSpecular(osg::Vec4(1, 1, 1, 1));
+        light->setSpecular(osg::Vec4(1, 1, 1, 1));
         light->setPosition(osg::Vec4(direction.x(), direction.y(), direction.z(), 0));
 
-		float density = 0.f;
-		float	hR;
-		float	hG;
-		float	hB;
-		_inCloudsFogDensity = -1.f;
+        float density = 0.f;
+        float	hR;
+        float	hG;
+        float	hB;
+        _inCloudsFogDensity = -1.f;
+
         if(_fog.valid())
-        {
+        {			
             if(atmosphere->GetFogEnabled())
             {//we are inside the stratus layer
 
@@ -324,14 +352,16 @@ void SkyDrawable::setLighting(SilverLining::Atmosphere *atmosphere) const
                 {
                     old_density = _fog->getDensity();
                     getDensity = false;
-                }
-
-                atmosphere->GetFogSettings(&density, &hR, &hG, &hB);
-                _fog->setColor(osg::Vec4(hG,hG,hG,1.f));
-				_fog->setDensity(_inCloudsFogDensity = density);
+                }								
+																
+				atmosphere->GetFogSettings(&density, &hR, &hG, &hB);					
+				osg::Vec4 color(hR, hG, hB,1.f);
+					
+				_fog->setColor(osg::Vec4(color.r(), color.g(), color.b(), 1.f));
+				_fog->setDensity(_inCloudsFogDensity = density);								
             }
             else
-            {
+            {				
                 //put back original density when we exit the cloud layer.
                 if(!getDensity)
                 {
@@ -340,7 +370,7 @@ void SkyDrawable::setLighting(SilverLining::Atmosphere *atmosphere) const
                 }
 
                 atmosphere->GetHorizonColor(0,&hR, &hG, &hB);
-                density = _fog->getDensity();
+                density = _inCloudsFogDensity = _fog->getDensity();
                 atmosphere->GetConditions()->SetFog(density,hG,hG,hG);
                 _fog->setColor(osg::Vec4(hG,hG,hG,1.f));
                 atmosphere->SetHaze(hG,hG,hG,1.5*M_PER_NMI, density);
@@ -349,16 +379,23 @@ void SkyDrawable::setLighting(SilverLining::Atmosphere *atmosphere) const
     }
 }
 
-void SkyDrawable::initializeSilverLining(AtmosphereReference *ar) const
+std::string SkyDrawable::_skyModel = "Simple";
+
+void SkyDrawable::setSkyModel(const std::string& skyModel)
+{
+	_skyModel = skyModel;
+}
+
+void SkyDrawable::initializeSilverLining(AtmosphereReference *ar, osg::GLExtensions* ext) const
 {
     if (ar && !ar->atmosphereInitialized)
     {
         ar->atmosphereInitialized = true; // only try once.
-		SilverLining::Atmosphere *atmosphere = ar->atmosphere;
+        SilverLining::Atmosphere *atmosphere = ar->atmosphere;
 
-		if (atmosphere)
+        if (atmosphere)
         {
-			srand(1234); // constant random seed to ensure consistent clouds across windows
+            srand(1234); // constant random seed to ensure consistent clouds across windows
 
             // Update the path below to where you installed SilverLining's resources folder.
             const char *slPath = getenv("SILVERLINING_PATH");
@@ -386,10 +423,27 @@ void SkyDrawable::initializeSilverLining(AtmosphereReference *ar) const
 #ifdef _WIN32
             resPath += "\\Resources\\";
 #else
-			resPath += "/Resources/";
+            resPath += "/Resources/";
 #endif
+            SL_VECTOR(unsigned int) vectorUserShaders;
+
+            std::stringstream ssLogZShaderVS;
+            ssLogZShaderVS<<"vec4 log_z_vs(in vec4 position){ return position; }"<<std::endl;
+            GLint logZShaderVS = osg::ShaderUtils::compileShader(ssLogZShaderVS.str(), osg::Shader::VERTEX, ext);
+            if (logZShaderVS!=0) vectorUserShaders.push_back(logZShaderVS);
+
+            std::stringstream ssLogZShaderPS;
+            ssLogZShaderPS<<"void log_z_ps(float depthoffset){}"<<std::endl;
+            GLint logZShaderPS = osg::ShaderUtils::compileShader(ssLogZShaderPS.str(), osg::Shader::FRAGMENT, ext);
+            if (logZShaderPS!=0) vectorUserShaders.push_back(logZShaderPS);
+
+            std::stringstream ssBBShader;
+            ssBBShader<<"void overrideBillboardFragment_forward_plus_sl_ps(in vec4 texColor, in vec4 lightColor, inout vec4 finalColor){}"<<std::endl;
+            GLint BBShader = osg::ShaderUtils::compileShader(ssBBShader.str(), osg::Shader::FRAGMENT, ext);
+            if (BBShader!=0) vectorUserShaders.push_back(BBShader);
+
             int ret = atmosphere->Initialize(SilverLining::Atmosphere::OPENGL, resPath.c_str(),
-                                             true, 0);
+                                             true, 0, vectorUserShaders);
             if (ret != SilverLining::Atmosphere::E_NOERROR)
             {
 #if 0
@@ -407,15 +461,23 @@ void SkyDrawable::initializeSilverLining(AtmosphereReference *ar) const
                 exit(0);
             }
 
-			//atmosphere->SetConfigOption( "render-offscreen", "yes" );
-			// This config option must set to get shadow clouds
+			if (_skyModel == "HosekWilkie")
+				atmosphere->SetSkyModel(HOSEK_WILKIE);
+			else
+			if (_skyModel == "Preetham")
+				atmosphere->SetSkyModel(PREETHAM);
+			else
+				atmosphere->SetConfigOption("sky-simple-shader", "yes");
+
+            //atmosphere->SetConfigOption( "render-offscreen", "yes" );
+            // This config option must set to get shadow clouds
             // if not set shadow clouds are black and hence overall shadow gets black too
             //atmosphere->SetConfigOption( "cumulus-lighting-quick-and-dirty", "no" );
 
             // Agreed to not hard code any of the config as long as they are
             // required by some very special effect
 #if 0
-			atmosphere->SetConfigOption("shadow-map-texture-size", "8192");
+            atmosphere->SetConfigOption("shadow-map-texture-size", "8192");
             atmosphere->SetConfigOption("enable-precipitation-visibility-effects", "no:");
 #endif
             // Let SilverLining know which way is up. OSG usually has Z going up.
@@ -425,96 +487,89 @@ void SkyDrawable::initializeSilverLining(AtmosphereReference *ar) const
             // Set our location (change this to your own latitude and longitude)
             SilverLining::Location loc;
             loc.SetAltitude(0);
-            loc.SetLatitude(12);
-            loc.SetLongitude(42);
+            loc.SetLatitude(_latitude);
+            loc.SetLongitude(_longitude);
             atmosphere->GetConditions()->SetLocation(loc);
 
-            // Set the time to noon in PST
-            SilverLining::LocalTime t;
-            t.SetFromSystemTime();
-			t.SetHour(11);
-			t.SetTimeZone(CET);
-            atmosphere->GetConditions()->SetTime(t);
+            atmosphere->EnableLensFlare(true);
 
-			atmosphere->EnableLensFlare(true);            
-
-			if (cullCallback)
-				cullCallback->atmosphere = atmosphere;
+            if (cullCallback)
+                cullCallback->atmosphere = atmosphere;
         }
     }
 }
 
 void SkyDrawable::setShadow(SilverLining::Atmosphere *atmosphere, osg::RenderInfo & renderInfo )
-{    
+{
     if (!atmosphere || !renderInfo.getState()) return;
 
-    osg::State & state = *renderInfo.getState(); 
+    osg::State & state = *renderInfo.getState();
 
     state.setActiveTextureUnit(_cloudShadowTextureStage);
     _cloudShadowTextureWhiteSubstitute->apply( state );
 
-	// Tell state about our changes
+    // Tell state about our changes
     state.haveAppliedTextureAttribute(_cloudShadowTextureStage, _cloudShadowTextureWhiteSubstitute);
 
     osg::Matrix cloudShadowProjection;
     cloudShadowProjection.makeIdentity();
-    	
+
     if (_enableCloudShadows && atmosphere->GetShadowMap(_shadowTexHandle, &_lightMVP, &_worldToShadowMapTexCoord, true, 0.1f))
-	{
+    {
 
         GLuint shadowMap = (GLuint)(long)(_shadowTexHandle);
 
-		cloudShadowProjection.set( _worldToShadowMapTexCoord.ToArray() );
+        cloudShadowProjection.set( _worldToShadowMapTexCoord.ToArray() );
         cloudShadowProjection = renderInfo.getCurrentCamera()->getInverseViewMatrix() * cloudShadowProjection;
 
         SkyDrawable* mutableThis = const_cast<SkyDrawable*>(this);
 
-		if (!_texture.valid()) 
+        if (!_texture.valid())
         {
             mutableThis->_texture = new osg::Texture2D;
         }
 
 
-		osg::ref_ptr<osg::Texture::TextureObject> textureObject = new osg::Texture::TextureObject(_texture.get(),shadowMap,GL_TEXTURE_2D);
-		textureObject->setAllocated();
+        osg::ref_ptr<osg::Texture::TextureObject> textureObject = new osg::Texture::TextureObject(_texture.get(),shadowMap,GL_TEXTURE_2D);
+        textureObject->setAllocated();
 
-		_texture->setTextureObject(renderInfo.getContextID(),textureObject.get());
-		
-		state.setActiveTextureUnit(_cloudShadowTextureStage);
-		_texture->apply( state );
+        _texture->setTextureObject(renderInfo.getContextID(),textureObject.get());
 
-		// Tell state about our changes
-		state.haveAppliedTextureAttribute(_cloudShadowTextureStage, _texture.get());
-		
+        state.setActiveTextureUnit(_cloudShadowTextureStage);
+        _texture->apply( state );
 
-	}
-	else
-	{
-		state.setActiveTextureUnit(_cloudShadowTextureStage);
-		_cloudShadowTextureWhiteSubstitute->apply( state );
+        // Tell state about our changes
+        state.haveAppliedTextureAttribute(_cloudShadowTextureStage, _texture.get());
 
-		// Tell state about our changes
-		state.haveAppliedTextureAttribute(_cloudShadowTextureStage, _cloudShadowTextureWhiteSubstitute);
 
-	}
+    }
+    else
+    {
+        state.setActiveTextureUnit(_cloudShadowTextureStage);
+        _cloudShadowTextureWhiteSubstitute->apply( state );
 
-    _cloudShadowCoordMatrixUniform->set( cloudShadowProjection );       
+        // Tell state about our changes
+        state.haveAppliedTextureAttribute(_cloudShadowTextureStage, _cloudShadowTextureWhiteSubstitute);
+
+    }
+
+    _cloudShadowCoordMatrixUniform->set( cloudShadowProjection );
     _cloudShadowTexgen->setPlanesFromMatrix( cloudShadowProjection );
 
     // Now goes tricky part of the code !!!
     // We need to interact with OSG during render phase in delicate way and
-    // not go out of sync with OpenGL states recorded by osg::State. 
+    // not go out of sync with OpenGL states recorded by osg::State.
 
     // Change texture stage to proper one
     state.setActiveTextureUnit(_cloudShadowTexgenStage);
-    
-    // We set texgen with identity on OpenGL modelview matrix            
+
+    // We set texgen with identity on OpenGL modelview matrix
     // since our TexGen was already premultiplied with inverse view.
     // This method minimizes precision errors as we used OSG double matrices.
     // If we had not premultiplied the texgen then we would need to set
     // view on OpenGL modelview matrix which would cause internal OpenGL
     // premutiplication of TexGen by inverse view using float matrices.
-    // Such float computation may cause shadow texture jittering between 
+    // Such float computation may cause shadow texture jittering between
     // frames if scenes/terrains spanning large coordinate ranges are used.
     state.applyModelViewMatrix( NULL );
 
@@ -529,7 +584,7 @@ void SkyDrawable::setShadow(SilverLining::Atmosphere *atmosphere, osg::RenderInf
     // Tell state about our changes
     state.haveAppliedTextureAttribute(_cloudShadowTexgenStage, _cloudShadowTexgen);
 
-    // Set this TexGen as a global default 
+    // Set this TexGen as a global default
     state.setGlobalDefaultTextureAttribute(_cloudShadowTexgenStage, _cloudShadowTexgen);
 }
 
@@ -539,6 +594,19 @@ void SkyDrawable::setTimeOfDay(unsigned int hour, unsigned int minutes)
     _todMinutes = minutes;
 
     _todDirty = true;
+    _utcSet = false;
+}
+
+bool SkyDrawable::_utcSet = false;
+int SkyDrawable::_utcHour = 12;
+int SkyDrawable::_utcMinutes = 0;
+
+void SkyDrawable::setUTC(int hour, int minutes)
+{
+    _utcHour = hour;
+    _utcMinutes = minutes;
+
+    _utcSet = true;
 }
 
 void SkyDrawable::setWind(float speed, float direction)
@@ -674,7 +742,7 @@ void SkyDrawable::removeClouds(SilverLining::Atmosphere *atmosphere)
 
 void SkyDrawable::setGeocentric(bool geocentric)
 {
-	_geocentric = geocentric;
+    _geocentric = geocentric;
 }
 
 void SkyDrawable::removeAllCloudLayers()
@@ -735,71 +803,113 @@ void SkyDrawable::updateClouds(SilverLining::Atmosphere *atmosphere)
     }
 }
 
+void SkyDrawable::setDate(int month, int day, int year)
+{
+    _month = month;
+    _day = day;
+    _year = year;
+}
+
 void SkyDrawable::setRain(double factor)
 {
     _rainFactor = factor * 30.0;
-    _snowFactor = 0.0;
+    //_snowFactor = 0.0;
 }
 
 void SkyDrawable::setSnow(double factor)
 {
     _snowFactor = factor * 30;
-    _rainFactor = 0.0;
+    //_rainFactor = 0.0;
+}
+
+double	SkyDrawable::_gamma = 1.8;
+bool	SkyDrawable::_userDefinedGamma = false;
+
+void SkyDrawable::setGamma(double gamma, bool use)
+{
+    _gamma = gamma;
+	_userDefinedGamma = use;
+
+}
+
+//We get from this plugins XML datafile now...CGR
+double SkyDrawable::_latitude = 12;
+double SkyDrawable::_longitude = 42;
+void SkyDrawable::setLocation(double lat, double lon)
+{
+    _latitude = lat;
+    _longitude = lon;
+}
+
+////We get the data from this plugins XML datafile now...CGR
+void SkyDrawable::setTimezone(int tz)
+{
+    _tz = tz;
 }
 
 void SkyDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 {
     SilverLining::Atmosphere *atmosphere = 0;
 
-	AtmosphereReference *ar = dynamic_cast<AtmosphereReference *>(renderInfo.getCurrentCamera()->getUserData());
-	if (ar)
-	{
-		atmosphere = ar->atmosphere;
+    AtmosphereReference *ar = dynamic_cast<AtmosphereReference *>(renderInfo.getCurrentCamera()->getUserData());
+    if (ar)
+    {
+        atmosphere = ar->atmosphere;
 
-		SkyDrawable* mutableThis = const_cast<SkyDrawable*>(this);
-		mutableThis->_slatmosphere = atmosphere;
-	}
+        SkyDrawable* mutableThis = const_cast<SkyDrawable*>(this);
+        mutableThis->_slatmosphere = atmosphere;
+    }
 
-	renderInfo.getState()->disableAllVertexArrays();
+    renderInfo.getState()->disableAllVertexArrays();
 
     if (atmosphere)
     {
-        initializeSilverLining(ar);
+        initializeSilverLining(ar, osg::GL2Extensions::Get(renderInfo.getContextID(), true));
 
-		osg::GL2Extensions* ext = osg::GL2Extensions::Get(renderInfo.getContextID(), true);
-		if (ext == 0)
-		{
-			return;
-		}
+		if (_userDefinedGamma) atmosphere->SetGamma(SkyDrawable::_gamma);
 
-		atmosphere->GetSkyShader();
-		GLint program = (GLint)atmosphere->GetSkyShader();
-		ext->glUseProgram(program);
-		GLint loc = ext->glGetUniformLocation(program, "ViewOptions_EO");
-		if (loc != -1)
-		{
-			osg::Camera* camera = renderInfo.getCurrentCamera();
-			osg::View* view = camera->getView();
-			unsigned int options = 0;
-			view->getUserValue("Options", options);
+        osg::GL2Extensions* ext = osg::GL2Extensions::Get(renderInfo.getContextID(), true);
 
-			bool POD = options == OpenIG::Engine::EO;
+        GLint program = (GLint)atmosphere->GetSkyShader();
+        if(program != 0 && ext != 0)
+        {
+            ext->glUseProgram(program);
+            GLint loc = ext->glGetUniformLocation(program, "ViewOptions_EO");
+            if (loc != -1)
+            {
+                osg::Camera* camera = renderInfo.getCurrentCamera();
+                osg::View* view = camera->getView();
+                unsigned int options = 0;
+                view->getUserValue("Options", options);
 
-			ext->glUniform1i(loc, POD ? 1 : 0);
-		}
-		loc = ext->glGetUniformLocation(program, "ViewOptions_IR");
-		if (loc != -1)
-		{
-			osg::Camera* camera = renderInfo.getCurrentCamera();
-			osg::View* view = camera->getView();
-			unsigned int options = 0;
-			view->getUserValue("Options", options);
+                bool POD = options == OpenIG::Engine::EO;
 
-			bool POD = options == OpenIG::Engine::IR;
+                ext->glUniform1i(loc, POD ? 1 : 0);
+            }
+            else
+                glGetError();
 
-			ext->glUniform1i(loc, POD ? 1 : 0);
-		}
-		ext->glUseProgram(0);
+            loc = ext->glGetUniformLocation(program, "ViewOptions_IR");
+            if (loc != -1)
+            {
+                osg::Camera* camera = renderInfo.getCurrentCamera();
+                osg::View* view = camera->getView();
+                unsigned int options = 0;
+                view->getUserValue("Options", options);
+
+                bool POD = options == OpenIG::Engine::IR;
+
+                ext->glUniform1i(loc, POD ? 1 : 0);
+            }
+            else
+                glGetError();
+
+            ext->glUseProgram(0);
+        }
+//        else
+//        {
+//            osg::notify(osg::NOTICE) << "SilverLining: Unable to atmosphere->GetSkyShader()!!!!!" << std::endl;
+//        }
 
         atmosphere->GetConditions()->SetPrecipitation(CloudLayer::NONE, 0);
         atmosphere->GetConditions()->SetPrecipitation(CloudLayer::RAIN, _rainFactor);
@@ -812,14 +922,34 @@ void SkyDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 #if 0
         t.SetFromSystemTime();
 #else
-        t.SetYear(2015);
-        t.SetMonth(8);
-        t.SetDay(2);
+        t.SetYear(_year);
+        t.SetMonth(_month);
+        t.SetDay(_day);
 #endif
-        t.SetHour(_todHour);
-        t.SetMinutes(_todMinutes);
-        t.SetTimeZone(CET);
+
+#if 1
+        if (_utcSet)
+        {
+            t.SetHour(_utcMinutes);
+            t.SetMinutes(_utcMinutes);
+            t.SetTimeZone(0);
+        }
+        else
+        {
+            t.SetHour(_todHour);
+            t.SetMinutes(_todMinutes);
+            t.SetTimeZone(_tz);
+        }
         atmosphere->GetConditions()->SetTime(t);
+
+        SilverLining::Location loc;
+        loc.SetAltitude(0);
+        loc.SetLatitude(_latitude);
+        loc.SetLongitude(_longitude);
+        atmosphere->GetConditions()->SetLocation(loc);
+#else
+
+#endif
 
         osg::Vec3d position = renderInfo.getCurrentCamera()->getInverseViewMatrix().getTrans();
 
@@ -852,69 +982,70 @@ void SkyDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
             mutableThis->_windVolumeHandle = atmosphere->GetConditions()->SetWind(windVolume);
         }
 
-		if (_geocentric)
-		{
+        if (_geocentric)
+        {
             osg::Vec3d ceye;
-			osg::Vec3d ccenter;
-			osg::Vec3d cup;
-			renderInfo.getCurrentCamera()->getViewMatrixAsLookAt(ceye, ccenter, cup);
+            osg::Vec3d ccenter;
+            osg::Vec3d cup;
+            renderInfo.getCurrentCamera()->getViewMatrixAsLookAt(ceye, ccenter, cup);
 
-			osg::Vec3d up = ceye;
-			up.normalize();
-			osg::Vec3d north = osg::Vec3d(0, 0, 1);
-			osg::Vec3d east = north ^ up;
-			// Check for edge case of north or south pole
-			if (east.length2() == 0) {
-				east = osg::Vec3d(1, 0, 0);
-			}
-			east.normalize();
+            osg::Vec3d up = ceye;
+            up.normalize();
+            osg::Vec3d north = osg::Vec3d(0, 0, 1);
+            osg::Vec3d east = north ^ up;
+            // Check for edge case of north or south pole
+            if (east.length2() == 0) {
+                east = osg::Vec3d(1, 0, 0);
+            }
+            east.normalize();
 
-			atmosphere->SetUpVector(up.x(), up.y(), up.z());
-			atmosphere->SetRightVector(east.x(), east.y(), east.z());
+            atmosphere->SetUpVector(up.x(), up.y(), up.z());
+            atmosphere->SetRightVector(east.x(), east.y(), east.z());
 
-			double latitude = 0.0;
-			double longitude = 0.0;
-			double altitude = 0.0;
+            double latitude = 0.0;
+            double longitude = 0.0;
+            double altitude = 0.0;
 
-			osg::EllipsoidModel em;
-			em.convertXYZToLatLongHeight(ceye.x(), ceye.y(), ceye.z(), latitude, longitude, altitude);
+            osg::EllipsoidModel em;
+            em.convertXYZToLatLongHeight(ceye.x(), ceye.y(), ceye.z(), latitude, longitude, altitude);
 
-			SilverLining::Location loc;
-			loc.SetAltitude(altitude);
-			loc.SetLongitude(osg::RadiansToDegrees(longitude));
-			loc.SetLatitude(osg::RadiansToDegrees(latitude));
-			atmosphere->GetConditions()->SetLocation(loc);
-			
-			boost::posix_time::ptime t(
-				boost::gregorian::date(2015, boost::gregorian::Aug, 2),
-				boost::posix_time::hours(_todHour) + boost::posix_time::minutes(_todMinutes)
-			);			
-			boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
-			boost::posix_time::time_duration::sec_type x = (t - epoch).total_seconds();
-			
-			SilverLining::LocalTime utcTime;
-			utcTime.SetFromEpochSeconds(time_t(x));
-			utcTime.SetTimeZone(0);
-			atmosphere->GetConditions()->SetTime(utcTime);
-		}
+            SilverLining::Location loc;
+            loc.SetAltitude(altitude);
+            loc.SetLongitude(osg::RadiansToDegrees(longitude));
+            loc.SetLatitude(osg::RadiansToDegrees(latitude));
+            atmosphere->GetConditions()->SetLocation(loc);
+
+            boost::posix_time::ptime t(
+                boost::gregorian::date(2015, boost::gregorian::Aug, 2),
+                boost::posix_time::hours(_utcSet ? _utcHour : _todHour) +
+                boost::posix_time::minutes(_utcSet ? _utcMinutes : _todMinutes)
+            );
+            boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
+            boost::posix_time::time_duration::sec_type x = (t - epoch).total_seconds();
+
+            SilverLining::LocalTime utcTime;
+            utcTime.SetFromEpochSeconds(time_t(x));
+            utcTime.SetTimeZone(0);
+            atmosphere->GetConditions()->SetTime(utcTime);
+        }
 
         double fovy, ar, zNear, zFar;
         renderInfo.getCurrentCamera()->getProjectionMatrixAsPerspective(fovy, ar, zNear, zFar);
         float fCoef = (float)(2.0f / OpenIG::Library::Graphics::Math::Log2(zFar + 1.0f));
         setLogDepthUniforms(atmosphere, renderInfo.getState(), fCoef);
 
-		atmosphere->DrawSky(true, _geocentric , _skyboxSize, true, false);
+		resetLighting(atmosphere);
 
-        setLighting(atmosphere);
+        atmosphere->DrawSky(true, _geocentric , _skyboxSize, true, false);
+
+		setLighting(atmosphere);
         const_cast<SkyDrawable*>(this)->setShadow(atmosphere,renderInfo);
-		const_cast<SkyDrawable*>(this)->setLightingParams(_openIG);
-
-
-
+        const_cast<SkyDrawable*>(this)->setLightingParams(_openIG);		
+		
     }
 
 
-	renderInfo.getState()->dirtyAllVertexArrays();
+    renderInfo.getState()->dirtyAllVertexArrays();
 }
 
 static void ApplyFCoef(GLint shader, osg::GLExtensions *ext, float fCoef)
@@ -938,7 +1069,7 @@ void SkyDrawable::setLogDepthUniforms(SilverLining::Atmosphere *atmosphere, cons
             ApplyFCoef(atmosphere->GetBillboardShader(), ext, fCoef);
             ApplyFCoef(atmosphere->GetPrecipitationShader(), ext, fCoef);
             ApplyFCoef(atmosphere->GetStarShader(), ext, fCoef);
-			ApplyFCoef(atmosphere->GetAtmosphericLimbShader(), ext, fCoef);
+            ApplyFCoef(atmosphere->GetAtmosphericLimbShader(), ext, fCoef);
 
             SL_VECTOR(unsigned int) cloudShaders = atmosphere->GetActivePlanarCloudShaders();
             SL_VECTOR(unsigned int)::iterator it;
@@ -953,8 +1084,8 @@ void SilverLiningUpdateCallback::update(osg::NodeVisitor *nv, osg::Drawable* dra
 {
     SilverLining::Atmosphere *atmosphere = 0;
 
-	osg::Camera* camera = cameras.size() ? cameras.at(0) : 0;
-	if (!camera) return;
+    osg::Camera* camera = cameras.size() ? cameras.at(0) : 0;
+    if (!camera) return;
 
     AtmosphereReference *ar = dynamic_cast<AtmosphereReference *>(camera->getUserData());
     if (ar) {
@@ -975,8 +1106,8 @@ osg::BoundingBox SilverLiningSkyComputeBoundingBoxCallback::computeBound(const o
 {
     osg::BoundingBox box;
 
-	osg::Camera* camera = cameras.size() ? cameras.at(0) : 0;
-	if (!camera) return box;
+    osg::Camera* camera = cameras.size() ? cameras.at(0) : 0;
+    if (!camera) return box;
 
     if (camera)
     {
@@ -988,7 +1119,7 @@ osg::BoundingBox SilverLiningSkyComputeBoundingBoxCallback::computeBound(const o
             atmosphere = ar->atmosphere;
         }
 
-        if (atmosphere) 
+        if (atmosphere)
         {
             double skyboxSize;
 
@@ -998,7 +1129,7 @@ osg::BoundingBox SilverLiningSkyComputeBoundingBoxCallback::computeBound(const o
                 skyboxSize = atmosphere->GetConfigOptionDouble("sky-box-size");
                 if (skyboxSize == 0.0) skyboxSize = 1000.0;
             }
-          
+
             double radius = skyboxSize * 0.5;
             osg::Vec3f eye, center, up;
             camera->getViewMatrixAsLookAt(eye, center, up);
@@ -1010,15 +1141,15 @@ osg::BoundingBox SilverLiningSkyComputeBoundingBoxCallback::computeBound(const o
 
             double dToOrigin = camPos.length();
 
-		    bool hasLimb = atmosphere->GetConfigOptionBoolean("enable-atmosphere-from-space");
-		    if (hasLimb)
-		    {
-			    // Compute bounds of atmospheric limb centered at 0,0,0
-			    double earthRadius = atmosphere->GetConfigOptionDouble("earth-radius-meters");
-			    double atmosphereHeight = earthRadius +
-				    + atmosphere->GetConfigOptionDouble("atmosphere-height");
-			    double atmosphereThickness = atmosphere->GetConfigOptionDouble("atmosphere-scale-height-meters")
-				    + earthRadius;
+            bool hasLimb = atmosphere->GetConfigOptionBoolean("enable-atmosphere-from-space");
+            if (hasLimb)
+            {
+                // Compute bounds of atmospheric limb centered at 0,0,0
+                double earthRadius = atmosphere->GetConfigOptionDouble("earth-radius-meters");
+                double atmosphereHeight = earthRadius +
+                    + atmosphere->GetConfigOptionDouble("atmosphere-height");
+                double atmosphereThickness = atmosphere->GetConfigOptionDouble("atmosphere-scale-height-meters")
+                    + earthRadius;
 
                 osg::BoundingBox atmosphereBox;
                 osg::Vec3d atmMin(-atmosphereThickness, -atmosphereThickness, -atmosphereThickness);
@@ -1026,7 +1157,7 @@ osg::BoundingBox SilverLiningSkyComputeBoundingBoxCallback::computeBound(const o
 
                 // Expand these bounds by it
                 box.expandBy(atmosphereBox);
-		    }
+            }
         }
     }
 

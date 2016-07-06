@@ -13,30 +13,31 @@ TEMPLATE = lib
 
 DEFINES += IGLIBNETWORKING_LIBRARY
 
-SOURCES +=  buffer.cpp \
-            network.cpp \
-            packet.cpp \
-            udpnetwork.cpp \
-            tcpserver.cpp \
-            tcpclient.cpp \
+SOURCES +=  buffer.cpp\
+            network.cpp\
+            packet.cpp\
+            udpnetwork.cpp\
+            tcpserver.cpp\
+            tcpclient.cpp\
             factory.cpp
 
-HEADERS +=  buffer.h \
-            export.h \
-            network.h \
-            packet.h \
-            parser.h \
-            udpnetwork.h \
-            tcpserver.h \
-            tcpclient.h \
-            error.h \
+HEADERS +=  export.h\
+            buffer.h\
+            network.h\
+            packet.h\
+            udpnetwork.h\
+            parser.h\
+            tcpserver.h\
+            tcpclient.h\
+            error.h\
             factory.h
-
 
 INCLUDEPATH += ../
 DEPENDPATH += ../
 
 OTHER_FILES += CMakeLists.txt
+
+#LIBS += -lOpenIG-Protocol
 
 unix {
     !mac:contains(QMAKE_HOST.arch, x86_64):{
@@ -53,7 +54,7 @@ unix {
     INSTALLS += target
 
     INCLUDEPATH += /usr/local/include
-    DEPENDPATH += /usr/local/include    
+    DEPENDPATH += /usr/local/include
 
     INCLUDEPATH += /usr/local/lib64
     DEPENDPATH += /usr/local/lib64
@@ -92,11 +93,11 @@ unix {
     # library version number files
     exists( "../openig_version.pri" ) {
 
-	include( "../openig_version.pri" )
+    include( "../openig_version.pri" )
         isEmpty( VERSION ){ error( "$$TARGET -- bad or undefined VERSION variable inside file openig_version.pri" )
-	} else {
+    } else {
         message( "$$TARGET -- Set version info to: $$VERSION" )
-	}
+    }
 
     }
     else { error( "$$TARGET -- could not find pri library version file openig_version.pri" ) }
@@ -108,6 +109,26 @@ unix {
 win32-g++:QMAKE_CXXFLAGS += -fpermissive -shared-libgcc -D_GLIBCXX_DLL
 
 win32 {
+    OSGROOT = $$(OSG_ROOT)
+    isEmpty(OSGROOT) {
+        !build_pass:message($$basename(_PRO_FILE_) -- \"OpenSceneGraph\" not detected...)
+    }
+    else {
+       !build_pass:message($$basename(_PRO_FILE_) -- \"OpenSceneGraph\" detected in \"$$OSGROOT\")
+        INCLUDEPATH += $$OSGROOT/include
+        LIBS += -L$$OSGROOT/lib
+    }
+    OSGBUILD = $$(OSG_BUILD)
+    isEmpty(OSGBUILD) {
+        !build_pass:message($$basename(_PRO_FILE_) -- \"OpenSceneGraph build\" not detected...)
+    }
+    else {
+        !build_pass:message($$basename(_PRO_FILE_) -- \"OpenSceneGraph build\" detected in \"$$OSGBUILD\")
+        DEPENDPATH += $$OSGBUILD/lib
+        INCLUDEPATH += $$OSGBUILD/include
+        LIBS += -L$$OSGBUILD/lib
+    }
+
     BOOSTROOT = $$(BOOST_ROOT)
     isEmpty(BOOSTROOT) {
         message($$TARGET -- \"boost\" not detected...)

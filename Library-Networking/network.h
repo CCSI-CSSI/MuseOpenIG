@@ -22,6 +22,8 @@
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
 //#*****************************************************************************
+//#*	author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+//#*	copyright(c)Compro Computer Services, Inc.
 
 #ifndef NETWORK_H
 #define NETWORK_H
@@ -67,7 +69,7 @@ namespace OpenIG {
 				virtual ~Network();
 
 				virtual void send(const Buffer&) = 0;
-				virtual void receive(Buffer&) = 0;
+				virtual void receive(Buffer&, bool resetBuffer = true) = 0;
 
 				void addCallback(Packet::Opcode, Packet::Callback*);
 				void removeCallback(Packet::Opcode);

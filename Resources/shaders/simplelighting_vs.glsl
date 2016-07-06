@@ -48,6 +48,7 @@ void main()
 	if (Fcoef > 0)
 	{
 		gl_Position.z = (log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0) * gl_Position.w;
+		flogz = 1.0 + gl_Position.w;
 	}
 #endif
    normal = normalize( gl_NormalMatrix * gl_Normal );

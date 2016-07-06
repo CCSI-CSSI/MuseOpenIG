@@ -12,22 +12,25 @@ TEMPLATE = lib
 
 DEFINES += IGPLUGINFORWARDPLUSLIGHTING_LIBRARY
 
-SOURCES +=  dummylight.cpp \
-            forwardpluscullvisitor.cpp \
-            forwardpluslightimplementationcallback.cpp \
-            igpluginforwardpluslighting.cpp \
+SOURCES +=  dummylight.cpp\
+            forwardpluscullvisitor.cpp\
+            forwardplusengine.cpp\
+            forwardpluslightimplementationcallback.cpp\
+            igpluginforwardpluslighting.cpp\
             lightmanagerstateattribute.cpp
 
-HEADERS +=  dummylight.h \
-            forwardpluscullvisitor.h \
-            forwardpluslightimplementationcallback.h \
-            lightmanagerstateattribute.h \
-            osgtofputils.h
+HEADERS +=  dummylight.h\
+            forwardpluscullvisitor.h\
+            forwardplusengine.h\
+            forwardpluslightimplementationcallback.h\
+            osgtofputils.h\
+            lightmanagerstateattribute.h
+
 
 INCLUDEPATH += ../
 DEPENDPATH += ../
 
-LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgShadow -losgUtil\
+LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgShadow -losgUtil -losgSim -losgText -losgGA\
         -lOpenIG-Engine -lOpenIG-Base -lOpenIG-Graphics -lOpenIG-PluginBase
 
 OTHER_FILES += DataFiles/libIgPlugin-ForwardPlusLighting.so.xml
@@ -147,10 +150,12 @@ win32 {
             LIBS += -L$$BOOSTROOT\stage\lib
             CONFIG( debug,debug|release ){
                 message($$TARGET -- Boost using debug version of libraries )
-                LIBS += -llibboost_filesystem-vc120-mt-gd-1_58 -llibboost_system-vc120-mt-gd-1_58 -llibboost_thread-vc120-mt-gd-1_58
+                LIBS += -llibboost_filesystem-vc120-mt-gd-1_58  -llibboost_date_time-vc120-mt-gd-1_58 \
+                        -llibboost_system-vc120-mt-gd-1_58 -llibboost_thread-vc120-mt-gd-1_58
             }else{
                 message($$TARGET -- Boost using release version of libraries )
-                LIBS += -llibboost_filesystem-vc120-mt-1_58 -llibboost_system-vc120-mt-1_58 -llibboost_thread-vc120-mt-1_58
+                LIBS += -llibboost_filesystem-vc120-mt-1_58  -llibboost_date_time-vc120-mt-1_58 \
+                        -llibboost_system-vc120-mt-1_58 -llibboost_thread-vc120-mt-1_58
             }
         }
     }

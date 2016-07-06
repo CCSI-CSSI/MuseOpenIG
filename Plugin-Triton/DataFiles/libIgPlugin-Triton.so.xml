@@ -1,12 +1,13 @@
 <OpenIG-Plugin-Config>
-    <Triton-License-UserName>Compro</Triton-License-UserName>
-    <Triton-License-Key>MuseOpenIG</Triton-License-Key>
-    <Triton-Resource-Path>/usr/local/Triton</Triton-Resource-Path>
-    <Triton-Geocentric>no</Triton-Geocentric>
-    <Triton-HeightMap>yes</Triton-HeightMap>
-    <Triton-HeightMapHUD>no</Triton-HeightMapHUD>
-    <Triton-BelowWaterVisibility>5.0</Triton-BelowWaterVisibility>
-    <Triton-EnvironmentalMapping>yes</Triton-EnvironmentalMapping>
-    <Triton-PlanarReflectionBlend>1</Triton-PlanarReflectionBlend>
-    <Triton-ForwardPlusEnabled>no</Triton-ForwardPlusEnabled>
+  <Triton-License-UserName>Compro</Triton-License-UserName>
+  <Triton-License-Key>MuseOpenIG</Triton-License-Key>
+  <Triton-Resource-Path>/usr/local/Triton</Triton-Resource-Path>
+  <Triton-Geocentric>no</Triton-Geocentric>
+  <Triton-HeightMap>yes</Triton-HeightMap>
+  <Triton-HeightMapHUD>no</Triton-HeightMapHUD>
+  <Triton-BelowWaterVisibility>5.0</Triton-BelowWaterVisibility>
+  <Triton-EnvironmentalMapping>yes</Triton-EnvironmentalMapping>
+  <Triton-PlanarReflectionBlend>1</Triton-PlanarReflectionBlend>
+  <Triton-ForwardPlusEnabled>no</Triton-ForwardPlusEnabled>
+  <Triton-LogZEnabled>yes</Triton-LogZEnabled>
 </OpenIG-Plugin-Config>

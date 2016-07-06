@@ -22,6 +22,8 @@
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
 //#*****************************************************************************
+//#*	author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+//#*	copyright(c)Compro Computer Services, Inc.
 
 #include <Library-Networking/network.h>
 
@@ -86,6 +88,7 @@ void Network::process()
 
 	Buffer buffer(BUFFER_SIZE);
 	receive(buffer);
+	if (buffer.getWritten() == 0) return;
 
 	Packet* packet = 0;
     while ((packet = _parser->parse(buffer)))

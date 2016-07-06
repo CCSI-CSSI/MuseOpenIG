@@ -1,5 +1,5 @@
 <OpenIG-Plugin-Config>
-    <Max-Num-Of-Lights>200</Max-Num-Of-Lights>
+    <Max-Num-Of-Lights>400</Max-Num-Of-Lights>
     <Material>
         <Ambient>0.7 0.7 0.7 1.0</Ambient>
         <Diffuse>0.6 0.6 0.6 1.0</Diffuse>

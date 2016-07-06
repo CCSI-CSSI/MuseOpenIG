@@ -101,6 +101,22 @@ namespace OpenIG {
 		protected:
 			std::string     _modelFileName;
 
+			virtual void clean(OpenIG::PluginBase::PluginContext& context)
+			{
+				OpenIG::Base::Commands::instance()->removeCommand("fog");
+				OpenIG::Base::Commands::instance()->removeCommand("rain");
+				OpenIG::Base::Commands::instance()->removeCommand("snow");
+
+				if (context.getImageGenerator()->getScene() && context.getImageGenerator()->getScene()->asGroup())
+				{
+					context.getImageGenerator()->getScene()->asGroup()->removeChild(_sky);
+					_sky = NULL;
+
+					context.getImageGenerator()->getViewer()->getView(0)->getSceneData()->asGroup()->removeChild(_precipitation);
+					_precipitation = NULL;
+				}
+			}
+
 
 			virtual void init(OpenIG::PluginBase::PluginContext& context)
 			{

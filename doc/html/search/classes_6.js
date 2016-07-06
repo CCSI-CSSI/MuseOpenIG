@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['lightattributes',['LightAttributes',['../struct_open_i_g_1_1_base_1_1_light_attributes.html',1,'OpenIG::Base']]],
-  ['lightimplementationcallback',['LightImplementationCallback',['../class_open_i_g_1_1_base_1_1_light_implementation_callback.html',1,'OpenIG::Base']]]
+  ['idgroup',['IdGroup',['../struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group.html',1,'OpenIG::Base::GlobalIdGenerator']]],
+  ['imagegenerator',['ImageGenerator',['../class_open_i_g_1_1_base_1_1_image_generator.html',1,'OpenIG::Base']]]
 ];

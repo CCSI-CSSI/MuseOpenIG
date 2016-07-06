@@ -41,6 +41,10 @@
 #include <Library-Networking/parser.h>
 #include <Library-Networking/factory.h>
 
+#include <Library-Protocol/header.h>
+#include <Library-Protocol/entitystate.h>
+#include <Library-Protocol/camera.h>
+
 #include <osgDB/XmlParser>
 
 #include <osg/LineWidth>
@@ -58,129 +62,14 @@
 
 namespace OpenIG { namespace Plugins {
 
-const unsigned int SWAP_BYTES_COMPARE = 0x12345678;
-#define OPCODE_HEADER					1
-#define OPCODE_ENTITYSTATE				100
-#define OPCODE_CAMERA					101
-#define OPCODE_HOSTID					102
-
-struct Header : public OpenIG::Library::Networking::Packet
-{
-	Header(unsigned int frameNum = 0)
-		: magic(0)
-		, masterIsDead(0)
-		, frameNumber(frameNum)
-	{		
-	}
-
-	META_Packet(OPCODE_HEADER, Header);
-
-	virtual int write(OpenIG::Library::Networking::Buffer &buf) const
-	{
-		buf << (unsigned char)opcode() << SWAP_BYTES_COMPARE << masterIsDead << frameNumber;
-
-		return sizeof(unsigned char) + sizeof(unsigned int) + sizeof(unsigned short) + sizeof(unsigned int);
-	}
-
-	virtual int read(OpenIG::Library::Networking::Buffer &buf)
-	{
-		unsigned char op;		
-
-		buf >> op >> magic >> masterIsDead >> frameNumber;
-
-		return sizeof(unsigned char) + sizeof(unsigned int) + sizeof(unsigned short) + sizeof(unsigned int);
-	}
-
-	unsigned int	magic;
-	unsigned short	masterIsDead;
-	unsigned int	frameNumber;
-};
-
-struct EntityState: public OpenIG::Library::Networking::Packet
-{
-	EntityState()
-		: entityID(0)
-	{
-	}
-
-	META_Packet(OPCODE_ENTITYSTATE, EntityState);
-
-	virtual int write(OpenIG::Library::Networking::Buffer &buf) const
-	{		
-		buf << (unsigned char)opcode();
-		buf << entityID;
-		buf << mx(0, 0) << mx(0, 1) << mx(0, 2) << mx(0, 3);
-		buf << mx(1, 0) << mx(1, 1) << mx(1, 2) << mx(1, 3);
-		buf << mx(2, 0) << mx(2, 1) << mx(2, 2) << mx(2, 3);
-		buf << mx(3, 0) << mx(3, 1) << mx(3, 2) << mx(3, 3);
-
-		return sizeof(unsigned char) + sizeof(entityID) + sizeof(osg::Matrixd::value_type) * 16;
-	}
-
-	virtual int read(OpenIG::Library::Networking::Buffer &buf)
-	{		
-		unsigned char op;
-
-		buf >> op;
-		buf >> entityID;
-		buf >> mx(0, 0) >> mx(0, 1) >> mx(0, 2) >> mx(0, 3);
-		buf >> mx(1, 0) >> mx(1, 1) >> mx(1, 2) >> mx(1, 3);
-		buf >> mx(2, 0) >> mx(2, 1) >> mx(2, 2) >> mx(2, 3);
-		buf >> mx(3, 0) >> mx(3, 1) >> mx(3, 2) >> mx(3, 3);
-
-		return sizeof(unsigned char) + sizeof(entityID) + sizeof(osg::Matrixd::value_type) * 16;
-	}
-
-	unsigned int	entityID;
-	osg::Matrixd	mx;
-};
-
-struct CameraPacket : public OpenIG::Library::Networking::Packet
-{
-	CameraPacket()
-		: bindToEntity(0)
-	{
-	}
-
-	META_Packet(OPCODE_CAMERA, CameraPacket);
-
-	virtual int write(OpenIG::Library::Networking::Buffer &buf) const
-	{
-		buf << (unsigned char)opcode();
-		buf << bindToEntity;
-		buf << mx(0, 0) << mx(0, 1) << mx(0, 2) << mx(0, 3);
-		buf << mx(1, 0) << mx(1, 1) << mx(1, 2) << mx(1, 3);
-		buf << mx(2, 0) << mx(2, 1) << mx(2, 2) << mx(2, 3);
-		buf << mx(3, 0) << mx(3, 1) << mx(3, 2) << mx(3, 3);
-
-		return sizeof(unsigned char) + sizeof(osg::Matrixd::value_type) * 16 + sizeof(bindToEntity);
-	}
-
-	virtual int read(OpenIG::Library::Networking::Buffer &buf)
-	{
-		unsigned char op;
-
-		buf >> op;
-		buf >> bindToEntity;
-		buf >> mx(0, 0) >> mx(0, 1) >> mx(0, 2) >> mx(0, 3);
-		buf >> mx(1, 0) >> mx(1, 1) >> mx(1, 2) >> mx(1, 3);
-		buf >> mx(2, 0) >> mx(2, 1) >> mx(2, 2) >> mx(2, 3);
-		buf >> mx(3, 0) >> mx(3, 1) >> mx(3, 2) >> mx(3, 3);
-
-		return sizeof(unsigned char) + sizeof(osg::Matrixd::value_type) * 16 + sizeof(bindToEntity);
-	}
-
-	osg::Matrixd mx;
-	unsigned int bindToEntity;
-};
 
 struct Parser : public OpenIG::Library::Networking::Parser
 {
 	Parser()
 	{
-		OpenIG::Library::Networking::Factory::instance()->addTemplate(new Header);
-		OpenIG::Library::Networking::Factory::instance()->addTemplate(new EntityState);
-		OpenIG::Library::Networking::Factory::instance()->addTemplate(new CameraPacket);
+		OpenIG::Library::Networking::Factory::instance()->addTemplate(new OpenIG::Library::Protocol::Header);
+		OpenIG::Library::Networking::Factory::instance()->addTemplate(new OpenIG::Library::Protocol::EntityState);
+		OpenIG::Library::Networking::Factory::instance()->addTemplate(new OpenIG::Library::Protocol::Camera);
 	}
 
 	virtual OpenIG::Library::Networking::Packet* parse(OpenIG::Library::Networking::Buffer& buffer)
@@ -192,8 +81,8 @@ struct Parser : public OpenIG::Library::Networking::Parser
 		{
 			packet->read(buffer);
 
-			Header* header = dynamic_cast<Header*>(packet);
-			if (header && header->magic != SWAP_BYTES_COMPARE)
+			OpenIG::Library::Protocol::Header* header = dynamic_cast<OpenIG::Library::Protocol::Header*>(packet);
+			if (header && header->magic != OpenIG::Library::Protocol::SWAP_BYTES_COMPARE)
 			{
 				buffer.setSwapBytes(true);
 			}
@@ -227,7 +116,7 @@ struct EntityStateCallback : public OpenIG::Library::Networking::Packet::Callbac
 
 	virtual void process(OpenIG::Library::Networking::Packet& packet)
 	{
-		EntityState* es = dynamic_cast<EntityState*>(&packet);
+		OpenIG::Library::Protocol::EntityState* es = dynamic_cast<OpenIG::Library::Protocol::EntityState*>(&packet);
 		if (es)
 		{
 			imageGenerator->updateEntity(es->entityID, es->mx);
@@ -247,7 +136,7 @@ struct CameraPacketCallback : public OpenIG::Library::Networking::Packet::Callba
 
 	virtual void process(OpenIG::Library::Networking::Packet& packet)
 	{
-		CameraPacket* cp = dynamic_cast<CameraPacket*>(&packet);
+		OpenIG::Library::Protocol::Camera* cp = dynamic_cast<OpenIG::Library::Protocol::Camera*>(&packet);
 		if (cp)
 		{
 			if (cp->bindToEntity)
@@ -545,19 +434,19 @@ public:
 			{		
 				OpenIG::Library::Networking::Buffer buffer(BUFFER_SIZE);
 
-				Header header(context.getImageGenerator()->getViewer()->getFrameStamp()->getFrameNumber());
+				OpenIG::Library::Protocol::Header header(context.getImageGenerator()->getViewer()->getFrameStamp()->getFrameNumber());
 				header.write(buffer);
 
 				OpenIG::Base::ImageGenerator::EntityMapIterator itr = _ig->getEntityMap().begin();
 				for (; itr != _ig->getEntityMap().end(); ++itr)
 				{
-					EntityState estate;
+					OpenIG::Library::Protocol::EntityState estate;
 					estate.entityID = itr->first;
 					estate.mx = itr->second->getMatrix();
 					estate.write(buffer);
 				}
 
-				CameraPacket camera;
+				OpenIG::Library::Protocol::Camera camera;
 				camera.mx = _ig->getViewer()->getView(0)->getCamera()->getViewMatrix();
 
 				unsigned int id = 0;
@@ -639,7 +528,7 @@ public:
 		{
 			for (unsigned int i = 0; i < 50; ++i)
 			{
-				Header header(context.getImageGenerator()->getViewer()->getFrameStamp()->getFrameNumber());
+				OpenIG::Library::Protocol::Header header(context.getImageGenerator()->getViewer()->getFrameStamp()->getFrameNumber());
 				header.masterIsDead = 1;
 
 				if (_network.get())
@@ -1142,7 +1031,7 @@ HeaderCallback::HeaderCallback(OpenIG::Base::ImageGenerator* ig, NetworkingPlugi
 
 void HeaderCallback::process(OpenIG::Library::Networking::Packet& packet)
 {
-	Header* h = dynamic_cast<Header*>(&packet);
+	OpenIG::Library::Protocol::Header* h = dynamic_cast<OpenIG::Library::Protocol::Header*>(&packet);
 	if (h)
 	{
 		if (h->masterIsDead == 1) imageGenerator->getViewer()->setDone(true);

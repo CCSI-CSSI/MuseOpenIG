@@ -12,6 +12,9 @@ include_directories(
 )
 add_library( ${LIB_NAME} SHARED
     ${_IgPluginMersive}
+    Plugin-Mersive.pro
+    DataFiles/libIgPlugin-Mersive.so.xml
+    README_OPENSCENEGRAPH_PATCH.txt
 )
 
 if(WIN32)

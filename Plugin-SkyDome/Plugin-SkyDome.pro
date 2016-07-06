@@ -19,7 +19,8 @@ HEADERS +=
 INCLUDEPATH += ../
 DEPENDPATH += ../
 
-LIBS += -losg -losgDB -losgViewer -losgParticle -lOpenIG-Engine -lOpenThreads -lOpenIG-PluginBase -lOpenIG-Base
+LIBS += -losg -losgDB -losgViewer -losgParticle -lOpenThreads\
+      -lOpenIG-Engine -lOpenIG-PluginBase -lOpenIG-Base
 
 OTHER_FILES += CMakeLists.txt
 DISTFILES += CMakeLists.txt

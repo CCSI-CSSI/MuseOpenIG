@@ -69,9 +69,9 @@
 using namespace osg;
 
 
-namespace OpenIG { namespace Plugins { 
+namespace OpenIG { namespace Plugins {
 
-	static const std::string tilesWildcardMatchAll = ".*";
+    static const std::string tilesWildcardMatchAll = ".*";
 
     // This is for debugging/statistics purpose only
     struct LightPointNodeStats
@@ -88,9 +88,9 @@ namespace OpenIG { namespace Plugins {
 
         LightsControlPlugin()
             : _ig(0)
-			, _xmlThreadIsRunning(false)
-			, _xmlThreadRunningCondition(false)
-			, _xmlLastCheckedTime(0)
+            , _xmlThreadIsRunning(false)
+            , _xmlThreadRunningCondition(false)
+            , _xmlLastCheckedTime(0)
         {
            std::string resourcePath = OpenIG::Base::FileSystem::path(OpenIG::Base::FileSystem::Resources, "../resources");
            _textureCache.addPath(resourcePath);
@@ -112,11 +112,11 @@ namespace OpenIG { namespace Plugins {
         typedef std::map< std::string, std::vector<unsigned> >				MultiSwitches;
         MultiSwitches _multiSwitches;
 
-		// This was introduced to set the active switch set
-		// for a MultiSwitch and it has priority over the
-		// setting the active children in the ValueList
-		typedef std::map< std::string, int >								ActiveSwitchSets;
-		ActiveSwitchSets _activeSwtichSets;
+        // This was introduced to set the active switch set
+        // for a MultiSwitch and it has priority over the
+        // setting the active children in the ValueList
+        typedef std::map< std::string, int >								ActiveSwitchSets;
+        ActiveSwitchSets _activeSwtichSets;
 
         // We traverse the active/inactive child of the MultiSwitches and enable/disable
         // lights accordingly. We use NodeVisitor for that
@@ -130,13 +130,13 @@ namespace OpenIG { namespace Plugins {
                 osg::ref_ptr<osgSim::LightPointNode> lpn = dynamic_cast<osgSim::LightPointNode*>(&node);
                 if (lpn.valid())
                 {
-					bool always_on = false;
-					lpn->getUserValue("always_on", always_on);
+                    bool always_on = false;
+                    lpn->getUserValue("always_on", always_on);
 
                     std::string ids;
                     if (lpn->getUserValue("Real-Lights-IDs", ids) && !ids.empty())
                     {
-						OpenThreads::ScopedLock<OpenThreads::Mutex> lock(OpenIG::Plugins::LightsControlPlugin::lightMutex);
+                        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(OpenIG::Plugins::LightsControlPlugin::lightMutex);
 
                         OpenIG::Base::StringUtils::Tokens tokens = OpenIG::Base::StringUtils::instance()->tokenize(ids, ";");
                         OpenIG::Base::StringUtils::TokensIterator titr = tokens.begin();
@@ -147,7 +147,7 @@ namespace OpenIG { namespace Plugins {
                             unsigned int lightId = atoi(id.c_str());
                             if (lightId)
                             {
-								_ig->enableLight(lightId, always_on ? true : _enable);
+                                _ig->enableLight(lightId, always_on ? true : _enable);
                             }
                         }
                     }
@@ -166,7 +166,7 @@ namespace OpenIG { namespace Plugins {
             OpenIG::Base::ImageGenerator*	_ig;
         };
 
-	public:
+    public:
         // Time of day. We use this to read in from the lighting.xml
         // to turn on/off lights based on time
         struct TOD
@@ -183,116 +183,116 @@ namespace OpenIG { namespace Plugins {
             bool& set() { return _set; }
         };
 
-		// This is the custom command. On execution it will 
-		// launch a NodeVisitor to find the MultiSwicth nodes
-		// based on their pattern and change the Active Switch
-		// Set based on the ValueLists
-		class MultiSwitchExtendedCommand : public OpenIG::Base::Commands::Command
-		{
-		public:
+        // This is the custom command. On execution it will
+        // launch a NodeVisitor to find the MultiSwicth nodes
+        // based on their pattern and change the Active Switch
+        // Set based on the ValueLists
+        class MultiSwitchExtendedCommand : public OpenIG::Base::Commands::Command
+        {
+        public:
 
-			struct UpdateMultiSwitchSetActiveSwitchSetNodeVisitor : public osg::NodeVisitor
-			{
-				UpdateMultiSwitchSetActiveSwitchSetNodeVisitor(const std::string& name, int index, ActiveSwitchSets& mss, OpenIG::Base::ImageGenerator* ig, bool enabledByTOD)
-					: osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
-					, _msName(name), _index(index), _mss(mss), _ig(ig), _enabledByTOD(enabledByTOD)
-				{
-					_mss[_msName] = _index;
-				}
-				
-				virtual void apply(osg::Node& node)
-				{
-					osg::ref_ptr<osgSim::MultiSwitch> ms = dynamic_cast<osgSim::MultiSwitch*>(&node);
-					if (ms.valid())
-					{
-						if (ms->getName().substr(0, osg::minimum(ms->getName().length(), _msName.length())) == _msName)
-						{	
-							if (_index > -1 && _index < (int)ms->getSwitchSetList().size())
-							{
-								osgSim::MultiSwitch::ValueList vl = ms->getValueList(_index);
+            struct UpdateMultiSwitchSetActiveSwitchSetNodeVisitor : public osg::NodeVisitor
+            {
+                UpdateMultiSwitchSetActiveSwitchSetNodeVisitor(const std::string& name, int index, ActiveSwitchSets& mss, OpenIG::Base::ImageGenerator* ig, bool enabledByTOD)
+                    : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+                    , _msName(name), _index(index), _mss(mss), _ig(ig), _enabledByTOD(enabledByTOD)
+                {
+                    _mss[_msName] = _index;
+                }
 
-								for (size_t i = 0; i < vl.size(); ++i)
-								{
-									bool active = vl.at(i);
+                virtual void apply(osg::Node& node)
+                {
+                    osg::ref_ptr<osgSim::MultiSwitch> ms = dynamic_cast<osgSim::MultiSwitch*>(&node);
+                    if (ms.valid())
+                    {
+                        if (ms->getName().substr(0, osg::minimum(ms->getName().length(), _msName.length())) == _msName)
+                        {
+                            if (_index > -1 && _index < (int)ms->getSwitchSetList().size())
+                            {
+                                osgSim::MultiSwitch::ValueList vl = ms->getValueList(_index);
 
-									UpdateMSLightsNodeVisitor nv(_enabledByTOD ? active : false, _ig);
-									ms->getChild(i)->accept(nv);
-								}
+                                for (size_t i = 0; i < vl.size(); ++i)
+                                {
+                                    bool active = vl.at(i);
 
-								ms->setActiveSwitchSet(_index);
+                                    UpdateMSLightsNodeVisitor nv(_enabledByTOD ? active : false, _ig);
+                                    ms->getChild(i)->accept(nv);
+                                }
 
-								osg::notify(osg::NOTICE) << "LightsControl: MSExtended " << _msName << " active switch set set to: " << _index << " { ";
-								for (size_t i = 0; i < vl.size(); ++i)
-								{
-									osg::notify(osg::NOTICE) << vl.at(i) << " ";
-								}
-								osg::notify(osg::NOTICE) << "}" << std::endl;
-							}
+                                ms->setActiveSwitchSet(_index);
 
-							return;
-						}
-					}
+                                osg::notify(osg::NOTICE) << "LightsControl: MSExtended " << _msName << " active switch set set to: " << _index << " { ";
+                                for (size_t i = 0; i < vl.size(); ++i)
+                                {
+                                    osg::notify(osg::NOTICE) << vl.at(i) << " ";
+                                }
+                                osg::notify(osg::NOTICE) << "}" << std::endl;
+                            }
 
-					traverse(node);
-				}
-			protected:
-				const std::string						_msName;
-				int										_index;
-				ActiveSwitchSets&						_mss;
-				OpenIG::Base::ImageGenerator*			_ig;
-				bool									_enabledByTOD;
-			};
+                            return;
+                        }
+                    }
 
-			MultiSwitchExtendedCommand(OpenIG::Base::ImageGenerator* ig, ActiveSwitchSets& mss)
-				: _ig(ig), _mss(mss), _lightsEnabled(true)
-			{
-			}
+                    traverse(node);
+                }
+            protected:
+                const std::string						_msName;
+                int										_index;
+                ActiveSwitchSets&						_mss;
+                OpenIG::Base::ImageGenerator*			_ig;
+                bool									_enabledByTOD;
+            };
 
-			virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)
-			{
-				if (tokens.size() == 2)
-				{
-					std::string     name = tokens.at(0);
-					int				index = atoi(tokens.at(1).c_str());
-		
-					if (LightsControlPlugin::tod.set() && LightsControlPlugin::onTOD.set() && LightsControlPlugin::offTOD.set())
-					{
-						_lightsEnabled =
-							LightsControlPlugin::tod.hour() >= LightsControlPlugin::onTOD.hour() ||
-							LightsControlPlugin::tod.hour() <= LightsControlPlugin::offTOD.hour();
-					}
+            MultiSwitchExtendedCommand(OpenIG::Base::ImageGenerator* ig, ActiveSwitchSets& mss)
+                : _ig(ig), _mss(mss), _lightsEnabled(true)
+            {
+            }
 
-					UpdateMultiSwitchSetActiveSwitchSetNodeVisitor nv(name, index, _mss, _ig, _lightsEnabled);
-					_ig->getScene()->accept(nv);
+            virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)
+            {
+                if (tokens.size() == 2)
+                {
+                    std::string     name = tokens.at(0);
+                    int				index = atoi(tokens.at(1).c_str());
 
-					return 0;
-				}
+                    if (LightsControlPlugin::tod.set() && LightsControlPlugin::onTOD.set() && LightsControlPlugin::offTOD.set())
+                    {
+                        _lightsEnabled =
+                            LightsControlPlugin::tod.hour() >= LightsControlPlugin::onTOD.hour() ||
+                            LightsControlPlugin::tod.hour() <= LightsControlPlugin::offTOD.hour();
+                    }
 
-				return -1;
-			}
+                    UpdateMultiSwitchSetActiveSwitchSetNodeVisitor nv(name, index, _mss, _ig, _lightsEnabled);
+                    _ig->getScene()->accept(nv);
 
-			virtual const std::string getUsage() const
-			{
-				return "multiswitch_namepattern index";
-			}
-			virtual const std::string getArgumentsFormat() const
-			{
-				return "S:I";
-			}
-			virtual const std::string getDescription() const
-			{
-				return  "find the multiswitch in the database based on a name pattern and set the active switch set\n"
-					"     multiswitch_namepattern - part or whole name of the MultiSwitch\n"
-					"     index- index of the switchset to set it as active";
-			}
+                    return 0;
+                }
 
-		protected:
-			OpenIG::Base::ImageGenerator*	_ig;
-			ActiveSwitchSets&				_mss;
-			bool							_lightsEnabled;
-		};
+                return -1;
+            }
 
-        // This is the custom command. On execution it will 
+            virtual const std::string getUsage() const
+            {
+                return "multiswitch_namepattern index";
+            }
+            virtual const std::string getArgumentsFormat() const
+            {
+                return "S:I";
+            }
+            virtual const std::string getDescription() const
+            {
+                return  "find the multiswitch in the database based on a name pattern and set the active switch set\n"
+                    "     multiswitch_namepattern - part or whole name of the MultiSwitch\n"
+                    "     index- index of the switchset to set it as active";
+            }
+
+        protected:
+            OpenIG::Base::ImageGenerator*	_ig;
+            ActiveSwitchSets&				_mss;
+            bool							_lightsEnabled;
+        };
+
+        // This is the custom command. On execution it will
         // launch a NodeVisitor to find the MultiSwicth nodes
         // based on their pattern and change the child
         class MultiSwitchCommand : public OpenIG::Base::Commands::Command
@@ -363,7 +363,6 @@ namespace OpenIG { namespace Plugins {
                 MultiSwitches&							_mss;
                 OpenIG::Base::ImageGenerator*			_ig;
                 bool									_enabledByTOD;
-
             };
 
             virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)
@@ -379,12 +378,12 @@ namespace OpenIG { namespace Plugins {
                         childs.push_back(child);
                     }
 
-					if (LightsControlPlugin::tod.set() && LightsControlPlugin::onTOD.set() && LightsControlPlugin::offTOD.set())
-					{
-						_lightsEnabled = 
-							LightsControlPlugin::tod.hour() >= LightsControlPlugin::onTOD.hour() || 
-							LightsControlPlugin::tod.hour() <= LightsControlPlugin::offTOD.hour();
-					}
+                    if (LightsControlPlugin::tod.set() && LightsControlPlugin::onTOD.set() && LightsControlPlugin::offTOD.set())
+                    {
+                        _lightsEnabled =
+                            LightsControlPlugin::tod.hour() >= LightsControlPlugin::onTOD.hour() ||
+                            LightsControlPlugin::tod.hour() <= LightsControlPlugin::offTOD.hour();
+                    }
 
                     UpdateMultiSwitchNodeVisitor nv(name, childs, _mss, _ig, _lightsEnabled);
                     _ig->getScene()->accept(nv);
@@ -399,10 +398,10 @@ namespace OpenIG { namespace Plugins {
             {
                 return "multiswitch_namepattern [optional:child1] [optional:child2] ...";
             }
-			virtual const std::string getArgumentsFormat() const
-			{
-				return "S:S";
-			}
+            virtual const std::string getArgumentsFormat() const
+            {
+                return "S:S";
+            }
             virtual const std::string getDescription() const
             {
                 return  "find the multiswitch in the database based on a name pattern and select the child\n"
@@ -420,37 +419,37 @@ namespace OpenIG { namespace Plugins {
         // We save the reference to the IG for later use here
         virtual void init(OpenIG::PluginBase::PluginContext& context)
         {
-			// Some defaults here
-			LightsControlPlugin::tod.hour() = 4;
-			LightsControlPlugin::onTOD.hour() = 17;
-			LightsControlPlugin::offTOD.hour() = 6;
+            // Some defaults here
+            LightsControlPlugin::tod.hour() = 4;
+            LightsControlPlugin::onTOD.hour() = 17;
+            LightsControlPlugin::offTOD.hour() = 6;
 
             // Save for later
             _ig = context.getImageGenerator();
 
             // Our custom command for multiswictes
             OpenIG::Base::Commands::instance()->addCommand("ms", new MultiSwitchCommand(_ig,_multiSwitches));
-			OpenIG::Base::Commands::instance()->addCommand("mse", new MultiSwitchExtendedCommand(_ig, _activeSwtichSets));
+            OpenIG::Base::Commands::instance()->addCommand("mse", new MultiSwitchExtendedCommand(_ig, _activeSwtichSets));
 
-			// Let find if we have foward+ available
-			// if not, no sprites either, till fixed
-			OpenIG::Plugins::LightsControlPlugin::forwardPlusPluginAvailable = false;
+            // Let find if we have foward+ available
+            // if not, no sprites either, till fixed
+            OpenIG::Plugins::LightsControlPlugin::forwardPlusPluginAvailable = false;
 
-			// Look up for the F+ plugin
-			OpenIG::Engine* openIG = dynamic_cast<OpenIG::Engine*>(_ig);
-			if (openIG)
-			{
-				const OpenIG::PluginBase::PluginHost::PluginsMap& plugins = openIG->getPlugins();
-				OpenIG::PluginBase::PluginHost::PluginsMap::const_iterator itr = plugins.begin();
-				for (; itr != plugins.end(); ++itr)
-				{
-					if (itr->second->getName() == "ForwardPlusLighting")
-					{
-						OpenIG::Plugins::LightsControlPlugin::forwardPlusPluginAvailable = true;
-						break;
-					}
-				}
-			}
+            // Look up for the F+ plugin
+            OpenIG::Engine* openIG = dynamic_cast<OpenIG::Engine*>(_ig);
+            if (openIG)
+            {
+                const OpenIG::PluginBase::PluginHost::PluginsMap& plugins = openIG->getPlugins();
+                OpenIG::PluginBase::PluginHost::PluginsMap::const_iterator itr = plugins.begin();
+                for (; itr != plugins.end(); ++itr)
+                {
+                    if (itr->second->getName() == "ForwardPlusLighting")
+                    {
+                        OpenIG::Plugins::LightsControlPlugin::forwardPlusPluginAvailable = true;
+                        break;
+                    }
+                }
+            }
 
         }
 
@@ -464,102 +463,110 @@ namespace OpenIG { namespace Plugins {
             osg::ref_ptr<osgSim::MultiSwitch> ms = dynamic_cast<osgSim::MultiSwitch*>(&node);
             if (ms.valid())
             {
-				bool processed = false;
-				if (ms->getUserValue("processed", processed) && processed) return;
+                bool processed = false;
+                if (ms->getUserValue("processed", processed) && processed) return;
 
-				processed = true;
-				ms->setUserValue("processed", processed);
+                processed = true;
+                ms->setUserValue("processed", processed);
 
-				bool todEnabled = true;
-				if (LightsControlPlugin::tod.set() && LightsControlPlugin::offTOD.set() && LightsControlPlugin::onTOD.set())
-				{
-					todEnabled =
-						LightsControlPlugin::tod.hour() >= LightsControlPlugin::onTOD.hour() ||
-						LightsControlPlugin::tod.hour() <= LightsControlPlugin::offTOD.hour();
-				}
+                bool todEnabled = true;
+                if (LightsControlPlugin::tod.set() && LightsControlPlugin::offTOD.set() && LightsControlPlugin::onTOD.set())
+                {
+                    todEnabled =
+                        LightsControlPlugin::tod.hour() >= LightsControlPlugin::onTOD.hour() ||
+                        LightsControlPlugin::tod.hour() <= LightsControlPlugin::offTOD.hour();
+                }
 
-				
-				for (ActiveSwitchSets::iterator itr = _activeSwtichSets.begin();
-					itr != _activeSwtichSets.end(); 
-					++itr)
-				{
-					const std::string& name = itr->first;
-					if (ms->getName().substr(0, osg::minimum(name.length(), ms->getName().length())) == name)
-					{
-						int activeSwitchSet = -1;
-						ActiveSwitchSets::iterator aitr = _activeSwtichSets.find(name);
-						if (aitr != _activeSwtichSets.end())
-						{
-							activeSwitchSet = aitr->second;
-						}
-						else
-						{
-							_activeSwtichSets[name] = -1;
-						}
-						if (activeSwitchSet != -1)
-						{
-							osgSim::MultiSwitch::ValueList vl = ms->getValueList(activeSwitchSet);
 
-							for (size_t i = 0; i < vl.size(); ++i)
-							{
-								bool active = vl.at(i);
-
-								UpdateMSLightsNodeVisitor nv(todEnabled ? active : false, _ig);
-								ms->getChild(i)->accept(nv);
-							}
-
-							ms->setActiveSwitchSet(activeSwitchSet);
-
-							osg::notify(osg::NOTICE) << "LightsControl: MSExtended " << name << " active switch set set to: " << activeSwitchSet << " { ";
-							for (size_t i = 0; i < vl.size(); ++i)
-							{
-								osg::notify(osg::NOTICE) << vl.at(i) << " ";
-							}
-							osg::notify(osg::NOTICE) << "}" << std::endl;
-						}
-					}
-				}
-
-                // now we go through the map and look for some
-                // names we have processed already
-				for (MultiSwitches::iterator itr = _multiSwitches.begin(); 
-					itr != _multiSwitches.end(); 
-					++itr)
+                for (ActiveSwitchSets::iterator itr = _activeSwtichSets.begin();
+                    itr != _activeSwtichSets.end();
+                    ++itr)
                 {
                     const std::string& name = itr->first;
                     if (ms->getName().substr(0, osg::minimum(name.length(), ms->getName().length())) == name)
                     {
-						std::vector<unsigned>& childs = itr->second;
-						osgSim::MultiSwitch::ValueList vl;
-						for (size_t i = 0; i < ms->getNumChildren(); ++i)
-						{
-							bool childEnabled = false;
-							for (size_t j = 0; j < childs.size(); ++j)
-							{
-								if (i == childs.at(j))
-								{
-									childEnabled = true;
-									break;
-								}
-							}
-							vl.push_back(childEnabled);
+                        int activeSwitchSet = -1;
+                        ActiveSwitchSets::iterator aitr = _activeSwtichSets.find(name);
+                        if (aitr != _activeSwtichSets.end())
+                        {
+                            activeSwitchSet = aitr->second;
+                        }
+                        else
+                        {
+                            _activeSwtichSets[name] = -1;
+                        }
+                        if (activeSwitchSet != -1)
+                        {
+                            osgSim::MultiSwitch::ValueList vl = ms->getValueList(activeSwitchSet);
 
-							UpdateMSLightsNodeVisitor nv(todEnabled ? childEnabled : false, _ig);
-							ms->getChild(i)->accept(nv);
-						}
+                            for (size_t i = 0; i < vl.size(); ++i)
+                            {
+                                bool active = vl.at(i);
 
-						ms->setValueList(0, vl);
-						ms->setActiveSwitchSet(0);
+                                UpdateMSLightsNodeVisitor nv(todEnabled ? active : false, _ig);
+                                ms->getChild(i)->accept(nv);
+                            }
 
-						osg::notify(osg::NOTICE) << "LightsControl: MS " << name << " set to: ";
-						for (size_t i = 0; i < vl.size(); ++i)
-						{
-							osg::notify(osg::NOTICE) << vl.at(i) << " ";
-						}
-						osg::notify(osg::NOTICE) << std::endl;
+                            ms->setActiveSwitchSet(activeSwitchSet);
 
-						break;
-					}
+                            osg::notify(osg::NOTICE) << "LightsControl: MSExtended " << name << " active switch set set to: " << activeSwitchSet << " { ";
+                            for (size_t i = 0; i < vl.size(); ++i)
+                            {
+                                osg::notify(osg::NOTICE) << vl.at(i) << " ";
+                            }
+                            osg::notify(osg::NOTICE) << "}" << std::endl;
+                        }
+                    }
+                }
+
+                // now we go through the map and look for some
+                // names we have processed already
+                for (MultiSwitches::iterator itr = _multiSwitches.begin();
+                    itr != _multiSwitches.end();
+                    ++itr)
+                {
+                    bool handled = false;
+                    if (ms->getUserValue("handled", handled) && handled)
+                    {
+                        continue;
+                    }
+
+                    const std::string& name = itr->first;
+                    if (ms->getName().substr(0, osg::minimum(name.length(), ms->getName().length())) == name)
+                    {
+                        std::vector<unsigned>& childs = itr->second;
+                        osgSim::MultiSwitch::ValueList vl;
+                        for (size_t i = 0; i < ms->getNumChildren(); ++i)
+                        {
+                            bool childEnabled = false;
+                            for (size_t j = 0; j < childs.size(); ++j)
+                            {
+                                if (i == childs.at(j))
+                                {
+                                    childEnabled = true;
+                                    break;
+                                }
+                            }
+                            vl.push_back(childEnabled);
+
+                            UpdateMSLightsNodeVisitor nv(todEnabled ? childEnabled : false, _ig);
+                            ms->getChild(i)->accept(nv);
+                        }
+
+                        ms->setValueList(0, vl);
+                        ms->setActiveSwitchSet(0);
+
+                        osg::notify(osg::NOTICE) << "LightsControl: MS " << name << "(" << (long long)ms.get() << ")" << " set to: ";
+                        for (size_t i = 0; i < vl.size(); ++i)
+                        {
+                            osg::notify(osg::NOTICE) << vl.at(i) << " ";
+                        }
+                        osg::notify(osg::NOTICE) << std::endl;
+
+                        ms->setUserValue("handled", (bool)true);
+
+                        break;
+                    }
                 }
             }
         }
@@ -628,40 +635,40 @@ namespace OpenIG { namespace Plugins {
             struct UpdateLightsInMultiSwitchNodeVisitor : public osg::NodeVisitor
             {
                 UpdateLightsInMultiSwitchNodeVisitor(OpenIG::Base::ImageGenerator* ig)
-					: osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), _ig(ig)
-				{
-					_todEnabled = true;
-					if (LightsControlPlugin::tod.set() && LightsControlPlugin::offTOD.set() && LightsControlPlugin::onTOD.set())
-					{
-						_todEnabled = 
-							LightsControlPlugin::tod.hour() >= LightsControlPlugin::onTOD.hour() || 
-							LightsControlPlugin::tod.hour() <= LightsControlPlugin::offTOD.hour();
-					}
-				}
+                    : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), _ig(ig)
+                {
+                    _todEnabled = true;
+                    if (LightsControlPlugin::tod.set() && LightsControlPlugin::offTOD.set() && LightsControlPlugin::onTOD.set())
+                    {
+                        _todEnabled =
+                            LightsControlPlugin::tod.hour() >= LightsControlPlugin::onTOD.hour() ||
+                            LightsControlPlugin::tod.hour() <= LightsControlPlugin::offTOD.hour();
+                    }
+                }
 
                 virtual void apply(osg::Node& node)
                 {
                     osg::ref_ptr<osgSim::MultiSwitch> ms = dynamic_cast<osgSim::MultiSwitch*>(&node);
                     if (ms.valid())
                     {
-						unsigned activeSwitchSet = 0;// ms->getActiveSwitchSet();
-						const osgSim::MultiSwitch::SwitchSetList& ssl = ms->getSwitchSetList();
-						if (activeSwitchSet < ssl.size())
-						{
-							const osgSim::MultiSwitch::ValueList& vl = ms->getValueList(activeSwitchSet);
-							for (size_t i = 0; i < vl.size(); ++i)
-							{
-								UpdateMSLightsNodeVisitor nv(_todEnabled ? vl.at(i) : false, _ig);
-								ms->getChild(i)->accept(nv);
-							}
-						}
+                        unsigned activeSwitchSet = 0;// ms->getActiveSwitchSet();
+                        const osgSim::MultiSwitch::SwitchSetList& ssl = ms->getSwitchSetList();
+                        if (activeSwitchSet < ssl.size())
+                        {
+                            const osgSim::MultiSwitch::ValueList& vl = ms->getValueList(activeSwitchSet);
+                            for (size_t i = 0; i < vl.size(); ++i)
+                            {
+                                UpdateMSLightsNodeVisitor nv(_todEnabled ? vl.at(i) : false, _ig);
+                                ms->getChild(i)->accept(nv);
+                            }
+                        }
                     }
                     traverse(node);
                 }
 
             protected:
                 OpenIG::Base::ImageGenerator* _ig;
-				bool					_todEnabled;
+                bool					_todEnabled;
             };
 
             // This will be used for blinking sequences
@@ -712,7 +719,7 @@ namespace OpenIG { namespace Plugins {
 
                                 OpenIG::Base::LightAttributes la;
                                 la.diffuse = color;
-								la.brightness = 3;
+                                la.brightness = 3;
                                 la.dirtyMask = OpenIG::Base::LightAttributes::DIFFUSE;
 
                                 _imageGenerator->updateLightAttributes(id, la);
@@ -741,25 +748,25 @@ namespace OpenIG { namespace Plugins {
             struct PagedLODPagingObserverNodeCallback : public osg::NodeCallback
             {
                 PagedLODPagingObserverNodeCallback(PagedLODWithLightPointNodeListMap& map,OpenThreads::Mutex& mutex,OpenIG::Base::ImageGenerator* ig)
-						: _map(map), _mutex(mutex), _numChildrenCheck(0), _ig(ig)
-				{
-				}
+                        : _map(map), _mutex(mutex), _numChildrenCheck(0), _ig(ig)
+                {
+                }
 
-				bool isFPlusLight(LightPointNodePointer& lpn)
-				{
-					LightsControlPlugin::LightPointDefinitions::iterator itr = LightsControlPlugin::definitions.begin();
-					for (; itr != LightsControlPlugin::definitions.end(); ++itr)
-					{
-						if (lpn->getName().substr(0, osg::minimum(lpn->getName().length(), itr->second.name.length())) == itr->second.name)
-						{
-							bool fplus = false;
-							lpn->getUserValue("f+", fplus);
+                bool isFPlusLight(LightPointNodePointer& lpn)
+                {
+                    LightsControlPlugin::LightPointDefinitions::iterator itr = LightsControlPlugin::definitions.begin();
+                    for (; itr != LightsControlPlugin::definitions.end(); ++itr)
+                    {
+                        if (lpn->getName().substr(0, osg::minimum(lpn->getName().length(), itr->second.name.length())) == itr->second.name)
+                        {
+                            bool fplus = false;
+                            lpn->getUserValue("f+", fplus);
 
-							return fplus;
-						}
-					}
-					return false;
-				}
+                            return fplus;
+                        }
+                    }
+                    return false;
+                }
 
                 virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
                 {
@@ -799,10 +806,10 @@ namespace OpenIG { namespace Plugins {
                             // light have been created
                             std::vector<unsigned> lightsAllocated;
 
-							// Record the non=F+ lights as well
-							std::vector<unsigned> nonFPlusLights;
+                            // Record the non=F+ lights as well
+                            std::vector<unsigned> nonFPlusLights;
 
-							LightPointsStats lpnStats;
+                            LightPointsStats lpnStats;
 
                             // Here we convert the osgSim::LightPointNodes from the visual database
                             // into imagegenerator lights whatever their implementations is - obviously
@@ -818,18 +825,18 @@ namespace OpenIG { namespace Plugins {
                                     LightPointNodePointer& lpn = *light_iter;
                                     if (!lpn.valid()) continue;
 
-									// Do our stats
-									LightPointNodeStats stats;
-									stats.name = lpn->getName();
-									stats.numOfLightPoints = lpn->getNumLightPoints();
+                                    // Do our stats
+                                    LightPointNodeStats stats;
+                                    stats.name = lpn->getName();
+                                    stats.numOfLightPoints = lpn->getNumLightPoints();
 
-									lpnStats.push_back(stats);
-									
-									if (!isFPlusLight(lpn))
-									{
-										nonFPlusLights.push_back(lpn->getNumLightPoints());
-										continue;
-									}
+                                    lpnStats.push_back(stats);
+
+                                    if (!isFPlusLight(lpn))
+                                    {
+                                        nonFPlusLights.push_back(lpn->getNumLightPoints());
+                                        continue;
+                                    }
 
                                     osg::NodePath np;
                                     np.push_back(lpn.get());
@@ -877,7 +884,7 @@ namespace OpenIG { namespace Plugins {
                                                         lp._position.z(),
                                                         osg::RadiansToDegrees(hpr.x()), 0, 0);
 
-													lightType = OpenIG::Base::LT_SPOT;
+                                                    lightType = OpenIG::Base::LT_SPOT;
                                                 }
                                             }
                                             // no sector valid, so probably we make them generic to
@@ -892,32 +899,32 @@ namespace OpenIG { namespace Plugins {
 
                                             osg::Matrixd final = mx * wmx;
 
-											float brightness = 1.f;
-											float range = 15.f;
+                                            float brightness = 1.f;
+                                            float range = 15.f;
 
-											lpn->getUserValue("brightness", brightness);
-											lpn->getUserValue("fEndRange",range);
+                                            lpn->getUserValue("brightness", brightness);
+                                            lpn->getUserValue("fEndRange",range);
 
-											double lodRange = OpenIG::Base::Configuration::instance()->getConfig("ForwardPlusLightsDefaultLODRange",1000.0);
+                                            double lodRange = OpenIG::Base::Configuration::instance()->getConfig("ForwardPlusLightsDefaultLODRange",1000.0);
 
                                             OpenIG::Base::LightAttributes la;
                                             la.diffuse = lp._color;
                                             la.ambient = osg::Vec4(0, 0, 0, 1);
                                             la.specular = osg::Vec4(0, 0, 0, 1);
                                             la.constantAttenuation = 50;
-											la.brightness = brightness;
+                                            la.brightness = brightness;
                                             la.spotCutoff = 20;
-											la.realLightLOD = lodRange;
+                                            la.realLightLOD = lodRange;
                                             la.fStartRange = 0.0;
-											la.fEndRange = range;
+                                            la.fEndRange = range;
                                             la.fSpotInnerAngle = 10;
                                             la.fSpotOuterAngle = 120;
                                             la.lightType = lightType;
-											la.enabled = lp._on;
-											la.dataVariance = osg::Object::STATIC;
+                                            la.enabled = lp._on;
+                                            la.dataVariance = osg::Object::STATIC;
                                             la.dirtyMask = OpenIG::Base::LightAttributes::ALL;
 
-											OpenThreads::ScopedLock<OpenThreads::Mutex> lock(OpenIG::Plugins::LightsControlPlugin::lightMutex);
+                                            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(OpenIG::Plugins::LightsControlPlugin::lightMutex);
 
                                             _ig->addLight(id, la, final);
                                             lightsAllocated.push_back(id);
@@ -938,7 +945,7 @@ namespace OpenIG { namespace Plugins {
 
                                     // here we keep track of what lids IDs are used
                                     // so later we release them when a tile keeping
-                                    // these lights is being paged 
+                                    // these lights is being paged
                                     std::string value = oss.str();
                                     lpn->setUserValue("Real-Lights-IDs", value);
 
@@ -963,27 +970,27 @@ namespace OpenIG { namespace Plugins {
                                 osg::notify(osg::NOTICE) << "LightsControl: lights allocated: " << lightsAllocated.size() << std::endl;
                             }
 
-							if (nonFPlusLights.size())
-							{
-								size_t num = 0;
-								for (size_t i = 0; i < nonFPlusLights.size(); ++i)
-									num += nonFPlusLights.at(i);
+                            if (nonFPlusLights.size())
+                            {
+                                size_t num = 0;
+                                for (size_t i = 0; i < nonFPlusLights.size(); ++i)
+                                    num += nonFPlusLights.at(i);
 
-								osg::notify(osg::NOTICE) << "LightsControl: non F+ lights allocated: " << num << std::endl;
-							}
-							
-							// Print out the stats
-							if (lpnStats.size())
-							{
-								osg::notify(osg::NOTICE) << "LightsControl: LightPointNode stats ========" << std::endl;
-								LightPointsStats::iterator lpnIter = lpnStats.begin();
-								for (; lpnIter != lpnStats.end(); ++lpnIter)
-								{
-									LightPointNodeStats& stats = *lpnIter;
-									osg::notify(osg::NOTICE) << stats.name << ": " << stats.numOfLightPoints << std::endl;
-								}
-								osg::notify(osg::NOTICE) << "============================================" << std::endl;
-							}
+                                osg::notify(osg::NOTICE) << "LightsControl: non F+ lights allocated: " << num << std::endl;
+                            }
+
+                            // Print out the stats
+                            if (lpnStats.size())
+                            {
+                                osg::notify(osg::NOTICE) << "LightsControl: LightPointNode stats ========" << std::endl;
+                                LightPointsStats::iterator lpnIter = lpnStats.begin();
+                                for (; lpnIter != lpnStats.end(); ++lpnIter)
+                                {
+                                    LightPointNodeStats& stats = *lpnIter;
+                                    osg::notify(osg::NOTICE) << stats.name << ": " << stats.numOfLightPoints << std::endl;
+                                }
+                                osg::notify(osg::NOTICE) << "============================================" << std::endl;
+                            }
                         }
                         // No children, they are out
                         else
@@ -1020,7 +1027,7 @@ namespace OpenIG { namespace Plugins {
 
                                         // We have encoded the IDs used for
                                         // imagegenerator lights in User Value,
-                                        // see above 
+                                        // see above
                                         std::string ids;
                                         if (lpn->getUserValue("Real-Lights-IDs", ids) && !ids.empty())
                                         {
@@ -1041,7 +1048,7 @@ namespace OpenIG { namespace Plugins {
                                     }
                                 }
                                 lights.clear();
-                            }							
+                            }
 
                             // Now if we have released some lights
                             // let reuse their ids
@@ -1068,15 +1075,15 @@ namespace OpenIG { namespace Plugins {
             };
 
             FindPagedLODsNodeVisitor(PagedLODWithLightPointNodeListMap& map,OpenThreads::Mutex& mutex,OpenIG::Base::ImageGenerator* ig)
-					: osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), _map(map), _mutex(mutex), _ig(ig)
-			{
-			}
+                    : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), _map(map), _mutex(mutex), _ig(ig)
+            {
+            }
 
             // We have a stack of PLODs. When we
             // hit a PagedLOD we add it to the stack,
             // traverse it, and remove from the stack.
             // Basic operation to have the actual PagedLOD
-            // parent on top of the stack			
+            // parent on top of the stack
             // If we hit a osgSim::LightPointNode we add it
             // to our list (and map) so we keep track of them
             virtual void apply(osg::Node& node)
@@ -1103,185 +1110,185 @@ namespace OpenIG { namespace Plugins {
             OpenIG::Base::ImageGenerator*					_ig;
         };
 
-		// Okay. Now we want to know what tiles are to be parsed for lights
-		// points. They are defined in the XML with the tag <Tile>. You
-		// cand use wild card. If not found, then we simple remove the
-		// lightpoints. The reason for this is that we want to keep the
-		// lighting system optimized from unoptimized databases. The following
-		// node visitor will remove all unwanted lights from the loaded tile
-		struct RemoveLightsNodeVisitor : public osg::NodeVisitor
-		{
-			RemoveLightsNodeVisitor()
-				: osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
-			{
+        // Okay. Now we want to know what tiles are to be parsed for lights
+        // points. They are defined in the XML with the tag <Tile>. You
+        // cand use wild card. If not found, then we simple remove the
+        // lightpoints. The reason for this is that we want to keep the
+        // lighting system optimized from unoptimized databases. The following
+        // node visitor will remove all unwanted lights from the loaded tile
+        struct RemoveLightsNodeVisitor : public osg::NodeVisitor
+        {
+            RemoveLightsNodeVisitor()
+                : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+            {
 
-			}
+            }
 
-			virtual void apply(osg::Node& node)
-			{
-				osg::ref_ptr<osgSim::LightPointNode> lpn = dynamic_cast<osgSim::LightPointNode*>(&node);
-				if (lpn.valid())
-				{
-					osgSim::LightPointNode::LightPointList& lps = lpn->getLightPointList();
-					lps.clear();
-				}
+            virtual void apply(osg::Node& node)
+            {
+                osg::ref_ptr<osgSim::LightPointNode> lpn = dynamic_cast<osgSim::LightPointNode*>(&node);
+                if (lpn.valid())
+                {
+                    osgSim::LightPointNode::LightPointList& lps = lpn->getLightPointList();
+                    lps.clear();
+                }
 
-				traverse(node);
-			}
-		};
+                traverse(node);
+            }
+        };
 
-		// Here we want to combine light point nodes for faster rendering based
-		// on their name. We use this visitor in the databaseRead hook
-		struct CombineLightPointNodesVisitor : public osg::NodeVisitor
-		{
-			CombineLightPointNodesVisitor() : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN) {}
+        // Here we want to combine light point nodes for faster rendering based
+        // on their name. We use this visitor in the databaseRead hook
+        struct CombineLightPointNodesVisitor : public osg::NodeVisitor
+        {
+            CombineLightPointNodesVisitor() : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN) {}
 
-			virtual void apply(osg::Node& node)
-			{
-				osgSim::LightPointNode* lpn = dynamic_cast<osgSim::LightPointNode*>(&node);
-				if (lpn)
-				{
-					// What is the XML name pattern for this lpn?
-					const std::string xmlLightName = getLpnNameBasedOnXMLDefinition(lpn);
-					
-					if (!xmlLightName.empty())
-					{
-						// Now we have the name, we find or create a new lpn with
-						// this XML name that will contain all the lpns but grouped
-						osg::ref_ptr<osgSim::LightPointNode> matchedLpn = _lpns[xmlLightName];
-						if (!matchedLpn.valid())
-						{
-							_lpns[xmlLightName] = matchedLpn = new osgSim::LightPointNode(*lpn, osg::CopyOp::DEEP_COPY_ALL);
-							matchedLpn->setName(xmlLightName);
+            virtual void apply(osg::Node& node)
+            {
+                osgSim::LightPointNode* lpn = dynamic_cast<osgSim::LightPointNode*>(&node);
+                if (lpn)
+                {
+                    // What is the XML name pattern for this lpn?
+                    const std::string xmlLightName = getLpnNameBasedOnXMLDefinition(lpn);
 
-							// If we work with Triton, then 
-							// dont render these lights in the
-							// Height map
-							matchedLpn->setNodeMask(0x4);
-							matchedLpn->setCullingActive(true);
-						}
-						else
-						{
-							// We add the light points to our 
-							// 'grouped' lpn
-							for (size_t i = 0; i < lpn->getNumLightPoints(); ++i)
-							{
-								osgSim::LightPoint& lp = lpn->getLightPoint(i);
-								matchedLpn->addLightPoint(lp);
-							}
-						}
-						
-						// And we record the processed lpn for further removal
-						_lpnsToBeGrouped.push_back(lpn);
-					}
-				}
-				traverse(node);
-			}
+                    if (!xmlLightName.empty())
+                    {
+                        // Now we have the name, we find or create a new lpn with
+                        // this XML name that will contain all the lpns but grouped
+                        osg::ref_ptr<osgSim::LightPointNode> matchedLpn = _lpns[xmlLightName];
+                        if (!matchedLpn.valid())
+                        {
+                            _lpns[xmlLightName] = matchedLpn = new osgSim::LightPointNode(*lpn, osg::CopyOp::DEEP_COPY_ALL);
+                            matchedLpn->setName(xmlLightName);
 
-			void groupLightPointNodes()
-			{
-				typedef std::map< std::string, osg::Node::ParentList >			Parents;
-				Parents	parents;
+                            // If we work with Triton, then
+                            // dont render these lights in the
+                            // Height map
+                            matchedLpn->setNodeMask(0x4);
+                            matchedLpn->setCullingActive(true);
+                        }
+                        else
+                        {
+                            // We add the light points to our
+                            // 'grouped' lpn
+                            for (size_t i = 0; i < lpn->getNumLightPoints(); ++i)
+                            {
+                                osgSim::LightPoint& lp = lpn->getLightPoint(i);
+                                matchedLpn->addLightPoint(lp);
+                            }
+                        }
 
-				// Ok, here we go through all the parents of the 'old' lpns to be
-				// grouped and we remove the individual lpns from them and we keep
-				// track of these parents, they can be switches and we attach to them
-				// our 'new' grouped lpns
-				for (LightPointNodesToBeGrouped::iterator itr = _lpnsToBeGrouped.begin();
-					itr != _lpnsToBeGrouped.end();
-					++itr)
-				{
-					osg::ref_ptr<osgSim::LightPointNode> lpn = *itr;
-					lpn->setCullingActive(true);
+                        // And we record the processed lpn for further removal
+                        _lpnsToBeGrouped.push_back(lpn);
+                    }
+                }
+                traverse(node);
+            }
 
-					const std::string xmlName = getLpnNameBasedOnXMLDefinition(lpn);
-					if (!xmlName.empty())
-					{
-						osg::Node::ParentList& lpnParents = parents[xmlName];
+            void groupLightPointNodes()
+            {
+                typedef std::map< std::string, osg::Node::ParentList >			Parents;
+                Parents	parents;
 
-						osg::Node::ParentList oldParents = lpn->getParents();
-						for (osg::Node::ParentList::iterator pitr = oldParents.begin();
-							pitr != oldParents.end();
-							++pitr)
-						{
-							// Remove it from the original parent
-							osg::ref_ptr<osg::Group> parent = *pitr;
-							if (parent.valid())
-							{
-								parent->removeChild(lpn);
+                // Ok, here we go through all the parents of the 'old' lpns to be
+                // grouped and we remove the individual lpns from them and we keep
+                // track of these parents, they can be switches and we attach to them
+                // our 'new' grouped lpns
+                for (LightPointNodesToBeGrouped::iterator itr = _lpnsToBeGrouped.begin();
+                    itr != _lpnsToBeGrouped.end();
+                    ++itr)
+                {
+                    osg::ref_ptr<osgSim::LightPointNode> lpn = *itr;
+                    lpn->setCullingActive(true);
 
-								// and record the parent for the new
-								// attachment to for the grouped lpn
-								lpnParents.push_back(parent);
-							}
-						}
-					}
-				}
+                    const std::string xmlName = getLpnNameBasedOnXMLDefinition(lpn);
+                    if (!xmlName.empty())
+                    {
+                        osg::Node::ParentList& lpnParents = parents[xmlName];
 
-				// now, we go through all the new grouped lpns
-				// and attach them to the original parents
-				for (LightPointNodes::iterator itr = _lpns.begin();
-					itr != _lpns.end();
-					++itr)
-				{
-					const std::string		name = itr->first;
-					osgSim::LightPointNode*	lpn = itr->second;
+                        osg::Node::ParentList oldParents = lpn->getParents();
+                        for (osg::Node::ParentList::iterator pitr = oldParents.begin();
+                            pitr != oldParents.end();
+                            ++pitr)
+                        {
+                            // Remove it from the original parent
+                            osg::ref_ptr<osg::Group> parent = *pitr;
+                            if (parent.valid())
+                            {
+                                parent->removeChild(lpn);
 
-					lpn->setCullingActive(true);
+                                // and record the parent for the new
+                                // attachment to for the grouped lpn
+                                lpnParents.push_back(parent);
+                            }
+                        }
+                    }
+                }
 
-					// Get the parent list
-					osg::Node::ParentList& lpnParents = parents[name];
-					if (lpnParents.size())
-					{
+                // now, we go through all the new grouped lpns
+                // and attach them to the original parents
+                for (LightPointNodes::iterator itr = _lpns.begin();
+                    itr != _lpns.end();
+                    ++itr)
+                {
+                    const std::string		name = itr->first;
+                    osgSim::LightPointNode*	lpn = itr->second;
+
+                    lpn->setCullingActive(true);
+
+                    // Get the parent list
+                    osg::Node::ParentList& lpnParents = parents[name];
+                    if (lpnParents.size())
+                    {
 #if 1
-						osg::Group* parent = lpnParents.at(0);
-						parent->removeChild(lpn);
-						parent->addChild(lpn);
+                        osg::Group* parent = lpnParents.at(0);
+                        parent->removeChild(lpn);
+                        parent->addChild(lpn);
 #else
-						for (osg::Node::ParentList::iterator pitr = lpnParents.begin();
-							pitr != lpnParents.end();
-							++pitr)
-						{
-							// Here we add the grouped lpns and we are done
-							osg::Group* parent = *pitr;
-							parent->removeChild(lpn);
-							parent->addChild(lpn);
-						}
+                        for (osg::Node::ParentList::iterator pitr = lpnParents.begin();
+                            pitr != lpnParents.end();
+                            ++pitr)
+                        {
+                            // Here we add the grouped lpns and we are done
+                            osg::Group* parent = *pitr;
+                            parent->removeChild(lpn);
+                            parent->addChild(lpn);
+                        }
 #endif
-					}
-				}
-			}
-		protected:
-			typedef std::map< std::string, osg::ref_ptr<osgSim::LightPointNode> >		LightPointNodes;
-			LightPointNodes					_lpns;
+                    }
+                }
+            }
+        protected:
+            typedef std::map< std::string, osg::ref_ptr<osgSim::LightPointNode> >		LightPointNodes;
+            LightPointNodes					_lpns;
 
-			typedef std::vector< osg::ref_ptr<osgSim::LightPointNode> >					LightPointNodesToBeGrouped;
-			LightPointNodesToBeGrouped		_lpnsToBeGrouped;
+            typedef std::vector< osg::ref_ptr<osgSim::LightPointNode> >					LightPointNodesToBeGrouped;
+            LightPointNodesToBeGrouped		_lpnsToBeGrouped;
 
-			const std::string getLpnNameBasedOnXMLDefinition(osgSim::LightPointNode* lpn)
-			{
-				LightsControlPlugin::LightPointDefinitions::iterator itr = LightsControlPlugin::definitions.begin();
-				for (; itr != LightsControlPlugin::definitions.end(); ++itr)
-				{
-					const std::string& name = itr->first;
-					if (lpn->getName().substr(0, osg::minimum(lpn->getName().length(), name.length())) == name)
-					{
-						// Ok .. Here we have to be carefull. If we have lp nodes
-						// attached to parents with names same as some other names
-						// let attach the pointer of their parent so we make sure
-						// they are attached to the same parent
-						std::ostringstream oss;
-						oss << name;
-						if (lpn->getParents().size() != 0)
-						{
-							oss << "_" << (long long)lpn->getParent(0);
-						}
-						return oss.str();
-					}
-				}
-				return "";
-			}
-		};
+            const std::string getLpnNameBasedOnXMLDefinition(osgSim::LightPointNode* lpn)
+            {
+                LightsControlPlugin::LightPointDefinitions::iterator itr = LightsControlPlugin::definitions.begin();
+                for (; itr != LightsControlPlugin::definitions.end(); ++itr)
+                {
+                    const std::string& name = itr->first;
+                    if (lpn->getName().substr(0, osg::minimum(lpn->getName().length(), name.length())) == name)
+                    {
+                        // Ok .. Here we have to be carefull. If we have lp nodes
+                        // attached to parents with names same as some other names
+                        // let attach the pointer of their parent so we make sure
+                        // they are attached to the same parent
+                        std::ostringstream oss;
+                        oss << name;
+                        if (lpn->getParents().size() != 0)
+                        {
+                            oss << "_" << (long long)lpn->getParent(0);
+                        }
+                        return oss.str();
+                    }
+                }
+                return "";
+            }
+        };
 
         // Here when we read in a tile, we check for xml config file, if exists, we read it,
         // and we store the lights definitions coming from there. Further, we traverse the
@@ -1304,67 +1311,67 @@ namespace OpenIG { namespace Plugins {
                 // will be a need of muitiple files
                 // like per tile, or multiple databases
                 // then consider making these in a vector
-				_xmlThreadRunningCondition = true;
-				_xmlFileObserverThread = boost::shared_ptr<boost::thread>(new boost::thread(&OpenIG::Plugins::LightsControlPlugin::xmlFileObserverThread, this));
+                _xmlThreadRunningCondition = true;
+                _xmlFileObserverThread = boost::shared_ptr<boost::thread>(new boost::thread(&OpenIG::Plugins::LightsControlPlugin::xmlFileObserverThread, this));
 
             }
-			else
-			// no top level XML? then match all tiles for light points
-			{
-			}
+            else
+            // no top level XML? then match all tiles for light points
+            {
+            }
 
-			// We filter here tiles for light points management. If the tile
-			// does not match the pattern from the XML (see tag <Tile>), we
-			// remove all the lps from there to not overload the Lighting System
-			// NOTE: future versions dealing with only light points should be
-			// considered for grouping the lps and not creating real lights from these
-			// light points, for maximum peformance
-			std::string simpleFileName(osgDB::getSimpleFileName(fileName));
+            // We filter here tiles for light points management. If the tile
+            // does not match the pattern from the XML (see tag <Tile>), we
+            // remove all the lps from there to not overload the Lighting System
+            // NOTE: future versions dealing with only light points should be
+            // considered for grouping the lps and not creating real lights from these
+            // light points, for maximum peformance
+            std::string simpleFileName(osgDB::getSimpleFileName(fileName));
 
-			// this will use regex expressions to match a tile but it makes
-			// the paging way too slow
-			// if (OpenIG::Base::FileSystem::match(_tiles,simpleFileName))
-			// we use tilemap instead and let makes them all valid by default
-			bool validTile = _validTiles.empty() ? true : _validTiles[simpleFileName];
-			if (!validTile)
-			{
-				RemoveLightsNodeVisitor remove;
-				node->accept(remove);
+            // this will use regex expressions to match a tile but it makes
+            // the paging way too slow
+            // if (OpenIG::Base::FileSystem::match(_tiles,simpleFileName))
+            // we use tilemap instead and let makes them all valid by default
+            bool validTile = _validTiles.empty() ? true : _validTiles[simpleFileName];
+            if (!validTile)
+            {
+                RemoveLightsNodeVisitor remove;
+                node->accept(remove);
 
-				FindPagedLODsNodeVisitor nv(_plodLightPointNodes, _mutex, _ig);
-				node->accept(nv);
-			}
-			else
-			{
-				// We combine all the light points here
-				// with common attributes for performance
-				// gain. NOTE: reconsider this to use 
-				// different plugin hooks to speed up the paging
-				// since we have now multiple vistits of the node
-				// once readed
-				if (OpenIG::Base::Configuration::instance()->getConfig("GroupLightsBasedOnXMLDefinition", "no") == "yes")
-				{
-					CombineLightPointNodesVisitor nv;
-					node->accept(nv);
-					nv.groupLightPointNodes();
-				}
+                FindPagedLODsNodeVisitor nv(_plodLightPointNodes, _mutex, _ig);
+                node->accept(nv);
+            }
+            else
+            {
+                // We combine all the light points here
+                // with common attributes for performance
+                // gain. NOTE: reconsider this to use
+                // different plugin hooks to speed up the paging
+                // since we have now multiple vistits of the node
+                // once readed
+                if (OpenIG::Base::Configuration::instance()->getConfig("GroupLightsBasedOnXMLDefinition", "no") == "yes")
+                {
+                    CombineLightPointNodesVisitor nv;
+                    node->accept(nv);
+                    nv.groupLightPointNodes();
+                }
 
-				FindPagedLODsNodeVisitor nv(_plodLightPointNodes, _mutex, _ig);
-				node->accept(nv);
+                FindPagedLODsNodeVisitor nv(_plodLightPointNodes, _mutex, _ig);
+                node->accept(nv);
 
-				// add the PATH to the texture cache
-				_textureCache.addPath(osgDB::getFilePath(fileName));
+                // add the PATH to the texture cache
+                _textureCache.addPath(osgDB::getFilePath(fileName));
 
-				// We have some XML Definitions for the lights, so
-				// let update the new lights with them. Later, there
-				// is a thread that monitors changes in this XML
-				// configuration and on change it update the whole scene
-				// again
-				updateLightPointNodesBasedOnXMLDefinitions(node);
+                // We have some XML Definitions for the lights, so
+                // let update the new lights with them. Later, there
+                // is a thread that monitors changes in this XML
+                // configuration and on change it update the whole scene
+                // again
+                updateLightPointNodesBasedOnXMLDefinitions(node);
 
-				// we update lights based on the time of day as well
-				updateLightPointNodesBasedOnTimeOfDay(node);
-			}
+                // we update lights based on the time of day as well
+                updateLightPointNodesBasedOnTimeOfDay(node);
+            }
         }
 
         // We iterate here over the map and those expired
@@ -1412,7 +1419,7 @@ namespace OpenIG { namespace Plugins {
 
                                 // We have encoded the IDs used for
                                 // imagegenerator lights in User Value,
-                                // see above 
+                                // see above
                                 std::string ids;
                                 if (lpn->getUserValue("Real-Lights-IDs", ids) && !ids.empty())
                                 {
@@ -1457,10 +1464,10 @@ namespace OpenIG { namespace Plugins {
 
             // Here we check if the XML has changed. If so, reload and update
             _xmlAccessMutex.lock();
-			if (_xmlLastCheckedTime == 0)
-			{
-				_xmlLastCheckedTime = _xmlLastWriteTime;
-			}
+            if (_xmlLastCheckedTime == 0)
+            {
+                _xmlLastCheckedTime = _xmlLastWriteTime;
+            }
             if (_xmlLastCheckedTime != _xmlLastWriteTime)
             {
                 osg::notify(osg::NOTICE) << "LightsControl: XML updated: " << _xmlFile << std::endl;
@@ -1477,9 +1484,9 @@ namespace OpenIG { namespace Plugins {
             OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::TimeOfDayAttributes> *attr = dynamic_cast<OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::TimeOfDayAttributes> *>(ref.get());
             if (attr)
             {
-				// NOTE: we have to set some default here
-				LightsControlPlugin::tod.hour() = attr->getValue().getHour();
-				LightsControlPlugin::tod.minutes() = attr->getValue().getMinutes();
+                // NOTE: we have to set some default here
+                LightsControlPlugin::tod.hour() = attr->getValue().getHour();
+                LightsControlPlugin::tod.minutes() = attr->getValue().getMinutes();
 
                 updateLightPointNodesBasedOnTimeOfDay(context.getImageGenerator()->getScene());
             }
@@ -1493,25 +1500,25 @@ namespace OpenIG { namespace Plugins {
 
             OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_mutex);
 
-			PagedLODWithLightPointNodeListMap::iterator itr = _plodLightPointNodes.begin();
-			for (; itr != _plodLightPointNodes.end(); ++itr)
-			{
-				const PagedLODObserverPointer& plod = itr->first;
-				if (plod.valid())
-				{
-					plod->setUpdateCallback(0);
-					plod->setUserData(0);
-				}
-			}
+            PagedLODWithLightPointNodeListMap::iterator itr = _plodLightPointNodes.begin();
+            for (; itr != _plodLightPointNodes.end(); ++itr)
+            {
+                const PagedLODObserverPointer& plod = itr->first;
+                if (plod.valid())
+                {
+                    plod->setUpdateCallback(0);
+                    plod->setUserData(0);
+                }
+            }
             _plodLightPointNodes.clear();
 
-			if (_xmlFileObserverThread.get())
-			{
-				_xmlThreadRunningCondition = false;
-				while (_xmlThreadIsRunning);
-				_xmlFileObserverThread->join();
-			}
-			_xmlFileObserverThread.reset();
+            if (_xmlFileObserverThread.get())
+            {
+                _xmlThreadRunningCondition = false;
+                while (_xmlThreadIsRunning);
+                _xmlFileObserverThread->join();
+            }
+            _xmlFileObserverThread.reset();
         }
 
     protected:
@@ -1519,38 +1526,38 @@ namespace OpenIG { namespace Plugins {
         PagedLODWithLightPointNodeListMap			_plodLightPointNodes;
         OpenThreads::Mutex							_mutex;
         std::string									_xmlFile;
-		OpenIG::Base::StringUtils::StringList		_tiles;
-		
-		typedef std::map<std::string, bool >		ValidTiles;
-		ValidTiles									_validTiles;
+        OpenIG::Base::StringUtils::StringList		_tiles;
 
-	public:
+        typedef std::map<std::string, bool >		ValidTiles;
+        ValidTiles									_validTiles;
+
+    public:
         struct LightPointDefinition
         {
             std::string name;
             bool		always_on;
             float		minPixelSize;
-			float		minPixelSizeMultiplierForSprites;
+            float		minPixelSizeMultiplierForSprites;
             float		maxPixelSize;
-			float		radius;
+            float		radius;
             float		intensity;
-			float		brightness;
-			float		range;
+            float		brightness;
+            float		range;
             bool		sprites;
             std::string	texture;
-			bool		fplus;
+            bool		fplus;
         };
 
         typedef std::map< std::string, LightPointDefinition >	LightPointDefinitions;
         static LightPointDefinitions definitions;
 
-		static bool	forwardPlusPluginAvailable;
+        static bool	forwardPlusPluginAvailable;
 
-	protected:
+    protected:
         void readXML(const std::string&  xmlFile)
         {
-			_tiles.clear();
-			_validTiles.clear();
+            _tiles.clear();
+            _validTiles.clear();
 
             osgDB::XmlNode* root = osgDB::readXmlFile(xmlFile);
             if (!root)
@@ -1567,16 +1574,16 @@ namespace OpenIG { namespace Plugins {
             typedef std::multimap< std::string, osgDB::XmlNode::Properties >		TagProperties;
             TagProperties	tags;
 
-			typedef std::multimap< std::string, std::string>						TagValues;
-			TagValues	values;
+            typedef std::multimap< std::string, std::string>						TagValues;
+            TagValues	values;
 
             for (osgDB::XmlNode::Children::iterator itr = root->children.at(0)->children.begin();
-                itr != root->children.at(0)->children.end(); 
+                itr != root->children.at(0)->children.end();
                 ++itr)
             {
                 osgDB::XmlNode* child = *itr;
                 tags.insert(std::pair<std::string, osgDB::XmlNode::Properties>(child->name, child->properties));
-				values.insert(std::pair<std::string, std::string>(child->name, child->contents));
+                values.insert(std::pair<std::string, std::string>(child->name, child->contents));
             }
 
             for (TagProperties::iterator itr = tags.begin();
@@ -1598,41 +1605,41 @@ namespace OpenIG { namespace Plugins {
                     LightPointDefinition def;
                     def.name								= properties["name"];
                     def.always_on							= properties["always_on"] == "true";
-					def.minPixelSize						= osg::maximum(atof(properties["minPixelSize"].c_str()),1.0);
-					def.minPixelSizeMultiplierForSprites	= osg::maximum(atof(properties["minPixelSizeMultiplierForSprites"].c_str()),1.0);
+                    def.minPixelSize						= osg::maximum(atof(properties["minPixelSize"].c_str()),1.0);
+                    def.minPixelSizeMultiplierForSprites	= osg::maximum(atof(properties["minPixelSizeMultiplierForSprites"].c_str()),1.0);
                     def.maxPixelSize						= osg::maximum(atof(properties["maxPixelSize"].c_str()),1.0);
                     def.intensity							= atof(properties["intensity"].c_str());
                     def.radius								= atof(properties["radius"].c_str());
-					def.brightness							= atof(properties["brightness"].c_str());
-					def.range								= atof(properties["range"].c_str());
+                    def.brightness							= atof(properties["brightness"].c_str());
+                    def.range								= atof(properties["range"].c_str());
                     def.sprites								= properties["sprites"] == "true";
-                    def.texture								= properties["texture"]; properties["sprites"] == "true";
-					def.fplus								= properties["fplus"] == "true";
+                    def.texture								= properties["texture"];
+                    def.fplus								= properties["fplus"] == "true";
 
                     definitions[def.name] = def;
                 }
                 else
                 if (itr->first == "TimeofDay")
                 {
-					LightsControlPlugin::onTOD.hour() = atoi(properties["on"].c_str());
-					LightsControlPlugin::offTOD.hour() = atoi(properties["off"].c_str());
+                    LightsControlPlugin::onTOD.hour() = atoi(properties["on"].c_str());
+                    LightsControlPlugin::offTOD.hour() = atoi(properties["off"].c_str());
                 }
 
-				for (TagValues::iterator itr = values.begin();
-					itr != values.end();
-					++itr)
-				{
-					if (itr->first == "Tile")
-					{
-						std::string fileName = itr->second;
-						std::string path = osgDB::getFilePath(fileName);
-						if (path.empty()) path = osgDB::getFilePath(_xmlFile);
+                for (TagValues::iterator itr = values.begin();
+                    itr != values.end();
+                    ++itr)
+                {
+                    if (itr->first == "Tile")
+                    {
+                        std::string fileName = itr->second;
+                        std::string path = osgDB::getFilePath(fileName);
+                        if (path.empty()) path = osgDB::getFilePath(_xmlFile);
 
-						_tiles.push_back(path + "/" + fileName);
-						_validTiles[fileName] = true;
-					}
-				}
-				if (_tiles.empty()) _tiles.push_back(tilesWildcardMatchAll);
+                        _tiles.push_back(path + "/" + fileName);
+                        _validTiles[fileName] = true;
+                    }
+                }
+                if (_tiles.empty()) _tiles.push_back(tilesWildcardMatchAll);
             }
         }
 
@@ -1642,7 +1649,7 @@ namespace OpenIG { namespace Plugins {
         osg::ref_ptr<osg::Program> _spriteProgram;
         osg::ref_ptr<osg::Program> _lightPointProgram;
 
- 
+
         // We will use simple cache for images
         // used for LPN sprites. Already created
         // as textures
@@ -1657,13 +1664,13 @@ namespace OpenIG { namespace Plugins {
                 , SpriteStateSetCache& spriteStateSetCache, osg::ref_ptr<osg::Program>& spriteProgram
                 , osg::ref_ptr<osg::Program>& lightPointProgram
                 , OpenIG::Base::ImageGenerator& ig)
-					: osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
-					, _defs(defs), _textureCache(textureCache) 
-					, _spriteStateSetCache(spriteStateSetCache) 
-					, _spriteProgram(spriteProgram)
-					, _lightPointProgram(lightPointProgram), _ig(ig) 
-			{
-			}
+                    : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+                    , _defs(defs), _textureCache(textureCache)
+                    , _spriteStateSetCache(spriteStateSetCache)
+                    , _spriteProgram(spriteProgram)
+                    , _lightPointProgram(lightPointProgram), _ig(ig)
+            {
+            }
 
             void updateLight(osgSim::LightPointNode* lpn)
             {
@@ -1671,64 +1678,64 @@ namespace OpenIG { namespace Plugins {
                 for (; itr != _defs.end(); ++itr)
                 {
                     LightPointDefinition& def = itr->second;
-                    const std::string name = itr->first;					
+                    const std::string name = itr->first;
 
                     // This is our light definition based on the name
                     if (lpn->getName().substr(0, osg::minimum(lpn->getName().length(), name.length())) == name)
                     {
-						std::vector<osg::Vec4> color;
+                        std::vector<osg::Vec4> color;
                         for (size_t i = 0; i < lpn->getNumLightPoints(); ++i)
                         {
                             osgSim::LightPoint& lp = lpn->getLightPoint(i);
                             lp._radius = def.radius;
                             lp._intensity = def.intensity;
-							// always use additive blending
-							lp._blendingMode = osgSim::LightPoint::ADDITIVE;
+                            // always use additive blending
+                            lp._blendingMode = osgSim::LightPoint::ADDITIVE;
 
-							color.push_back(lp._color);
+                            color.push_back(lp._color);
                         }
                         lpn->setMinPixelSize(def.minPixelSize);
                         lpn->setMaxPixelSize(def.maxPixelSize);
                         lpn->setPointSprite(def.sprites);
                         lpn->setUserValue("always_on", def.always_on);
-						lpn->setUserValue("brightness", def.brightness);
-						lpn->setUserValue("fEndRange", def.range);
+                        lpn->setUserValue("brightness", def.brightness);
+                        lpn->setUserValue("fEndRange", def.range);
 
-						bool fplusLight = false;
-						lpn->getUserValue("f+", fplusLight);
-						lpn->setUserValue("f+", def.fplus);
+                        bool fplusLight = false;
+                        lpn->getUserValue("f+", fplusLight);
+                        lpn->setUserValue("f+", def.fplus);
 
-						std::string ids;
-						if (lpn->getUserValue("Real-Lights-IDs", ids) && !ids.empty())
-						{
-							OpenThreads::ScopedLock<OpenThreads::Mutex> lock(OpenIG::Plugins::LightsControlPlugin::lightMutex);
+                        std::string ids;
+                        if (lpn->getUserValue("Real-Lights-IDs", ids) && !ids.empty())
+                        {
+                            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(OpenIG::Plugins::LightsControlPlugin::lightMutex);
 
-							OpenIG::Base::StringUtils::Tokens tokens = OpenIG::Base::StringUtils::instance()->tokenize(ids, ";");
-							OpenIG::Base::StringUtils::TokensIterator titr = tokens.begin();
-							size_t index = 0;
-							for (; titr != tokens.end(); ++titr)
-							{
-								const std::string& id = *titr;
+                            OpenIG::Base::StringUtils::Tokens tokens = OpenIG::Base::StringUtils::instance()->tokenize(ids, ";");
+                            OpenIG::Base::StringUtils::TokensIterator titr = tokens.begin();
+                            size_t index = 0;
+                            for (; titr != tokens.end(); ++titr)
+                            {
+                                const std::string& id = *titr;
 
-								unsigned int lightId = atoi(id.c_str());
-								if (lightId)
-								{
-									OpenIG::Base::LightAttributes la;
-									la.diffuse = color.at(index++);
-									la.brightness = def.brightness;
-									la.fEndRange = def.range;
-									la.fStartRange = 0.f;
-									la.dirtyMask = OpenIG::Base::LightAttributes::DIFFUSE|OpenIG::Base::LightAttributes::RANGES;
+                                unsigned int lightId = atoi(id.c_str());
+                                if (lightId)
+                                {
+                                    OpenIG::Base::LightAttributes la;
+                                    la.diffuse = color.at(index++);
+                                    la.brightness = def.brightness;
+                                    la.fEndRange = def.range;
+                                    la.fStartRange = 0.f;
+                                    la.dirtyMask = OpenIG::Base::LightAttributes::DIFFUSE|OpenIG::Base::LightAttributes::RANGES;
 
-									if (!def.fplus && fplusLight)
-										_ig.removeLight(lightId);
-									else
-									if (def.fplus && fplusLight)
-										_ig.updateLightAttributes(lightId, la);									
+                                    if (!def.fplus && fplusLight)
+                                        _ig.removeLight(lightId);
+                                    else
+                                    if (def.fplus && fplusLight)
+                                        _ig.updateLightAttributes(lightId, la);
 
-								}
-							}
-						}
+                                }
+                            }
+                        }
 
                         setUpSpriteStateSet(lpn, def);
 
@@ -1766,7 +1773,7 @@ namespace OpenIG { namespace Plugins {
                 return seed;
             }
 
-        
+
             void setUpLightPointStateSet(osgSim::LightPointNode* lpn, LightPointDefinition& def)
             {
                 if (_lightPointProgram.valid()==false)
@@ -1775,9 +1782,9 @@ namespace OpenIG { namespace Plugins {
                     return;
                 }
 
-				osg::StateSet* stateSet = new osg::StateSet;
-				stateSet->merge(*lpn->getOrCreateStateSet());
-				lpn->setStateSet(stateSet);
+                osg::StateSet* stateSet = new osg::StateSet;
+                stateSet->merge(*lpn->getOrCreateStateSet());
+                lpn->setStateSet(stateSet);
 
                 stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF|osg::StateAttribute::PROTECTED|osg::StateAttribute::OVERRIDE);
 
@@ -1786,19 +1793,21 @@ namespace OpenIG { namespace Plugins {
                 stateSet->setTextureAttributeAndModes(0,0);
             }
 
-			static bool useLogZDepthBuffer(void)
-			{
-				std::string strLogZDepthBuffer = OpenIG::Base::Configuration::instance()->getConfig("LogZDepthBuffer","yes");
-				if (strLogZDepthBuffer.compare(0, 3, "yes") == 0)
-					return true;
-				else
-					return false;
-			}
+            static bool useLogZDepthBuffer(void)
+            {
+                std::string strLogZDepthBuffer = OpenIG::Base::Configuration::instance()->getConfig("LogZDepthBuffer","yes");
+                if (strLogZDepthBuffer.compare(0, 3, "yes") == 0)
+                    return true;
+                else
+                    return false;
+            }
 
             void setUpSpriteStateSet(osgSim::LightPointNode* lpn, LightPointDefinition& def)
             {
-
-				if (def.sprites == false || !OpenIG::Plugins::LightsControlPlugin::forwardPlusPluginAvailable)
+                // Not sure why this was looking for the F+ lights - I know there was a reason
+                // but suddenly other plugins like SimpleLighting can not have sprites with this
+                //if (def.sprites == false || !OpenIG::Plugins::LightsControlPlugin::forwardPlusPluginAvailable)
+                if (def.sprites == false)
                 {
                     setUpLightPointStateSet(lpn, def);
                     return;
@@ -1807,7 +1816,7 @@ namespace OpenIG { namespace Plugins {
                 if (def.texture.empty())
                 {
                     setUpLightPointStateSet(lpn, def);
-					return;
+                    return;
                 }
 
                 if (_spriteProgram.valid()==false)
@@ -1816,35 +1825,42 @@ namespace OpenIG { namespace Plugins {
                     return;
                 }
 
+                //osg::notify(osg::NOTICE)<<"Lights Control: Setup Sprite texture!!"<<std::endl;
                 Texture2DPointer texture = _textureCache.get(def.texture);
                 if (texture.valid()==false)
                 {
                     setUpLightPointStateSet(lpn, def);
+                    //osg::notify(osg::NOTICE)<<"Lights Control: Setup Sprite texture FAILED!!!!!!!"<<std::endl;
                     return;
                 }
+				else
+				{
+					//osg::notify(osg::NOTICE) << "Lights Control: Setup Sprite texture PASSED!!!!!!!" << std::endl;
+				}
+
 
                 std::size_t stateSetID = getStateSetID(def);
 
                 SpriteStateSetCache::const_iterator it = _spriteStateSetCache.find(stateSetID);
                 if (it!=_spriteStateSetCache.end())
                 {
-					static const float radiusMultiplier = 0.25f;
-					osg::Vec4f vSpriteDimensions(def.minPixelSize*def.minPixelSizeMultiplierForSprites, def.maxPixelSize, def.radius*radiusMultiplier, 0);
-					it->second->addUniform(new osg::Uniform("spriteDimensions", vSpriteDimensions), osg::StateAttribute::ON | osg::StateAttribute::PROTECTED);
+                    static const float radiusMultiplier = 0.25f;
+                    osg::Vec4f vSpriteDimensions(def.minPixelSize*def.minPixelSizeMultiplierForSprites, def.maxPixelSize, def.radius*radiusMultiplier, 0);
+                    it->second->addUniform(new osg::Uniform("spriteDimensions", vSpriteDimensions), osg::StateAttribute::ON | osg::StateAttribute::PROTECTED);
 
                     lpn->setStateSet(it->second);
-
+                    //osg::notify(osg::NOTICE)<<"Lights Control: Setup exisiting lp: "<<lpn->getName() << "'s stateset" << std::endl;
                     return;
                 }
 
                 osg::StateSet* stateSet = new osg::StateSet();
-				stateSet->setRenderBinDetails(GROUND_SPRITE_LIGHT_POINTS_RENDER_BIN, "DepthSortedBin");
+                stateSet->setRenderBinDetails(GROUND_SPRITE_LIGHT_POINTS_RENDER_BIN, "DepthSortedBin");
 
                 // Turn off our lighting. We will use our own shader, primarily because we use logarithmic depth buffer,
                 // but also because we could have an optional sprite texture
                 stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF|osg::StateAttribute::PROTECTED|osg::StateAttribute::OVERRIDE);
 
-				osg::StateAttribute::OverrideValue val = osg::StateAttribute::ON | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE;
+                osg::StateAttribute::OverrideValue val = osg::StateAttribute::ON | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE;
 
                 stateSet->setTextureAttributeAndModes(0,texture,val);
                 stateSet->addUniform(new osg::Uniform("spriteTexture",0), val);
@@ -1854,7 +1870,7 @@ namespace OpenIG { namespace Plugins {
                     stateSet->setDefine("USE_LOG_DEPTH_BUFFER");
                 }
 
-				static const float radiusMultiplier = 0.25f;
+                static const float radiusMultiplier = 0.25f;
                 osg::Vec4f vSpriteDimensions(def.minPixelSize*def.minPixelSizeMultiplierForSprites, def.maxPixelSize, def.radius*radiusMultiplier, 0);
                 stateSet->addUniform(new osg::Uniform("spriteDimensions", vSpriteDimensions), val);
 
@@ -1867,6 +1883,7 @@ namespace OpenIG { namespace Plugins {
 
                 // Override the state set because the LightPoint node uses an internal singleton stateset
                 lpn->setStateSet(stateSet);
+                //osg::notify(osg::NOTICE)<<"Lights Control: Setup NEW lp: "<<lpn->getName() << "'s stateset" << std::endl;
             }
         };
 
@@ -1880,22 +1897,38 @@ namespace OpenIG { namespace Plugins {
             checkedProgram = true;
 
 
+#if defined(_WIN32)
             std::string resourcesPath = OpenIG::Base::FileSystem::path(OpenIG::Base::FileSystem::Resources, "../resources");
+#else
+            std::string resourcesPath = OpenIG::Base::FileSystem::path(OpenIG::Base::FileSystem::Resources, "../../openig/resources");
+#endif
 
             std::string strVS = OpenIG::Base::FileSystem::readFileIntoString(resourcesPath + "/shaders/sprite_bb_vs.glsl");
             std::string strGS = OpenIG::Base::FileSystem::readFileIntoString(resourcesPath + "/shaders/sprite_bb_gs.glsl");
             std::string strPS = OpenIG::Base::FileSystem::readFileIntoString(resourcesPath + "/shaders/sprite_bb_ps.glsl");
             if (strVS!=""&&strPS!=""&&strGS!="")
             {
-                osg::notify(osg::NOTICE)<<"Lights Control: Loaded sprite programs (vs, gs, ps)"<<std::endl;
+                osg::notify(osg::NOTICE)<<"Lights Control: Successfully read in sprite programs (vs, gs, ps)"<<std::endl;
                 _spriteProgram = new osg::Program;
-                _spriteProgram->addShader(new osg::Shader(osg::Shader::VERTEX  , strVS));
-                _spriteProgram->addShader(new osg::Shader(osg::Shader::GEOMETRY, strGS));
-                _spriteProgram->addShader(new osg::Shader(osg::Shader::FRAGMENT, strPS));
+                bool statusV = _spriteProgram->addShader(new osg::Shader(osg::Shader::VERTEX  , strVS));
+                if(statusV)
+                    osg::notify(osg::NOTICE)<<"Lights Control: added sprite VERTEX shader!!"<<std::endl;
+                else
+                    osg::notify(osg::NOTICE)<<"Lights Control: FAILED to add sprite VERTEX shader!!"<<std::endl;
+                bool statusG = _spriteProgram->addShader(new osg::Shader(osg::Shader::GEOMETRY, strGS));
+                if(statusG)
+                    osg::notify(osg::NOTICE)<<"Lights Control: added GEOMETRY shader!!"<<std::endl;
+                else
+                    osg::notify(osg::NOTICE)<<"Lights Control: FAILED to add sprite GEOMETRY shader!!"<<std::endl;
+                bool statusF = _spriteProgram->addShader(new osg::Shader(osg::Shader::FRAGMENT, strPS));
+                if(statusF)
+                    osg::notify(osg::NOTICE)<<"Lights Control: added FRAGMENT shader!!"<<std::endl;
+                else
+                    osg::notify(osg::NOTICE)<<"Lights Control: FAILED to add sprite FRAGMENT shader!!"<<std::endl;
             }
             else
             {
-                osg::notify(osg::NOTICE)<<"Lights Control: Error: could not load sprite programs (vs, gs, ps)"<<std::endl;
+                osg::notify(osg::NOTICE)<<"####Lights Control: Error: could not load sprite programs (vs, gs, ps)####"<<std::endl;
             }
         }
 
@@ -1908,7 +1941,13 @@ namespace OpenIG { namespace Plugins {
             }
             checkedProgram = true;
 
+#if defined(_WIN32)
             std::string resourcesPath = OpenIG::Base::FileSystem::path(OpenIG::Base::FileSystem::Resources, "../resources");
+#else
+            std::string resourcesPath = OpenIG::Base::FileSystem::path(OpenIG::Base::FileSystem::Resources, "../../openig/resources");
+#endif
+            osg::notify(osg::NOTICE)<<"Lights Control: setUpLightPointStateSetProgram resourcesPath: " << resourcesPath << std::endl;
+
 
             std::string strVS = OpenIG::Base::FileSystem::readFileIntoString(resourcesPath+"/shaders/lightpoint_vs.glsl");
             std::string strPS = OpenIG::Base::FileSystem::readFileIntoString(resourcesPath+"/shaders/lightpoint_ps.glsl");
@@ -1934,53 +1973,53 @@ namespace OpenIG { namespace Plugins {
             setUpLightPointStateSetProgram();
             UpdateLightPointNodeNodeVisitor nv(definitions, _textureCache, _spriteStateSetCache, _spriteProgram, _lightPointProgram, *_ig);
 
-            if (node) 
+            if (node)
             {
                 node->accept(nv);
             }
         }
 
-		boost::shared_ptr<boost::thread>	_xmlFileObserverThread;
-		volatile bool						_xmlThreadIsRunning;
-		volatile bool						_xmlThreadRunningCondition;
+        boost::shared_ptr<boost::thread>	_xmlFileObserverThread;
+        volatile bool						_xmlThreadIsRunning;
+        volatile bool						_xmlThreadRunningCondition;
         boost::mutex						_xmlAccessMutex;
         std::time_t							_xmlLastWriteTime;
         std::time_t							_xmlLastCheckedTime;
 
-	public:
-		static OpenThreads::Mutex	lightMutex;
-	protected:
+    public:
+        static OpenThreads::Mutex	lightMutex;
+    protected:
 
         // Thread function to check the
         // XML config file if changed
         void xmlFileObserverThread()
         {
-			_xmlThreadIsRunning = true;
-			while (_xmlThreadRunningCondition)
+            _xmlThreadIsRunning = true;
+            while (_xmlThreadRunningCondition)
             {
-				try
-				{
-					_xmlAccessMutex.lock();
-					_xmlLastWriteTime = OpenIG::Base::FileSystem::lastWriteTime(_xmlFile); 
-					_xmlAccessMutex.unlock();
-				}
-				catch (const std::exception& e)
-				{
-					osg::notify(osg::NOTICE) << "Lights control: File montoring exception: " << e.what() << std::endl;
-					break;
-				}
+                try
+                {
+                    _xmlAccessMutex.lock();
+                    _xmlLastWriteTime = OpenIG::Base::FileSystem::lastWriteTime(_xmlFile);
+                    _xmlAccessMutex.unlock();
+                }
+                catch (const std::exception& e)
+                {
+                    osg::notify(osg::NOTICE) << "Lights control: File montoring exception: " << e.what() << std::endl;
+                    break;
+                }
 
                 OpenThreads::Thread::microSleep(10000);
             }
-			_xmlThreadIsRunning = false;
+            _xmlThreadIsRunning = false;
         }
 
-		public:
-			static TOD	tod;
-			static TOD	onTOD;
-			static TOD	offTOD;
+        public:
+            static TOD	tod;
+            static TOD	onTOD;
+            static TOD	offTOD;
 
-		protected:
+        protected:
         // Nodevisitor that will go through
         // LPNs and turn them on/off based
         // on the time of day and the XML
@@ -1988,11 +2027,11 @@ namespace OpenIG { namespace Plugins {
         struct AdjustLightPointNodesNodeVisitor : public osg::NodeVisitor
         {
             AdjustLightPointNodesNodeVisitor(OpenIG::Base::ImageGenerator* ig)
-				: osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), _ig(ig), _msActiveChild(true)
+                : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), _ig(ig), _msActiveChild(true)
             {
-				_lightsEnabled = 
-					LightsControlPlugin::tod.hour() >= LightsControlPlugin::onTOD.hour() || 
-					LightsControlPlugin::tod.hour() <= LightsControlPlugin::offTOD.hour();
+                _lightsEnabled =
+                    LightsControlPlugin::tod.hour() >= LightsControlPlugin::onTOD.hour() ||
+                    LightsControlPlugin::tod.hour() <= LightsControlPlugin::offTOD.hour();
             }
 
             void enableDisableLight(osgSim::LightPointNode* lpn)
@@ -2000,12 +2039,12 @@ namespace OpenIG { namespace Plugins {
                 bool always_on = true;
                 if (lpn->getUserValue("always_on", always_on))
                 {
-                    // Manage turn them on/off, the 
+                    // Manage turn them on/off, the
                     // lights implementations by the ig
                     std::string ids;
                     if (lpn->getUserValue("Real-Lights-IDs", ids) && !ids.empty())
                     {
-						OpenThreads::ScopedLock<OpenThreads::Mutex> lock(OpenIG::Plugins::LightsControlPlugin::lightMutex);
+                        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(OpenIG::Plugins::LightsControlPlugin::lightMutex);
 
                         OpenIG::Base::StringUtils::Tokens tokens = OpenIG::Base::StringUtils::instance()->tokenize(ids, ";");
                         OpenIG::Base::StringUtils::TokensIterator titr = tokens.begin();
@@ -2016,19 +2055,19 @@ namespace OpenIG { namespace Plugins {
                             unsigned int lightId = atoi(id.c_str());
                             if (lightId)
                             {
-								bool on = (always_on && _msActiveChild) ? true : _lightsEnabled;
+                                bool on = (always_on && _msActiveChild) ? true : _lightsEnabled;
                                 _ig->enableLight(lightId, on);
                             }
                         }
                     }
                     // And the light points
-					bool on = (always_on && _msActiveChild) ? true : _lightsEnabled;
+                    bool on = (always_on && _msActiveChild) ? true : _lightsEnabled;
                     for (size_t i = 0; i < lpn->getNumLightPoints(); ++i)
                     {
                         osgSim::LightPoint& lp = lpn->getLightPoint(i);
                         lp._on = on;
                     }
-					
+
                 }
             }
 
@@ -2041,21 +2080,21 @@ namespace OpenIG { namespace Plugins {
                     // In that case re-write to use stack
                     bool enabled = _lightsEnabled;
 
-					unsigned int activeSwitchSet = ms->getActiveSwitchSet();
-					const osgSim::MultiSwitch::SwitchSetList& ssl = ms->getSwitchSetList();
-					if (activeSwitchSet < ssl.size())
-					{
-						const osgSim::MultiSwitch::ValueList& vl = ms->getValueList(activeSwitchSet);
-						for (size_t i = 0; i < vl.size(); ++i)
-						{
-							_msActiveChild = vl.at(i);
-							_lightsEnabled = (vl.at(i)) ? enabled : false;
-							ms->getChild(i)->accept(*this);
-						}
-					}
+                    unsigned int activeSwitchSet = ms->getActiveSwitchSet();
+                    const osgSim::MultiSwitch::SwitchSetList& ssl = ms->getSwitchSetList();
+                    if (activeSwitchSet < ssl.size())
+                    {
+                        const osgSim::MultiSwitch::ValueList& vl = ms->getValueList(activeSwitchSet);
+                        for (size_t i = 0; i < vl.size(); ++i)
+                        {
+                            _msActiveChild = vl.at(i);
+                            _lightsEnabled = (vl.at(i)) ? enabled : false;
+                            ms->getChild(i)->accept(*this);
+                        }
+                    }
 
                     _lightsEnabled = enabled;
-					_msActiveChild = true;
+                    _msActiveChild = true;
                 }
                 else
                 {
@@ -2072,24 +2111,24 @@ namespace OpenIG { namespace Plugins {
         protected:
             OpenIG::Base::ImageGenerator* _ig;
             bool					_lightsEnabled;
-			bool					_msActiveChild;
+            bool					_msActiveChild;
         };
 
         void updateLightPointNodesBasedOnTimeOfDay(osg::Node* node)
         {
-			if (!LightsControlPlugin::tod.set() ||
-				!LightsControlPlugin::onTOD.set() ||
-				!LightsControlPlugin::offTOD.set()
-				)
-			{
-				return;
-			}
+            if (!LightsControlPlugin::tod.set() ||
+                !LightsControlPlugin::onTOD.set() ||
+                !LightsControlPlugin::offTOD.set()
+                )
+            {
+                return;
+            }
 
             OpenThreads::ScopedLock<OpenThreads::Mutex>	lock(_mutex);
 
             AdjustLightPointNodesNodeVisitor nv(_ig);
             if (node) node->accept(nv);
-        }		
+        }
     };
 } // namespace
 } // namespace

@@ -5,5 +5,6 @@ var searchData=
   ['math',['Math',['../class_open_i_g_1_1_base_1_1_math.html#a8c00d667fe49b8a16aca804a03dcde8c',1,'OpenIG::Base::Math']]],
   ['math',['Math',['../class_open_i_g_1_1_base_1_1_math.html',1,'OpenIG::Base']]],
   ['mathematics_2eh',['mathematics.h',['../mathematics_8h.html',1,'']]],
-  ['minutes',['minutes',['../struct_open_i_g_1_1_base_1_1_time_of_day_attributes.html#a7e2117529384c71c383ef97fc807f5bd',1,'OpenIG::Base::TimeOfDayAttributes']]]
+  ['minutes',['minutes',['../struct_open_i_g_1_1_base_1_1_time_of_day_attributes.html#a7e2117529384c71c383ef97fc807f5bd',1,'OpenIG::Base::TimeOfDayAttributes']]],
+  ['month',['month',['../struct_open_i_g_1_1_base_1_1_date_attributes.html#ab064e1a4de2141502f297abdd0cec8a8',1,'OpenIG::Base::DateAttributes']]]
 ];

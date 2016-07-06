@@ -45,6 +45,7 @@
 #include <osg/Vec3d>
 #include <osg/Quat>
 #include <osg/Notify>
+#include <osg/io_utils>
 
 #include <osgShadow/ShadowedScene>
 #include <osgShadow/LightSpacePerspectiveShadowMap>
@@ -65,7 +66,7 @@ Engine::Engine()
     : _sceneCreatedByOpenIG(false)
     , _updateViewerCameraMainpulator(false)
     , _splashOn(true)
-	, _setupMask(Standard)
+    , _setupMask(Standard)
 {
 }
 
@@ -76,7 +77,7 @@ Engine::~Engine()
 
 std::string Engine::version()
 {
-    return "2.0.1";
+    return "2.0.2";
 }
 
 class InitPluginOperation : public PluginOperation
@@ -170,6 +171,44 @@ public:
     virtual void apply(OpenIG::PluginBase::Plugin* plugin)
     {
         if (plugin) plugin->update(_ig->getPluginContext());
+    }
+
+protected:
+    OpenIG::Engine* _ig;
+};
+
+class BeginningOfFramePluginOperation : public PluginOperation
+{
+public:
+    BeginningOfFramePluginOperation(OpenIG::Engine* ig)
+        : PluginOperation()
+        , _ig(ig)
+    {
+
+    }
+
+    virtual void apply(OpenIG::PluginBase::Plugin* plugin)
+    {
+        if (plugin) plugin->beginningOfFrame(_ig->getPluginContext());
+    }
+
+protected:
+    OpenIG::Engine* _ig;
+};
+
+class EndOfFramePluginOperation : public PluginOperation
+{
+public:
+    EndOfFramePluginOperation(OpenIG::Engine* ig)
+        : PluginOperation()
+        , _ig(ig)
+    {
+
+    }
+
+    virtual void apply(OpenIG::PluginBase::Plugin* plugin)
+    {
+        if (plugin) plugin->endOfFrame(_ig->getPluginContext());
     }
 
 protected:
@@ -315,27 +354,27 @@ public:
 
     virtual osgDB::ReaderWriter::ReadResult readNode(const std::string& filename, const osgDB::Options* options)
     {
-		osgDB::ReaderWriter::ReadResult result;
+        osgDB::ReaderWriter::ReadResult result;
 
-		if (_ig->getReadNodeImplementationCallback())
-		{
-			osg::ref_ptr<osg::Node> node = _ig->getReadNodeImplementationCallback()->readNode(filename, options);
-			if (node.valid())
-			{
-				result = osgDB::ReaderWriter::ReadResult(node, osgDB::ReaderWriter::ReadResult::FILE_LOADED);
-			}
-		}
-		else
-		{
-			if (_ig->getReadFileCallback())
-			{
-				result = _ig->getReadFileCallback()->readNode(filename, options);
-			}
-			else
-			{
-				result = osgDB::Registry::instance()->readNodeImplementation(filename, options);
-			}
-		}
+        if (_ig->getReadNodeImplementationCallback())
+        {
+            osg::ref_ptr<osg::Node> node = _ig->getReadNodeImplementationCallback()->readNode(filename, options);
+            if (node.valid())
+            {
+                result = osgDB::ReaderWriter::ReadResult(node, osgDB::ReaderWriter::ReadResult::FILE_LOADED);
+            }
+        }
+        else
+        {
+            if (_ig->getReadFileCallback())
+            {
+                result = _ig->getReadFileCallback()->readNode(filename, options);
+            }
+            else
+            {
+                result = osgDB::Registry::instance()->readNodeImplementation(filename, options);
+            }
+        }
         if (result.getNode())
         {
             osg::ref_ptr<DatabaseReadPluginOperation> po(
@@ -363,20 +402,20 @@ class PrintLoadedPluginsPluginOperation : public OpenIG::PluginBase::PluginOpera
 public:
     virtual void apply(OpenIG::PluginBase::Plugin* plugin)
     {
-		osg::notify(osg::NOTICE) << "OpenIG: Plugin loaded: " << plugin->getName() << std::endl;
-		osg::notify(osg::NOTICE) << "\tauthor: " << plugin->getAuthor() << std::endl;
-		osg::notify(osg::NOTICE) << "\tversion: " << plugin->getVersion() << std::endl;
-		osg::notify(osg::NOTICE) << "\tdescription: " << plugin->getDescription() << std::endl;
+        osg::notify(osg::NOTICE) << "OpenIG: Plugin loaded: " << plugin->getName() << std::endl;
+        osg::notify(osg::NOTICE) << "\tauthor: " << plugin->getAuthor() << std::endl;
+        osg::notify(osg::NOTICE) << "\tversion: " << plugin->getVersion() << std::endl;
+        osg::notify(osg::NOTICE) << "\tdescription: " << plugin->getDescription() << std::endl;
     }
 };
 void Engine::setReadNodeImplementationCallback(OpenIG::Base::ImageGenerator::ReadNodeImplementationCallback* cb)
 {
-	_readFileCallback = cb;
+    _readFileCallback = cb;
 }
 
 OpenIG::Base::ImageGenerator::ReadNodeImplementationCallback* Engine::getReadNodeImplementationCallback()
 {
-	return _readFileCallback;
+    return _readFileCallback;
 }
 
 struct SetFarPlaneUniformCallback : public osg::Camera::DrawCallback
@@ -403,13 +442,13 @@ struct SetFarPlaneUniformCallback : public osg::Camera::DrawCallback
 
 void Engine::setReadFileCallback(osgDB::Registry::ReadFileCallback* cb)
 {
-	_userReadFileCallback = cb;
+    _userReadFileCallback = cb;
 }
 
 
 osgDB::Registry::ReadFileCallback* Engine::getReadFileCallback()
 {
-	return _userReadFileCallback.get();
+    return _userReadFileCallback.get();
 }
 
 void Engine::init(osgViewer::CompositeViewer* viewer, const std::string& xmlFileName, const ViewIdentifiers& ids)
@@ -424,30 +463,30 @@ void Engine::init(osgViewer::CompositeViewer* viewer, const std::string& xmlFile
         }
     }
 
-	std::string configPath = osgDB::getFilePath(xmlFileName);	
-	std::string configFileName = osgDB::getSimpleFileName(xmlFileName);
+    std::string configPath = osgDB::getFilePath(xmlFileName);
+    std::string configFileName = osgDB::getSimpleFileName(xmlFileName);
 
-	if (configPath.empty()) configPath = std::string("igdata/");
-	else configPath += std::string("/");
+    if (configPath.empty()) configPath = std::string("igdata/");
+    else configPath += std::string("/");
 
-	Configuration::instance()->readFromXML(configPath + configFileName,"OpenIG-Config");
+    Configuration::instance()->readFromXML(configPath + configFileName,"OpenIG-Config");
 
-	initScene();
+    initScene();
     initViewer(viewer,ids);
     if (_setupMask & WithTerminal) initTerminal();
     initCommands();
     initPluginContext();
-	if (_setupMask & WithOnscreenHelp) initOnScreenHelp();
+    if (_setupMask & WithOnscreenHelp) initOnScreenHelp();
     if (_setupMask & WithSplashScreen) initSplashScreen();
-	initEffects();
+    initEffects();
 
     osgDB::Registry::instance()->setReadFileCallback( new DatabaseReadCallback(this) );
 
-	std::string pluginsPath = FileSystem::path(FileSystem::Plugins);
-	osg::notify(osg::NOTICE) << "OpenIG: Loading Plugins from path: " << pluginsPath << std::endl;
-	osg::notify(osg::NOTICE) << "OpenIG: Loading Plugins config: " << configPath + configFileName << std::endl;
+    std::string pluginsPath = FileSystem::path(FileSystem::Plugins);
+    osg::notify(osg::NOTICE) << "OpenIG: Loading Plugins from path: " << pluginsPath << std::endl;
+    osg::notify(osg::NOTICE) << "OpenIG: Loading Plugins config: " << configPath + configFileName << std::endl;
 
-	PluginHost::loadPlugins(pluginsPath, configPath + configFileName);
+    PluginHost::loadPlugins(pluginsPath, configPath + configFileName);
 
     osg::ref_ptr<PrintLoadedPluginsPluginOperation> printPluginOperation(new PrintLoadedPluginsPluginOperation);
     PluginHost::applyPluginOperation(printPluginOperation.get());
@@ -458,93 +497,93 @@ void Engine::init(osgViewer::CompositeViewer* viewer, const std::string& xmlFile
     osg::ref_ptr<InitPluginOperation> initPluginOperation(new InitPluginOperation(this));
     PluginHost::applyPluginOperation(initPluginOperation.get());
 
-	createSunMoonLight();
+    createSunMoonLight();
 
 }
 
 void Engine::loadScript(const std::string& fileName)
 {
-	OpenIG::Base::Commands::instance()->loadScript(fileName);
+    OpenIG::Base::Commands::instance()->loadScript(fileName);
 }
 
 class CleanPluginOperation : public OpenIG::PluginBase::PluginOperation
 {
 public:
-	CleanPluginOperation(OpenIG::Engine* ig)
-		: _ig(ig)
-	{
-	}
-	virtual void apply(OpenIG::PluginBase::Plugin* plugin)
+    CleanPluginOperation(OpenIG::Engine* ig)
+        : _ig(ig)
     {
-		if (plugin && _ig) plugin->clean(_ig->getPluginContext());
+    }
+    virtual void apply(OpenIG::PluginBase::Plugin* plugin)
+    {
+        if (plugin && _ig) plugin->clean(_ig->getPluginContext());
     }
 
 protected:
-	OpenIG::Engine* _ig;
+    OpenIG::Engine* _ig;
 };
 
 void Engine::cleanup()
 {
-	if (_viewer.valid())
-	{
-		_viewer->stopThreading();
-		while (_viewer->areThreadsRunning());
+    if (_viewer.valid())
+    {
+        _viewer->stopThreading();
+        while (_viewer->areThreadsRunning());
 
-		osgViewer::ViewerBase::Views views;
-		_viewer->getViews(views);
+        osgViewer::ViewerBase::Views views;
+        _viewer->getViews(views);
 
-		osgViewer::ViewerBase::Views::iterator itr = views.begin();
-		for (; itr != views.end(); ++itr)
-		{
-			osgViewer::View* view = *itr;
+        osgViewer::ViewerBase::Views::iterator itr = views.begin();
+        for (; itr != views.end(); ++itr)
+        {
+            osgViewer::View* view = *itr;
 
-			bool openIGScene = false;
-			if (view->getUserValue("OpenIG-Scene", openIGScene) && openIGScene)
-			{
-				view->setSceneData(0);
-			}
-		}
-	}
+            bool openIGScene = false;
+            if (view->getUserValue("OpenIG-Scene", openIGScene) && openIGScene)
+            {
+                view->setSceneData(0);
+            }
+        }
+    }
 
-	_context.setValueObject(0);
-	_context.getAttributes().clear();
+    _context.setValueObject(0);
+    _context.getAttributes().clear();
     _entities.clear();
     _lights.clear();
-	_effects.clear();
-	_lightAttributes.clear();
-	_entityCache.clear();
+    _effects.clear();
+    _lightAttributes.clear();
+    _entityCache.clear();
 
-	_sunOrMoonLight					= NULL;
-	_fog							= NULL;
-	_scene							= NULL;
-	_lightImplementationCallback	= NULL;
-	_lightsGroup					= NULL;
-	_keypad							= NULL;
-	_keypadCameraManipulator		= NULL;
-	_viewerCameraManipulator		= NULL;
-	_splashCamera					= NULL;
-	_effectsRoot					= NULL;
-	_effectsImplementationCallback	= NULL;
-	_readFileCallback				= NULL;
-	_userReadFileCallback			= NULL;
+    _sunOrMoonLight					= NULL;
+    _fog							= NULL;
+    _scene							= NULL;
+    _lightImplementationCallback	= NULL;
+    _lightsGroup					= NULL;
+    _keypad							= NULL;
+    _keypadCameraManipulator		= NULL;
+    _viewerCameraManipulator		= NULL;
+    _splashCamera					= NULL;
+    _effectsRoot					= NULL;
+    _effectsImplementationCallback	= NULL;
+    _readFileCallback				= NULL;
+    _userReadFileCallback			= NULL;
 
-	osgDB::Registry::instance()->setReadFileCallback(0);
+    osgDB::Registry::instance()->setReadFileCallback(0);
 
     Commands::instance()->clear();
 
-	osg::ref_ptr<CleanPluginOperation> operation(new CleanPluginOperation(this));
-	PluginHost::applyPluginOperation(operation.get());     
+    osg::ref_ptr<CleanPluginOperation> operation(new CleanPluginOperation(this));
+    PluginHost::applyPluginOperation(operation.get());
 
-	PluginHost::unloadPlugins();	
+    PluginHost::unloadPlugins();
 
-	if (_viewer.valid())
-	{
-		_viewer->startThreading();
-		_viewer = NULL;
-	}
+    if (_viewer.valid())
+    {
+        _viewer->startThreading();
+        _viewer = NULL;
+    }
 }
 
-void Engine::frame()
+void Engine::frame(bool usePlugins)
 {
     static bool         firstFrame = true;
     static osg::Timer_t firstFrimeTimeTick = 0;
@@ -561,26 +600,46 @@ void Engine::frame()
         }
         else
         {
+            if (usePlugins)
+            {
+                osg::ref_ptr<BeginningOfFramePluginOperation> pluginOperation(new BeginningOfFramePluginOperation(this));
+                PluginHost::applyPluginOperation(pluginOperation.get());
+            }
+
             _viewer->advance();
             _viewer->eventTraversal();
             _viewer->updateTraversal();
 
-            osg::ref_ptr<UpdatePluginOperation> updatePluginOperation(new UpdatePluginOperation(this));
-            PluginHost::applyPluginOperation(updatePluginOperation.get());
+            if (usePlugins)
+            {
+                osg::ref_ptr<UpdatePluginOperation> updatePluginOperation(new UpdatePluginOperation(this));
+                PluginHost::applyPluginOperation(updatePluginOperation.get());
+            }
 
             preRender();
 
-            osg::ref_ptr<PreFramePluginOperation> preFramePluginOperation(
-                new PreFramePluginOperation(this,_viewer->getFrameStamp()->getSimulationTime())
-            );
-            PluginHost::applyPluginOperation(preFramePluginOperation.get());
+            if (usePlugins)
+            {
+                osg::ref_ptr<PreFramePluginOperation> preFramePluginOperation(
+                    new PreFramePluginOperation(this, _viewer->getFrameStamp()->getSimulationTime())
+                    );
+                PluginHost::applyPluginOperation(preFramePluginOperation.get());
+            }
 
             _viewer->renderingTraversals();
 
-            osg::ref_ptr<PostFramePluginOperation> postFramePluginOperation(
-                new PostFramePluginOperation(this,_viewer->getFrameStamp()->getSimulationTime())
-            );
-            PluginHost::applyPluginOperation(postFramePluginOperation.get());
+            if (usePlugins)
+            {
+                osg::ref_ptr<PostFramePluginOperation> postFramePluginOperation(
+                    new PostFramePluginOperation(this, _viewer->getFrameStamp()->getSimulationTime())
+                    );
+                PluginHost::applyPluginOperation(postFramePluginOperation.get());
+
+                osg::ref_ptr<EndOfFramePluginOperation> endOfFramePluginOperation(
+                    new EndOfFramePluginOperation(this)
+                    );
+                PluginHost::applyPluginOperation(endOfFramePluginOperation.get());
+            }
 
             postRender();
         }
@@ -591,7 +650,13 @@ void Engine::frame()
     if (_splashOn && osg::Timer::instance()->delta_s(firstFrimeTimeTick,now) > 5.0)
     {
         _splashOn = false;
-        _viewer->getView(0)->getSceneData()->asGroup()->removeChild(_splashCamera);
+        for (size_t i = 0; i < _viewer->getNumViews(); ++i)
+        {
+            if (_viewer->getView(i)->getSceneData() && _viewer->getView(i)->getSceneData()->asGroup())
+            {
+                _viewer->getView(i)->getSceneData()->asGroup()->removeChild(_splashCamera);
+            }
+        }
         _splashCamera = 0;
     }
 }
@@ -599,70 +664,86 @@ void Engine::frame()
 void Engine::preRender()
 {
     if (_viewer->getNumViews() != 0)
-    {		
-		for (unsigned int cameraID = 0; cameraID < _viewer->getNumViews(); ++cameraID)
-		{			
-			osg::ref_ptr<osg::Camera> camera = _viewer->getView(cameraID)->getCamera();
+    {
+        for (unsigned int cameraID = 0; cameraID < _viewer->getNumViews(); ++cameraID)
+        {
+            osg::ref_ptr<osg::Camera> camera = _viewer->getView(cameraID)->getCamera();
 
-			unsigned int    id = 0;
-			osg::Matrixd    offset;
-			bool            bind = false;
+            unsigned int    id = 0;
+            osg::Matrixd    offset;
+            bool            bind = false;
 
-			if (camera->getUserValue("bindOffset", offset) &&
-				camera->getUserValue("bindTo", id) &&
-				camera->getUserValue("bindToEntity", bind))
-			{
-				if (bind)
-				{
-					EntityMapIterator itr = _entities.find(id);
-					if (itr == _entities.end())
-						return;
+            if (camera->getUserValue("bindOffset", offset) &&
+                camera->getUserValue("bindTo", id) &&
+                camera->getUserValue("bindToEntity", bind))
+            {
+                if (bind)
+                {
+                    EntityMapIterator itr = _entities.find(id);
+                    if (itr == _entities.end())
+                        return;
 
-					bool freezeOrientation = false;
-					camera->getUserValue("freeze", freezeOrientation);
+                    bool freezeOrientation = false;
+                    camera->getUserValue("freeze", freezeOrientation);
 
-					osg::NodePath np;
+                    osg::NodePath np;
 
-					osg::ref_ptr<osg::MatrixTransform> e = new osg::MatrixTransform;
-					if (freezeOrientation)
-					{
-						e->setMatrix(osg::Matrixd::translate(itr->second->getMatrix().getTrans()));
-						np.push_back(e);
-					}
-					else
-					{
-						np.push_back(itr->second);
-					}
+                    osg::ref_ptr<osg::MatrixTransform> e = new osg::MatrixTransform;
+                    if (freezeOrientation)
+                    {
+                        e->setMatrix(osg::Matrixd::translate(itr->second->getMatrix().getTrans()));
+                        np.push_back(e);
+                    }
+                    else
+                    {
+                        np.push_back(itr->second);
+                    }
 
-					osg::ref_ptr<osg::Group> parent = itr->second->getNumParents() ? itr->second->getParent(0) : 0;
-					while (parent)
-					{
-						np.insert(np.begin(), parent);
-						parent = parent->getNumParents() ? parent->getParent(0) : 0;
-					}
+                    osg::ref_ptr<osg::Group> parent = itr->second->getNumParents() ? itr->second->getParent(0) : 0;
+                    while (parent)
+                    {
+                        np.insert(np.begin(), parent);
+                        parent = parent->getNumParents() ? parent->getParent(0) : 0;
+                    }
 
-					osg::Matrixd wmx = osg::computeLocalToWorld(np);
+                    osg::Matrixd wmx = osg::computeLocalToWorld(np);
 
-					osg::Matrixd final = offset * wmx;
+                    osg::Matrixd final = offset * wmx;
 
-					bool fixedUp = false;
-					if (camera->getUserValue("fixedUp", fixedUp) && fixedUp)
-					{
-						osg::Vec3d  scale = wmx.getScale();
-						osg::Quat   rotation = wmx.getRotate();
-						osg::Vec3d  translate = wmx.getTrans();
+                    bool fixedUp = false;
+                    if (camera->getUserValue("fixedUp", fixedUp) && fixedUp)
+                    {
+                        osg::Vec3d  scale = wmx.getScale();
+                        osg::Quat   rotation = wmx.getRotate();
+                        osg::Vec3d  translate = wmx.getTrans();
 
-						OpenIG::Base::Math::instance()->fixVerticalAxis(translate, rotation, false);
+                        OpenIG::Base::Math::instance()->fixVerticalAxis(translate, rotation, false);
 
-						wmx = osg::Matrixd::scale(scale)*osg::Matrixd::rotate(rotation)*osg::Matrixd::translate(translate);
-						final = offset * wmx;
-					}
+                        wmx = osg::Matrixd::scale(scale)*osg::Matrixd::rotate(rotation)*osg::Matrixd::translate(translate);
+                        final = offset * wmx;
+                    }
 
-					setCameraPosition(final,false,cameraID);
+                    setCameraPosition(final,false,cameraID);
 
-				}
-			}
-		}
+                }
+            }
+
+            osg::ref_ptr<osg::UserDataContainer> container = camera->getUserDataContainer();
+            if (!container.valid()) continue;
+
+            for (size_t i = 0; i < container->getNumUserObjects(); ++i)
+            {
+                osg::ref_ptr<osg::MatrixTransform> entity = dynamic_cast<osg::MatrixTransform*>(container->getUserObject(i));
+                if (!entity.valid()) continue;
+
+                osg::Matrixd mx;
+                entity->getUserValue("BindToCameraOffset", mx);
+
+                osg::Matrixd wmx = mx * camera->getInverseViewMatrix();
+
+                entity->setMatrix(wmx);
+            }
+        }
     }
 }
 
@@ -674,8 +755,8 @@ void Engine::postRender()
 
 
 void Engine::addEntity(unsigned int id, const std::string& fileName, const osg::Matrixd& mx, const osgDB::Options* options)
-{	
-	osgDB::getDataFilePathList().push_back(osgDB::getFilePath(fileName));
+{
+    osgDB::getDataFilePathList().push_back(osgDB::getFilePath(fileName));
 
     if (options != 0 && !options->getOptionString().empty())
     {
@@ -686,31 +767,31 @@ void Engine::addEntity(unsigned int id, const std::string& fileName, const osg::
         osgDB::Registry::instance()->setOptions(0);
     }
 
-	osg::ref_ptr<osg::Node> model; 
+    osg::ref_ptr<osg::Node> model;
 
-	std::string simpleFileName = osgDB::getSimpleFileName(fileName);
-	if (isFileCached(simpleFileName))
-	{
-		EntityCache::iterator itr = _entityCache.find(simpleFileName);
-		if (itr != _entityCache.end())
-		{
-			model = itr->second;
-			osg::notify(osg::NOTICE) << "OpenIG: Model " << simpleFileName << " added from the cache." << std::endl;
-		}
-		else
-		{
-			model = osgDB::readNodeFile(fileName, options);
-			if (model.valid())
-			{
-				_entityCache[simpleFileName] = model;
-				osg::notify(osg::NOTICE) << "OpenIG: Model " << simpleFileName << " added to the cache." << std::endl;
-			}
-		}
-	}
-	else
-	{
-		model = osgDB::readNodeFile(fileName, options);
-	}
+    std::string simpleFileName = osgDB::getSimpleFileName(fileName);
+    if (isFileCached(simpleFileName))
+    {
+        EntityCache::iterator itr = _entityCache.find(simpleFileName);
+        if (itr != _entityCache.end())
+        {
+            model = itr->second;
+            osg::notify(osg::NOTICE) << "OpenIG: Model " << simpleFileName << " added from the cache." << std::endl;
+        }
+        else
+        {
+            model = osgDB::readNodeFile(fileName, options);
+            if (model.valid())
+            {
+                _entityCache[simpleFileName] = model;
+                osg::notify(osg::NOTICE) << "OpenIG: Model " << simpleFileName << " added to the cache." << std::endl;
+            }
+        }
+    }
+    else
+    {
+        model = osgDB::readNodeFile(fileName, options);
+    }
 
     if (!model.valid())
     {
@@ -729,45 +810,45 @@ void Engine::addEntity(unsigned int id, const std::string& fileName, const osg::
     mxt->setUserValue("ID",id);
 
     _entities[id] = mxt;
-	getScene()->asGroup()->addChild(mxt);
+    getScene()->asGroup()->addChild(mxt);
 
     osg::ref_ptr<AddEntityPluginOperation> pluginOperation(new AddEntityPluginOperation(this,mxt,id,fileName));
     this->applyPluginOperation(pluginOperation.get());
 }
 
 void Engine::addEntity(unsigned int id, const osg::Node* node, const osg::Matrixd& mx, const osgDB::Options* options)
-{	
-	osg::ref_ptr<osg::Node> model = const_cast<osg::Node*>(node);
+{
+    osg::ref_ptr<osg::Node> model = const_cast<osg::Node*>(node);
 
-	if (options != 0 && !options->getOptionString().empty())
-	{
-		osgDB::Registry::instance()->setOptions(const_cast<osgDB::Options*>(options));
-	}
-	else
-	{
-		osgDB::Registry::instance()->setOptions(0);
-	}
+    if (options != 0 && !options->getOptionString().empty())
+    {
+        osgDB::Registry::instance()->setOptions(const_cast<osgDB::Options*>(options));
+    }
+    else
+    {
+        osgDB::Registry::instance()->setOptions(0);
+    }
 
-	if (!model.valid())
-	{
-		osg::notify(osg::NOTICE) << "OpenIG: failed to add entity from Node" << std::endl;
-		return;
-	}
+    if (!model.valid())
+    {
+        osg::notify(osg::NOTICE) << "OpenIG: failed to add entity from Node" << std::endl;
+        return;
+    }
 
-	osg::ref_ptr<osg::MatrixTransform> mxt = new osg::MatrixTransform;
-	mxt->addChild(model);
-	mxt->setMatrix(mx);
+    osg::ref_ptr<osg::MatrixTransform> mxt = new osg::MatrixTransform;
+    mxt->addChild(model);
+    mxt->setMatrix(mx);
 
-	std::ostringstream oss;
-	oss << id;
-	mxt->setName(oss.str());	
-	mxt->setUserValue("ID", id);
+    std::ostringstream oss;
+    oss << id;
+    mxt->setName(oss.str());
+    mxt->setUserValue("ID", id);
 
-	_entities[id] = mxt;
-	getScene()->asGroup()->addChild(mxt);
+    _entities[id] = mxt;
+    getScene()->asGroup()->addChild(mxt);
 
-	osg::ref_ptr<AddEntityPluginOperation> pluginOperation(new AddEntityPluginOperation(this, mxt, id, "fromNode"));
-	this->applyPluginOperation(pluginOperation.get());
+    osg::ref_ptr<AddEntityPluginOperation> pluginOperation(new AddEntityPluginOperation(this, mxt, id, "fromNode"));
+    this->applyPluginOperation(pluginOperation.get());
 }
 
 void Engine::reloadEntity(unsigned int id, const std::string& fileName, const osgDB::Options* options)
@@ -779,20 +860,20 @@ void Engine::reloadEntity(unsigned int id, const std::string& fileName, const os
     itr->second->setUserValue("fileName",fileName);
     itr->second->getChild(0)->setUserData(const_cast<osgDB::Options*>(options));
 
-	osg::ref_ptr<osg::Node> model = osgDB::readNodeFile(fileName, options);
+    osg::ref_ptr<osg::Node> model = osgDB::readNodeFile(fileName, options);
 
-	if (!model.valid())
-	{
-		osg::notify(osg::NOTICE) << "OpenIG: failed to reload entity: " << fileName << std::endl;
-		return;
-	}
+    if (!model.valid())
+    {
+        osg::notify(osg::NOTICE) << "OpenIG: failed to reload entity: " << fileName << std::endl;
+        return;
+    }
 
-	osg::notify(osg::NOTICE) << "OpenIG: reloading :" << fileName << std::endl;
+    osg::notify(osg::NOTICE) << "OpenIG: reloading :" << fileName << std::endl;
 
-	itr->second->setUserValue("fileName", fileName);
-	itr->second->replaceChild(itr->second->getChild(0), model);
+    itr->second->setUserValue("fileName", fileName);
+    itr->second->replaceChild(itr->second->getChild(0), model);
 
-	osg::notify(osg::NOTICE) << "OpenIG: reloading done:" << fileName << std::endl;
+    osg::notify(osg::NOTICE) << "OpenIG: reloading done:" << fileName << std::endl;
 }
 
 void Engine::setEntityName(unsigned int id, const std::string& name)
@@ -814,13 +895,53 @@ std::string Engine::getEntityName(unsigned int id)
     return name;
 }
 
+struct FindSubEntityNodeVisitor : public osg::NodeVisitor
+{
+	FindSubEntityNodeVisitor(const std::string& name)
+		: osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+		, _name(name)
+	{
+
+	}
+
+	virtual void apply(osg::Node& node)
+	{
+		std::string name;
+		if (node.getUserValue("Name", name) && name == _name)
+		{
+			subEntity = dynamic_cast<osg::MatrixTransform*>(&node);
+		}
+
+		if (!subEntity.valid()) traverse(node);
+	}
+	Engine::Entity	subEntity;
+protected:
+	std::string		_name;
+};
+
+unsigned int Engine::getEntityId(unsigned int parentEntityId, const std::string& subEntityName)
+{
+	EntityMapIterator itr = _entities.find(parentEntityId);
+	if (itr == _entities.end()) return 0;
+
+	FindSubEntityNodeVisitor nv(subEntityName);
+	itr->second->accept(nv);
+
+	unsigned int ID = 0;
+	if (nv.subEntity.valid())
+		nv.subEntity->getUserValue("ID", ID);
+
+	return ID;
+}
+
+
 void Engine::removeEntity(unsigned int id)
 {
     EntityMapIterator itr = _entities.find(id);
     if (itr == _entities.end())
         return;
 
-	getScene()->asGroup()->removeChild(itr->second);
+    getScene()->asGroup()->removeChild(itr->second);
     _entities.erase(itr);
 }
 
@@ -907,138 +1028,242 @@ void Engine::unbindFromEntity(unsigned int id)
     entity->setMatrix(wmx);
 }
 
+void Engine::bindEntityToCamera(unsigned int id, const osg::Matrixd& mx, unsigned int cameraID)
+{
+    if (cameraID >= _viewer->getNumViews()) return;
+
+    EntityMapIterator itr = _entities.find(id);
+    if (itr == _entities.end()) return;
+
+    osg::ref_ptr<osg::MatrixTransform> entity = itr->second;
+    if (!entity.valid()) return;
+
+    osg::ref_ptr<osg::Camera> camera = _viewer->getView(cameraID)->getCamera();
+
+    osg::ref_ptr<osg::UserDataContainer> container = camera->getOrCreateUserDataContainer();
+    if (!container.valid()) return;
+
+    container->addUserObject(entity);
+    entity->setUserValue("BindToCameraOffset", mx);
+
+    std::string cameras;
+    entity->getUserValue("BindCameras", cameras);
+
+    std::ostringstream oss;
+    oss << cameras << ":" << cameraID;
+    entity->setUserValue("BindCameras", oss.str());
+}
+
+void Engine::bindEntityToCameraUpdate(unsigned int id, const osg::Matrixd& mx)
+{
+    EntityMapIterator itr = _entities.find(id);
+    if (itr == _entities.end()) return;
+
+    osg::ref_ptr<osg::MatrixTransform> entity = itr->second;
+    if (!entity.valid()) return;
+
+    entity->setUserValue("BindToCameraOffset", mx);
+}
+
+void Engine::unbindEntityFromCamera(unsigned int id)
+{
+    EntityMapIterator itr = _entities.find(id);
+    if (itr == _entities.end()) return;
+
+    osg::ref_ptr<osg::MatrixTransform> entity = itr->second;
+    if (!entity.valid()) return;
+
+    std::string cameras;
+    entity->getUserValue("BindCameras", cameras);
+
+    unsigned int cameraID = 0;
+
+    StringUtils::Tokens tokens = StringUtils::instance()->tokenize(cameras, ":");
+    StringUtils::TokensIterator titr = tokens.begin();
+    for (; titr != tokens.end(); ++titr)
+    {
+        cameraID = atoi(titr->c_str());
+
+        if (cameraID >= _viewer->getNumViews()) continue;
+
+        osg::ref_ptr<osg::Camera> camera = _viewer->getView(cameraID)->getCamera();
+
+        osg::ref_ptr<osg::UserDataContainer> container = camera->getUserDataContainer();
+        if (!container.valid()) continue;
+
+        bool removed = false;
+        for (size_t i = 0; i < container->getNumUserObjects(); ++i)
+        {
+            osg::ref_ptr<osg::MatrixTransform> object = dynamic_cast<osg::MatrixTransform*>(container->getUserObject(i));
+            if (!object.valid()) continue;
+
+            if (object == entity)
+            {
+                container->removeUserObject(i);
+                removed = true;
+                break;
+            }
+        }
+        if (removed) break;
+    }
+
+    std::ostringstream oss;
+
+    titr = tokens.begin();
+    for (; titr != tokens.end(); ++titr)
+    {
+        if (atoi(titr->c_str()) != cameraID)
+        {
+            oss << ":" << *titr;
+        }
+    }
+
+    entity->setUserValue("BindCameras", oss.str());
+}
+
+
 void Engine::initScene()
 {
     if (!_scene.valid())
-    {            
+    {
         _sunOrMoonLight = new osg::LightSource;
         _sunOrMoonLight->getLight()->setLightNum(0);
         _sunOrMoonLight->setName("SunOrMoon");
-        _sunOrMoonLight->setCullingActive(false);                    
+        _sunOrMoonLight->setCullingActive(false);
 
-        osg::ref_ptr<osgShadow::ShadowedScene> shadowedScene = new osgShadow::ShadowedScene;
-        osg::ref_ptr<osgShadow::MinimalShadowMap> msm = new osgShadow::LightSpacePerspectiveShadowMapDB;
-        shadowedScene->setShadowTechnique( msm.get() );
+        float minLightMargin = Configuration::instance()->getConfig("ShadowedScene-minLightMargin", 10.0);
+        float maxFarPlane = Configuration::instance()->getConfig("ShadowedScene-maxFarPlane", 1000.0);
+        unsigned int texSize = Configuration::instance()->getConfig("ShadowedScene-texSize", 4096);
+        unsigned int baseTexUnit = Configuration::instance()->getConfig("ShadowedScene-baseTexUnit", 0);
+        unsigned int shadowTexUnit = Configuration::instance()->getConfig("ShadowedScene-shadowTexUnit", 1);
+        bool useShadowedScene = Configuration::instance()->getConfig("ShadowedScene", "yes") == "yes";
 
-        shadowedScene->setReceivesShadowTraversalMask(ReceivesShadowTraversalMask);
-        shadowedScene->setCastsShadowTraversalMask(CastsShadowTraversalMask);
+        if (useShadowedScene)
+        {
+            osg::ref_ptr<osgShadow::ShadowedScene> shadowedScene = new osgShadow::ShadowedScene;
+            osg::ref_ptr<osgShadow::MinimalShadowMap> msm = new osgShadow::LightSpacePerspectiveShadowMapDB;
+            shadowedScene->setShadowTechnique(msm.get());
 
-        float minLightMargin        = Configuration::instance()->getConfig("ShadowedScene-minLightMargin",10.0);
-        float maxFarPlane           = Configuration::instance()->getConfig("ShadowedScene-maxFarPlane",1000.0);
-        unsigned int texSize        = Configuration::instance()->getConfig("ShadowedScene-texSize",4096);
-        unsigned int baseTexUnit    = Configuration::instance()->getConfig("ShadowedScene-baseTexUnit",0);
-        unsigned int shadowTexUnit  = Configuration::instance()->getConfig("ShadowedScene-shadowTexUnit",1);
+            shadowedScene->setReceivesShadowTraversalMask(ReceivesShadowTraversalMask);
+            shadowedScene->setCastsShadowTraversalMask(CastsShadowTraversalMask);
 
-        msm->setMinLightMargin( minLightMargin );
-        msm->setMaxFarPlane( maxFarPlane );
-        msm->setTextureSize( osg::Vec2s( texSize, texSize ) );
-        msm->setShadowTextureCoordIndex( shadowTexUnit );
-        msm->setShadowTextureUnit( shadowTexUnit );
-        msm->setBaseTextureCoordIndex( baseTexUnit );
-        msm->setBaseTextureUnit( baseTexUnit );
-        msm->setLight(_sunOrMoonLight->getLight());
+            msm->setMinLightMargin(minLightMargin);
+            msm->setMaxFarPlane(maxFarPlane);
+            msm->setTextureSize(osg::Vec2s(texSize, texSize));
+            msm->setShadowTextureCoordIndex(shadowTexUnit);
+            msm->setShadowTextureUnit(shadowTexUnit);
+            msm->setBaseTextureCoordIndex(baseTexUnit);
+            msm->setBaseTextureUnit(baseTexUnit);
+            msm->setLight(_sunOrMoonLight->getLight());
+
+            osg::Shader* mainFragmentShader = new osg::Shader(osg::Shader::FRAGMENT,
+                " // following expressions are auto modified - do not change them:       \n"
+                " // gl_TexCoord[0]  0 - can be subsituted with other index              \n"
+                "                                                                        \n"
+                "float DynamicShadow( );                                                 \n"
+                "                                                                        \n"
+                "uniform sampler2D baseTexture;                                          \n"
+                "                                                                        \n"
+                "void computeFogColor(inout vec4 color)                                  \n"
+                "{                                                                       \n"
+                "    if (gl_FragCoord.w > 0.0)                                           \n"
+                "    {                                                                   \n"
+                "        const float LOG2 = 1.442695;									 \n"
+                "        float z = gl_FragCoord.z / gl_FragCoord.w;                      \n"
+                "        float fogFactor = exp2( -gl_Fog.density *						 \n"
+                "            gl_Fog.density *											 \n"
+                "            z *														 \n"
+                "            z *														 \n"
+                "            LOG2 );													 \n"
+                "        fogFactor = clamp(fogFactor, 0.0, 1.0);                         \n"
+                "                                                                        \n"
+                "        vec4 clr = color;                                               \n"
+                "        color = mix(gl_Fog.color, color, fogFactor );                   \n"
+                "        color.a = clr.a;                                                \n"
+                "    }                                                                   \n"
+                "}	                                                                     \n"
+                "void main(void)                                                         \n"
+                "{                                                                       \n"
+                "  vec4 colorAmbientEmissive = gl_FrontLightModelProduct.sceneColor;     \n"
+                "  vec4 color = texture2D( baseTexture, gl_TexCoord[0].xy );             \n"
+                "  color *= mix( colorAmbientEmissive, gl_Color, DynamicShadow() );      \n"
+                "  computeFogColor(color.rgba);                                          \n"
+                "  gl_FragColor = color;                                                 \n"
+                "} \n");
+
+            msm->setMainFragmentShader(mainFragmentShader);
+
+            _scene = shadowedScene;
+        }
+        else
+        {
+            _scene = new osg::Group;
+        }
+
+        _lightsGroup = new osg::Group;
 
         _fog = new osg::Fog;
         _fog->setDensity(0);
-        shadowedScene->getOrCreateStateSet()->setAttributeAndModes(_fog.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+        _scene->getOrCreateStateSet()->setAttributeAndModes(_fog.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
-        osg::Shader* mainFragmentShader = new osg::Shader( osg::Shader::FRAGMENT,
-            " // following expressions are auto modified - do not change them:       \n"
-            " // gl_TexCoord[0]  0 - can be subsituted with other index              \n"
-            "                                                                        \n"
-            "float DynamicShadow( );                                                 \n"
-            "                                                                        \n"
-            "uniform sampler2D baseTexture;                                          \n"
-            "                                                                        \n"
-            "void computeFogColor(inout vec4 color)                                  \n"
-            "{                                                                       \n"
-            "    if (gl_FragCoord.w > 0.0)                                           \n"
-            "    {                                                                   \n"
-            "        const float LOG2 = 1.442695;									 \n"
-            "        float z = gl_FragCoord.z / gl_FragCoord.w;                      \n"
-            "        float fogFactor = exp2( -gl_Fog.density *						 \n"
-            "            gl_Fog.density *											 \n"
-            "            z *														 \n"
-            "            z *														 \n"
-            "            LOG2 );													 \n"
-            "        fogFactor = clamp(fogFactor, 0.0, 1.0);                         \n"
-            "                                                                        \n"
-            "        vec4 clr = color;                                               \n"
-            "        color = mix(gl_Fog.color, color, fogFactor );                   \n"
-            "        color.a = clr.a;                                                \n"
-            "    }                                                                   \n"
-            "}	                                                                     \n"
-            "void main(void)                                                         \n"
-            "{                                                                       \n"
-            "  vec4 colorAmbientEmissive = gl_FrontLightModelProduct.sceneColor;     \n"
-            "  vec4 color = texture2D( baseTexture, gl_TexCoord[0].xy );             \n"
-            "  color *= mix( colorAmbientEmissive, gl_Color, DynamicShadow() );      \n"
-            "  computeFogColor(color.rgba);                                          \n"
-            "  gl_FragColor = color;                                                 \n"
-            "} \n" );
-
-        msm->setMainFragmentShader(mainFragmentShader);
-
-		_scene = shadowedScene;
-		_lightsGroup = new osg::Group;
-    }	
+    }
 }
 
 void Engine::setupInitFlags(unsigned int mask)
 {
-	_setupMask = mask;
+    _setupMask = mask;
 }
 
 void Engine::setViewType(osgViewer::View* view, ViewType type)
 {
-	// This is really experimental we are not after
-	// doing full sensor support
-	switch (type)
-	{
-	case OTW:
-		view->getSceneData()->getOrCreateStateSet()->addUniform(new osg::Uniform("ViewOptions_EO", (bool)false));
-		view->getSceneData()->getOrCreateStateSet()->addUniform(new osg::Uniform("ViewOptions_IR", (bool)false));
-		break;
-	case EO:
-		view->getSceneData()->getOrCreateStateSet()->addUniform(new osg::Uniform("ViewOptions_EO", (bool)true));
-		view->getSceneData()->getOrCreateStateSet()->addUniform(new osg::Uniform("ViewOptions_IR", (bool)false));
-		break;
-	case IR:
-		view->getSceneData()->getOrCreateStateSet()->addUniform(new osg::Uniform("ViewOptions_EO", (bool)false));
-		view->getSceneData()->getOrCreateStateSet()->addUniform(new osg::Uniform("ViewOptions_IR", (bool)true));
-		break;
-	default:
-		view->getSceneData()->getOrCreateStateSet()->addUniform(new osg::Uniform("ViewOptions_EO", (bool)false));
-		view->getSceneData()->getOrCreateStateSet()->addUniform(new osg::Uniform("ViewOptions_IR", (bool)false));
-	}
-	view->setUserValue("Options", (unsigned int)type);
+    // This is really experimental we are not after
+    // doing full sensor support
+    switch (type)
+    {
+    case OTW:
+        view->getSceneData()->getOrCreateStateSet()->addUniform(new osg::Uniform("ViewOptions_EO", (bool)false));
+        view->getSceneData()->getOrCreateStateSet()->addUniform(new osg::Uniform("ViewOptions_IR", (bool)false));
+        break;
+    case EO:
+        view->getSceneData()->getOrCreateStateSet()->addUniform(new osg::Uniform("ViewOptions_EO", (bool)true));
+        view->getSceneData()->getOrCreateStateSet()->addUniform(new osg::Uniform("ViewOptions_IR", (bool)false));
+        break;
+    case IR:
+        view->getSceneData()->getOrCreateStateSet()->addUniform(new osg::Uniform("ViewOptions_EO", (bool)false));
+        view->getSceneData()->getOrCreateStateSet()->addUniform(new osg::Uniform("ViewOptions_IR", (bool)true));
+        break;
+    default:
+        view->getSceneData()->getOrCreateStateSet()->addUniform(new osg::Uniform("ViewOptions_EO", (bool)false));
+        view->getSceneData()->getOrCreateStateSet()->addUniform(new osg::Uniform("ViewOptions_IR", (bool)false));
+    }
+    view->setUserValue("Options", (unsigned int)type);
 }
 
 void Engine::initView(osgViewer::View* view, ViewType type)
 {
-	initScene();
+    initScene();
 
-	osg::Group* root = new osg::Group;
-	root->addChild(_sunOrMoonLight);
-	root->addChild(_scene);
-	root->addChild(_lightsGroup);
-	view->setSceneData(root);
+    osg::Group* root = new osg::Group;
+    root->addChild(_sunOrMoonLight);
+    root->addChild(_scene);
+    root->addChild(_lightsGroup);
+    view->setSceneData(root);
 
-	view->setLight(_sunOrMoonLight->getLight());	
-	view->setUserValue("OpenIG-Scene", (bool)true);	
+    view->setLight(_sunOrMoonLight->getLight());
+    view->setUserValue("OpenIG-Scene", (bool)true);
 
-	osg::ref_ptr<osg::Uniform> fCoefUniform = new osg::Uniform("Fcoef", 0.0f);
-	view->getSceneData()->getOrCreateStateSet()->addUniform(fCoefUniform);
-	view->getCamera()->setPreDrawCallback(new SetFarPlaneUniformCallback(fCoefUniform.get()));
+    osg::ref_ptr<osg::Uniform> fCoefUniform = new osg::Uniform("Fcoef", 0.0f);
+    view->getSceneData()->getOrCreateStateSet()->addUniform(fCoefUniform);
+    view->getCamera()->setPreDrawCallback(new SetFarPlaneUniformCallback(fCoefUniform.get()));
 
-	osg::StateSet *stateSet = view->getSceneData()->getOrCreateStateSet();
-	stateSet->setMode(GL_DEPTH_CLAMP, osg::StateAttribute::ON);
-	osg::Depth* depth = new osg::Depth(osg::Depth::LEQUAL);
-	stateSet->setAttribute(depth);
+    osg::StateSet *stateSet = view->getSceneData()->getOrCreateStateSet();
+    stateSet->setMode(GL_DEPTH_CLAMP, osg::StateAttribute::ON);
+    osg::Depth* depth = new osg::Depth(osg::Depth::LEQUAL);
+    stateSet->setAttribute(depth);
 
-	setViewType(view, type);
+    setViewType(view, type);
 
-	createSunMoonLight();
+    createSunMoonLight();
 }
 
 void Engine::initViewer(osgViewer::CompositeViewer *viewer, const ViewIdentifiers& ids)
@@ -1047,34 +1272,34 @@ void Engine::initViewer(osgViewer::CompositeViewer *viewer, const ViewIdentifier
 
     if (_viewer->getNumViews() != 0)
     {
-		osgViewer::ViewerBase::Views views;
-		_viewer->getViews(views);
+        osgViewer::ViewerBase::Views views;
+        _viewer->getViews(views);
 
-		osgViewer::ViewerBase::Views::iterator itr = views.begin();
-		for (unsigned int viewID = 0; itr != views.end(); ++itr, ++viewID)
-		{
-			bool processThisView = false;
-			if (ids.size())
-			{
-				ViewIdentifiers::const_iterator vitr = ids.begin();
-				for (; vitr != ids.end(); ++vitr)
-				{
-					if (*vitr == viewID)
-					{
-						processThisView = true;
-						break;
-					}
-				}
-			}
-			else
-			{
-				processThisView = true;
-			}
-			if (processThisView && !(**itr).getSceneData())
-			{
-				initView(*itr);
-			}
-		}        
+        osgViewer::ViewerBase::Views::iterator itr = views.begin();
+        for (unsigned int viewID = 0; itr != views.end(); ++itr, ++viewID)
+        {
+            bool processThisView = false;
+            if (ids.size())
+            {
+                ViewIdentifiers::const_iterator vitr = ids.begin();
+                for (; vitr != ids.end(); ++vitr)
+                {
+                    if (*vitr == viewID)
+                    {
+                        processThisView = true;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                processThisView = true;
+            }
+            if (processThisView && !(**itr).getSceneData())
+            {
+                initView(*itr);
+            }
+        }
     }
 
 }
@@ -1087,18 +1312,19 @@ void Engine::initPluginContext()
 void Engine::setCameraPosition(const osg::Matrixd& mx, bool viewMatrix, unsigned int cameraID)
 {
     if (_viewer->getNumViews()==0) return;
-	if (cameraID >= _viewer->getNumViews()) return;
+    if (cameraID >= _viewer->getNumViews()) return;
 
     switch (viewMatrix)
     {
     case true:
          _viewer->getView(cameraID)->getCamera()->setViewMatrix(mx);
+         _viewer->getView(cameraID)->getCamera()->setUserValue("ViewMatrix", mx);
         break;
     case false:
          _viewer->getView(cameraID)->getCamera()->setViewMatrix(osg::Matrixd::inverse(mx));
+         _viewer->getView(cameraID)->getCamera()->setUserValue("ViewMatrix", osg::Matrixd::inverse(mx));
         break;
-    }	
-
+    }
 }
 
 void Engine::bindCameraToEntity(unsigned int id, const osg::Matrixd& mx, unsigned int cameraID)
@@ -1112,34 +1338,34 @@ void Engine::bindCameraToEntity(unsigned int id, const osg::Matrixd& mx, unsigne
         osg::ref_ptr<osg::Camera> camera = _viewer->getView(cameraID)->getCamera();
         camera->setUserValue("bindOffset",mx);
         camera->setUserValue("bindTo",id);
-        camera->setUserValue("bindToEntity",(bool)true);		
+        camera->setUserValue("bindToEntity",(bool)true);
     }
 }
 
 void Engine::bindCameraSetFixedUp(bool fixedUp, bool freezeOrientation, unsigned int cameraID)
 {
-	if (_viewer.valid() && (_viewer->getNumViews() != 0) && (cameraID < _viewer->getNumViews()))
+    if (_viewer.valid() && (_viewer->getNumViews() != 0) && (cameraID < _viewer->getNumViews()))
     {
         osg::ref_ptr<osg::Camera> camera = _viewer->getView(cameraID)->getCamera();
         camera->setUserValue("fixedUp",(bool)fixedUp);
-		camera->setUserValue("freeze", (bool)freezeOrientation);
+        camera->setUserValue("freeze", (bool)freezeOrientation);
 
     }
 }
 
 void Engine::bindCameraUpdate(const osg::Matrixd& mx, unsigned int cameraID)
 {
-	if (_viewer.valid() && (_viewer->getNumViews() != 0) && (cameraID < _viewer->getNumViews()))
+    if (_viewer.valid() && (_viewer->getNumViews() != 0) && (cameraID < _viewer->getNumViews()))
     {
         osg::ref_ptr<osg::Camera> camera = _viewer->getView(cameraID)->getCamera();
-        camera->setUserValue("bindOffset",mx);	
+        camera->setUserValue("bindOffset",mx);
     }
 }
 
 bool Engine::isCameraBoundToEntity(unsigned int cameraID)
 {
     bool bound = false;
-	if (_viewer.valid() && _viewer->getNumViews() != 0 && cameraID < _viewer->getNumViews())
+    if (_viewer.valid() && _viewer->getNumViews() != 0 && cameraID < _viewer->getNumViews())
     {
         osg::ref_ptr<osg::Camera> camera = _viewer->getView(cameraID)->getCamera();
         camera->getUserValue("bindToEntity",bound);
@@ -1150,7 +1376,7 @@ bool Engine::isCameraBoundToEntity(unsigned int cameraID)
 
 void Engine::unbindCameraFromEntity(unsigned int cameraID)
 {
-	if (_viewer.valid() && _viewer->getNumViews() != 0 && cameraID < _viewer->getNumViews())
+    if (_viewer.valid() && _viewer->getNumViews() != 0 && cameraID < _viewer->getNumViews())
     {
         osg::ref_ptr<osg::Camera> camera = _viewer->getView(cameraID)->getCamera();
 
@@ -1183,6 +1409,12 @@ void Engine::setTimeOfDay(unsigned int hour, unsigned int minutes)
         OpenIG::Base::TimeOfDayAttributes tod((hour ? hour : 1),minutes);
         _context.addAttribute("TOD", new PluginContext::Attribute<OpenIG::Base::TimeOfDayAttributes>(tod));
     }
+}
+
+void Engine::setDate(unsigned int month, int day, int year)
+{
+    OpenIG::Base::DateAttributes date(month,day,year);
+    _context.addAttribute("Date", new PluginContext::Attribute<OpenIG::Base::DateAttributes>(date));
 }
 
 void Engine::setRain(double factor)
@@ -1287,6 +1519,50 @@ void Engine::playAnimation(unsigned int entityId, const std::string& animationNa
 
 }
 
+void Engine::changeAnimationStatus(unsigned int entityId, ImageGenerator::AnimationStatus status, const OpenIG::Base::StringUtils::StringList& animations)
+{
+    switch (status)
+    {
+    case Play:
+        playAnimation(entityId, animations);
+        break;
+    case Stop:
+        stopAnimation(entityId, animations);
+        break;
+    case Reset:
+        resetAnimation(entityId, animations);
+        break;
+    case Pause:
+        {
+            StringUtils::StringListConstIterator itr = animations.begin();
+            for (; itr != animations.end(); ++itr)
+            {
+                OpenIG::Base::AnimationAttributes attr;
+                attr.entityId = entityId;
+                attr.animationName = *itr;
+                attr.pause = true;
+
+                _context.addAttribute("Animation", new PluginContext::Attribute<OpenIG::Base::AnimationAttributes>(attr));
+            }
+        }
+        break;
+    case Restore:
+    {
+        StringUtils::StringListConstIterator itr = animations.begin();
+        for (; itr != animations.end(); ++itr)
+        {
+            OpenIG::Base::AnimationAttributes attr;
+            attr.entityId = entityId;
+            attr.animationName = *itr;
+            attr.restore = true;
+
+            _context.addAttribute("Animation", new PluginContext::Attribute<OpenIG::Base::AnimationAttributes>(attr));
+        }
+    }
+        break;
+    }
+}
+
 void Engine::playAnimation(unsigned int entityId, const StringUtils::StringList& animations)
 {
     StringUtils::StringListConstIterator itr = animations.begin();
@@ -1358,22 +1634,22 @@ Engine::LightsMap& Engine::getLightsMap()
 
 const OpenIG::Base::StringUtils::StringList& Engine::getFilesToBeCached() const
 {
-	return _filesToBeCached;
+    return _filesToBeCached;
 }
 
 void Engine::addFilesToBeCached(const OpenIG::Base::StringUtils::StringList& files)
 {
-	_filesToBeCached.insert(_filesToBeCached.end(), files.begin(), files.end());
+    _filesToBeCached.insert(_filesToBeCached.end(), files.begin(), files.end());
 }
 
 bool Engine::isFileCached(const std::string& fileName)
 {
-	OpenIG::Base::StringUtils::StringList::iterator itr = _filesToBeCached.begin();
-	for (; itr != _filesToBeCached.end(); ++itr)
-	{
-		if (*itr == fileName) return true;
-	}
-	return false;
+    OpenIG::Base::StringUtils::StringList::iterator itr = _filesToBeCached.begin();
+    for (; itr != _filesToBeCached.end(); ++itr)
+    {
+        if (*itr == fileName) return true;
+    }
+    return false;
 }
 
 

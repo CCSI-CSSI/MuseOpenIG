@@ -8,10 +8,10 @@ QT       -= core gui
 
 #CONFIG += silent
 
-TARGET = Plugin-SimpleLighting
+TARGET = OpenIG-Plugin-SimpleLighting
 TEMPLATE = lib
 
-DEFINES += IGPLUGINSIMPLELIGHTING_LIBRARY OPENIG_SDK
+DEFINES += IGPLUGINSIMPLELIGHTING_LIBRARY
 
 SOURCES += igpluginsimplelighting.cpp
 
@@ -20,7 +20,7 @@ HEADERS +=
 INCLUDEPATH += ../
 DEPENDPATH += ../
 
-LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgShadow \
+LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgShadow -losgGA -losgText -losgUtil \
         -lOpenIG-Engine -lOpenIG-Base -lOpenIG-PluginBase
 
 OTHER_FILES += libIgPlugin-SimpleLighting.so.xml
@@ -34,11 +34,11 @@ OTHER_FILES += \
 
 unix {
     !mac:contains(QMAKE_HOST.arch, x86_64):{
-        DESTDIR = /usr/local/lib64/igplugins
-        target.path = /usr/local/lib64/igplugins
+        DESTDIR = /usr/local/lib64/plugins
+        target.path = /usr/local/lib64/plugins
     } else {
-        DESTDIR = /usr/local/lib/igplugins
-        target.path = /usr/local/lib/igplugins
+        DESTDIR = /usr/local/lib/plugins
+        target.path = /usr/local/lib/plugins
     }
     message(Libs will be installed into $$DESTDIR)
 
@@ -49,9 +49,9 @@ unix {
     INCLUDEPATH += /usr/local/lib64
     DEPENDPATH += /usr/local/lib64
 
-    FILE = $${PWD}/DataFiles/libIgPlugin-SimpleLighting.so.xml
-    DDIR = $${DESTDIR}/libIgPlugin-SimpleLighting.so.xml
-    mac: DDIR = $${DESTDIR}/libIgPlugin-SimpleLighting.dylib.xml
+    FILE      = $${PWD}/DataFiles/libIgPlugin-SimpleLighting.so.xml
+    DDIR      = $${DESTDIR}/libOpenIG-Plugin-SimpleLighting.so.xml
+    mac: DDIR = $${DESTDIR}/libOpenIG-Plugin-SimpleLighting.dylib.xml
 
     QMAKE_POST_LINK =  test -d $$quote($$DESTDIR) || $$QMAKE_MKDIR $$quote($$DESTDIR) $$escape_expand(\\n\\t)
     QMAKE_POST_LINK += test -e $$quote($$DDIR) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DDIR) $$escape_expand(\\n\\t)
@@ -59,11 +59,11 @@ unix {
     # library version number files
     exists( "../openig_version.pri" ) {
 
-	include( "../openig_version.pri" )
-	isEmpty( VERSION ){ error( "bad or undefined VERSION variable inside file openig_version.pri" )
-	} else {
-	message( "Set version info to: $$VERSION" )
-	}
+    include( "../openig_version.pri" )
+    isEmpty( VERSION ){ error( "bad or undefined VERSION variable inside file openig_version.pri" )
+    } else {
+    message( "Set version info to: $$VERSION" )
+    }
 
     }
     else { error( "could not find pri library version file openig_version.pri" ) }
@@ -81,6 +81,7 @@ win32 {
     else {
         message(\"OpenSceneGraph\" detected in \"$$OSGROOT\")
         INCLUDEPATH += $$OSGROOT/include
+        LIBS += -L$$OSGROOT/lib
     }
     OSGBUILD = $$(OSG_BUILD)
     isEmpty(OSGBUILD) {
@@ -98,12 +99,12 @@ win32 {
         OPENIGBUILD = $$IN_PWD/..
     }
     DESTDIR = $$OPENIGBUILD/lib
-    DLLDESTDIR = $$OPENIGBUILD/bin/igplugins
+    DLLDESTDIR = $$OPENIGBUILD/bin/plugins
 
     LIBS += -L$$OPENIGBUILD/lib # -lstdc++.dll
 
     FILE = $${PWD}/DataFiles/libIgPlugin-SimpleLighting.so.xml
-    DFILE = $${DLLDESTDIR}/IgPlugin-SimpleLighting.dll.xml
+    DFILE = $${DLLDESTDIR}/OpenIG-Plugin-SimpleLighting.dll.xml
 
     FILE ~= s,/,\\,g
     DFILE ~= s,/,\\,g

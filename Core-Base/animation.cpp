@@ -73,6 +73,9 @@ void Animations::resetAnimation( OpenIG::Base::ImageGenerator* ig, unsigned int 
             }
 
             rtanimation->_startTime = osg::Timer::instance()->tick();
+			rtanimation->_pauseTime = 0.0;
+			rtanimation->_pausedTime = 0.0;
+			rtanimation->_resumed = false;
         }
     }
 
@@ -171,6 +174,31 @@ void Animations::playAnimation(OpenIG::Base::ImageGenerator* ig, unsigned int en
 {
     if (!ig) return;
 
+	RuntimeAnimationsIterator itr = _animations.begin();
+	while (itr != _animations.end())
+	{
+		osg::ref_ptr<RuntimeAnimation> rtanimation = *itr;
+		if (!rtanimation.valid())
+		{
+			++itr;
+			continue;
+		}
+
+		osg::ref_ptr<Animation> animation = rtanimation->_animation.get();
+		if (!animation.valid())
+		{
+			++itr;
+			continue;
+		}		
+
+		if (rtanimation->_entityId == entityId && animation->_name == name)
+		{
+			osg::notify(osg::NOTICE) << "ImageGenerator Core: " << rtanimation->_animation->_name << " already in playback/paused" << std::endl;
+			return;
+		}
+		++itr;
+	}
+
     ImageGenerator::Entity& entity = ig->getEntityMap()[entityId];
     if (!entity.valid()) return;
 
@@ -198,6 +226,58 @@ void Animations::playAnimation(OpenIG::Base::ImageGenerator* ig, unsigned int en
     rtanimation->_startTime = osg::Timer::instance()->tick();
 }
 
+void Animations::pauseResumeAnimation(OpenIG::Base::ImageGenerator* ig, unsigned int entityId, const std::string& name, bool pauseResume)
+{
+	if (!ig) return;
+
+	RuntimeAnimationsIterator itr = _animations.begin();
+	while (itr != _animations.end())
+	{
+		osg::ref_ptr<RuntimeAnimation> rtanimation = *itr;
+		if (!rtanimation.valid())
+		{
+			++itr;
+			continue;
+		}
+
+		osg::ref_ptr<Animation> animation = rtanimation->_animation.get();
+		if (!animation.valid())
+		{
+			++itr;
+			continue;
+		}
+
+		//osg::notify(osg::NOTICE) << "checking animation " << rtanimation->_animation->_name << std::endl;
+
+		if (rtanimation->_entityId == entityId && animation->_name == name)
+		{
+			if (pauseResume)
+			{
+				rtanimation->_pauseTime = osg::Timer::instance()->tick();
+
+				osg::notify(osg::NOTICE) << "ImageGenerator Core: animation " << rtanimation->_animation->_name << " paused" << std::endl;
+			}
+			else
+			{
+				if (rtanimation->_pauseTime > 0.0)
+				{
+#if 0
+					rtanimation->_pausedTime += osg::Timer::instance()->delta_s(
+						rtanimation->_pauseTime, osg::Timer::instance()->tick()
+						);
+#endif
+					rtanimation->_resumed = true;
+				}
+#if 0
+				rtanimation->_pauseTime = 0.0;
+#endif
+			}
+			break;
+		}
+		++itr;
+	}
+}
+
 void Animations::updateAnimations(OpenIG::Base::ImageGenerator* ig)
 {
     if (!ig) return;    
@@ -211,7 +291,20 @@ void Animations::updateAnimations(OpenIG::Base::ImageGenerator* ig)
 
         if (!rtanimation->_animation.valid()) continue;
 
-        double dt = osg::Timer::instance()->delta_s(rtanimation->_startTime,now);
+		if (rtanimation->_resumed)
+		{
+			rtanimation->_pausedTime += osg::Timer::instance()->delta_s(rtanimation->_pauseTime, now);
+			rtanimation->_resumed = false;
+			rtanimation->_pauseTime = 0.0;
+
+			osg::notify(osg::NOTICE) << "ImageGenerator Core: animation " << rtanimation->_animation->_name << " resumed" << std::endl;
+		}
+		if (rtanimation->_pauseTime != 0.0)
+		{			
+			continue;
+		}
+
+        double dt = osg::Timer::instance()->delta_s(rtanimation->_startTime,now) - rtanimation->_pausedTime;
 
         Animation* animation = rtanimation->_animation.get();
         double duration = animation->_duration;
@@ -328,7 +421,13 @@ void Animations::updateAnimations(OpenIG::Base::ImageGenerator* ig)
             continue;
         }
 
-        double dt = osg::Timer::instance()->delta_s(rtanimation->_startTime,now);
+		if (rtanimation->_pauseTime != 0.0)
+		{
+			++itr;
+			continue;
+		}
+
+		double dt = osg::Timer::instance()->delta_s(rtanimation->_startTime, now) - rtanimation->_pausedTime;
 
         Animation* animation = rtanimation->_animation.get();
         double duration = animation->_duration;

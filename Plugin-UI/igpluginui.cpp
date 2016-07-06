@@ -66,6 +66,7 @@ class UIPlugin : public PluginBase::Plugin
 public:
 
 	static unsigned ScreenWidth;
+	static bool jrmSensorsFound;
 
 	struct LightPointDefinition : osg::Referenced
 	{
@@ -111,6 +112,7 @@ public:
 			, _colorDialog(0)
 			, _plugin(plugin)
 			, _lightingTab(0)
+			, _jrmSensorTab(0)
 		{
 
 		}
@@ -420,6 +422,169 @@ public:
 				_commandArgumentsEditBox->setOnlyText(oss.str().c_str());
 			}
 		}
+
+		void createJRMSensorsTab()
+		{
+			MyGUI::TextBox* text;
+			MyGUI::EditBox* edit;
+
+			MyGUI::TabItem* tab = _jrmSensorTab = _tabRoot->addItem("JRM Sensors Settings");
+
+			MyGUI::IntCoord coord;
+			MyGUI::Align	align = MyGUI::Align::Stretch;
+
+			float width = (_size.x() - 60 + 50) / 24.f;
+			float top = 30.f;
+			float height = _size.y() - 80;
+
+			coord.set(10, 10, _size.x() - 24, height);
+			MyGUI::TabControl* tabControl = MyGUI::Gui::getInstance().createWidget<MyGUI::TabControl>("TabControl", coord, align, "Overlapped", "SensorControl");
+			tabControl->attachToWidget(tab);
+
+			MyGUI::TabItem* redTab = tabControl->addItem("Red");
+			coord.set(300, 10, redTab->getSize().width - 300 - 10, redTab->getSize().height - 20);
+			MyGUI::TabControl* redTabSenSim = MyGUI::Gui::getInstance().createWidget<MyGUI::TabControl>("TabControl", coord, align, "Overlapped", "SenSim");
+			redTabSenSim->attachToWidget(redTab);
+			redTabSenSim->addItem("senSim");
+			redTabSenSim->addItem("detector");
+			redTabSenSim->addItem("optics");
+			redTabSenSim->addItem("electronics");
+
+			coord.set(20, 10, 260, ((redTab->getSize().height) - 20));			
+			_scrolls["red"] = MyGUI::Gui::getInstance().createWidget<MyGUI::ScrollView>("ScrollView", coord, MyGUI::Align::Stretch, "Overlapped", "Scroll");
+			_scrolls["red"]->attachToWidget(redTab);
+			_scrolls["red"]->setCanvasSize(coord.width, coord.height * 2);
+
+			//_items["red"]->eventListChangeScroll += MyGUI::newDelegate(this, &CustomMYGUIManager::notifyListChangeScroll);
+			//_items["red"]->eventListChangePosition += MyGUI::newDelegate(this, &CustomMYGUIManager::notifyListChangePosition);
+
+			//coord.set( ((_lists["red"]->getSize().width)-40), 0, 40, _lists["red"]->getSize().height);
+			//coord.set( 0, 0, 50, (_lists["red"]->getSize().height - 10) );
+			//MyGUI::ScrollBar *sbar = MyGUI::Gui::getInstance().createWidget<MyGUI::ScrollBar>("ScrollBar",coord, align,"Overlapped","scollbar1");
+			//sbar->setScrollRange(200);
+			//sbar->setScrollPosition(10);
+			//sbar->setScrollPage(1);
+			//sbar->setScrollViewPage(20);
+			//sbar->attachToWidget(_lists["red"]);
+			//_lists["red"]->setScrollVisible(true);
+			//_lists["red"]->setScrollPosition(10);
+
+			for (int x = 0; x<50; x++)
+			{
+				//coord.set(5, 2+(x*20), 50, 20);
+				//text = MyGUI::Gui::getInstance().createWidget<MyGUI::TextBox>("TextBox", coord, align, "Overlapped", "text");
+				//_lists["red"]->addItem("text");
+				//text->attachToWidget(_lists["red"]);
+				//_lists["red"]->setItemDataAt(x, x);
+				//text->setColour(MyGUI::Colour::Blue);
+				//text->setCaption("name:");
+				//coord.set(5+50, 2+(x*20), 40, 20);				
+				//coord.set(5, 2 + (x * 20), 50, 20);
+				//edit = MyGUI::Gui::getInstance().createWidget<MyGUI::EditBox>("EditBox", coord, align, "Overlapped", "redsensorName");
+				//_items["red"]->addItem(edit);
+				//edit->attachToWidget(scroll_view);
+				//edit->addText("0");
+				//_lists["red"]->setScrollPosition(200+(x*20));
+
+				coord.set(0, x * 20, 50, 20);
+				MyGUI::EditBox* edit = _scrolls["red"]->createWidget<MyGUI::EditBox>("EditBox", coord, MyGUI::Align::Default);
+				edit->addText("0");
+			}
+			//            MyGUI::List *test = MyGUI::Gui::getInstance().createWidget<MyGUI::ListBox>("ListBox", coord, align, "Overlapped", "tests1");
+			//            test->setScrollVisible(true);
+			//            test->setScrollPosition(_size.y()+200);
+
+			MyGUI::TabItem* greenTab = tabControl->addItem("Green");
+			coord.set(300, 10, greenTab->getSize().width - 300 - 10, greenTab->getSize().height - 20);
+			MyGUI::TabControl* greenTabSenSim = MyGUI::Gui::getInstance().createWidget<MyGUI::TabControl>("TabControl", coord, align, "Overlapped", "SenSim");
+			greenTabSenSim->attachToWidget(greenTab);
+			greenTabSenSim->addItem("senSim");
+			greenTabSenSim->addItem("detector");
+			greenTabSenSim->addItem("optics");
+			greenTabSenSim->addItem("electronics");
+			coord.set(20, 20, 260, redTab->getSize().height - 30);
+			_lists["green"] = MyGUI::Gui::getInstance().createWidget<MyGUI::ListBox>("ListBox", coord, align, "Overlapped", "lists1");
+			_lists["green"]->attachToWidget(greenTab);
+
+			MyGUI::TabItem* blueTab = tabControl->addItem("Blue");
+			coord.set(300, 10, blueTab->getSize().width - 300 - 10, blueTab->getSize().height - 20);
+			MyGUI::TabControl* blueTabSenSim = MyGUI::Gui::getInstance().createWidget<MyGUI::TabControl>("TabControl", coord, align, "Overlapped", "SenSim");
+			blueTabSenSim->attachToWidget(blueTab);
+			blueTabSenSim->addItem("senSim");
+			blueTabSenSim->addItem("detector");
+			blueTabSenSim->addItem("optics");
+			blueTabSenSim->addItem("electronics");
+			coord.set(20, 20, 260, blueTab->getSize().height - 30);
+			_lists["blue"] = MyGUI::Gui::getInstance().createWidget<MyGUI::ListBox>("ListBox", coord, align, "Overlapped", "lists1");
+			_lists["blue"]->attachToWidget(blueTab);
+
+			MyGUI::TabItem* mwirTab = tabControl->addItem("MWIR");
+			coord.set(300, 10, mwirTab->getSize().width - 300 - 10, mwirTab->getSize().height - 20);
+			MyGUI::TabControl* mwirTabSenSim = MyGUI::Gui::getInstance().createWidget<MyGUI::TabControl>("TabControl", coord, align, "Overlapped", "SenSim");
+			mwirTabSenSim->attachToWidget(mwirTab);
+			mwirTabSenSim->addItem("senSim");
+			mwirTabSenSim->addItem("detector");
+			mwirTabSenSim->addItem("optics");
+			mwirTabSenSim->addItem("electronics");
+			coord.set(20, 20, 260, mwirTab->getSize().height - 30);
+			_lists["mwir"] = MyGUI::Gui::getInstance().createWidget<MyGUI::ListBox>("ListBox", coord, align, "Overlapped", "lists1");
+			_lists["mwir"]->attachToWidget(mwirTab);
+
+			MyGUI::TabItem* lwirTab = tabControl->addItem("LWIR");
+			coord.set(300, 10, lwirTab->getSize().width - 300 - 10, lwirTab->getSize().height - 20);
+			MyGUI::TabControl* lwirTabSenSim = MyGUI::Gui::getInstance().createWidget<MyGUI::TabControl>("TabControl", coord, align, "Overlapped", "SenSim");
+			lwirTabSenSim->attachToWidget(lwirTab);
+			lwirTabSenSim->addItem("senSim");
+			lwirTabSenSim->addItem("detector");
+			lwirTabSenSim->addItem("optics");
+			lwirTabSenSim->addItem("electronics");
+			coord.set(20, 20, 260, lwirTab->getSize().height - 30);
+			_lists["lwir"] = MyGUI::Gui::getInstance().createWidget<MyGUI::ListBox>("ListBox", coord, align, "Overlapped", "lists1");
+			_lists["lwir"]->attachToWidget(lwirTab);
+
+			MyGUI::TabItem* nvgTab = tabControl->addItem("NVG");
+			coord.set(300, 10, nvgTab->getSize().width - 300 - 10, nvgTab->getSize().height - 20);
+			MyGUI::TabControl* nvgTabSenSim = MyGUI::Gui::getInstance().createWidget<MyGUI::TabControl>("TabControl", coord, align, "Overlapped", "SenSim");
+			nvgTabSenSim->attachToWidget(nvgTab);
+			nvgTabSenSim->addItem("senSim");
+			nvgTabSenSim->addItem("detector");
+			nvgTabSenSim->addItem("optics");
+			nvgTabSenSim->addItem("electronics");
+			coord.set(20, 20, 260, nvgTab->getSize().height - 30);
+			_lists["nvg"] = MyGUI::Gui::getInstance().createWidget<MyGUI::ListBox>("ListBox", coord, align, "Overlapped", "lists1");
+			_lists["nvg"]->attachToWidget(nvgTab);
+
+			coord.set(_size.x() - 90, _size.y() - 50, 65, 20);
+			align = MyGUI::Align::Stretch;
+
+			MyGUI::Button* button = MyGUI::Gui::getInstance().createWidget<MyGUI::Button>("Button", coord, align, "Overlapped", "JRMUpdate");
+			button->attachToWidget(tab);
+			button->setCaption("Update");
+			button->eventMouseButtonPressed += MyGUI::newDelegate(this, &CustomMYGUIManager::notifyUpdateButtonClick);
+
+			coord.set(_size.x() - 160, _size.y() - 50, 65, 20);
+			align = MyGUI::Align::Stretch;
+
+			button = MyGUI::Gui::getInstance().createWidget<MyGUI::Button>("Button", coord, align, "Overlapped", "JRMRevert");
+			button->attachToWidget(tab);
+			button->setCaption("Revert");
+			button->eventMouseButtonPressed += MyGUI::newDelegate(this, &CustomMYGUIManager::notifyRevertButtonClick);
+
+			//            coord.set(20, _size.y() - 80, 110, 30);
+			//            MyGUI::ListBox* _sensorlistb = MyGUI::Gui::getInstance().createWidget<MyGUI::ListBox>("ListBox", coord, align, "Overlapped", "lists1");
+			//            _sensorlistb->attachToWidget(tab);
+
+			coord.set(20, _size.y() - 60, 80, 20);
+			text = MyGUI::Gui::getInstance().createWidget<MyGUI::TextBox>("TextBox", coord, align, "Overlapped", "text");
+			text->attachToWidget(tab);
+			text->setColour(MyGUI::Colour::Blue);
+			text->setCaption("sensorGain:");
+
+			coord.set(80 + 20, _size.y() - 60, 20, 20);
+			edit = MyGUI::Gui::getInstance().createWidget<MyGUI::EditBox>("EditBox", coord, align, "Overlapped", "sensorGain");
+			edit->attachToWidget(tab);
+		}
+
 
 		void createLightingTab()
 		{
@@ -961,7 +1126,20 @@ public:
 			createLightingTab();
 			//createConfigTab();
 
-			_tabRoot->selectSheetIndex(1);
+			if (UIPlugin::jrmSensorsFound)
+			{
+				createJRMSensorsTab();
+			}
+
+			//Run through tabs leaving last one selected and
+			//hiding all the other data on their respective tabs....
+			//If we do not do this, you can see all the tabs at once
+			//blended together for some reason....
+			for (size_t x = 0; x<_tabRoot->getItemCount(); x++)
+			{
+				_tabRoot->setIndexSelected(x);
+			}
+			_tabRoot->setIndexSelected((size_t)1);
 
 			if (_colorDialog == 0)
 			{
@@ -1302,10 +1480,14 @@ public:
 		MyGUI::Button*			_colorButton;
 		UIPlugin*				_plugin;
 		MyGUI::TabItem*			_lightingTab;
+		MyGUI::TabItem*			_jrmSensorTab;
 		
 
 		typedef std::map< std::string, MyGUI::ListBox*>	ListBoxes;
 		ListBoxes				_lists;
+
+		typedef std::map< std::string, MyGUI::ScrollView*>	ScrollViews;
+		ScrollViews				_scrolls;
 
 	};
 
@@ -1376,7 +1558,7 @@ public:
 
 	virtual void init(PluginBase::PluginContext& context)
 	{
-		_mygui = new CustomMYGUIManager(context.getImageGenerator(),_rootMedia,this);
+		_mygui = new CustomMYGUIManager(context.getImageGenerator(), _rootMedia, this);
 
 		_geode = new osg::Geode;
 		_geode->setCullingActive(false);
@@ -1393,9 +1575,24 @@ public:
 		_camera->addChild(_geode.get());
 		_camera->setClearMask(0);
 
-		context.getImageGenerator()->getViewer()->getView(0)->getSceneData()->asGroup()->addChild(_camera);
-		context.getImageGenerator()->getViewer()->getView(0)->addEventHandler(new MYGUIHandler(_camera.get(), _mygui.get(), context.getImageGenerator(), UIPlugin::ScreenWidth));
+		_handler = new MYGUIHandler(_camera.get(), _mygui.get(), context.getImageGenerator(), UIPlugin::ScreenWidth);
 
+		context.getImageGenerator()->getViewer()->getView(0)->getSceneData()->asGroup()->addChild(_camera);
+		context.getImageGenerator()->getViewer()->getView(0)->addEventHandler(_handler);
+
+		// Look up for the JRMSensors plugin, so we can add the sensor data to MyGUI for editing
+		const OpenIG::Engine* ig = dynamic_cast<OpenIG::Engine*>(context.getImageGenerator());
+		const OpenIG::PluginBase::PluginHost::PluginsMap& plugins = ig->getPlugins();
+		OpenIG::PluginBase::PluginHost::PluginsMap::const_iterator itr = plugins.begin();
+		jrmSensorsFound = false;
+		for (; itr != plugins.end(); ++itr)
+		{
+			if (itr->second->getName() == "JRMSensors")
+			{
+				jrmSensorsFound = true;
+				break;
+			}
+		}
 	}
 	
 	LightPointDefinitions	_defs;
@@ -1518,10 +1715,14 @@ public:
 			catch (const std::exception& e)
 			{
 				osg::notify(osg::NOTICE) << "UI: exception thrown file creating a backup file: " << backup << ", " << e.what() << std::endl;
-			}
+			}			
 
 			// Read the XML
 			readFromXML(_xmlFileName);
+		}
+		else
+		{
+			_xmlFileName = "";
 		}
 	}
 
@@ -1529,8 +1730,14 @@ public:
     {		
 		static bool once = false;
 		if (!once)
-		{
+		{			
 			once = true;
+
+			for (size_t i = 1; i < context.getImageGenerator()->getViewer()->getNumViews(); ++i)
+			{
+				context.getImageGenerator()->getViewer()->getView(i)->getSceneData()->asGroup()->addChild(_camera);
+				context.getImageGenerator()->getViewer()->getView(i)->addEventHandler(_handler);
+			}
 
 			osgViewer::GraphicsWindow* gw = dynamic_cast<osgViewer::GraphicsWindow*>(context.getImageGenerator()->getViewer()->getView(0)->getCamera()->getGraphicsContext());
 			if (gw)
@@ -1539,14 +1746,18 @@ public:
 				int x, y, w, h;
 				gw->getWindowRectangle(x, y, w, h);
 				w = osg::minimum(w, (int)UIPlugin::ScreenWidth);
-				context.getImageGenerator()->getViewer()->getView(0)->getEventQueue()->windowResize(x, y, w, h);
+				context.getImageGenerator()->getViewer()->getView(
+						context.getImageGenerator()->getViewer()->getNumViews()-1
+					)->getEventQueue()->windowResize(x, y, w, h);
 
-			}
+			}			
 		}
     }
 
 	virtual void clean(PluginBase::PluginContext& context)
 	{		
+		_handler = NULL;
+
 		_mygui->cleanup();
 		_mygui = NULL;
 
@@ -1558,6 +1769,7 @@ protected:
 	osg::ref_ptr<CustomMYGUIManager>	_mygui;
 	osg::ref_ptr<osg::Geode>			_geode;
 	osg::ref_ptr<osg::Camera>			_camera;
+	osg::ref_ptr<MYGUIHandler>			_handler;
 	std::string							_rootMedia;
 };
 
@@ -1565,6 +1777,7 @@ protected:
 } // namespace
 
 unsigned OpenIG::Plugins::UIPlugin::ScreenWidth = 1600;
+bool OpenIG::Plugins::UIPlugin::jrmSensorsFound = false;
 
 #if defined(_MSC_VER) || defined(__MINGW32__)
     //  Microsoft

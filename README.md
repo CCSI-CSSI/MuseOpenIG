@@ -1,16 +1,25 @@
-# Muse OpenIG V2.0.1
+# Muse OpenIG V2.0.2
 The Muse OpenIG.  An opensource OpenSceneGraph based image generator application suite.
-
-#       Now features a Forward Plus lighting system, as its default lighting method!!!
-
 Documentation, sample datasets and Binary Downloads for some platforms available at: http://openig.compro.net
 
+#  New CIGI plugin -- Sample code demonstrates how to implement the CIGI protocol with OpenIG.
+   Sample code provided in the source code under the Simulation directory.  This sample code
+   shows some basic commands set-up and integrated for an OpenIG IG, a Host system and a terrain-query server.
+   The rest is left up to the user to determine how far you need to extend the CIGI command structure.
+   It is all based on the Boeing CIGI Class Library.  Boeing also provides a CIGI Host Emulator application
+   for Windows based systems and we have integrated it with our Application-Earth OSGEarth test application.
+   So lots of CIGI sample code for you to use if you need CIGI on your IG system.
+
+# Since V2.0.0 -- Features a Forward Plus lighting system plugin, as its default lighting method!!!
+-----------------------------------------------------------------------------------------------------------------
 Dependencies for compiling from source:
 --------------------------------------
-*   OpenSceneGraph 3.3.7 or later  
+*   Minimum of OpenSceneGraph 3.3.7 
     A patched version of OSG 3.3.7 is available on our [Downloads](http://openig.compro.net/download-openig.html)
     page, that contains some updates and allows full functionality
     of all features of MuseOpenIG.
+*   We now recommend you upgrade your OSG release to at least 3.4.0(3.5.3 Dev.)
+    in order to get the best OpenIG experience.
 
 *   QT 5.4.1/later or CMake 3.X/later
 *   Boost C++ Libraries 1.54 or later

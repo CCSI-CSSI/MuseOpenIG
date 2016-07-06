@@ -12,6 +12,9 @@
 #include <osg/BlendFunc>
 #include <osg/Timer>
 #include <osg/ValueObject>
+#include <osg/PagedLOD>
+#include <osg/ProxyNode>
+#include <osg/MatrixTransform>
 
 #include <osgDB/Registry>
 #include <osgDB/ReadFile>
@@ -19,6 +22,7 @@
 #include <osgDB/FileNameUtils>
 #include <osgDB/ReaderWriter>
 #include <osgDB/PluginQuery>
+#include <osgDB/XmlParser>
 
 #include <osgUtil/Optimizer>
 #include <osgUtil/Simplifier>
@@ -32,6 +36,8 @@
 #include <iostream>
 
 #include "OrientationConverter.h"
+
+#include <Core-Base/filesystem.h>
 
 typedef std::vector<std::string> FileNameList;
 
@@ -414,7 +420,18 @@ public:
 // Assign lp names based on their parent's name as a sufix
 struct AssignLpNamesVisitor : public osg::NodeVisitor
 {
-	AssignLpNamesVisitor() : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN) {}
+	AssignLpNamesVisitor() : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+	{
+		TimeOfDay_off = "7";
+		TimeOfDay_on = "18";
+		LandingLightBrightness_enable = "true";
+		LandingLightBrightness_day = "1";
+		LandingLightBrightness_night = "2";
+		LightBrightnessOnClouds_day = "0.01";
+		LightBrightnessOnClouds_night = "0.1";
+		LightBrightnessOnWater_day = "0.01";
+		LightBrightnessOnWater_night = "0.1";
+	}
 
 	virtual void apply(osg::Node& node)
 	{
@@ -434,10 +451,213 @@ struct AssignLpNamesVisitor : public osg::NodeVisitor
 
 				renamed = true;
 				lpn->setUserValue("renamed", renamed);
+
+				NamesMap::iterator itr = names.find(parentName);
+				if (itr == names.end())
+				{
+					LightDefinition def;
+					def.pattern = parentName;
+
+					names[parentName] = def;
+					//std::cout << "Light node processed: " << parentName << std::endl;
+				}
 			}
 		}
 		traverse(node);
 	}
+
+	void readXML(const std::string& fileName)
+	{
+		osgDB::XmlNode* root = osgDB::readXmlFile(fileName);
+		std::cout << "reading XML: " << fileName << std::endl;
+
+		if (root != 0 && root->children.size() != 0)
+		{
+
+			osgDB::XmlNode* config = root->children.at(0);
+			if (config->name == "OsgNodeSettings")
+			{
+
+				osgDB::XmlNode::Children::iterator itr = config->children.begin();
+				for (; itr != config->children.end(); ++itr)
+				{
+					osgDB::XmlNode* child = *itr;
+
+					if (child->name == "TimeOfDay")
+					{
+						TimeOfDay_on = child->properties["on"];
+						TimeOfDay_off = child->properties["off"];
+					}
+					if (child->name == "LandingLightBrightness")
+					{
+						LandingLightBrightness_enable = child->properties["enable"];
+						LandingLightBrightness_day = child->properties["day"];
+						LandingLightBrightness_night = child->properties["night"];
+					}
+					if (child->name == "LightBrightnessOnClouds")
+					{
+						LightBrightnessOnClouds_day = child->properties["day"];
+						LightBrightnessOnClouds_night = child->properties["night"];
+					}
+					if (child->name == "LightBrightnessOnWater")
+					{
+						LightBrightnessOnWater_day = child->properties["day"];
+						LightBrightnessOnWater_night = child->properties["night"];
+					}
+					if (child->name == "LightPointNode")
+					{
+						LightDefinition def;
+						def.always_on = child->properties["always_on"];
+						def.brightness = child->properties["brightness"];
+						def.fplus = child->properties["fplus"];
+						def.intensity = child->properties["intensity"];
+						def.maxPixelSize = child->properties["maxPixelSize"];
+						def.minPixelSize = child->properties["minPixelSize"];
+						def.mult = child->properties["minPixelSizeMultiplierForSprites"];
+						def.pattern = child->properties["name"];
+						def.radius = child->properties["radius"];
+						def.range = child->properties["range"];
+						def.sprites = child->properties["sprites"];
+						def.texture = child->properties["texture"];
+
+						names[def.pattern] = def;
+					}
+				}
+			}
+		}
+	}
+
+	void generateXML(const std::string& fileName)
+	{
+		osg::ref_ptr<osgDB::XmlNode> root = new osgDB::XmlNode;
+		root->name = "OsgNodeSettings";
+		root->type = osgDB::XmlNode::GROUP;
+
+		{
+			osg::ref_ptr<osgDB::XmlNode> child = new osgDB::XmlNode;
+
+			child->type = osgDB::XmlNode::NODE;
+			child->name = "TimeofDay";
+			child->properties["on"] = TimeOfDay_on;
+			child->properties["off"] = TimeOfDay_off;
+
+			root->children.push_back(child);
+		}
+			{
+				osg::ref_ptr<osgDB::XmlNode> child = new osgDB::XmlNode;
+
+				child->type = osgDB::XmlNode::NODE;
+				child->name = "LandingLightBrightness";
+				child->properties["enable"] = LandingLightBrightness_enable;
+				child->properties["day"] = LandingLightBrightness_day;
+				child->properties["night"] = LandingLightBrightness_night;
+
+				root->children.push_back(child);
+			}
+			{
+				osg::ref_ptr<osgDB::XmlNode> child = new osgDB::XmlNode;
+
+				child->type = osgDB::XmlNode::NODE;
+				child->name = "LightBrightnessOnClouds";
+				child->properties["day"] = LightBrightnessOnClouds_day;
+				child->properties["night"] = LightBrightnessOnClouds_night;
+
+				root->children.push_back(child);
+			}
+			{
+				osg::ref_ptr<osgDB::XmlNode> child = new osgDB::XmlNode;
+
+				child->type = osgDB::XmlNode::NODE;
+				child->name = "LightBrightnessOnWater";
+				child->properties["day"] = LightBrightnessOnWater_day;
+				child->properties["night"] = LightBrightnessOnWater_night;
+
+				root->children.push_back(child);
+			}
+
+			NamesMap::iterator itr = names.begin();
+			for (; itr != names.end(); ++itr)
+			{
+				osg::ref_ptr<osgDB::XmlNode> child = new osgDB::XmlNode;
+
+				child->type = osgDB::XmlNode::NODE;
+				child->name = "LightPointNode";
+				child->properties["name"] = itr->second.pattern;
+				child->properties["always_on"] = itr->second.always_on;
+				child->properties["minPixelSize"] = itr->second.minPixelSize;
+				child->properties["maxPixelSize"] = itr->second.maxPixelSize;
+				child->properties["intensity"] = itr->second.intensity;
+				child->properties["radius"] = itr->second.radius;
+				child->properties["brightness"] = itr->second.brightness;
+				child->properties["range"] = itr->second.range;
+				child->properties["minPixelSizeMultiplierForSprites"] = itr->second.mult;
+				child->properties["sprites"] = itr->second.sprites;
+				child->properties["texture"] = itr->second.texture;
+				child->properties["fplus"] = itr->second.fplus;
+
+				root->children.push_back(child);
+
+			}
+			
+			std::string xmlFileName = fileName;
+
+			std::ofstream file;
+			file.open(xmlFileName.c_str(), std::ios::out);
+			if (file.is_open())
+			{
+				osg::ref_ptr<osgDB::XmlNode> xml = new osgDB::XmlNode;
+				xml->type = osgDB::XmlNode::ROOT;
+				xml->children.push_back(root);
+				xml->write(file);
+				file.close();
+
+				std::cout << "Suportive lighting XML created/updated: " << xmlFileName << std::endl;
+			}
+	}
+
+	struct LightDefinition
+	{
+		std::string pattern;
+		std::string always_on;
+		std::string minPixelSize;
+		std::string maxPixelSize;
+		std::string intensity;
+		std::string radius;
+		std::string brightness;
+		std::string range;
+		std::string mult;
+		std::string sprites;
+		std::string texture;
+		std::string fplus;
+
+		LightDefinition()
+		{
+			always_on = "false";
+			minPixelSize = "1";
+			maxPixelSize = "4";
+			intensity = "1";
+			radius = "5";
+			brightness = "0.1";
+			range = "5";
+			mult = "7";
+			sprites = "true";
+			texture = "textures/lensflare_white_no_alpha_3.dds";
+			fplus = "false";
+		}
+	};
+
+	typedef std::map< std::string, LightDefinition >	NamesMap;
+	NamesMap											names;
+
+	std::string	TimeOfDay_off;
+	std::string TimeOfDay_on;
+	std::string LandingLightBrightness_enable;
+	std::string LandingLightBrightness_day;
+	std::string LandingLightBrightness_night;
+	std::string LightBrightnessOnClouds_day;
+	std::string LightBrightnessOnClouds_night;
+	std::string LightBrightnessOnWater_day;
+	std::string LightBrightnessOnWater_night;
 };
 
 static void usage( const char *prog, const char *msg )
@@ -559,9 +779,382 @@ static void usage( const char *prog, const char *msg )
         "    --plugin <plugin>  - Display information about the specified <plugin>,\n"
         "                         where <plugin> is the plugin's full path and file name." << std::endl;
 	osg::notify(osg::NOTICE) <<
+		"    --lighting-xml     - The xml to be used for lights definition." << std::endl;
+	osg::notify(osg::NOTICE) <<
 		"    --assign-lp-names  - Assign names of the light point nodes based on \n"
-		"                         the parent node name." << std::endl;
+		"                         the parent node name and output the config into the xmlFileName\n"
+		"                         specified with the --lighting-xml option." << std::endl;
+	osg::notify(osg::NOTICE) <<
+		"    --fix-geocentric   - Create Matrix referenced tiles from compiled in place." << std::endl;
+	osg::notify(osg::NOTICE) <<
+		"    --group-lps        - Group individual common LightPoints into one LightPointNode." << std::endl;
 }
+
+struct FindPagedLODVisitor : public osg::NodeVisitor
+{
+	FindPagedLODVisitor() : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN) {}
+
+	virtual void apply(osg::PagedLOD& node)
+	{
+		plods.push_back(&node);
+		traverse(node);
+	}
+	virtual void apply(osg::Node& node)
+	{
+		osg::PagedLOD* plod = dynamic_cast<osg::PagedLOD*>(&node);
+		if (plod) plods.push_back(plod);
+
+		osg::ProxyNode* pnode = dynamic_cast<osg::ProxyNode*>(&node);
+		if (pnode)
+		{			
+			proxys.push_back(pnode);	
+			return;
+		}
+		traverse(node); 
+	}
+
+	typedef std::vector< osg::ref_ptr<osg::PagedLOD> >		PagedLODs;
+	PagedLODs plods;
+
+	typedef std::vector< osg::ref_ptr<osg::ProxyNode> >		Proxys;
+	Proxys proxys;
+};
+
+struct ApplyOffsetVisitor : public osg::NodeVisitor
+{
+	ApplyOffsetVisitor(const osg::Vec3d& offset)
+		: osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+		, _offset(offset)
+	{
+	}
+
+	virtual void apply(osg::LOD& node)
+	{
+		node.setCenter(node.getCenter() + _offset);
+		traverse(node);
+	}
+
+	virtual void apply(osg::MatrixTransform& node)
+	{
+		osg::Matrixd mx = node.getMatrix();
+
+		osg::Vec3d scale = mx.getScale();
+		osg::Quat rotate = mx.getRotate();
+		osg::Vec3d translate = mx.getTrans();
+
+		node.setMatrix(osg::Matrixd::scale(scale) * osg::Matrixd::rotate(rotate) * osg::Matrixd::translate(translate + _offset));
+
+		traverse(node);
+	}
+
+	virtual void apply(osg::ProxyNode& node)
+	{
+		std::cout << "Proxy:" << node.getFileName(0) << std::endl;
+		traverse(node);
+	}	
+
+	virtual void apply(osg::Node& node)
+	{
+		osg::Geode* geode = dynamic_cast<osg::Geode*>(&node);
+		if (geode)
+		{
+			for (size_t i = 0; i < geode->getNumDrawables(); ++i)
+			{
+				osg::Geometry* geometry = geode->getDrawable(i)->asGeometry();
+				//if (geometry)
+				{
+					applyOffset(*geometry);
+				}
+			}
+		}
+		traverse(node);
+	}
+protected:
+
+	void applyOffset(osg::Geometry& geometry)
+	{
+		bool processed = false;
+		if (geometry.getUserValue("processed", processed) && processed) return;
+
+		osg::Vec3dArray* vxsd = dynamic_cast<osg::Vec3dArray*>(geometry.getVertexArray());
+		if (vxsd)
+		{
+			std::cout << "Vec3dArray: " << vxsd->size() << std::endl;
+			for (size_t i = 0; i < vxsd->size(); ++i)
+			{
+				osg::Vec3d& v = (*vxsd)[i];
+				v += _offset;
+			}
+		}
+		osg::Vec3Array* vxs = dynamic_cast<osg::Vec3Array*>(geometry.getVertexArray());
+		if (vxs)
+		{
+			osg::Vec3Array* nvxs = new osg::Vec3Array;
+
+			std::cout << "Vec3Array: " << vxs->size() << std::endl;
+
+			for (size_t i = 0; i < vxs->size(); ++i)
+			{
+				osg::Vec3& v = (*vxs)[i];
+
+				//std::cout << std::endl;
+				//std::cout << v.x() << "," << v.y() << "," << v.z() << " --> ";				
+				v += _offset;
+				//std::cout << v.x() << "," << v.y() << "," << v.z();
+				//std::cout << std::endl;
+
+				nvxs->push_back(v);
+			}
+
+			geometry.setVertexArray(nvxs);			
+		}
+		geometry.setUserValue("processed", (bool)true);
+	}
+	
+	osg::Vec3d _offset;
+};
+
+// Here we want to combine light point nodes for faster rendering based
+// on their name. We use this visitor in the databaseRead hook
+struct CombineLightPointNodesVisitor : public osg::NodeVisitor
+{
+	CombineLightPointNodesVisitor(const std::string& xmlFileName) : 
+		osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN) 
+	{
+		readXML(xmlFileName);
+	}
+
+	virtual void apply(osg::Node& node)
+	{
+		osgSim::LightPointNode* lpn = dynamic_cast<osgSim::LightPointNode*>(&node);
+		if (lpn)
+		{
+			// What is the XML name pattern for this lpn?
+			const std::string xmlLightName = getLpnNameBasedOnXMLDefinition(lpn);
+
+			if (!xmlLightName.empty())
+			{
+				// Now we have the name, we find or create a new lpn with
+				// this XML name that will contain all the lpns but grouped
+				osg::ref_ptr<osgSim::LightPointNode> matchedLpn = _lpns[xmlLightName];
+				if (!matchedLpn.valid())
+				{
+					_lpns[xmlLightName] = matchedLpn = new osgSim::LightPointNode(*lpn, osg::CopyOp::DEEP_COPY_ALL);
+					matchedLpn->setName(xmlLightName);
+
+					// If we work with Triton, then 
+					// dont render these lights in the
+					// Height map
+					matchedLpn->setNodeMask(0x4);
+					matchedLpn->setCullingActive(true);
+				}
+				else
+				{
+					// We add the light points to our 
+					// 'grouped' lpn
+					for (size_t i = 0; i < lpn->getNumLightPoints(); ++i)
+					{
+						osgSim::LightPoint& lp = lpn->getLightPoint(i);
+						matchedLpn->addLightPoint(lp);
+					}
+				}
+
+				// And we record the processed lpn for further removal
+				_lpnsToBeGrouped.push_back(lpn);
+			}
+		}
+		traverse(node);
+	}
+
+	void groupLightPointNodes()
+	{
+		typedef std::map< std::string, osg::Node::ParentList >			Parents;
+		Parents	parents;
+
+		// Ok, here we go through all the parents of the 'old' lpns to be
+		// grouped and we remove the individual lpns from them and we keep
+		// track of these parents, they can be switches and we attach to them
+		// our 'new' grouped lpns
+		for (LightPointNodesToBeGrouped::iterator itr = _lpnsToBeGrouped.begin();
+			itr != _lpnsToBeGrouped.end();
+			++itr)
+		{
+			osg::ref_ptr<osgSim::LightPointNode> lpn = *itr;
+			lpn->setCullingActive(true);
+
+			const std::string xmlName = getLpnNameBasedOnXMLDefinition(lpn);
+			if (!xmlName.empty())
+			{
+				osg::Node::ParentList& lpnParents = parents[xmlName];
+
+				osg::Node::ParentList oldParents = lpn->getParents();
+				for (osg::Node::ParentList::iterator pitr = oldParents.begin();
+					pitr != oldParents.end();
+					++pitr)
+				{
+					// Remove it from the original parent
+					osg::ref_ptr<osg::Group> parent = *pitr;
+					if (parent.valid())
+					{
+						parent->removeChild(lpn);
+
+						// and record the parent for the new
+						// attachment to for the grouped lpn
+						lpnParents.push_back(parent);
+					}
+				}
+			}
+		}
+
+		// now, we go through all the new grouped lpns
+		// and attach them to the original parents
+		for (LightPointNodes::iterator itr = _lpns.begin();
+			itr != _lpns.end();
+			++itr)
+		{
+			const std::string		name = itr->first;
+			osgSim::LightPointNode*	lpn = itr->second;
+
+			lpn->setCullingActive(true);
+
+			// Get the parent list
+			osg::Node::ParentList& lpnParents = parents[name];
+			if (lpnParents.size())
+			{
+#if 1
+				osg::Group* parent = lpnParents.at(0);
+				parent->removeChild(lpn);
+				parent->addChild(lpn);
+#else
+				for (osg::Node::ParentList::iterator pitr = lpnParents.begin();
+					pitr != lpnParents.end();
+					++pitr)
+				{
+					// Here we add the grouped lpns and we are done
+					osg::Group* parent = *pitr;
+					parent->removeChild(lpn);
+					parent->addChild(lpn);
+				}
+#endif
+			}
+		}
+	}
+protected:
+	typedef std::map< std::string, osg::ref_ptr<osgSim::LightPointNode> >		LightPointNodes;
+	LightPointNodes					_lpns;
+
+	typedef std::vector< osg::ref_ptr<osgSim::LightPointNode> >					LightPointNodesToBeGrouped;
+	LightPointNodesToBeGrouped		_lpnsToBeGrouped;
+
+	struct LightPointDefinition
+	{
+		std::string name;
+		bool		always_on;
+		float		minPixelSize;
+		float		minPixelSizeMultiplierForSprites;
+		float		maxPixelSize;
+		float		radius;
+		float		intensity;
+		float		brightness;
+		float		range;
+		bool		sprites;
+		std::string	texture;
+		bool		fplus;
+	};
+
+	typedef std::map< std::string, LightPointDefinition >	LightPointDefinitions;
+	LightPointDefinitions definitions;
+
+	void readXML(const std::string&  xmlFile)
+	{
+		osgDB::XmlNode* root = osgDB::readXmlFile(xmlFile);
+		if (!root)
+		{
+			osg::notify(osg::NOTICE) << "Lighting XML NULL root: " << xmlFile << std::endl;
+			return;
+		}
+		if (!root->children.size())
+		{
+			osg::notify(osg::NOTICE) << "Lighting XML root with no children: " << xmlFile << std::endl;
+			return;
+		}
+
+		std::cout << "Reading lighting xml: " << xmlFile << std::endl;
+
+		typedef std::multimap< std::string, osgDB::XmlNode::Properties >		TagProperties;
+		TagProperties	tags;
+
+		typedef std::multimap< std::string, std::string>						TagValues;
+		TagValues	values;
+
+		for (osgDB::XmlNode::Children::iterator itr = root->children.at(0)->children.begin();
+			itr != root->children.at(0)->children.end();
+			++itr)
+		{
+			osgDB::XmlNode* child = *itr;
+			tags.insert(std::pair<std::string, osgDB::XmlNode::Properties>(child->name, child->properties));
+			values.insert(std::pair<std::string, std::string>(child->name, child->contents));
+		}
+
+		for (TagProperties::iterator itr = tags.begin();
+			itr != tags.end();
+			++itr)
+		{
+			typedef std::map< std::string, std::string>	Properties;
+			Properties properties;
+
+			for (osgDB::XmlNode::Properties::iterator pitr = itr->second.begin();
+				pitr != itr->second.end();
+				++pitr)
+			{
+				properties[pitr->first] = pitr->second;
+			}
+
+			if (itr->first == "LightPointNode")
+			{
+				LightPointDefinition def;
+				def.name = properties["name"];
+				def.always_on = properties["always_on"] == "true";
+				def.minPixelSize = osg::maximum(atof(properties["minPixelSize"].c_str()), 1.0);
+				def.minPixelSizeMultiplierForSprites = osg::maximum(atof(properties["minPixelSizeMultiplierForSprites"].c_str()), 1.0);
+				def.maxPixelSize = osg::maximum(atof(properties["maxPixelSize"].c_str()), 1.0);
+				def.intensity = atof(properties["intensity"].c_str());
+				def.radius = atof(properties["radius"].c_str());
+				def.brightness = atof(properties["brightness"].c_str());
+				def.range = atof(properties["range"].c_str());
+				def.sprites = properties["sprites"] == "true";
+				def.texture = properties["texture"]; properties["sprites"] == "true";
+				def.fplus = properties["fplus"] == "true";
+
+				definitions[def.name] = def;
+			}
+		}
+	}
+
+	const std::string getLpnNameBasedOnXMLDefinition(osgSim::LightPointNode* lpn)
+	{
+		LightPointDefinitions::iterator itr = definitions.begin();
+		for (; itr != definitions.end(); ++itr)
+		{
+			const std::string& name = itr->first;
+			if (lpn->getName().substr(0, osg::minimum(lpn->getName().length(), name.length())) == name)
+			{
+				// Ok .. Here we have to be carefull. If we have lp nodes
+				// attached to parents with names same as some other names
+				// let attach the pointer of their parent so we make sure
+				// they are attached to the same parent
+				std::ostringstream oss;
+				oss << name;
+				if (lpn->getParents().size() != 0)
+				{
+					oss << "_" << (long long)lpn->getParent(0);
+				}
+				return oss.str();
+			}
+		}
+		return "";
+	}
+};
 
 
 int main( int argc, char **argv )
@@ -637,13 +1230,7 @@ int main( int argc, char **argv )
     {
         arguments.getApplicationUsage()->write(std::cout,osg::ApplicationUsage::COMMAND_LINE_OPTION);
         return 1;
-    }
-
-	bool assignLpNames = false;
-	if (arguments.read("--assign-lp-names"))
-	{
-		assignLpNames = true;
-	}
+    }	
 
     FileNameList fileNames;
     OrientationConverter oc;
@@ -779,6 +1366,28 @@ int main( int argc, char **argv )
     bool enableObjectCache = false;
     while(arguments.read("--enable-object-cache")) { enableObjectCache = true; }
 
+	bool fixGeocentric = false;
+	while (arguments.read("--fix-geocentric")) { fixGeocentric = true;  }
+	
+	std::string lightingXmlFile;
+	while (arguments.read("--lighting-xml", lightingXmlFile));
+	if (lightingXmlFile.empty())
+	{
+		lightingXmlFile = "master.flt.osg.lighting.xml";
+	}
+
+	bool assignLpNames = false;	
+	if (arguments.read("--assign-lp-names"))
+	{
+		assignLpNames = true;
+	}
+
+	bool groupLps = false;	
+	if (arguments.read("--group-lps")) 
+	{ 
+		groupLps = true;  
+	}
+
     // any option left unread are converted into errors to write out later.
     arguments.reportRemainingOptionsAsUnrecognized();
 
@@ -820,12 +1429,125 @@ int main( int argc, char **argv )
         osg::notify(osg::INFO)<<"Time to load files "<<osg::Timer::instance()->delta_m(startTick, endTick)<<" ms"<<std::endl;
     }
 
-	if (assignLpNames)
+	if (assignLpNames && fileNames.size())
 	{
 		AssignLpNamesVisitor nv;
+
+		nv.readXML(lightingXmlFile);
+
 		root->accept(nv);
+
+		nv.generateXML(lightingXmlFile);
 	}
 
+	if (groupLps)
+	{
+		CombineLightPointNodesVisitor nv(lightingXmlFile);
+		root->accept(nv);
+		nv.groupLightPointNodes();
+	}
+
+	if (fixGeocentric)
+	{
+		FindPagedLODVisitor nv;
+		root->accept(nv);
+
+		if (nv.plods.size() || nv.proxys.size())
+		{
+			osg::ref_ptr<osg::Group> master = new osg::Group;
+
+			if (nv.plods.size())
+			{
+				FindPagedLODVisitor::PagedLODs::iterator itr = nv.plods.begin();
+				for (; itr != nv.plods.end(); ++itr)
+				{
+					osg::ref_ptr<osg::PagedLOD> plod = *itr;
+
+					for (size_t i = 0; i < plod->getNumChildren(); ++i)
+					{
+						const std::string& fileName = plod->getFileName(i);
+
+						std::cout << "	...processing: " << fileName;
+						osg::ref_ptr<osg::Node> plodRoot = osgDB::readNodeFile(fileName);
+						if (!plodRoot.valid())
+						{
+							std::cout << " .. failed to read!" << std::endl;
+							continue;
+						}
+
+						const osg::BoundingSphere& bs = plodRoot->getBound();
+
+						ApplyOffsetVisitor anv(bs.center());
+						plodRoot->accept(anv);
+
+						std::string convertedFileName = osgDB::getFilePath(fileName) + "/" + osgDB::getNameLessExtension(fileName) + ".osgb";
+						plod->setFileName(i, convertedFileName);
+
+						osgDB::writeNodeFile(*plodRoot, convertedFileName);
+
+						std::cout << " .. saved as: " << convertedFileName << std::endl;
+					}
+
+					master->addChild(plod);
+				}
+			}
+			else
+			{
+				FindPagedLODVisitor::Proxys::iterator itr = nv.proxys.begin();
+				for (; itr != nv.proxys.end(); ++itr)
+				{
+					osg::ref_ptr<osg::ProxyNode> pnode = *itr;
+					osg::ref_ptr<osg::PagedLOD> plod = new osg::PagedLOD;
+
+					osg::Vec3d center;
+
+					for (size_t i = 0; i < pnode->getNumFileNames(); ++i)
+					{
+						const std::string& fileName = pnode->getFileName(i);
+
+						std::cout << "	...processing: " << fileName;
+						osg::ref_ptr<osg::Node> node = osgDB::readNodeFile(fileName);
+						if (!node.valid())
+						{
+							std::cout << " .. failed to read!" << std::endl;
+							continue;
+						}
+
+						const osg::BoundingSphere& bs = node->getBound();
+
+						ApplyOffsetVisitor anv(-bs.center());
+						node->accept(anv);						
+
+						std::string convertedFileName = osgDB::getNameLessExtension(fileName) + ".geocentric.osgb";
+						plod->setFileName(i, convertedFileName);
+						//plod->setCenter(bs.center());
+						plod->setRadius(bs.radius());
+						plod->setRange(i, 0, 10000000);
+
+						osgDB::writeNodeFile(*node, convertedFileName);
+
+						center = bs.center();
+
+						std::cout << " .. saved as: " << convertedFileName << std::endl;
+					}
+
+					osg::ref_ptr<osg::MatrixTransform> mxt = new osg::MatrixTransform;
+					mxt->setMatrix(osg::Matrixd::translate(center));
+					mxt->addChild(plod);
+
+					master->addChild(mxt);
+				}
+			}
+
+			std::cout << "Saving master file master.geocentric.osg";
+			if (osgDB::writeNodeFile(*master, "master.geocentric.osg"))
+				std::cout << " ... done.";
+			else
+				std::cout << " ... failed!";
+
+			exit(0);
+		}
+	}
 
     if (pruneStateSet)
     {
@@ -838,6 +1560,7 @@ int main( int argc, char **argv )
         FixTransparencyVisitor atv(fixTransparencyMode);
         root->accept(atv);
     }
+
 
     if ( root.valid() )
     {

@@ -4,24 +4,27 @@ addentity 1 {$OPENIG_DATA_PATH;/usr/local/database;../data}/model/A320/a320.ive 
 addentity 0 {$OPENIG_DATA_PATH/terrain;/data/OIG/OIG_DEMO_SC_7_NT_;../data/terrain}/master.flt.osg 0 0 0 -51.1 0 0
 
 fpo -4 0 -37
+
 ms SBSC_Activ 0
 
-# addentity 0 {$OPENIG_DATA_PATH/geocentric;/data/OIG/OIG_DEMO_SC_7_NT_;../data/geocentric}/master.flt.osg 0 0 0 0 0 0
+#addentity 0 {$OPENIG_DATA_PATH/geocentric;/data/OIG/OIG_DEMO_SC_7_NT_;../data/geocentric}/master.geocentric.osg 0 0 0 0 0 0
 # If you have Geocentric visual database
 # use this command to set the zero 0,0,0
 # in geographics coords. The entity will
 # be placed right there
-# geozero -22.943 -43.7251
+#geozero -22.943 -43.7251
 
 playanim 2 fbx:"Take 001":LOOP
 
 manip 1 trackball
 bindcamera 1 10 30 -2 -200 0 0
 
-tod 4 45
-fog 500000
+tod 7 0
+fog 50000
 wind 5 90
-addclouds 0 4 500 3000 0.7
+addclouds 0 0 5000 0 1
+
+silverlining flat dynamic
 
 
 

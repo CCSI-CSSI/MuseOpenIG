@@ -21,8 +21,8 @@ LIBS += -losg -losgDB -losgViewer -lCstShare -lOpenThreads -lOpenIG-Engine
 INCLUDEPATH += ../
 DEPENDPATH += ../
 
-OTHER_FILES += CMakeLists.txt
-DISTFILES += CMakeLists.txt
+OTHER_FILES += CMakeLists.txt README_OPENSCENEGRAPH_PATCH.txt
+DISTFILES += CMakeLists.txt README_OPENSCENEGRAPH_PATCH.txt
 
 unix {
     !mac:contains(QMAKE_HOST.arch, x86_64):{
@@ -68,11 +68,11 @@ unix {
     # library version number files
     exists( "../openig_version.pri" ) {
 
-	include( "../openig_version.pri" )
+    include( "../openig_version.pri" )
         isEmpty( VERSION ){ error( "$$TARGET -- bad or undefined VERSION variable inside file openig_version.pri" )
-	} else {
+    } else {
         message( "$$TARGET -- Set version info to: $$VERSION" )
-	}
+    }
 
     }
     else { error( "$$TARGET -- could not find pri library version file openig_version.pri" ) }

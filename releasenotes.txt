@@ -1,9 +1,65 @@
+06 Jul 2016, version 2.0.2
+
+- New "date" command added to command line command list to set the simulation date.  This affects how
+    Silverlining displays its atmospherics, sun, moon, stars, etc..
+
+- New "location" command to set Latitude and longitude, right now mainly for the SilverLining Plugin.  The
+    latitude and longitude settings can also be set in the SilverLining plugins XML datafile, along with
+    the timezone value.  Between this and the new date command above it allows Silverlining to be more accurate
+    in its representation of the atmosphere at the location specified.
+
+- New "utc" command, when used this sets the simulation time to timezone 0(UTC) and resets the simulation time
+    to that input with this new command.
+
+- New Simulation project consisting of 3 sample applications and  one sample plugin. The applications are:
+    >> Sample Image Generator - driven by a host over UDP - simply moving an entity clamped on a terrain. It uses
+    the sample Plugin that listen on the network for UDP packets from the Host using sample Protocol
+    >> TerrainQueriesServer - sample TCP server that provides HOT (Height of Terrain) and LOS (Line of Sight)
+    queries and send responses to the Host
+    >> Host - sample host that talks to the Terrain Queries Server for HAT and LOS and drives the scene in the
+    Image Generator.
+
+    And the sample Plugin for the sample Image Generator for the Networking - to fit the OpenIG design.
+
+    This "simulation suite" is for fast start and the users are free to extend with features they wish
+- New CIGI Plugin. Very simple plugin that implements very basics packets from CIGI using the Boeing CIGI Class Library.
+    Works together with the Application-Earth based on osgearth and was tested with the CIGI Host Emulator.
+    http://cigi.sourceforge.net/products.php
+- Updates in the ImageGenerator interface with features to bind/update/unbind entities to the camera
+- Better visual look of the SilverLining sky by using the simple-sky - setting in the SilverLining.config together
+    with some Gamma settings. Slowes down the performance but looks impresive. If you chase performance then dont
+    use this
+- The Sample Networking plugin was removed from the Application-Bullet demo due to the new simulation project
+    that demonstrates better the networking in OpenIG. Now works only in standalone to present the osgBullet integration
+    in OpenIG
+- Sundog's Silverlining revision 4.051 tested against this release of OpenIG
+- Sundog's Triton revision 3.59 tested against this release of OpenIG
+ 
+Known issues(bugs) fixed in this release:
+
+Public GitHub issue list
+Issue  #2: (fixed) F+ lights attached for entities are not computing the screen space direction/position properly during flight/moving
+Issue  #3: (fixed) The CameraManipulator inherited from the TrackballManipulator can zoom out indefinitely
+Issue  #4: (fixed) F+ lighting system is not working properly with only the Sun or Moon light source present in the scene
+                   Work around is to have at least one F+ light in the scene
+
+Local Development Repository issue list
+Issue  #A: (fixed) Triton visibility on the water not workng properly
+Issue  #B: (fixed) Silverlinings GL shaders are failing to compile due to our custom SL UserFunction shader changes
+Issue  #C: (fixed) A320 Demo model landing lights do not visually turn off
+Issue  #D: (fixed) LogZ, F+ flag toggle not working right
+Issue  #E: (fixed) SilverLining lensflare broken -fixed as a result of issue #B
+Issue  #F: (fixed) new Cigi plugin fails to compile on Linux
+
+Some other misc things were fixed as well that were discovered during testing and developement.
+
+
 29 Mar 2016, version 2.0.1
 
 Known issues:
 Issue #3: The CameraManipulator inherited from the TrackballManipulator can zoom out indefinitely
 Issue #4: F+ lighting system is not working properly with only the Sun or Moon light source present in the scene
-          Work around is to have at least one F+ light in the scene			
+          Work around is to have at least one F+ light in the scene
 These issues are scheduled to be fixed in one of the next release
 
 Updates in this release:
@@ -12,7 +68,7 @@ Updates in this release:
 - Support for multiple views and sharing the OpenIG scene across these views
 - Added back the SimpleLighting plugin - might be handy for MacOS users
   since we are still working on F+ to make it run on MacOS which seams to
-  be an OSG issue	
+  be an OSG issue
 - Along with the SimpleLighting plugin added support for simple 'psudo'
   sensors for EO and IR (really very simple implementation of these)
 - Fixed the RenderBins of lights with sprites and clouds
@@ -39,11 +95,11 @@ Updates in this release:
   = namespaces =
   * All the code is now under the namespace of OpenIG
   * Core libs have nested namespace with the name of the library
-  * Library libs (Bullet, Networking and Graphics) libs have nested name of the 
+  * Library libs (Bullet, Networking and Graphics) libs have nested name of the
     name of the library under a common nested namespace OpenIG::Library
   * Plugins libs are under nested namespace OpenIG::Plugins
 
-  = libs = 
+  = libs =
   IgCore is renamed to Core-Base (in the install SDK it is OpenIG-Base)
   IgPluginCore is renamed to Core-PluginBase (in the install SDK it is OpenIG-PluginBase)
   OpenIG is renamed to Core-OpenIG (in the install SDK it is OpenIG-Engine)
@@ -55,7 +111,7 @@ Updates in this release:
 
   = classes =
   The only class that was renamed is the igcore::OpenIG class from the
-  old OpenIG lib. Now it is OpenIG::Engine, in the Core-OpenIG lib 
+  old OpenIG lib. Now it is OpenIG::Engine, in the Core-OpenIG lib
   (OpenIG-Engine in the install SDK)
 
   = examples =
@@ -67,11 +123,11 @@ Updates in this release:
   fragment user shaders to turn on/off the F+ lighting on the clouds
   and water
 
-- Added new IgPlugin-UI 
+- Added new IgPlugin-UI
   This plugin is in its early stages and its being designed
   as a GUI interface for all of the xml datafiles that are
   part of OpenIG's setup and control and not only.  This plug-in is
-  based on the opensource MyGui cross-platform set oflibraries.  
+  based on the opensource MyGui cross-platform set oflibraries.
   Available for download at:  https://github.com/MyGUI/mygui
 
 - Added Graphics library needed for the Forward+ lighting implementation
@@ -81,14 +137,14 @@ Updates in this release:
   This involved removal of some of the previous lighting plug-ins
   and replacing them all with the new IgPlugin-ForwardPlusLighting.
   Plugins removed:
-  IgPlugin-Lighting  
+  IgPlugin-Lighting
   IgPlugin-SimpleLighting
 
-- Added LightsControl plugin that supress the 
+- Added LightsControl plugin that supress the
   IgPlugin-RunwayLights and IgPlugin-RunwayControl plugins.
-  This plugin works with lights on a runway, convert the 
+  This plugin works with lights on a runway, convert the
   runway lights into F+ lights and manage multi-switches
-  on runwyas. 
+  on runwyas.
 
 - Removed the IgPlugin-TimeOfDayBasedMaterial
 
@@ -103,29 +159,29 @@ Updates in this release:
   for use with our Forward+ lighting system and Triton
 
 11 Sep 2015, version 1.2.0
-- Added support for TCP/IP and UDP Network transfers between 
+- Added support for TCP/IP and UDP Network transfers between
   a host and the OpenIG through the new library IgLib-Network
-  and the new IgPlugin-Networking Plugin.  These API's are 
+  and the new IgPlugin-Networking Plugin.  These API's are
   designed as generic interfaces, to be able to support
-  just about any network protocol required. For example 
+  just about any network protocol required. For example
   the CIGI protocol is one that is being added using this
-  new library and plugin and should at least be partially 
+  new library and plugin and should at least be partially
   supported in a future release.  Timing of the network
   transfers is based on the framerate of the monitor you
   are running on.  Best results can be obtained if you
   ensure your MASTER and SLAVES are using the same
   VSYNC rate on their respective monitors.  This new
-  plugin can be tested/demonstrated using the OpenIG Bullet 
+  plugin can be tested/demonstrated using the OpenIG Bullet
   demo, which has the Network added to its running configuration
-  already.  
+  already.
 
   The user simply needs to modify the appropriate
   copy of the libIgPlugin-Networking.so.xml config file.
   It resides in the IgPlugin-Networking plugin directory
-  before installation.  You need ONE MASTER and as many 
-  SLAVES as you want to configure.  This file is 
+  before installation.  You need ONE MASTER and as many
+  SLAVES as you want to configure.  This file is
   responsible for all network configuration parameters.
-  You modify it for local and server/client IP addresses, 
+  You modify it for local and server/client IP addresses,
   whether you are using the TCP or UDP protocol, etc...
 
 - Added support for Sundog's Triton ocean SDK version 3.38,
@@ -137,22 +193,22 @@ Updates in this release:
   with your database.  We will be providing a sample Triton
   capable database in an update of the OpenIG datasets in
   the near future to demostrate these new features.
-- OpenIG was modified to support a logarithmic depth buffer 
-  Z-buffer implementation, which allows for better support of Triton 
+- OpenIG was modified to support a logarithmic depth buffer
+  Z-buffer implementation, which allows for better support of Triton
   in OpenIG, especially in areas where the water is very shallow.
 - Updated Sundogs SilverLining plugin to support version 4.024
   as well changes to SilverLining's userfunction shaders for
   the new logarithmic depth buffer implementation.
 - Added new updateclouds command to cli, was already in the
   C++ API
-- Minor changes to Cmake configuration files, they should 
+- Minor changes to Cmake configuration files, they should
   now find the required dependencies better.  We also
   added some of the "Extra" files to the files that will
   be listed in an IDE when using one for development to make
   them easier to open and modify as necessary.
-- The OpenIG core was changed from a delayed entity 
+- The OpenIG core was changed from a delayed entity
   addition/removal/reload process in the ViewerOperation,
-  to one where they are now managed directly in their respective calls. 
+  to one where they are now managed directly in their respective calls.
   (See:  openig::OpenIG::addEntity or openig::OpenIG::removeEntity)
 - The Muse OpenIG installer now checks to see if there is already
   a copy of it innstalled.  If there is, it asks the user to uninstall
@@ -164,42 +220,42 @@ Updates in this release:
   installer.
 
 6 Jul 2015, version 1.1.0
-- Added support for FBX animations through the new 
+- Added support for FBX animations through the new
   IgPlugin-FBXAnimation plugin
-- Added support for OSG ParticleEffects (smoke, explosions, 
+- Added support for OSG ParticleEffects (smoke, explosions,
   fire ..) through the IgPlugin-OSGParticleEffects plugin
-- Added support for osgEarth and osgEarth's SimpleLighting 
-  through the IgPlugin-OSGEarthSimpleLighting plugin, as well as shader 
+- Added support for osgEarth and osgEarth's SimpleLighting
+  through the IgPlugin-OSGEarthSimpleLighting plugin, as well as shader
   composition and a sample demo application, openig-earth.
-- Added support for Bullet vehicle physics through the 
+- Added support for Bullet vehicle physics through the
   IgPlugin-Bullet as well as a sample openig-bullet demo application
-- Moved the clouds related commands into the IgPlugin-SilverLining 
+- Moved the clouds related commands into the IgPlugin-SilverLining
   plugin and out of the OpenIG main application.
-  Same for the SkyDome plugin, all plugin related commands now 
+  Same for the SkyDome plugin, all plugin related commands now
   reside in their respective plugins.
-- Temporary workaround for TOD 0 and model lighting. This will be 
+- Temporary workaround for TOD 0 and model lighting. This will be
   revisited in a future release for a more permanent fix.
 - Reorganized the OpenIG file structure.  All demo apps now reside
   in their own directories, each with its own set of
-  configuration and support files.  This keeps things a bit more 
+  configuration and support files.  This keeps things a bit more
   structured and easy to find for configuration changes.
-- Added a new light attibute for adjustment of the brighness on 
+- Added a new light attibute for adjustment of the brighness on
   SilverLining clouds, together with matching changes to the
   SilverLining userfunctions shaders/files.
-- Added support for light brightness adjustment based on TOD as 
+- Added support for light brightness adjustment based on TOD as
   read from an XML configuration file.
-- Revisited CMake configuration files for the newly reorganized 
+- Revisited CMake configuration files for the newly reorganized
   file structure of OpenIG, as well as a few minor bug fixes.
 
 9 Jun 2015, version 1.0.1
 - Added CMake support
-- OpenIG, added support to allow adjustment of the brightness/attenuation 
+- OpenIG, added support to allow adjustment of the brightness/attenuation
   of the landing lights on the SilverLining clouds
   billboards types work now, Stratus should be in next release.
 - Fixed command line terminal so it takes no input unless
   it is enabled via the F8 key
 - IgPlugin-SilverLining, updated SunDog Software's SilverLining to release 4.008
-- IgPlugin-SimpleLighting, changed the uniform based branching to use 
+- IgPlugin-SimpleLighting, changed the uniform based branching to use
   the new OSG #pragmatic shader composition methods
 - IgPlugin-ModelComposition, fixes for AMD/ATI video cards
 

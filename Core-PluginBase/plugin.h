@@ -318,6 +318,24 @@ namespace OpenIG {
 			 */
 			virtual void entityAdded(PluginContext&, unsigned int, osg::Node&, const std::string&) {}
 
+			/*! Hook called on the very beginning of the frame before any processing.
+			* \brief Hook called on the very beginning of the frame before any processing
+			* \param the \ref igplugincore::PluginContext
+			* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			* \copyright (c)Compro Computer Services, Inc.
+			* \date      Sat May 14 2016
+			*/
+			virtual void beginningOfFrame(PluginContext&) {}
+
+			/*! Hook called on the end of the frame after all the frame processing.
+			* \brief Hook called on the end of the frame after all the frame processing
+			* \param the \ref igplugincore::PluginContext
+			* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			* \copyright (c)Compro Computer Services, Inc.
+			* \date      Sat May 14 2016
+			*/
+			virtual void endOfFrame(PluginContext&) {}
+
 		protected:
 			std::string     _library;       /*! \brief The shared library file name where this plugin is implemented */
 			int             _orderNumber;   /*! \brief The order number of the plugin. See \ref igplugincore::Plugin::getOrderNumber */

@@ -16,7 +16,7 @@ add_library( ${LIB_NAME} SHARED
     TritonDrawable.cpp
     PlanarReflection.h
     PlanarReflection.cpp
-	${SHADER_FILES}
+    ${SHADER_FILES}
     ${TARGET_OTHER_FILES}
 )
 
@@ -24,17 +24,17 @@ include_directories(
         ${OPENSCENEGRAPH_INCLUDE_DIR}
         ${OPENGL_INCLUDE_DIR}
         ${TRITON_INCLUDE_DIR}	
-		${Boost_INCLUDE_DIRS}		
+	${Boost_INCLUDE_DIRS}		
 )
 
 target_link_libraries( ${LIB_NAME}
     ${OSG_LIBRARIES}
     debug ${TRITON_LIBRARY_DEBUG} optimized ${TRITON_LIBRARY_RELEASE}    
     OpenIG-Engine
-	${Boost_LIBRARIES}
+    ${Boost_LIBRARIES}
 )
 
-if (APPLE)
+if ( APPLE OR ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
 target_link_libraries( ${LIB_NAME}
     fftss
     ${OPENGL_LIBRARY}

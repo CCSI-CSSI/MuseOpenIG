@@ -65,6 +65,25 @@ namespace OpenIG {
 					{
 						OpenIG::Base::RefAnimationSequenceCallbacks* cbs = dynamic_cast<OpenIG::Base::RefAnimationSequenceCallbacks*>(attr->getValue().sequenceCallbacks.get());
 
+						if (attr->getValue().pause)
+						{
+							OpenIG::Base::Animations::instance()->pauseResumeAnimation(
+								context.getImageGenerator(),
+								attr->getValue().entityId,
+								attr->getValue().animationName
+								);
+						}
+						else
+						if (attr->getValue().restore)
+						{
+							OpenIG::Base::Animations::instance()->pauseResumeAnimation(
+								context.getImageGenerator(),
+								attr->getValue().entityId,
+								attr->getValue().animationName,
+								false
+								);
+						}
+						else
 						if (attr->getValue().playback)
 						{
 							OpenIG::Base::Animations::instance()->playAnimation(
@@ -75,23 +94,21 @@ namespace OpenIG {
 								);
 						}
 						else
+						if (attr->getValue().reset)
 						{
-							if (attr->getValue().reset)
-							{
-								OpenIG::Base::Animations::instance()->resetAnimation(
-									context.getImageGenerator(),
-									attr->getValue().entityId,
-									attr->getValue().animationName
-									);
-							}
-							else
-							{
-								OpenIG::Base::Animations::instance()->stopAnimation(
-									context.getImageGenerator(),
-									attr->getValue().entityId,
-									attr->getValue().animationName
-									);
-							}
+							OpenIG::Base::Animations::instance()->resetAnimation(
+								context.getImageGenerator(),
+								attr->getValue().entityId,
+								attr->getValue().animationName
+								);
+						}
+						else
+						{
+							OpenIG::Base::Animations::instance()->stopAnimation(
+								context.getImageGenerator(),
+								attr->getValue().entityId,
+								attr->getValue().animationName
+								);
 						}
 					}
 				}

@@ -48,10 +48,9 @@ using namespace OpenIG::Plugins;
 
 CloudsDrawable::CloudsDrawable()
         : osg::Drawable()
-		, _viewer(0)
-        , _envMapDirty(false)
+        , _viewer(0)
         , _pluginContext(0)
-		, _forwardPlusEnabled(false)
+        , _forwardPlusEnabled(false)
 {
     initialize();
 }
@@ -60,25 +59,22 @@ CloudsDrawable::CloudsDrawable(osgViewer::CompositeViewer* viewer, OpenIG::Base:
         : osg::Drawable()
         , _viewer(viewer)
         , _ig(ig)
-        , _envMapDirty(false)
         , _pluginContext(0)
-		, _forwardPlusEnabled(forwardPlusEnabled)
-		, _logZEnabled(logZEnabled)
+        , _forwardPlusEnabled(forwardPlusEnabled)
+        , _logZEnabled(logZEnabled)
 {
     initialize();
-
-	_logZEnabled = useLogZDepthBuffer();
 }
 
 // Set up our attributes and callbacks.
 void CloudsDrawable::initialize()
 {
-	setDataVariance(osg::Object::DYNAMIC);
+    setDataVariance(osg::Object::DYNAMIC);
     setUseVertexBufferObjects(false);
     setUseDisplayList(false);
 
     if (_viewer) {
-		
+
         SilverLiningCloudsUpdateCallback *updateCallback = new SilverLiningCloudsUpdateCallback;
         setUpdateCallback(updateCallback);
 
@@ -92,345 +88,334 @@ void CloudsDrawable::initialize()
 
 static SilverLining::Atmosphere* getAtmosphere(osg::RenderInfo& renderInfo)
 {
-	if (renderInfo.getCurrentCamera()==0)
-	{
-		return 0;
-	}
-	AtmosphereReference *ar = dynamic_cast<AtmosphereReference *>(renderInfo.getCurrentCamera()->getUserData());
-	if (ar==0)
-	{
-		return 0;
-	}
-	return ar->atmosphere;
+    if (renderInfo.getCurrentCamera()==0)
+    {
+        return 0;
+    }
+    AtmosphereReference *ar = dynamic_cast<AtmosphereReference *>(renderInfo.getCurrentCamera()->getUserData());
+    if (ar==0)
+    {
+        return 0;
+    }
+    return ar->atmosphere;
 }
 
 static OpenIG::Library::Graphics::Matrix4_64 OsgMatrixToGraphicsMatrix(const osg::Matrix& matrix)
 {
-	return OpenIG::Library::Graphics::Matrix4_64(
-		matrix(0,0), matrix(0,1), matrix(0,2), matrix(0,3)
-		, matrix(1,0), matrix(1,1), matrix(1,2), matrix(1,3)
-		, matrix(2,0), matrix(2,1), matrix(2,2), matrix(2,3)
-		, matrix(3,0), matrix(3,1), matrix(3,2), matrix(3,3)
-		);
+    return OpenIG::Library::Graphics::Matrix4_64(
+        matrix(0,0), matrix(0,1), matrix(0,2), matrix(0,3)
+        , matrix(1,0), matrix(1,1), matrix(1,2), matrix(1,3)
+        , matrix(2,0), matrix(2,1), matrix(2,2), matrix(2,3)
+        , matrix(3,0), matrix(3,1), matrix(3,2), matrix(3,3)
+        );
 }
 
 static const int tboStartOffset = 15;
 
 static float LightBrightnessOnClouds = 0.f;
+static float ForwardPlusRange = 0.f;
+
+void CloudsDrawable::setForwardPlusRange(float range)
+{
+    ForwardPlusRange = range;
+}
 
 static void setUniform(const char* name, osg::GLExtensions* ext, GLint program, const osg::Vec4i& vec)
 {
-	if (name==0||ext==0)
-	{
-		return;
-	}
-	GLint loc = ext->glGetUniformLocation(program, name);
-	if (loc != -1)
-	{
-		ext->glUniform4i(loc, (int)vec.x(), (int)vec.y(), (int)vec.z(), (int)vec.w());
-	}
+    if (name==0||ext==0)
+    {
+        return;
+    }
+    GLint loc = ext->glGetUniformLocation(program, name);
+    if (loc != -1)
+    {
+        ext->glUniform4i(loc, (int)vec.x(), (int)vec.y(), (int)vec.z(), (int)vec.w());
+    }
 }
 
 static void setUniform(const char* name, osg::GLExtensions* ext, GLint program, int val)
 {
-	if (name==0||ext==0)
-	{
-		return;
-	}
+    if (name==0||ext==0)
+    {
+        return;
+    }
 
-	GLint loc = ext->glGetUniformLocation(program, name);
-	if (loc != -1)
-	{
-		ext->glUniform1i(loc, val);
-	}
+    GLint loc = ext->glGetUniformLocation(program, name);
+    if (loc != -1)
+    {
+        ext->glUniform1i(loc, val);
+    }
 }
 
 static void setUniform(const char* name, osg::GLExtensions* ext, GLint program, float val)
 {
-	if (name == 0 || ext == 0)
-	{
-		return;
-	}
+    if (name == 0 || ext == 0)
+    {
+        return;
+    }
 
-	GLint loc = ext->glGetUniformLocation(program, name);
-	if (loc != -1)
-	{
-		ext->glUniform1f(loc, val);
-	}
+    GLint loc = ext->glGetUniformLocation(program, name);
+    if (loc != -1)
+    {
+        ext->glUniform1f(loc, val);
+    }
 }
 
 static void setUpForwardPlus(osg::GL2Extensions* ext, GLint program, osg::Vec4d vTilingParams, const std::string& programName = "")
 {
-	if (ext == 0)
-	{
-		//osg::notify(osg::NOTICE) << "SilverLining: NULL GL2 Extension" << std::endl;
-		return;
-	}
-	if (program == 0)
-	{
-		//osg::notify(osg::NOTICE) << "SilverLining: NULL Program: " << programName << std::endl;
-		return;
-	}
+    if (ext == 0)
+    {
+        //osg::notify(osg::NOTICE) << "SilverLining: NULL GL2 Extension" << std::endl;
+        return;
+    }
+    if (program == 0)
+    {
+        //osg::notify(osg::NOTICE) << "SilverLining: NULL Program: " << programName << std::endl;
+        return;
+    }
 
-	osg::Vec4i vTilingParmsi((int)vTilingParams.x(),(int)vTilingParams.y(),(int)vTilingParams.z(),(int)vTilingParams.w());
-	setUniform("vTilingParams", ext, program, vTilingParmsi);
+    osg::Vec4i vTilingParmsi((int)vTilingParams.x(),(int)vTilingParams.y(),(int)vTilingParams.z(),(int)vTilingParams.w());
+    setUniform("vTilingParams", ext, program, vTilingParmsi);
 
-	setUniform("lightDataTBO", ext, program, tboStartOffset);
-	setUniform("lightIndexListTBO", ext, program, tboStartOffset-1);
-	setUniform("lightGridOffsetAndSizeTBO", ext, program, tboStartOffset-2);
-	setUniform("LightBrightnessOnClouds", ext, program, LightBrightnessOnClouds);
+    setUniform("lightDataTBO", ext, program, tboStartOffset);
+    setUniform("lightIndexListTBO", ext, program, tboStartOffset-1);
+    setUniform("lightGridOffsetAndSizeTBO", ext, program, tboStartOffset-2);
+    setUniform("LightBrightnessOnClouds", ext, program, LightBrightnessOnClouds);
+    setUniform("u_ForwardPlusRange", ext, program, ForwardPlusRange);
 }
 
 void CloudsDrawable::setUpShaders(SilverLining::Atmosphere *atmosphere, osg::RenderInfo& renderInfo) const
 {
-	osg::GL2Extensions* ext = osg::GL2Extensions::Get(renderInfo.getContextID(),true);
-	if (ext==0)
-	{
-		return;
-	}
+    osg::GL2Extensions* ext = osg::GL2Extensions::Get(renderInfo.getContextID(),true);
+    if (ext==0)
+    {
+        return;
+    }
 
-	CloudsDrawable* mutableThis = const_cast<CloudsDrawable*>(this);
-	if (mutableThis==0||mutableThis->_pluginContext==0)
-	{
-		return;
-	}
-	osg::ValueObject* valueObject = mutableThis->_pluginContext->getOrCreateValueObject();
-	if (valueObject==0)
-	{
-		return;
-	}
+    CloudsDrawable* mutableThis = const_cast<CloudsDrawable*>(this);
+    if (mutableThis==0||mutableThis->_pluginContext==0)
+    {
+        return;
+    }
+    osg::ValueObject* valueObject = mutableThis->_pluginContext->getOrCreateValueObject();
+    if (valueObject==0)
+    {
+        return;
+    }
 
-	osg::Camera* camera = renderInfo.getCurrentCamera();
-	if (camera==0)
-	{
-		return;
-	}
+    osg::Camera* camera = renderInfo.getCurrentCamera();
+    if (camera==0)
+    {
+        return;
+    }
 
-	osg::Vec4d vTilingParams;
-	if (valueObject->getUserValue("FowardPlus-vTilingParams", vTilingParams))
-	{
-		osg::Vec4i vTilingParmsi((int)vTilingParams.x(),(int)vTilingParams.y(),(int)vTilingParams.z(),(int)vTilingParams.w());
-	}
-	
-	OpenIG::Library::Graphics::Matrix4_64 view_matrix = OsgMatrixToGraphicsMatrix(camera->getViewMatrix()).GetTranspose();
+    osg::Vec4d vTilingParams;
+    if (valueObject->getUserValue("FowardPlus-vTilingParams", vTilingParams))
+    {
+        osg::Vec4i vTilingParmsi((int)vTilingParams.x(),(int)vTilingParams.y(),(int)vTilingParams.z(),(int)vTilingParams.w());
+    }
 
-	view_matrix[0][3] = 0;
-	view_matrix[1][3] = 0;
-	view_matrix[2][3] = 0;
+    OpenIG::Library::Graphics::Matrix4_64 view_matrix = OsgMatrixToGraphicsMatrix(camera->getViewMatrix()).GetTranspose();
 
-	OpenIG::Library::Graphics::Matrix4_64 view_inverse_transpose_matrix = view_matrix.GetInverse().GetTranspose();
+    view_matrix[0][3] = 0;
+    view_matrix[1][3] = 0;
+    view_matrix[2][3] = 0;
 
-	OpenIG::Library::Graphics::Matrix4_32 view_matrix_32                   = OpenIG::Library::Graphics::MatrixPrecisionConvert::ToFloat32(view_matrix);
+    OpenIG::Library::Graphics::Matrix4_64 view_inverse_transpose_matrix = view_matrix.GetInverse().GetTranspose();
 
-	GLint program = (GLint)atmosphere->GetBillboardShader();
-	ext->glUseProgram(program);
-	setUpForwardPlus(ext, program, vTilingParams,"Billboard");
+    OpenIG::Library::Graphics::Matrix4_32 view_matrix_32                   = OpenIG::Library::Graphics::MatrixPrecisionConvert::ToFloat32(view_matrix);
 
-	SL_VECTOR(unsigned int) shaders = atmosphere->GetActivePlanarCloudShaders();
-	for (SL_VECTOR(unsigned int)::iterator itr = shaders.begin(); itr != shaders.end(); ++itr)
-	{
-		program = *itr;
-		ext->glUseProgram(program);
-		setUpForwardPlus(ext, program, vTilingParams, "Planar");
-	}
+    GLint program = (GLint)atmosphere->GetBillboardShader();
+    ext->glUseProgram(program);
+    setUpForwardPlus(ext, program, vTilingParams,"Billboard");
 
-	ext->glUseProgram(0);
-}
+    SL_VECTOR(unsigned int) shaders = atmosphere->GetActivePlanarCloudShaders();
+    for (SL_VECTOR(unsigned int)::iterator itr = shaders.begin(); itr != shaders.end(); ++itr)
+    {
+        program = *itr;
+        ext->glUseProgram(program);
+        setUpForwardPlus(ext, program, vTilingParams, "Planar");
+    }
 
-bool CloudsDrawable::useLogZDepthBuffer() const
-{
-	std::string strLogZDepthBuffer = OpenIG::Base::Configuration::instance()->getConfig("LogZDepthBuffer","yes");
-	if (strLogZDepthBuffer.compare(0, 3, "yes") == 0)		
-		return _logZEnabled;
-	else
-		return false;
+    ext->glUseProgram(0);
 }
 
 void CloudsDrawable::initializeLogZDepthBuffer(osg::RenderInfo& renderInfo, std::vector<GLint>& userShaders) const
-{	
-	static bool _logz_tried = false;
-	if (_logz_tried==true)
-	{
-		return;
-	}
-	_logz_tried = true;
+{
+    static bool _logz_tried = false;
+    if (_logz_tried==true)
+    {
+        return;
+    }
+    _logz_tried = true;
 
-	std::string logZPreamble = useLogZDepthBuffer()?  "#define USE_LOG_DEPTH_BUFFER\n" : "";
+    std::string logZPreamble = _logZEnabled?  "#define USE_LOG_DEPTH_BUFFER\n" : "";
 
-	std::string resourcesPath = OpenIG::Base::FileSystem::path(OpenIG::Base::FileSystem::Resources, "../resources");
+#if defined(_WIN32)
+            std::string resourcesPath = OpenIG::Base::FileSystem::path(OpenIG::Base::FileSystem::Resources, "../resources");
+#else
+            std::string resourcesPath = OpenIG::Base::FileSystem::path(OpenIG::Base::FileSystem::Resources, "../../openig/resources");
+#endif
 
-	osg::GLExtensions* ext = osg::GLExtensions::Get(renderInfo.getState()->getContextID(), true);
+    osg::GLExtensions* ext = osg::GLExtensions::Get(renderInfo.getState()->getContextID(), true);
 
-	std::string strSource = logZPreamble + OpenIG::Base::FileSystem::readFileIntoString(resourcesPath + "/shaders/logz_vs.glsl");
+    std::string strSource = logZPreamble + OpenIG::Base::FileSystem::readFileIntoString(resourcesPath + "/shaders/logz_vs.glsl");
 
-	GLint shaderID = osg::ShaderUtils::compileShader(strSource, osg::Shader::VERTEX, ext);
-	if (shaderID == 0)
-	{
-		shaderID = osg::ShaderUtils::compileShader(strSource, osg::Shader::VERTEX, ext);
-	}
-	if (shaderID == 0)
-	{
-		osg::notify(osg::ALWAYS)<<"SilverLining: error: shader compilation error: /shaders/logz_vs.glsl"<<std::endl;
-	}
-	else
-	{
-		osg::notify(osg::ALWAYS) << "SilverLining: Log Z Vertex Shader compiled successfully..." << std::endl;
-		userShaders.push_back(shaderID);
-	}
+    GLint shaderID = osg::ShaderUtils::compileShader(strSource, osg::Shader::VERTEX, ext);
+    if (shaderID == 0)
+    {
+        osg::notify(osg::ALWAYS)<<"SilverLining: error: shader compilation error: "<<std::endl;
+    }
+    else
+    {
+        osg::notify(osg::ALWAYS) << "SilverLining: Log Z Vertex Shader compiled successfully..." << std::endl;
+        userShaders.push_back(shaderID);
+    }
 
-	strSource = logZPreamble + OpenIG::Base::FileSystem::readFileIntoString(resourcesPath + "/shaders/logz_ps.glsl");
+    strSource = logZPreamble + OpenIG::Base::FileSystem::readFileIntoString(resourcesPath + "/shaders/logz_ps.glsl");
 
-	shaderID = osg::ShaderUtils::compileShader(strSource, osg::Shader::FRAGMENT, ext);
-	if (shaderID == 0)
-	{
-		shaderID = osg::ShaderUtils::compileShader(strSource, osg::Shader::FRAGMENT, ext);
-	}
-	if (shaderID == 0)
-	{
-		osg::notify(osg::ALWAYS)<<"SilverLining: error: shader compilation error: /shaders/logz_ps.glsl"<<std::endl;
-	}
-	else
-	{
-		userShaders.push_back(shaderID);
-		osg::notify(osg::ALWAYS) << "SilverLining: Log Z Pixel Shader compiled successfully..." << std::endl;
-	}
+    shaderID = osg::ShaderUtils::compileShader(strSource, osg::Shader::FRAGMENT, ext);
+    if (shaderID == 0)
+    {
+        osg::notify(osg::ALWAYS)<<"SilverLining: error: shader compilation error: "<<std::endl;
+    }
+    else
+    {
+        userShaders.push_back(shaderID);
+        osg::notify(osg::ALWAYS) << "SilverLining: Log Z Pixel Shader compiled successfully..." << std::endl;
+    }
 }
 
 void CloudsDrawable::initializeForwardPlus(SilverLining::Atmosphere *atmosphere, osg::RenderInfo& renderInfo, std::vector<GLint>& userShaders) const
 {
-	static bool _forwardPlusSetUpTried = false;
+    static bool _forwardPlusSetUpTried = false;
 
-	if (_forwardPlusSetUpTried==true)
-	{
-		return;
-	}
-	_forwardPlusSetUpTried = true;
+    if (_forwardPlusSetUpTried==true)
+    {
+        return;
+    }
+    _forwardPlusSetUpTried = true;
 
-	osg::GLExtensions* ext = osg::GLExtensions::Get(renderInfo.getState()->getContextID(), true);
+    osg::GLExtensions* ext = osg::GLExtensions::Get(renderInfo.getState()->getContextID(), true);
 
-	std::string resourcesPath = OpenIG::Base::FileSystem::path(OpenIG::Base::FileSystem::Resources, "../resources");
+#if defined(_WIN32)
+            std::string resourcesPath = OpenIG::Base::FileSystem::path(OpenIG::Base::FileSystem::Resources, "../resources");
+#else
+            std::string resourcesPath = OpenIG::Base::FileSystem::path(OpenIG::Base::FileSystem::Resources, "../../openig/resources");
+#endif
 
-	std::string strForward_Plus_SL_PS;
-	std::string strForwardPlusDefine;
+    std::string strForward_Plus_SL_PS;
+    std::string strForwardPlusDefine;
 
-	if (_forwardPlusEnabled)
-	{
-		strForwardPlusDefine = "#define SL_USE_FORWARD_PLUS_LIGHTING\n";
-	}
+    if (_forwardPlusEnabled)
+    {
+        strForwardPlusDefine = "#define SL_USE_FORWARD_PLUS_LIGHTING\n";
+    }
 
-	strForward_Plus_SL_PS = strForwardPlusDefine + OpenIG::Base::FileSystem::readFileIntoString(resourcesPath + "/shaders/forward_plus_sl_ps.glsl");
-	{
-		GLint shaderID = osg::ShaderUtils::compileShader(strForward_Plus_SL_PS, osg::Shader::FRAGMENT, ext);
-		if (shaderID==0)
-		{
-			osg::notify(osg::ALWAYS) << "Silverlining: error: Could not create forward_plus_sl_ps Shader" << std::endl;
-		}
-		else
-		{
-			osg::notify(osg::ALWAYS) << "Silverlining: forward_plus_sl_ps Shader compiled successfully!" << std::endl;
-			userShaders.push_back(shaderID);
-		}
-	}
+    strForward_Plus_SL_PS = strForwardPlusDefine + OpenIG::Base::FileSystem::readFileIntoString(resourcesPath + "/shaders/forward_plus_sl_ps.glsl");
+    {
+        GLint shaderID = osg::ShaderUtils::compileShader(strForward_Plus_SL_PS, osg::Shader::FRAGMENT, ext);
+        if (shaderID==0)
+        {
+            osg::notify(osg::ALWAYS) << "Silverlining: error: Could not create forward_plus_sl_ps Shader" << std::endl;
+        }
+        else
+        {
+            osg::notify(osg::ALWAYS) << "Silverlining: forward_plus_sl_ps Shader compiled successfully!" << std::endl;
+            userShaders.push_back(shaderID);
+        }
+    }
 
-	// A fair metric for sky
-	std::string strMAX_LIGHTS_PER_PIXEL = "#define MAX_LIGHTS_PER_PIXEL 200\n";
+    // A fair metric for sky
+    std::string strMAX_LIGHTS_PER_PIXEL = "#define MAX_LIGHTS_PER_PIXEL 200\n";
 
-	std::string strSource = OpenIG::Base::FileSystem::readFileIntoString(resourcesPath + "/shaders/forwardplus_preamble.glsl") 
-		+ strMAX_LIGHTS_PER_PIXEL
-		+ OpenIG::Base::FileSystem::readFileIntoString(resourcesPath + "/shaders/lighting_math.glsl") 
-		+ OpenIG::Base::FileSystem::readFileIntoString(resourcesPath + "/shaders/forwardplus_math.glsl");
+    std::string strSource = OpenIG::Base::FileSystem::readFileIntoString(resourcesPath + "/shaders/forwardplus_preamble.glsl")
+        + strMAX_LIGHTS_PER_PIXEL
+        + OpenIG::Base::FileSystem::readFileIntoString(resourcesPath + "/shaders/lighting_math.glsl")
+        + OpenIG::Base::FileSystem::readFileIntoString(resourcesPath + "/shaders/forwardplus_math.glsl");
 
 
-	GLint shaderID = osg::ShaderUtils::compileShader(strSource, osg::Shader::FRAGMENT, ext);
-	if (shaderID==0)
-	{
-		osg::notify(osg::ALWAYS) << "Silverlining: error: Could not create User Functions Shader" << std::endl;
-	}
-	else
-	{
-		osg::notify(osg::ALWAYS) << "Silverlining: User Functions Shader compiled successfully!" << std::endl;
-		userShaders.push_back(shaderID);
-	}
+    GLint shaderID = osg::ShaderUtils::compileShader(strSource, osg::Shader::FRAGMENT, ext);
+    if (shaderID==0)
+    {
+        osg::notify(osg::ALWAYS) << "Silverlining: error: Could not create User Functions Shader" << std::endl;
+    }
+    else
+    {
+        osg::notify(osg::ALWAYS) << "Silverlining: User Functions Shader compiled successfully!" << std::endl;
+        userShaders.push_back(shaderID);
+    }
+}
+
+bool CloudsDrawable::_envMapDirty = true;
+void CloudsDrawable::setEnvironmentMapDirty(bool dirty)
+{
+    _envMapDirty = dirty;
 }
 
 // Draw the clouds.
 void CloudsDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 {
-	if (_lightBrightness_enable)
-	{
-		if (_todHour > 4 && _todHour < 19)			
-			LightBrightnessOnClouds = _lightBrightness_day;
-		else
-			LightBrightnessOnClouds = _lightBrightness_night;
-	}
-	else
-	{
-		LightBrightnessOnClouds = 0.f;
-	}
+    if (_lightBrightness_enable)
+    {
+        if (_todHour > 4 && _todHour < 19)
+            LightBrightnessOnClouds = _lightBrightness_day;
+        else
+            LightBrightnessOnClouds = _lightBrightness_night;
+    }
+    else
+    {
+        LightBrightnessOnClouds = 0.f;
+    }
 
-	AtmosphereReference *ar = dynamic_cast<AtmosphereReference *>(renderInfo.getCurrentCamera()->getUserData());
-	SilverLining::Atmosphere *atmosphere = 0;
-	if (ar) atmosphere = ar->atmosphere;
+    AtmosphereReference *ar = dynamic_cast<AtmosphereReference *>(renderInfo.getCurrentCamera()->getUserData());
+    SilverLining::Atmosphere *atmosphere = 0;
+    if (ar) atmosphere = ar->atmosphere;
 
-	osg::State & state = *renderInfo.getState();
-	state.disableAllVertexArrays();
+    osg::State & state = *renderInfo.getState();
+    state.disableAllVertexArrays();
 
     if (atmosphere)
-    {		
+    {
+        std::vector<GLint> stdVecUserShaders;
 
-		std::vector<GLint> stdVecUserShaders;
-		bool compileShaders = false;
+        initializeLogZDepthBuffer(renderInfo, stdVecUserShaders);
+        initializeForwardPlus(atmosphere, renderInfo, stdVecUserShaders);
 
-		if (_logZEnabled)
-		{
-			initializeLogZDepthBuffer(renderInfo, stdVecUserShaders);
-			compileShaders = true;
-		}
-		if (_forwardPlusEnabled)
-		{
-			initializeForwardPlus(atmosphere, renderInfo, stdVecUserShaders);
-			compileShaders = true;
-		}
+        if (stdVecUserShaders.empty() == false)
+        {
+            SL_VECTOR(unsigned int) vectorUserShaders;
+            for (int i = 0; i < stdVecUserShaders.size(); ++i)
+            {
+                vectorUserShaders.push_back(stdVecUserShaders[i]);
+            }
+            atmosphere->ReloadShaders(vectorUserShaders);
+        }
 
-		if (compileShaders)
-		{
-			SL_VECTOR(unsigned int) vectorUserShaders;
+        setUpShaders(atmosphere, renderInfo);
 
-			if (stdVecUserShaders.empty() == false)
-			{
-				SL_VECTOR(unsigned int) vectorUserShaders;
-				for (int i = 0; i < stdVecUserShaders.size(); ++i)
-				{
-					vectorUserShaders.push_back(stdVecUserShaders[i]);
-				}
-				atmosphere->ReloadShaders(vectorUserShaders);
-			}
-
-			setUpShaders(atmosphere, renderInfo);
-		}
-	 
         atmosphere->SetCameraMatrix(renderInfo.getCurrentCamera()->getViewMatrix().ptr());
         atmosphere->SetProjectionMatrix(renderInfo.getCurrentCamera()->getProjectionMatrix().ptr());
 
-		if (_logZEnabled)
-		{
-			glPushAttrib(GL_DEPTH_BUFFER_BIT);
-			glEnable(GL_DEPTH_CLAMP);
-		}
+        if (_logZEnabled)
+        {
+            glPushAttrib(GL_DEPTH_BUFFER_BIT);
+            glEnable(GL_DEPTH_CLAMP);
+        }
 
-		//Change the TU from non-zero to zero, or zero to one to get around caching
-		int tu = state.getActiveTextureUnit();
-		state.setActiveTextureUnit(tu ? 0 : 1);
+        //Change the TU from non-zero to zero, or zero to one to get around caching
+        int tu = state.getActiveTextureUnit();
+        state.setActiveTextureUnit(tu ? 0 : 1);
 
-		atmosphere->DrawObjects(true, true, true);
+        atmosphere->DrawObjects(true, true, true);
 
-		//Change the TU from non-zero to zero, or zero to one to get around caching
-		state.setActiveTextureUnit(tu);
+        //Change the TU from non-zero to zero, or zero to one to get around caching
+        state.setActiveTextureUnit(tu);
 
-		if (_logZEnabled)
-		{
-			glPopAttrib();
-		}
+        if (_logZEnabled)
+        {
+            glPopAttrib();
+        }
 
         if (_envMapDirty)
         {
@@ -462,14 +447,14 @@ void CloudsDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 osg::BoundingBox SilverLiningCloudsComputeBoundingBoxCallback::computeBound(const osg::Drawable&) const
 {
     osg::BoundingBox box;
-    
-	osg::Camera* camera = cameras.size() ? cameras.at(0) : 0;
-    if (camera) 
+
+    osg::Camera* camera = cameras.size() ? cameras.at(0) : 0;
+    if (camera)
     {
         AtmosphereReference *ar = dynamic_cast<AtmosphereReference *>( camera->getUserData() );
         if ( ar && ar->atmosphere)
         {
-            SilverLining::Atmosphere * atmosphere = ar->atmosphere;            
+            SilverLining::Atmosphere * atmosphere = ar->atmosphere;
 
             double minX, minY, minZ, maxX, maxY, maxZ;
             atmosphere->GetCloudBounds(minX, minY, minZ, maxX, maxY, maxZ);

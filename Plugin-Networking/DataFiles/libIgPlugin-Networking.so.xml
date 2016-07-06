@@ -1,6 +1,6 @@
 <OpenIG-Plugin-Config>
     <!-- MASTER or SLAVE -->
-    <Mode>MASTER</Mode>
+    <Mode>SLAVE</Mode>
     <!-- Reserved for future use -->
     <Name></Name>
     <Port>8888</Port>

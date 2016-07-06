@@ -1,0 +1,6 @@
+<OpenIG-Plugin-Config>
+  <Interface>127.0.0.1</Interface>
+  <Port>8888</Port>
+  <Host>127.0.0.1</Host>
+  <HostPort>8889</HostPort>
+</OpenIG-Plugin-Config>

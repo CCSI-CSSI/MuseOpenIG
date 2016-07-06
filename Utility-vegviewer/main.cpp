@@ -22,6 +22,8 @@
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
 //#*****************************************************************************
+//#*	author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+//#*	copyright(c)Compro Computer Services, Inc.
 
 #include <osgDB/XmlParser>
 #include <osgDB/ReadFile>

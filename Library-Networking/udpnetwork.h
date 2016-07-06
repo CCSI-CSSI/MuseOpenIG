@@ -22,6 +22,8 @@
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
 //#*****************************************************************************
+//#*	author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+//#*	copyright(c)Compro Computer Services, Inc.
 
 #ifndef UDPNETWORK_H
 #define UDPNETWORK_H
@@ -49,7 +51,7 @@ namespace OpenIG {
 				virtual ~UDPNetwork();
 
 				virtual void send(const Buffer&);
-				virtual void receive(Buffer&);
+				virtual void receive(Buffer&, bool resetBuffer = true);
 
 			protected:
 				boost::asio::io_service			_senderIOService;

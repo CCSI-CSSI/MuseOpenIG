@@ -1,0 +1,7 @@
+<OpenIg-Model-Composition>        
+    <Shadow>CAST</Shadow>
+    <Shadowing>no</Shadowing>
+    <Lighting>yes</Lighting>
+    <Texturing>no</Texturing>
+    <PreserveMaterial>yes</PreserveMaterial>      
+</OpenIg-Model-Composition>

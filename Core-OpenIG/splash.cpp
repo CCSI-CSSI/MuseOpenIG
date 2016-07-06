@@ -65,7 +65,13 @@ void Engine::initSplashScreen()
         float height = splash->t();
 
         _splashCamera = new osg::Camera;
-        _viewer->getView(0)->getSceneData()->asGroup()->addChild(_splashCamera);
+		for (size_t i = 0; i < _viewer->getNumViews(); ++i)
+		{
+			if (_viewer->getView(i)->getSceneData() && _viewer->getView(i)->getSceneData()->asGroup())
+			{
+				_viewer->getView(i)->getSceneData()->asGroup()->addChild(_splashCamera);
+			}
+		}		
 
         _splashCamera->setViewport(new osg::Viewport(0,0, screen_width, screen_height));
         _splashCamera->setProjectionMatrix(osg::Matrix::ortho2D(0,screen_width,0,screen_height));

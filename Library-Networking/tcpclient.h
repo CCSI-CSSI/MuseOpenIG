@@ -22,6 +22,8 @@
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
 //#*****************************************************************************
+//#*	author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+//#*	copyright(c)Compro Computer Services, Inc.
 
 #ifndef TCPCLIENT_H
 #define TCPCLIENT_H
@@ -50,7 +52,7 @@ namespace OpenIG {
 				virtual ~TCPClient();
 
 				virtual void send(const Buffer&);
-				virtual void receive(Buffer&);
+				virtual void receive(Buffer&, bool resetBuffer = true);
 
 			protected:
 

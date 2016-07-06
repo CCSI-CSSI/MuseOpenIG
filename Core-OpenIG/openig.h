@@ -26,23 +26,23 @@
 #define OPENIG_H
 
 #if defined(OPENIG_SDK)
-	#include <OpenIG-Engine/export.h>
-	#include <OpenIG-Engine/keypad.h>
+    #include <OpenIG-Engine/export.h>
+    #include <OpenIG-Engine/keypad.h>
 
-	#include <OpenIG-Base/imagegenerator.h>
-	#include <OpenIG-Base/attributes.h>
+    #include <OpenIG-Base/imagegenerator.h>
+    #include <OpenIG-Base/attributes.h>
 
-	#include <OpenIG-PluginBase/pluginhost.h>
-	#include <OpenIG-PluginBase/plugincontext.h>
+    #include <OpenIG-PluginBase/pluginhost.h>
+    #include <OpenIG-PluginBase/plugincontext.h>
 #else
-	#include <Core-OpenIG/export.h>
-	#include <Core-OpenIG/keypad.h>
+    #include <Core-OpenIG/export.h>
+    #include <Core-OpenIG/keypad.h>
 
-	#include <Core-Base/imagegenerator.h>
-	#include <Core-Base/attributes.h>
+    #include <Core-Base/imagegenerator.h>
+    #include <Core-Base/attributes.h>
 
-	#include <Core-PluginBase/pluginhost.h>
-	#include <Core-PluginBase/plugincontext.h>
+    #include <Core-PluginBase/pluginhost.h>
+    #include <Core-PluginBase/plugincontext.h>
 #endif
 
 #include <OpenThreads/Mutex>
@@ -70,13 +70,13 @@ public:
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jan 16 2015
      */
-	Engine();
+    Engine();
 
 protected:
     /*!
      * \brief Destructor
      */
-	virtual ~Engine();
+    virtual ~Engine();
 
 public:
     /*!
@@ -97,29 +97,29 @@ public:
      */
     virtual std::string version();
 
-	/*!
-	* \brief		OpenIG specific flags for how to setup the Viewer
-	* \author		Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    /*!
+    * \brief		OpenIG specific flags for how to setup the Viewer
+    * \author		Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
     * \copyright	(c)Compro Computer Services, Inc.
     * \date			Sun Jan 11 2015
-	*/
-	enum SetupFlags
-	{
-		None				= 0x00,
-		WithTerminal		= 0x01,
-		WithSplashScreen	= 0x02,
-		WithOnscreenHelp	= 0x04,
-		Standard			= WithTerminal | WithSplashScreen | WithOnscreenHelp
-	};
+    */
+    enum SetupFlags
+    {
+        None				= 0x00,
+        WithTerminal		= 0x01,
+        WithSplashScreen	= 0x02,
+        WithOnscreenHelp	= 0x04,
+        Standard			= WithTerminal | WithSplashScreen | WithOnscreenHelp
+    };
 
-	/*!
-	* \brief		Call this before \see init. It will setup OpenIG
-	* \param		The mask based on the \see SetupFlags
-	* \author		Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	* \copyright	(c)Compro Computer Services, Inc.
-	* \date			Sun Jan 11 2015
-	*/
-	virtual void setupInitFlags(unsigned int mask);
+    /*!
+    * \brief		Call this before \see init. It will setup OpenIG
+    * \param		The mask based on the \see SetupFlags
+    * \author		Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \copyright	(c)Compro Computer Services, Inc.
+    * \date			Sun Jan 11 2015
+    */
+    virtual void setupInitFlags(unsigned int mask);
 
     /*! Should be called immediatelly after making an instance. Here the setup of the
      *  scene and other things happen. By default \ref openig::OpenIG scene is
@@ -132,54 +132,54 @@ public:
      *  \param xmlFileName  The file name of the xml configuration file.
      *                      Defaults to openig.xml, on Windows in bin/igdata
      *                      MacOS and Linux in /usr/local/bin/igdata
-	 *	\param ids			List of Views to which we let OpenIG render. If empty
-	 *						it will use all the Views with no SceneData associated
+     *	\param ids			List of Views to which we let OpenIG render. If empty
+     *						it will use all the Views with no SceneData associated
      *  \return             Nothing
      *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
      *  \copyright (c)Compro Computer Services, Inc.
      *  \date      Sun Jan 11 2015
      */
-	virtual void init(osgViewer::CompositeViewer* viewer, const std::string& xmlFileName = "openig.xml", const ViewIdentifiers& ids = ViewIdentifiers());
+    virtual void init(osgViewer::CompositeViewer* viewer, const std::string& xmlFileName = "openig.xml", const ViewIdentifiers& ids = ViewIdentifiers());
 
-	/*!	This is to let the user setup a View with OpenIG with some
-	*	sepcifics for the rendering, like OTW, Sensor etc. Possibly
-	*	to be extended as we go
-	*  \brief Setup a View with OpenIG with rendering options
-	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	*  \copyright (c)Compro Computer Services, Inc.
-	*  \date      Thu Feb 25 2016
-	*/
-	enum ViewType
-	{		
-		OTW				= 1,
-		EO				= 2,
-		IR				= 3
-	};
+    /*!	This is to let the user setup a View with OpenIG with some
+    *	sepcifics for the rendering, like OTW, Sensor etc. Possibly
+    *	to be extended as we go
+    *  \brief Setup a View with OpenIG with rendering options
+    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \copyright (c)Compro Computer Services, Inc.
+    *  \date      Thu Feb 25 2016
+    */
+    enum ViewType
+    {
+        OTW				= 1,
+        EO				= 2,
+        IR				= 3
+    };
 
-	/*!	This is to let the user setup a View with OpenIG dynamicaly
-	*	if not set with \see init
-	*  \brief Setup a View with OpenIG
-	*  \param view			Your View. 	
-	*  \param option		The View option, OTW, EO, IR ... probably will 
-	*						be extending
-	*  \return				Nothing
-	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	*  \copyright (c)Compro Computer Services, Inc.
-	*  \date      Sat Feb 20 2016
-	*/
-	virtual void initView(osgViewer::View* view, ViewType options = OTW);
+    /*!	This is to let the user setup a View with OpenIG dynamicaly
+    *	if not set with \see init
+    *  \brief Setup a View with OpenIG
+    *  \param view			Your View.
+    *  \param option		The View option, OTW, EO, IR ... probably will
+    *						be extending
+    *  \return				Nothing
+    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \copyright (c)Compro Computer Services, Inc.
+    *  \date      Sat Feb 20 2016
+    */
+    virtual void initView(osgViewer::View* view, ViewType options = OTW);
 
-	/*!	Setup the view option for a view
-	*  \brief Setup the view option for a view
-	*  \param view			Your View.
-	*  \param option		The View option, OTW, EO, IR ... probably will
-	*						be extending
-	*  \return				Nothing
-	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	*  \copyright (c)Compro Computer Services, Inc.
-	*  \date      Sat Feb 27 2016
-	*/
-	virtual void setViewType(osgViewer::View* view, ViewType options);
+    /*!	Setup the view option for a view
+    *  \brief Setup the view option for a view
+    *  \param view			Your View.
+    *  \param option		The View option, OTW, EO, IR ... probably will
+    *						be extending
+    *  \return				Nothing
+    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \copyright (c)Compro Computer Services, Inc.
+    *  \date      Sat Feb 27 2016
+    */
+    virtual void setViewType(osgViewer::View* view, ViewType options);
 
 
     /*! Call it before destruction
@@ -227,54 +227,54 @@ public:
      *  \copyright (c)Compro Computer Services, Inc.
      *  \date      Sun Jan 11 2015
      */
-    virtual void frame();
+    virtual void frame(bool usePlugins = true);
 
-	/*! Sets the Read node callback. Some might want to change how the file
-	*	is read, like osgEarth for example. You have an option
-	*	to read files differently then with osgDB::readNodeFile(...)
-	*  \brief Sets the read node callback
-	*  \param cb The callback
-	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	*  \copyright (c)Compro Computer Services, Inc.
-	*  \date      Mon Jun 16 2015
-	*/
-	virtual void setReadNodeImplementationCallback(ReadNodeImplementationCallback* cb);
+    /*! Sets the Read node callback. Some might want to change how the file
+    *	is read, like osgEarth for example. You have an option
+    *	to read files differently then with osgDB::readNodeFile(...)
+    *  \brief Sets the read node callback
+    *  \param cb The callback
+    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \copyright (c)Compro Computer Services, Inc.
+    *  \date      Mon Jun 16 2015
+    */
+    virtual void setReadNodeImplementationCallback(ReadNodeImplementationCallback* cb);
 
-	/*! Gets the Read node callback. See \ref setReadNodeImplementationCallback
-	*  \brief Gets the read node callback
-	*  \return cb The callback
-	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	*  \copyright (c)Compro Computer Services, Inc.
-	*  \date      Mon Jun 16 2015
-	*/
-	virtual ReadNodeImplementationCallback* getReadNodeImplementationCallback();
+    /*! Gets the Read node callback. See \ref setReadNodeImplementationCallback
+    *  \brief Gets the read node callback
+    *  \return cb The callback
+    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \copyright (c)Compro Computer Services, Inc.
+    *  \date      Mon Jun 16 2015
+    */
+    virtual ReadNodeImplementationCallback* getReadNodeImplementationCallback();
 
-	/*! Sets a user read file callback. Please avoid setting the ReadFileCallback
-	*	when using OpenIG - it has internal one. Set it through this method if you
-	*	have one, it will work together with the OpenIG internal one	
-	*  \brief Sets user ReadFileCallback
-	*  \param cb The callback
-	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	*  \copyright (c)Compro Computer Services, Inc.
-	*  \date      Thu Mar 17 2016
-	*/
-	virtual void setReadFileCallback(osgDB::Registry::ReadFileCallback* cb);
+    /*! Sets a user read file callback. Please avoid setting the ReadFileCallback
+    *	when using OpenIG - it has internal one. Set it through this method if you
+    *	have one, it will work together with the OpenIG internal one
+    *  \brief Sets user ReadFileCallback
+    *  \param cb The callback
+    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \copyright (c)Compro Computer Services, Inc.
+    *  \date      Thu Mar 17 2016
+    */
+    virtual void setReadFileCallback(osgDB::Registry::ReadFileCallback* cb);
 
-	/*! Gets the user ReadFileCallback
-	*  \brief Gets the user ReadFileCallback
-	*  \return The callback
-	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	*  \copyright (c)Compro Computer Services, Inc.
-	*  \date      Thu Mar 17 2016
-	*/
-	virtual osgDB::Registry::ReadFileCallback* getReadFileCallback();
+    /*! Gets the user ReadFileCallback
+    *  \brief Gets the user ReadFileCallback
+    *  \return The callback
+    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \copyright (c)Compro Computer Services, Inc.
+    *  \date      Thu Mar 17 2016
+    */
+    virtual osgDB::Registry::ReadFileCallback* getReadFileCallback();
 
 
     /*! \ref OpenIG is using IDs for everything in the
      *  scene management. The IDs are mainly up to the user to maintain. However
      *  some plugins generates these IDs automatically, for example the \ref
      *  ModelCompositionPlugin or the \ref LightingPlugin. For the automated
-     *  ID generations there is a class \ref OpenIG::Base::GlobalIdGenerator. 
+     *  ID generations there is a class \ref OpenIG::Base::GlobalIdGenerator.
      *  \brief Adds \ref Entity in the scene.
      *  \param id       The id of the \ref Entity. You should use this Entity id to refer
      *                  to this model in the scene
@@ -290,21 +290,21 @@ public:
      */
     virtual void addEntity(unsigned int id, const std::string& fileName, const osg::Matrixd& mx, const osgDB::Options* options = 0);
 
-	/*! Adds entity in the scene from osg::Node instead of loading it from a file. See \ref addEntity
-	*  \brief Adds entity in the scene from osg::Node instead of loading it from a file.
-	*  \param id       The id of the \ref Entity. You should use this Entity id to refer
-	*                  to this model in the scene
-	*  \param node	   The node to become an \ref Entity
-	*  \param mx       Initial position as osg::Matrixd
-	*  \param options  Optional. The option string can be processed by some plugins.
-	*                  Good example can be the VDBOffset which shifts the database
-	*                  by a given offset defined in the osgDB::Options string.
-	*  \return         Nothing
-	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	*  \copyright (c)Compro Computer Services, Inc.
-	*  \date      Tue Jun 16 2015
-	*/
-	virtual void addEntity(unsigned int id, const osg::Node* node, const osg::Matrixd& mx, const osgDB::Options* options = 0);
+    /*! Adds entity in the scene from osg::Node instead of loading it from a file. See \ref addEntity
+    *  \brief Adds entity in the scene from osg::Node instead of loading it from a file.
+    *  \param id       The id of the \ref Entity. You should use this Entity id to refer
+    *                  to this model in the scene
+    *  \param node	   The node to become an \ref Entity
+    *  \param mx       Initial position as osg::Matrixd
+    *  \param options  Optional. The option string can be processed by some plugins.
+    *                  Good example can be the VDBOffset which shifts the database
+    *                  by a given offset defined in the osgDB::Options string.
+    *  \return         Nothing
+    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \copyright (c)Compro Computer Services, Inc.
+    *  \date      Tue Jun 16 2015
+    */
+    virtual void addEntity(unsigned int id, const osg::Node* node, const osg::Matrixd& mx, const osgDB::Options* options = 0);
 
     /*! Removes an entity from the scene. See \ref addEntity
      *  immediatelly, still in the same frame though and it processed in ViewerOperation.
@@ -367,6 +367,37 @@ public:
      */
     virtual void unbindFromEntity(unsigned int id);
 
+    /*! Binds an \ref Entity to the Camera. The given Matrix is the local offset
+    *  \brief Binds an \ref Entity to the Camera.
+    *  \param id            The id of the \ref Entity, the one you have used with \ref addEntity
+    *  \param mx            The local offset wrt. to the \ref Entity
+    *  \param cameraID      The ID of the Camera (think View)
+    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \copyright (c)Compro Computer Services, Inc.
+    *  \date      Sun May 02 2016
+    */
+    virtual void bindEntityToCamera(unsigned int id, const osg::Matrixd& mx, unsigned int cameraID = 0);
+
+    /*! Updates the \ref Entity if it is bound to the Camera with new position and
+    *  orientation through Matrix. Might be handy to use \ref OpenIG::Base::Math methods
+    *  like \ref OpenIG::Base::Math::toMatrix to construct the Matrix
+    *  \brief Updates the \ref Entity.
+    *  \param id        The id of the \ref Entity, the one you have used with \ref addEntity
+    *  \param mx		The matrix to update position and orientation
+    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \copyright (c)Compro Computer Services, Inc.
+    *  \date      Sun May 02 2016
+    */
+    virtual void bindEntityToCameraUpdate(unsigned int id, const osg::Matrixd& mx);
+
+    /*! Unbinds the \ref Entity from the Camera if it is already bound
+    *  \brief Unbinds the \ref Entity from a Camera
+    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \copyright (c)Compro Computer Services, Inc.
+    *  \date      Sun May 02 2016
+    */
+    virtual void unbindEntityFromCamera(unsigned int id);
+
     /*! You might want to replace the model with another and preserve the id. See \ref addEntity
      *  \param id       The id of the attached \ref Entity. This is the id you have used with \ref addEntity
      *  \param fileName The file name of the model. Can be the same or new
@@ -398,6 +429,17 @@ public:
      *  \date      Mon May 18 2015
      */
     virtual std::string getEntityName(unsigned int id);
+
+	/*! Gets the id of a entity based on the name. Can be handy for lookup
+	*  \brief Gets the id of a entity based on the name
+	*  \param id       The id of parent entity
+	*  \param name     The name of entity/sub-entity
+	*  \return         The Sub-\ref Entity id
+	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+	*  \copyright (c)Compro Computer Services, Inc.
+	*  \date      Fri Jun 17 2016
+	*/
+	virtual unsigned int getEntityId(unsigned int parentEntityId, const std::string& subEntityName);
 
     /*! Plays animation on an \ref Entity. At present it uses the internal simple animation handling
      *  - see \ref OpenIG::Base::Animations. The future versions will have FBX support as well. The
@@ -447,7 +489,7 @@ public:
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
-	virtual void playAnimation(unsigned int entityId, const std::string& animationName, OpenIG::Base::RefAnimationSequenceCallbacks* cbs);
+    virtual void playAnimation(unsigned int entityId, const std::string& animationName, OpenIG::Base::RefAnimationSequenceCallbacks* cbs);
 
     /*! Stops the playback of animation by name and \ref Entity ID. See \ref playAnimation
      * \brief Stops the playback of animation
@@ -467,7 +509,7 @@ public:
      * \copyright (c)Compro Computer Services, Inc.
      * \date      MOn May 18 2015
      */
-	virtual void stopAnimation(unsigned int entityId, const OpenIG::Base::StringUtils::StringList& animations);
+    virtual void stopAnimation(unsigned int entityId, const OpenIG::Base::StringUtils::StringList& animations);
 
     /*! Reset the playback of animation by name and \ref Entity ID. It placed the players at their
      *  initial position before the playback. See \ref playAnimation
@@ -489,72 +531,82 @@ public:
      * \copyright (c)Compro Computer Services, Inc.
      * \date      MOn May 18 2015
      */
-	virtual void resetAnimation(unsigned int entityId, const OpenIG::Base::StringUtils::StringList& animations);
+    virtual void resetAnimation(unsigned int entityId, const OpenIG::Base::StringUtils::StringList& animations);
 
+    /*! Changes the animation status
+    * \brief Changes the animation status
+    * \param entityId			The ID of the entity
+    * \param status				The status of the animation
+    * \param animations			The names of the animations
+    * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \copyright (c)Compro Computer Services, Inc.
+    * \date      Tue May 17 2016
+    */
+    virtual void changeAnimationStatus(unsigned int entityId, AnimationStatus status, const OpenIG::Base::StringUtils::StringList& animations);
 
-	// Effects
-	/*! Adds effect to the scene. This oonly manages internal structures, it
-	*	is up to plugins to provide implementation
-	*  \brief Adds effect to the scene
-	*  \param id	Unique effect to the scene
-	*  \param name	Name of the effect
-	*  \param mx	The initial position/orientation of the effect
-	*  \param attributes String based attributes for the pugins provoding the implementation, in form of token=attr;token=attr ...
-	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	*  \copyright (c)Compro Computer Services, Inc.
-	*  \date      Sun Jun 14 2015
-	*/
-	virtual void addEffect(unsigned int id, const std::string& name, const osg::Matrixd& mx, const std::string& attributes);
+    // Effects
+    /*! Adds effect to the scene. This oonly manages internal structures, it
+    *	is up to plugins to provide implementation
+    *  \brief Adds effect to the scene
+    *  \param id	Unique effect to the scene
+    *  \param name	Name of the effect
+    *  \param mx	The initial position/orientation of the effect
+    *  \param attributes String based attributes for the pugins provoding the implementation, in form of token=attr;token=attr ...
+    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \copyright (c)Compro Computer Services, Inc.
+    *  \date      Sun Jun 14 2015
+    */
+    virtual void addEffect(unsigned int id, const std::string& name, const osg::Matrixd& mx, const std::string& attributes);
 
-	/*! Removes effect from the scene
-	*  \brief Removes effect from the scene
-	*  \param id	Unique effect to the scene
-	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	*  \copyright (c)Compro Computer Services, Inc.
-	*  \date      Sun Jun 14 2015
-	*/
-	virtual void removeEffect(unsigned int id);
+    /*! Removes effect from the scene
+    *  \brief Removes effect from the scene
+    *  \param id	Unique effect to the scene
+    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \copyright (c)Compro Computer Services, Inc.
+    *  \date      Sun Jun 14 2015
+    */
+    virtual void removeEffect(unsigned int id);
 
-	/*! Binds effect to an \ref Entity
-	*  \brief Binds effect to an \ref Entity
-	*  \param id		Unique effect to the scene
-	*  \param entityID	The ID of the \ref Entity
-	*  \param mx		The offset position/orientation of the effect
-	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	*  \copyright (c)Compro Computer Services, Inc.
-	*  \date      Sun Jun 14 2015
-	*/
-	virtual void bindEffect(unsigned int id, unsigned int entityID, const osg::Matrixd& mx);
+    /*! Binds effect to an \ref Entity
+    *  \brief Binds effect to an \ref Entity
+    *  \param id		Unique effect to the scene
+    *  \param entityID	The ID of the \ref Entity
+    *  \param mx		The offset position/orientation of the effect
+    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \copyright (c)Compro Computer Services, Inc.
+    *  \date      Sun Jun 14 2015
+    */
+    virtual void bindEffect(unsigned int id, unsigned int entityID, const osg::Matrixd& mx);
 
-	/*! Unbinds effect to an \ref Entity
-	*  \brief Unbinds effect to an \ref Entity
-	*  \param id		Unique effect to the scene
-	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	*  \copyright (c)Compro Computer Services, Inc.
-	*  \date      Sun Jun 14 2015
-	*/
-	virtual void unbindEffect(unsigned int id);
+    /*! Unbinds effect to an \ref Entity
+    *  \brief Unbinds effect to an \ref Entity
+    *  \param id		Unique effect to the scene
+    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \copyright (c)Compro Computer Services, Inc.
+    *  \date      Sun Jun 14 2015
+    */
+    virtual void unbindEffect(unsigned int id);
 
-	/*! Update effect with new position/orientation
-	*  \brief Update effect with new position/orientation
-	*  \param id		Unique effect to the scene
-	*  \param mx		The new position/orientation
-	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	*  \copyright (c)Compro Computer Services, Inc.
-	*  \date      Sun Jun 14 2015
-	*/
-	virtual void updateEffect(unsigned int id, const osg::Matrixd& mx);
+    /*! Update effect with new position/orientation
+    *  \brief Update effect with new position/orientation
+    *  \param id		Unique effect to the scene
+    *  \param mx		The new position/orientation
+    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \copyright (c)Compro Computer Services, Inc.
+    *  \date      Sun Jun 14 2015
+    */
+    virtual void updateEffect(unsigned int id, const osg::Matrixd& mx);
 
-	/*! The \ref ImageGenerator, \ref OpenIG only manages structures for the
-	*	effects. It is up to plugins to provide their implementation. This is
-	*	the callback that provides the effect implementation
-	*  \brief Sets the effect implementation callback
-	*  \param cb		The callback
-	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	*  \copyright (c)Compro Computer Services, Inc.
-	*  \date      Sun Jun 14 2015
-	*/
-	virtual void setEffectImplementationCallback(OpenIG::Base::GenericImplementationCallback* cb);
+    /*! The \ref ImageGenerator, \ref OpenIG only manages structures for the
+    *	effects. It is up to plugins to provide their implementation. This is
+    *	the callback that provides the effect implementation
+    *  \brief Sets the effect implementation callback
+    *  \param cb		The callback
+    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \copyright (c)Compro Computer Services, Inc.
+    *  \date      Sun Jun 14 2015
+    */
+    virtual void setEffectImplementationCallback(OpenIG::Base::GenericImplementationCallback* cb);
 
 
     /*! Sets the position of the camera using Matrix. If the camera is bind to an
@@ -567,7 +619,7 @@ public:
      *  \copyright (c)Compro Computer Services, Inc.
      *  \date      Sun Jan 11 2015
      */
-	virtual void setCameraPosition(const osg::Matrixd& mx, bool viewMatrix = false, unsigned int cameraID = 0);
+    virtual void setCameraPosition(const osg::Matrixd& mx, bool viewMatrix = false, unsigned int cameraID = 0);
 
     /*! Binds the camera to an \ref Entity. Then as the \ref Entity is moving, the Camera
      *  is movving along with. The given Matrix is the local offset
@@ -578,7 +630,7 @@ public:
      *  \copyright (c)Compro Computer Services, Inc.
      *  \date      Sun Jan 11 2015
      */
-	virtual void bindCameraToEntity(unsigned int id, const osg::Matrixd& mx, unsigned int cameraID = 0);
+    virtual void bindCameraToEntity(unsigned int id, const osg::Matrixd& mx, unsigned int cameraID = 0);
 
     /*! Updates the camera if it is bound to an \ref Entity with new position and
      *  orientation through Matrix. Might be handy to use \ref OpenIG::Base::Math methods
@@ -589,7 +641,7 @@ public:
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
-	virtual void bindCameraUpdate(const osg::Matrixd& mx, unsigned int cameraID = 0);
+    virtual void bindCameraUpdate(const osg::Matrixd& mx, unsigned int cameraID = 0);
 
     /*! Unbinds the Camera from an \ref Entity if it is already bound
      * \brief Unbinds the Camera from an \ref Entity
@@ -597,7 +649,7 @@ public:
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
-	virtual void unbindCameraFromEntity(unsigned int cameraID = 0);
+    virtual void unbindCameraFromEntity(unsigned int cameraID = 0);
 
     /*! Checks if the Camera is bound to an \ref Entity
      * \brief Checks if the Camera is bound to an \ref Entity
@@ -606,7 +658,7 @@ public:
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
-	virtual bool isCameraBoundToEntity(unsigned int cameraID = 0);
+    virtual bool isCameraBoundToEntity(unsigned int cameraID = 0);
 
     /*! Sets for fixed up Cametra orientation or not. When is set with false,
      *  and is bound to an \ref Entity it follows the \ref Entity orientation,
@@ -615,12 +667,12 @@ public:
      *  following the \ref Entity orientation, like a bird eye.
      * \brief Sets for fixed up Cametra orientation or not
      * \param       fixedUp true to fix the up axis or false to follow the \ref Entity orientation
-	 * \param       freezeOrientation true to freeze orientation
+     * \param       freezeOrientation true to freeze orientation
      * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
-	virtual void bindCameraSetFixedUp(bool fixedUp, bool freezeOrientation = false, unsigned int cameraID = 0);
+    virtual void bindCameraSetFixedUp(bool fixedUp, bool freezeOrientation = false, unsigned int cameraID = 0);
 
     /*! Sets fog in the scene. The \ref openig::OpenIG is adding a Fog attribute in the scene
      *  and it is up to plugins to implement it's appearance. Example is the \ref LightingPlugin which
@@ -633,6 +685,19 @@ public:
      * \date      Sun Jan 11 2015
      */
     virtual void setFog(double visibility);
+
+    /*! Sets the simulation date. The core is not implementing this feature instead is creating
+     *  \ref OpenIG::Base::DateAttributes via \ref igplugincore::PluginContext::Attribute and
+     *  it is passing it to all the plugins to deal with.
+     * \brief Sets the simulation date.
+     * \param month
+     * \param day
+     * \param year
+     * \author    Curtis G Rubel crubel@compro.net
+     * \copyright (c)Compro Computer Services, Inc.
+     * \date      Wed May 25 2016
+     */
+    virtual void setDate(unsigned int month,int day, int year);
 
     /*! Sets the time of day. The core is not implementing this feature instead is creating
      *  \ref OpenIG::Base::TimeOfDayAttributes via \ref OpenIG::PluginBase::PluginContext::Attribute and
@@ -758,7 +823,7 @@ public:
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
-	virtual void addLight(unsigned int id, const OpenIG::Base::LightAttributes& lightAttributes, const osg::Matrixd& mx);
+    virtual void addLight(unsigned int id, const OpenIG::Base::LightAttributes& lightAttributes, const osg::Matrixd& mx);
 
     /*! Removes light from the scene. See \ref addLight for more info.
      * \brief Removes light from the scene
@@ -780,6 +845,16 @@ public:
      * \date      Sun Jan 11 2015
      */
     virtual void updateLight(unsigned int id, const osg::Matrixd& mx);
+
+    /*! Sets user data to a light created by a callback
+    * \brief Sets user data to a light created by a callback
+    * \param id		The ID of the light.
+    * \param data	User data
+    * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \copyright (c)Compro Computer Services, Inc.
+    * \date      Tue May 17 2016
+    */
+    virtual void setLightUserData(unsigned int id, osg::Referenced* data);
 
     /*! Binds a light to an \ref Entity. If you need to understand the ID paradigm refer to \ref
      *  addEntity and \ref addLight.
@@ -847,26 +922,26 @@ public:
      */
     virtual bool isLightEnabled(unsigned int id);
 
-	/*! Returns the LightAttributes map. The inheritants are expected to
-	*	keep track when they are updates. Plugins might use these
-	* \brief Returns the LightAttributes map
-	* \return The light attributes map
-	* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	* \copyright (c)Compro Computer Services, Inc.
-	* \date      Sat Jun 06 2015
-	*/
-	virtual LightAttributesMap& getLightAttributesMap();
+    /*! Returns the LightAttributes map. The inheritants are expected to
+    *	keep track when they are updates. Plugins might use these
+    * \brief Returns the LightAttributes map
+    * \return The light attributes map
+    * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \copyright (c)Compro Computer Services, Inc.
+    * \date      Sat Jun 06 2015
+    */
+    virtual LightAttributesMap& getLightAttributesMap();
 
-	/*! Returns the LightAttributes for a given light. The inheritants are expected to
-	*	keep track when they are updates. Plugins might use these
-	* \brief Returns the LightAttributes based on the light ID
-	* \param id The light ID
-	* \return The light attributes of the Light
-	* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	* \copyright (c)Compro Computer Services, Inc.
-	* \date      Sat Jun 06 2015
-	*/
-	virtual OpenIG::Base::LightAttributes getLightAttributes(unsigned int id);
+    /*! Returns the LightAttributes for a given light. The inheritants are expected to
+    *	keep track when they are updates. Plugins might use these
+    * \brief Returns the LightAttributes based on the light ID
+    * \param id The light ID
+    * \return The light attributes of the Light
+    * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \copyright (c)Compro Computer Services, Inc.
+    * \date      Sat Jun 06 2015
+    */
+    virtual OpenIG::Base::LightAttributes getLightAttributes(unsigned int id);
 
     /*! Updates light attributes via \ref OpenIG::Base::LightAttributes . Once you set the new
      *  light attributes, be aware that you have to set the dirty mask there as well
@@ -1008,32 +1083,32 @@ public:
      */
     LightsMap&                          getLightsMap();
 
-	/*!
-	* \brief Returns the list of files that use file cache
-	* \return	The list of files that use file cache
-	* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	* \copyright (c)Compro Computer Services, Inc.
-	* \date      Sat Jun 27 2015
-	*/
-	const OpenIG::Base::StringUtils::StringList& getFilesToBeCached() const;
+    /*!
+    * \brief Returns the list of files that use file cache
+    * \return	The list of files that use file cache
+    * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \copyright (c)Compro Computer Services, Inc.
+    * \date      Sat Jun 27 2015
+    */
+    const OpenIG::Base::StringUtils::StringList& getFilesToBeCached() const;
 
-	/*!
-	* \brief	Adds files to use the cache
-	* \param	fileList	The list of files that will use file cache
-	* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	* \copyright (c)Compro Computer Services, Inc.
-	* \date      Sat Jun 27 2015
-	*/
-	void addFilesToBeCached(const OpenIG::Base::StringUtils::StringList& files);
+    /*!
+    * \brief	Adds files to use the cache
+    * \param	fileList	The list of files that will use file cache
+    * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \copyright (c)Compro Computer Services, Inc.
+    * \date      Sat Jun 27 2015
+    */
+    void addFilesToBeCached(const OpenIG::Base::StringUtils::StringList& files);
 
-	/*!
-	* \brief	Returns true if the given file is using the file cache
-	* \return	Returns true if the given file is using the file cache
-	* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	* \copyright (c)Compro Computer Services, Inc.
-	* \date      Sat Jun 27 2015
-	*/
-	bool isFileCached(const std::string& fileName);
+    /*!
+    * \brief	Returns true if the given file is using the file cache
+    * \return	Returns true if the given file is using the file cache
+    * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \copyright (c)Compro Computer Services, Inc.
+    * \date      Sat Jun 27 2015
+    */
+    bool isFileCached(const std::string& fileName);
 
 protected:
 
@@ -1049,7 +1124,7 @@ protected:
     /*! \brief  The managed scene, which is osgShadow::Shadowed scene */
     osg::ref_ptr<osg::Group>                        _scene;
     /*! \brief  Handle of the light implementation callback. See \ref setLightImplementationCallback */
-	osg::observer_ptr<OpenIG::Base::LightImplementationCallback>  _lightImplementationCallback;
+    osg::observer_ptr<OpenIG::Base::LightImplementationCallback>  _lightImplementationCallback;
     /*! \brief  The \ref OpenIG::PluginBase::PluginContext to pass Attributes, ex: OpenIG::Base::FogAttributes
      *          to plugins */
     OpenIG::PluginBase::PluginContext                     _context;
@@ -1073,46 +1148,46 @@ protected:
     osg::ref_ptr<osg::Camera>                       _splashCamera;
     /*! \brief  Switch set to true when the splash screen is on */
     bool                                            _splashOn;
-	/*! \brief	The root of the effects*/
-	osg::ref_ptr<osg::Group>						_effectsRoot;
-	/*! \brief	The effect implementation callback */
-	osg::ref_ptr<OpenIG::Base::GenericImplementationCallback>	_effectsImplementationCallback;
+    /*! \brief	The root of the effects*/
+    osg::ref_ptr<osg::Group>						_effectsRoot;
+    /*! \brief	The effect implementation callback */
+    osg::ref_ptr<OpenIG::Base::GenericImplementationCallback>	_effectsImplementationCallback;
 
-	/*! \brief	Our Effect*/
-	typedef osg::ref_ptr<osg::MatrixTransform>			Effect;
-	typedef std::map< unsigned int, Effect >			EffectMap;
-	EffectMap											_effects;
+    /*! \brief	Our Effect*/
+    typedef osg::ref_ptr<osg::MatrixTransform>			Effect;
+    typedef std::map< unsigned int, Effect >			EffectMap;
+    EffectMap											_effects;
 
-	/*! \brief The Light Attributes */
-	LightAttributesMap								_lightAttributes;
+    /*! \brief The Light Attributes */
+    LightAttributesMap								_lightAttributes;
 
-	/*! \brief The read file callback*/
-	osg::ref_ptr<ReadNodeImplementationCallback>	_readFileCallback;
+    /*! \brief The read file callback*/
+    osg::ref_ptr<ReadNodeImplementationCallback>	_readFileCallback;
 
-	/*! \brief The file cache map*/
-	typedef std::map< std::string, osg::ref_ptr<osg::Node> >	EntityCache;
-	EntityCache													_entityCache;
+    /*! \brief The file cache map*/
+    typedef std::map< std::string, osg::ref_ptr<osg::Node> >	EntityCache;
+    EntityCache													_entityCache;
 
-	/*! \brief The files to be cached*/
-	OpenIG::Base::StringUtils::StringList						_filesToBeCached;
+    /*! \brief The files to be cached*/
+    OpenIG::Base::StringUtils::StringList						_filesToBeCached;
 
-	/*! \brief setup mask*/
-	unsigned int												_setupMask;
+    /*! \brief setup mask*/
+    unsigned int												_setupMask;
 
-	/*! \brief user ReadFileCallback*/
-	osg::ref_ptr<osgDB::Registry::ReadFileCallback>				_userReadFileCallback;
-	
+    /*! \brief user ReadFileCallback*/
+    osg::ref_ptr<osgDB::Registry::ReadFileCallback>				_userReadFileCallback;
+
     /*!
      * \brief Init the viewer. It calls \ref initScene and add the
      * ViewerOperation for managing the Entity maps. See \ref OpenIG::Base::ImageGenerator::addEntity
      * \param viewer Instance of osgViewer::CompositeViewer
-	 * \param ids			List of Views to which we let OpenIG render. If empty
-	 *						it will use all the Views with no SceneData associated
+     * \param ids			List of Views to which we let OpenIG render. If empty
+     *						it will use all the Views with no SceneData associated
      * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jan 16 2015
      */
-	void initViewer(osgViewer::CompositeViewer* viewer, const ViewIdentifiers& ids = ViewIdentifiers());
+    void initViewer(osgViewer::CompositeViewer* viewer, const ViewIdentifiers& ids = ViewIdentifiers());
 
     /*! Peforms init on the onscreen command line terminal. It is bound to F8
      * \brief Peforms init on the onscreen command line terminal
@@ -1145,7 +1220,7 @@ protected:
      * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Feb 19 2016
-	 * \param	  view - view to init the scene, If NULL provided then default to view(0)
+     * \param	  view - view to init the scene, If NULL provided then default to view(0)
      */
     void initScene();
 
@@ -1167,21 +1242,21 @@ protected:
      */
     void initSplashScreen();
 
-	/*! Init the effects. Add the effects root to the scene
-	* \brief Init the effects
-	* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	* \copyright (c)Compro Computer Services, Inc.
-	* \date      Sun Jun 14 2015
-	*/
-	void initEffects();
+    /*! Init the effects. Add the effects root to the scene
+    * \brief Init the effects
+    * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \copyright (c)Compro Computer Services, Inc.
+    * \date      Sun Jun 14 2015
+    */
+    void initEffects();
 
-	/*! Creates sun/moon light with the reserved ID 0
-	* \brief Creates sun/moon light with the reserved ID 0
-	* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	* \copyright (c)Compro Computer Services, Inc.
-	* \date      Wed Nov 4 2015
-	*/
-	void createSunMoonLight();
+    /*! Creates sun/moon light with the reserved ID 0
+    * \brief Creates sun/moon light with the reserved ID 0
+    * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \copyright (c)Compro Computer Services, Inc.
+    * \date      Wed Nov 4 2015
+    */
+    void createSunMoonLight();
 };
 
 } // namespace

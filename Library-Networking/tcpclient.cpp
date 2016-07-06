@@ -22,6 +22,8 @@
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
 //#*****************************************************************************
+//#*	author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+//#*	copyright(c)Compro Computer Services, Inc.
 
 #include <iostream>
 
@@ -70,7 +72,7 @@ void TCPClient::send(const Buffer& buffer)
 	}
 }
 
-void TCPClient::receive(Buffer& buffer)
+void TCPClient::receive(Buffer& buffer, bool resetBuffer)
 {
 	if (_socket == 0)
 	{
@@ -79,7 +81,8 @@ void TCPClient::receive(Buffer& buffer)
 
 	if (_socket)
 	{
-		const boost::asio::mutable_buffers_1	buff((void*)buffer.getData(), buffer.getSize());
+		Buffer cbuff(BUFFER_SIZE);
+		const boost::asio::mutable_buffers_1	buff((void*)cbuff.getData(), cbuff.getSize());
 		boost::system::error_code error;
 
 		try
@@ -87,6 +90,11 @@ void TCPClient::receive(Buffer& buffer)
 			setupSocket(*_socket);
 			size_t len = _socket->read_some(buff, error);
 
+			if (len)
+			{
+				buffer.write(cbuff.getData(), len);
+				if (resetBuffer) buffer.reset();
+			}
 			if (error)
 				throw boost::system::system_error(error); 
 		}
@@ -132,6 +140,6 @@ void TCPClient::setupSocket(boost::asio::ip::tcp::socket& socket)
 	if (!_setup_socket)
 	{
 		_setup_socket = true;
-		socket.set_option(boost::asio::ip::tcp::no_delay(true));
+		//socket.set_option(boost::asio::ip::tcp::no_delay(true));
 	}
 }

@@ -4,7 +4,6 @@ SUBDIRS +=  Library-Graphics \
             Core-Base \
             Core-PluginBase \
             Core-OpenIG \
-            Application-IG \
             Plugin-SkyDome \
             Utility-veggen \
             Utility-vegviewer \
@@ -19,6 +18,7 @@ SUBDIRS +=  Library-Graphics \
             Plugin-FBXAnimation \
             Plugin-OSGParticleEffects \
             Library-Networking \
+            Library-Protocol \
             Plugin-Networking \
             Application-A320
 
@@ -30,36 +30,43 @@ OTHER_FILES += CMakeModules/*.* \
                openig_version.pri \
                CMakeLists.txt \
                OpenIG_Environmental_Vars.reg \
-               LICENSE
-
-OTHER_FILES += Resources/*.* \
+               LICENSE \
+               Resources/*.* \
                Resources/shaders/*.* \
+               Resources/shaders/SilverLining/Original/*.* \
+               Resources/shaders/SilverLining/WithForwardPlusAndLogZ/*.* \
+               Resources/shaders/SilverLining/WithSimpleLighting/*.* \
+               Resources/shaders/Triton/*.* \
                Resources/textures/*.*
 
 unix {
+#SILVERLINING
     exists( /usr/local/lib/libSilverLining* ){
-        message( "Configuring for build with Sundog-Software's SilverLining..." )
+        message( "Configuring system to build with Sundog-Software's SilverLining..." )
         SUBDIRS += Plugin-SilverLining
     }else{
         message( "Sundog-Software's SilverLining not found on the system. The SilverLining plugin is not included in the build..." )
     }
 
+#TRITON
     exists( /usr/local/lib/libTriton* ){
-        message( "Configuring for build with Sundog-Software's Triton..." )
+        message( "Configuring system to build with Sundog-Software's Triton..." )
         SUBDIRS += Plugin-Triton
     }else{
         message( "Sundog-Software's Triton not found on the system. The Triton plugin is not included in the build..." )
     }
 
+#CSTSHARE
     exists( /usr/local/lib/libCstShare* ){
-        message( "Configuring for build with Legacy Muse products, legacy Muse libraries were found!!!......" )
+        message( "Configuring system to build with Legacy Muse products, legacy Muse libraries were found!!!......" )
         SUBDIRS += Plugin-Muse
     }else{
         message( "We are NOT Configuring for building with Legacy Muse products. required Muse libraries were not found!!!..." )
     }
 
+#BULLET
     !mac:exists( /usr/local/lib/libBullet* ):exists( /usr/local/lib64/libosgb* ) {
-        message( "Configuring for build with Bullets ..." )
+        message( "Configuring system to build with Bullets ..." )
         SUBDIRS += Library-Bullet
         SUBDIRS += Plugin-Bullet
         SUBDIRS += Application-Bullet
@@ -67,9 +74,8 @@ unix {
     else{
         !mac:message( "Bullets not found on the system. The Bullets application is not included in the build..." )
     }
-
     mac:exists( /usr/local/lib/libBullet* ):exists( /usr/local/lib/libosgb* ) {
-        message( "Configuring for build with Bullets ..." )
+        message( "Configuring system to build with Bullets ..." )
         SUBDIRS += Library-Bullet
         SUBDIRS += Plugin-Bullet
         SUBDIRS += Application-Bullet
@@ -78,66 +84,93 @@ unix {
         mac:message( "Bullets not found on the system. The Bullets application is not included in the build..." )
     }
 
+#OSGEarth
     !mac:exists( /usr/local/lib64/libosgEarth* ){
-        message( "Configuring for build with osgEarth ..." )
+        message( "Configuring system to build with osgEarth ..." )
         SUBDIRS += Plugin-OSGEarthSimpleLighting
         SUBDIRS += Application-Earth
     }else{
         !mac:message( "osgEarth not found on the system. The osgEarth application is not included in the build..." )
     }
-
     mac:exists( /usr/local/lib/libosgEarth* ){
-        message( "Configuring for build with osgEarth ..." )
+        message( "Configuring system to build with osgEarth ..." )
         SUBDIRS += Plugin-OSGEarthSimpleLighting
         SUBDIRS += Application-Earth
     }else{
         mac:message( "osgEarth not found on the system. The osgEarth application is not included in the build..." )
     }
 
+#MYGUI
     !mac:exists( /usr/local/lib64/libMyGUIEngine* ):exists( /usr/local/lib64/libMyGUI.OpenGLPlatform.a ){
-        message( "Configuring for build with MyGUI ..." )
+        message( "Configuring system to build with MyGUI ..." )
         SUBDIRS += Plugin-UI
     }else{
         message( "MyGUI not found on the Linux system. The Plug-UI is not included in the build..." )
     }
     mac:exists( /usr/local/lib/libMyGUIEngine* ):exists( /usr/local/lib/libMyGUI.OpenGLPlatform.* ){
-        message( "Configuring for build with MyGUI ..." )
+        message( "Configuring system to build with MyGUI ..." )
         SUBDIRS += Plugin-UI
     }else{
         mac:message( "MyGUI not found on the Mac system. The Plug-UI is not included in the build..." )
     }
 
+##CIGI
+    exists( /usr/local/lib64/libcigicl* ){
+        message( "Configuring system to build with CIGI Class Libraries..." )
+        SUBDIRS += Plugin-CIGI
+    }else{
+        message( "The CIGI class library was not found on the system. The CIGI plugin is not included in the build..." )
+    }
+    mac:exists( /usr/local/lib/libcigicl* ){
+        mac:message( "Configuring system to build with CIGI Class Libraries..." )
+        SUBDIRS += Plugin-CIGI
+    }else{
+        mac:message( "The CIGI class library was not found on the system. The CIGI plugin is not included in the build..." )
+    }
+
 ##mersive
     !mac:exists( /mersive/lib/libMersive* ) {
-         message( "Configuring for build with Mersive ..." )
+         message( "Configuring system to build with Mersive ..." )
          SUBDIRS += Plugin-Mersive
     }else{
          mac:message( "Mersive not found on the Mac system.  The Mersive Plugin is not included in the build..." )
     }
+
+##JRM Sensors
+#    JRMPATH = $$(JRM_OSV_PATH)
+#    isEmpty(JRMPATH) {
+#         message( "JRM Sensors not found on system, The JRM Sensor plugin is not included in the build ..." )
+#    }else{
+#         message( "Configuring system to build with JRM Sensors..." )
+#         SUBDIRS += Plugin-JRMSensors
+#    }
 }
 
 win32 {
     HAS_BULLET64=FALSE
+#SILVERLINING
     SLROOT = $$(SILVERLINING)
     isEmpty(SLROOT) {
         message( "SilverLining not found on the system. The SilverLining plugin is not included in the build..." )
     }
     else {
-        message( "Configuring Windows system build with SilverLining..." )
+        message( "Configuring Windows system to build with SilverLining..." )
         SUBDIRS += Plugin-SilverLining
     }
 
+#TRITON
     TROOT = $$(TRITON)
     isEmpty(TROOT) {
         message( "Triton not found on the system. The Triton plugin is not included in the build..." )
     }
     else {
-        message( "Configuring Windows system build with Triton..." )
+        message( "Configuring Windows system to build with Triton..." )
         SUBDIRS += Plugin-Triton
     }
 
+#BULLET
     exists( C:/Program Files/BULLET_PHYSICS ): exists( C:/Program Files/osgBullet ) {
-        message( "Configuring Windows system 64bit build with Bullets ..." )
+        message( "Configuring Windows system 64bit to build with Bullets ..." )
         SUBDIRS += Library-Bullet
         SUBDIRS += Plugin-Bullet
         SUBDIRS += Application-Bullet
@@ -159,6 +192,7 @@ win32 {
         }
     }
 
+#OSGEARTH
     exists( C:/Program Files/OSGEARTH ) {
         OSGEARTH_ROOT = C:\Program Files\OSGEARTH
     }
@@ -167,37 +201,51 @@ win32 {
         message( "osgEarth not found on the system. The application is not included in the build..." )
     }
     else {
-        message( "Configuring Windows system build with osgEarth ..." )
+        message( "Configuring Windows system to build with osgEarth ..." )
         SUBDIRS += Plugin-OSGEarthSimpleLighting
         SUBDIRS += Application-Earth
     }
 
+#CSTSHARED
     CSTSHAREROOT = $$(CSTSHARE)
     isEmpty(CSTSHAREROOT) {
         message( "We are NOT Configuring for building with Legacy Muse products. required Muse libraries were not found!!!..." )
     }
     else {
-        message( "Configuring Windows system build with Legacy Muse products..." )
-        SUBDIRS += Plugin-SLScene
+        message( "Configuring Windows system to build with Legacy Muse products..." )
+        SUBDIRS += Plugin-Muse
     }
 
+#MYGUI
     MYGUIROOT = $$(MYGUI_ROOT)
     isEmpty(MYGUIROOT) {
         message( "MyGUI not found on the Windows system. The Plug-UI is not included in the build..." )
     }
     else {
-        message( "Configuring Windows system build with MyGUI ..." )
+        message( "Configuring Windows system to build with MyGUI ..." )
         SUBDIRS += Plugin-UI
+    }
+
+#CIGI
+    CIGIROOT = $$(CIGI_ROOT)
+    isEmpty(CIGIROOT) {
+        message( "The CIGI Class libraries were not found on the Windows system. The CIGI plugin is not included in the build..." )
+    }
+    else {
+        message( "The CIGI Class libraries were founnd, configuring Windows system to build with the CIGI class libraries ..." )
+        SUBDIRS += Plugin-CIGI
     }
 }
 
-# library version number files
-exists( "/usr/local/muse/amx/openig_version.pri" ){
+#SUBDIRS += Simulation
 
-include( "/usr/local/muse/amx/openig_version.pri" )
-isEmpty( VERSION ){ error( "bad or undefined VERSION variable inside file /usr/local/muse/amx/openig_version.pri" ) }
+# library version number files
+exists( "openig_version.pri" ){
+
+include( "openig_version.pri" )
+isEmpty( VERSION ){ error( "bad or undefined VERSION variable inside file openig_version.pri" ) }
 
 }
-else { error( "could not find pri library version file /usr/local/muse/amx/openig_version.pri" ) }
+else { error( "could not find pri library version file openig_version.pri" ) }
 
 # end of library version number files

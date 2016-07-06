@@ -99,12 +99,7 @@ namespace OpenIG {
 				return new CloudsDrawable();
 			}
 
-			virtual void drawImplementation(osg::RenderInfo& renderInfo) const;
-
-			void setEnvironmentMapDirty(bool dirty)
-			{
-				_envMapDirty = dirty;
-			}
+			virtual void drawImplementation(osg::RenderInfo& renderInfo) const;			
 
 			void setPluginContext(OpenIG::PluginBase::PluginContext* context)
 			{
@@ -123,14 +118,16 @@ namespace OpenIG {
 				_todHour = hour;
 			}
 
+			static void setEnvironmentMapDirty(bool dirty);
+			static void setForwardPlusRange(float range);
+
 		protected:
 			void initialize();
-			bool useLogZDepthBuffer() const;
 
 			osgViewer::CompositeViewer*			_viewer;
 			mutable OpenThreads::Mutex			_mutex;
 			OpenIG::Base::ImageGenerator*       _ig;
-			bool								_envMapDirty;
+			static bool							_envMapDirty;
 			OpenIG::PluginBase::PluginContext*  _pluginContext;
 			bool								_lightBrightness_enable;
 			float								_lightBrightness_day;

@@ -112,6 +112,7 @@ win32 {
     else {
         !build_pass:message(\"$$basename(_PRO_FILE_) \"OpenSceneGraph\" detected in \"$$OSGROOT\")
         INCLUDEPATH += $$OSGROOT/include
+        LIBS += -L$$OSGROOT/lib
     }
     OSGBUILD = $$(OSG_BUILD)
     isEmpty(OSGBUILD) {

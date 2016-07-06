@@ -22,6 +22,8 @@
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
 //#*****************************************************************************
+//#*	author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+//#*	copyright(c)Compro Computer Services, Inc.
 
 #include <iostream>
 
@@ -101,7 +103,7 @@ void UDPNetwork::send(const Buffer& buffer)
 
 }
 
-void UDPNetwork::receive(Buffer& buffer)
+void UDPNetwork::receive(Buffer& buffer, bool resetBuffer)
 {
     boost::system::error_code errorcode;
     size_t bytes_recv=0;
@@ -123,6 +125,10 @@ void UDPNetwork::receive(Buffer& buffer)
             _recieverSocket->open(endpoint.protocol(), errorcode);
             _recieverSocket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
             _recieverSocket->bind(endpoint, errorcode);
+
+			std::ostringstream oss;
+			*log << oss << "Networking: UDP bound to:" << _recieverSocket->local_endpoint().address().to_string() << std::endl;
+
         }
 		catch (std::exception& e)
 		{
@@ -141,10 +147,16 @@ void UDPNetwork::receive(Buffer& buffer)
 	{
 		try
 		{
+			Buffer rbuff(BUFFER_SIZE);
 			boost::asio::ip::udp::endpoint	sendersEndpoint;
-			boost::asio::mutable_buffers_1	buff((void*)buffer.getData(), buffer.getSize());
+			boost::asio::mutable_buffers_1	buff((void*)rbuff.getData(), rbuff.getSize());
 
             bytes_recv = _recieverSocket->receive_from(buff, sendersEndpoint, 0, errorcode);
+			if (bytes_recv)
+			{
+				buffer.write(rbuff.getData(), bytes_recv);
+				if (resetBuffer) buffer.reset();
+			}
 		}
 		catch (std::exception& e)
 		{

@@ -109,7 +109,10 @@ void main()
 
 	bool adjustSize = false;
     vec2 actualSize = worldSizeToPixelSize(vCenter + vec4(-width, -width, 0, 0), vCenter + vec4( width, width, 0, 0));
-    if (actualSize.y<minPixelSize||actualSize.y<minPixelSize) 
+    //if (actualSize.y<minPixelSize||actualSize.y>maxPixelSize)
+	//Something is amiss here with this check for the same thing twice, but
+	//checking for a value > maxPixelSize leads to bad results right now CGR
+    if (actualSize.y<minPixelSize||actualSize.y<minPixelSize)
     {
 		adjustSize = true;
     }

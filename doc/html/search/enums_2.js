@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['pathtype',['PathType',['../class_open_i_g_1_1_base_1_1_file_system.html#a086a9d70656c2407794b08e4d5f60a39',1,'OpenIG::Base::FileSystem']]]
+  ['mask',['Mask',['../struct_open_i_g_1_1_base_1_1_light_attributes.html#aa6c7a573d9d54c46afc14cbde50bec64',1,'OpenIG::Base::LightAttributes']]]
 ];

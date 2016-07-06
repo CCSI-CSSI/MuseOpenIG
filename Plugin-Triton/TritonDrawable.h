@@ -33,7 +33,7 @@ namespace OpenIG {
 		class TritonDrawable : public osg::Drawable
 		{
 		public:
-			TritonDrawable(const std::string& resourcePath, const std::string& userName, const std::string& licence, bool geocentric = false, bool forwardPlusEnabled = true, osg::TextureCubeMap * cubeMap = NULL);
+			TritonDrawable(const std::string& resourcePath, const std::string& userName, const std::string& licence, bool geocentric = false, bool forwardPlusEnabled = true, bool logZEnabled = true, osg::TextureCubeMap * cubeMap = NULL);
 
 			void setHeightMapCamera(osg::Camera *heightMapcamera) { _heightMapcamera = heightMapcamera; }
 			void setHeightMap(osg::Texture2D *heightMap) { _heightMap = heightMap; }
@@ -120,6 +120,7 @@ namespace OpenIG {
 			bool _forwardPlusSetUpTried;
 			bool _forwardPlusEnabled;
 
+			bool _logZEnabled;
 			bool _logz_tried;
 			void initializeLogZDepthBuffer(osg::RenderInfo& renderInfo, std::vector<GLint>& userShaders);
 		};

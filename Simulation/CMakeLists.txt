@@ -1,0 +1,58 @@
+cmake_minimum_required( VERSION 2.8.8 )
+project( OpenIG-Client )
+
+set( OPENIG_CLIENT_VERSION 1.0.0 )
+set( OPENIG_CLIENT_MAJOR_VERSION 1 )
+set( OPENIG_CLIENT__VERSION 0 )
+set( OPENIG_CLIENT_SUB_VERSION 0 )
+
+set( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}" )
+
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
+set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib )
+if( WIN32 )
+    set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} )
+else()
+    set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY} )
+endif()
+
+IF( WIN32 AND MSVC )
+    OPTION( OPENIG_CLIENT_WIN32_USE_MP "Build with multiple processes (/MP option; VS 2005 and above)." ON )
+    MARK_AS_ADVANCED( OPENIG_CLIENT_WIN32_USE_MP )
+    IF( OPENIG_CLIENT_WIN32_USE_MP )
+        SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP" )
+    ENDIF( OPENIG_CLIENT_WIN32_USE_MP )
+ENDIF( WIN32 AND MSVC )
+
+if(CMAKE_COMPILER_IS_GNUCXX)
+    include(GNUInstallDirs)
+endif(CMAKE_COMPILER_IS_GNUCXX)
+
+if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
+    set(CMAKE_INSTALL_LIBDIR lib)
+endif(NOT DEFINED CMAKE_INSTALL_LIBDIR)
+
+if (NOT "$ENV{OPENIG_CLIENT_BUILD}" STREQUAL "")
+	SET(CMAKE_INSTALL_PREFIX "$ENV{OPENIG_CLIENT_BUILD}" CACHE PATH "OpeinIG Client install prefix" FORCE)
+endif()
+
+include( FindOSGHelper )
+include( FindBoostHelper )
+include( FindOpenIG )
+
+add_subdirectory(OpenIG-Host)
+add_subdirectory(OpenIG-TerrainQueryServer)
+add_subdirectory(OpenIG-ImageGenerator)
+add_subdirectory(OpenIG-Plugin)
+
+CONFIGURE_FILE(
+  "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/cmake_uninstall.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+  IMMEDIATE @ONLY)
+if( WIN32 )
+  ADD_CUSTOM_TARGET(UNINSTALL
+    "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
+else()
+  ADD_CUSTOM_TARGET(uninstall
+    "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
+endif()

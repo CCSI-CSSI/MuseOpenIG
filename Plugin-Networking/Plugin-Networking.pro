@@ -18,7 +18,7 @@ SOURCES += igpluginnetworking.cpp
 HEADERS +=
 
 LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgShadow -losgText\
-        -lOpenIG-Engine -lOpenIG-Base -lOpenIG-PluginBase -lOpenIG-Networking
+        -lOpenIG-Engine -lOpenIG-Base -lOpenIG-PluginBase -lOpenIG-Networking -lOpenIG-Protocol
 
 INCLUDEPATH += ../
 DEPENDPATH += ../

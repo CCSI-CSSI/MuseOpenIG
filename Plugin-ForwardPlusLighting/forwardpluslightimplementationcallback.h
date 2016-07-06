@@ -78,6 +78,9 @@ namespace OpenIG {
 
 			virtual osg::Referenced*	createLight(unsigned int id, const OpenIG::Base::LightAttributes& definition, osg::Group* lightsGroup);
 			virtual void				updateLight(unsigned int id, const OpenIG::Base::LightAttributes& definition);
+			virtual void				deleteLight(unsigned int id);
+			virtual void				setLightUserData(unsigned int id, osg::Referenced* data);
+
 			ForwardPlusEngine*			getFPEngine() { return _fpEngine;  }
 
 		protected:

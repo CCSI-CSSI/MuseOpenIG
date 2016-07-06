@@ -1,5 +1,7 @@
 // Tested agains SilverLining Version 4.040 January 12, 2016
 
+uniform float u_ForwardPlusRange;
+
 // Allow overriding of the final sky fragment color
 void overrideSkyFragColor(inout vec4 finalColor)
 {
@@ -24,7 +26,18 @@ void overrideBillboardFragment_forward_plus_sl_ps(in vec4 texColor, in vec4 ligh
 // Overrides fragment colors of billboards (cloud puffs, sun, moon.)
 void overrideBillboardFragment(in vec4 texColor, in vec4 lightColor, inout vec4 finalColor)
 {
-	overrideBillboardFragment_forward_plus_sl_ps(texColor, lightColor, finalColor);
+	if (u_ForwardPlusRange > 0.0)
+	{
+		float z = gl_FragCoord.z / gl_FragCoord.w;
+		if (z < u_ForwardPlusRange)
+		{
+			overrideBillboardFragment_forward_plus_sl_ps(texColor, lightColor, finalColor);
+		}
+	}
+	else
+	{
+		overrideBillboardFragment_forward_plus_sl_ps(texColor, lightColor, finalColor);
+	}
 }
 
 //Overrides the final color of the Cirrus Clouds

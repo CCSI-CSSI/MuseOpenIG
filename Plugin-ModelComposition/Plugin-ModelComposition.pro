@@ -24,7 +24,7 @@ DEPENDPATH += ../
 OTHER_FILES += CMakeLists.txt
 DISTFILES += CMakeLists.txt
 
-OTHER_FILES += $${PWD}/DataFiles/a320.obj.xml \
+OTHER_FILES += $${PWD}/DataFiles/a320.* \
                $${PWD}/DataFiles/libIgPlugin-ModelComposition.so.xml
 
 unix {

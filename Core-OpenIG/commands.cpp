@@ -201,9 +201,214 @@ public:
 			double          p = atof(tokens.at(4).c_str());
 			double          r = atof(tokens.at(5).c_str());
 
-			osg::Matrixd mx = Math::instance()->toMatrix(x,y,z,h,p+90,r);
+			osg::Matrixd mx = Math::instance()->toViewMatrix(x,y,z,h,p,r);
 
-			_ig->setCameraPosition(mx);
+			_ig->setCameraPosition(mx,true);
+
+			return 0;
+		}
+		return -1;
+	}
+
+protected:
+	OpenIG::Base::ImageGenerator* _ig;
+};
+
+class BindEntityToCameraCommand : public Commands::Command
+{
+public:
+	BindEntityToCameraCommand(ImageGenerator* ig)
+		: _ig(ig) {}
+
+	virtual const std::string getUsage() const
+	{
+		return "id x y z heading pitch roll (optional:View ID, defaulted to 0)";
+	}
+
+	virtual const std::string getArgumentsFormat() const
+	{
+		return "I:D:D:D:D:D:D:D";
+	}
+
+	virtual const std::string getDescription() const
+	{
+		return  "binds an entity to a camera, with an offset in camera space\n"
+			"     id - the id of the entity\n"
+			"     x - the x position of the camera\n"
+			"     y - the y position of the camera\n"
+			"     z - the z position of the camera\n"
+			"     heading - the heading of the camera in degrees\n"
+			"     pitch - the pitch of the camera in degrees\n"
+			"     roll - the roll of the camera in degrees\n"
+			"	  view id - the id of the view in multi-view setup";
+	}
+
+	virtual int exec(const StringUtils::Tokens& tokens)
+	{
+		if (tokens.size() >= 7)
+		{
+			unsigned int    id = atoi(tokens.at(0).c_str());
+			double          x = atof(tokens.at(1).c_str());
+			double          y = atof(tokens.at(2).c_str());
+			double          z = atof(tokens.at(3).c_str());
+			double          h = atof(tokens.at(4).c_str());
+			double          p = atof(tokens.at(5).c_str());
+			double          r = atof(tokens.at(6).c_str());
+
+			unsigned int viewID = 0;
+			if (tokens.size() == 8)
+			{
+				viewID = atoi(tokens.at(7).c_str());
+			}
+
+			osg::Matrixd offset = Math::instance()->toMatrix(x, y, z, h, p, r);
+
+			_ig->bindEntityToCamera(id, offset, viewID);
+
+			return 0;
+		}
+		return -1;
+	}
+
+protected:
+	OpenIG::Base::ImageGenerator* _ig;
+};
+
+class BindEntityToCameraUpdateCommand : public Commands::Command
+{
+public:
+	BindEntityToCameraUpdateCommand(ImageGenerator* ig)
+		: _ig(ig) {}
+
+	virtual const std::string getUsage() const
+	{
+		return "id x y z heading pitch roll";
+	}
+
+	virtual const std::string getArgumentsFormat() const
+	{
+		return "I:D:D:D:D:D:D";
+	}
+
+	virtual const std::string getDescription() const
+	{
+		return  "update the entity position and orientation if bound to camera\n"
+			"     id - the id of the entity\n"
+			"     x - the x position of the camera\n"
+			"     y - the y position of the camera\n"
+			"     z - the z position of the camera\n"
+			"     heading - the heading of the camera in degrees\n"
+			"     pitch - the pitch of the camera in degrees\n"
+			"     roll - the roll of the camera in degrees";			
+	}
+
+	virtual int exec(const StringUtils::Tokens& tokens)
+	{
+		if (tokens.size() >= 7)
+		{
+			unsigned int    id = atoi(tokens.at(0).c_str());
+			double          x = atof(tokens.at(1).c_str());
+			double          y = atof(tokens.at(2).c_str());
+			double          z = atof(tokens.at(3).c_str());
+			double          h = atof(tokens.at(4).c_str());
+			double          p = atof(tokens.at(5).c_str());
+			double          r = atof(tokens.at(6).c_str());			
+
+			osg::Matrixd offset = Math::instance()->toMatrix(x, y, z, h, p, r);
+
+			_ig->bindEntityToCameraUpdate(id, offset);
+
+			return 0;
+		}
+		return -1;
+	}
+
+protected:
+	OpenIG::Base::ImageGenerator* _ig;
+};
+
+class UpdateEntityCommand : public Commands::Command
+{
+public:
+	UpdateEntityCommand(ImageGenerator* ig)
+		: _ig(ig) {}
+
+	virtual const std::string getUsage() const
+	{
+		return "id x y z heading pitch roll";
+	}
+
+	virtual const std::string getArgumentsFormat() const
+	{
+		return "I:D:D:D:D:D:D";
+	}
+
+	virtual const std::string getDescription() const
+	{
+		return  "update entity position and orientation\n"
+			"     id - the id of the entity\n"
+			"     x - the x position of the camera\n"
+			"     y - the y position of the camera\n"
+			"     z - the z position of the camera\n"
+			"     heading - the heading of the camera in degrees\n"
+			"     pitch - the pitch of the camera in degrees\n"
+			"     roll - the roll of the camera in degrees";			
+	}
+
+	virtual int exec(const StringUtils::Tokens& tokens)
+	{
+		if (tokens.size() >= 7)
+		{
+			unsigned int    id = atoi(tokens.at(0).c_str());
+			double          x = atof(tokens.at(1).c_str());
+			double          y = atof(tokens.at(2).c_str());
+			double          z = atof(tokens.at(3).c_str());
+			double          h = atof(tokens.at(4).c_str());
+			double          p = atof(tokens.at(5).c_str());
+			double          r = atof(tokens.at(6).c_str());			
+
+			osg::Matrixd offset = Math::instance()->toMatrix(x, y, z, h, p, r);
+
+			_ig->updateEntity(id, offset);			
+
+			return 0;
+		}
+		return -1;
+	}
+
+protected:
+	OpenIG::Base::ImageGenerator* _ig;
+};
+
+class UnbindEntityFromCameraCommand : public Commands::Command
+{
+public:
+	UnbindEntityFromCameraCommand(ImageGenerator* ig)
+		: _ig(ig) {}
+
+	virtual const std::string getUsage() const
+	{
+		return "id";
+	}
+
+	virtual const std::string getArgumentsFormat() const
+	{
+		return "I";
+	}
+
+	virtual const std::string getDescription() const
+	{
+		return  "unbinds an entity from a camera\n"
+			"     id - the id of the entity";			
+	}
+
+	virtual int exec(const StringUtils::Tokens& tokens)
+	{
+		if (tokens.size() == 1)
+		{
+			unsigned int    id = atoi(tokens.at(0).c_str());			
+
+			_ig->unbindEntityFromCamera(id);			
 
 			return 0;
 		}
@@ -1599,4 +1804,8 @@ void Engine::initCommands()
 	Commands::instance()->addCommand("addeffect", new AddEffectCommand(this));
 	Commands::instance()->addCommand("cache", new CacheCommand(this));
 	Commands::instance()->addCommand("loadconfig", new LoadConfigCommand());
+	Commands::instance()->addCommand("bindtocamera", new BindEntityToCameraCommand(this));
+	Commands::instance()->addCommand("bindtocameraupdate", new BindEntityToCameraUpdateCommand(this));
+	Commands::instance()->addCommand("updateentity", new UpdateEntityCommand(this));
+	Commands::instance()->addCommand("unbindfromcamera", new UnbindEntityFromCameraCommand(this));
 }

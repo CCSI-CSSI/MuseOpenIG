@@ -1,4 +1,4 @@
-﻿/*
+/*
 -----------------------------------------------------------------------------
 File:        TileSpaceLightGrid.cpp
 Copyright:   Copyright (C) 2007-2015 Poojan Prabhu. All rights reserved.

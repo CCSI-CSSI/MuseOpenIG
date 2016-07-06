@@ -22,6 +22,8 @@
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
 //#*****************************************************************************
+//#*	author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+//#*	copyright(c)Compro Computer Services, Inc.
 
 #include <iostream>
 
@@ -38,6 +40,7 @@ TCPServer::TCPServer(const std::string& host, unsigned port)
 	, _host(host)
 {
 	setPort(port);
+	init();
 }
 
 TCPServer::~TCPServer()
@@ -116,30 +119,42 @@ void TCPServer::send(const Buffer& buffer)
 
 	_mutex.unlock();
 }
-void TCPServer::receive(Buffer& buffer)
-{
-
+void TCPServer::receive(Buffer& buffer, bool resetBuffer)
+{	
 	boost::asio::mutable_buffers_1	buff((void*)buffer.getData(), buffer.getSize());
 	boost::system::error_code error;
+	std::multimap<std::string, Connection::pointer>::iterator itr;
 	try
 	{
 		_mutex.lock();
 
-		std::multimap<std::string, Connection::pointer>::iterator itr = _connections.begin();
+		itr = _connections.begin();
 		for (; itr != _connections.end(); ++itr)
 		{
-			Connection::pointer connection = itr->second;
+			if (itr == _connections.begin()) continue;
 
-			Buffer cbuff;
+			Connection::pointer connection = itr->second;
+		
+			Buffer cbuff(BUFFER_SIZE);
 			boost::asio::mutable_buffers_1	buff((void*)cbuff.getData(), cbuff.getSize());
 			boost::system::error_code error;
 
 			size_t len = connection->socket().read_some(buff, error);
-
-			buffer << cbuff;
+			if (len)
+			{
+				buffer.write(cbuff.getData(), len);
+				if (resetBuffer) buffer.reset();
+			}
 
 			if (error)
+			{
+				std::ostringstream oss;
+				if (boost::asio::error::eof == error)
+					*log << oss << "Networking: tcp server receive error: eof" << std::endl;
+				else
+					*log << oss << "Networking: tcp server receive error: " << error << std::endl;
 				throw boost::system::system_error(error);
+			}
 
 		}
 		_mutex.unlock();
@@ -148,6 +163,8 @@ void TCPServer::receive(Buffer& buffer)
 	}
 	catch (std::exception& e)
 	{
+		_connections.erase(itr);
+
 		_mutex.unlock();
 
 		std::ostringstream oss;
@@ -235,6 +252,6 @@ void TCPServer::getConnectedClients(std::vector<std::string>& clients)
 void TCPServer::Connection::setupSocket(boost::asio::ip::tcp::socket& socket)
 {
 	_socket_setup = true;
-	_socket.set_option(boost::asio::ip::tcp::no_delay(true));
+	socket.set_option(boost::asio::ip::tcp::no_delay(true));
 }
 

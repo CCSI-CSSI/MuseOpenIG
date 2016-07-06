@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['changeanimationstatus',['changeAnimationStatus',['../class_open_i_g_1_1_base_1_1_image_generator.html#a6de0473d9accabf76a76f75cd3667529',1,'OpenIG::Base::ImageGenerator::changeAnimationStatus()'],['../class_open_i_g_1_1_engine.html#a2fc0972dd1202c01d7e7e3a2503dc37f',1,'OpenIG::Engine::changeAnimationStatus()']]],
   ['checkandlogerror',['checkAndLogError',['../class_open_i_g_1_1_base_1_1_g_l_error_utils.html#ab9aaf28d469f0b4b561f17ddbf5ad75a',1,'OpenIG::Base::GLErrorUtils']]],
   ['clean',['clean',['../class_open_i_g_1_1_plugin_base_1_1_plugin.html#a2f4eade6773717746ce45acc325d2957',1,'OpenIG::PluginBase::Plugin']]],
   ['cleanup',['cleanup',['../class_open_i_g_1_1_base_1_1_image_generator.html#adcbd179f11e255257b2ed2aef3feede1',1,'OpenIG::Base::ImageGenerator::cleanup()'],['../class_open_i_g_1_1_engine.html#a038277096b1b052dd4cbef61035cd757',1,'OpenIG::Engine::cleanup()']]],
