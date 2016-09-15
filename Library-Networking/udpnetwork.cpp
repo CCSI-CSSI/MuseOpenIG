@@ -60,14 +60,8 @@ void UDPNetwork::send(const Buffer& buffer)
 			_senderSocketInitiated = true;
 
 			_senderSocket = new boost::asio::ip::udp::socket(_senderIOService);
-			std::ostringstream oss;
-
 			_senderSocket->open(boost::asio::ip::udp::v4());
-			_senderSocket->bind(boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string(_host), 0));
-			_senderSocket->set_option(boost::asio::socket_base::reuse_address(true));
 			_senderSocket->set_option(boost::asio::socket_base::broadcast(true));
-
-			*log << oss << "Networking: UDP bound to:" << _senderSocket->local_endpoint().address().to_string() << std::endl;
 
 			_senderBroadcastEndpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::address_v4::broadcast(), _port);
 		}
@@ -88,11 +82,7 @@ void UDPNetwork::send(const Buffer& buffer)
 	{
 		try
 		{
-            boost::system::error_code ignored_error;
-            size_t status;
-            status = _senderSocket->send_to(boost::asio::buffer(buffer.getData(), buffer.getSize()), _senderBroadcastEndpoint, 0, ignored_error);
-            std::ostringstream oss;
-            *log << oss << "Networking UDP: send_to status: " << status << ", error_code: " << ignored_error << std::endl;
+			_senderSocket->send_to(boost::asio::buffer(buffer.getData(), buffer.getWritten()), _senderBroadcastEndpoint);
         }
 		catch (std::exception& e)
 		{
