@@ -1,7 +1,18 @@
-# Muse OpenIG V2.0.2
 The Muse OpenIG.  An opensource OpenSceneGraph based image generator application suite.
 Documentation, sample datasets and Binary Downloads for some platforms available at: http://openig.compro.net
 
+# Muse OpenIG V2.0.3
+  UDP network protocol is no longer defaulted to be a broadcast only, configurable
+  via the network plugins xml config/datafile, as requested in pull request #5 & #6 by jenglish.
+
+  Some content has been moved into the new Core-Utils directory, just keep in
+  mind in case of compile time errors after updating.
+
+  Visual/Artistic only changes to A320 demo
+
+  A few other misc updates and/or changes.
+
+# Muse OpenIG V2.0.2
 #  New CIGI plugin -- Sample code demonstrates how to implement the CIGI protocol with OpenIG.
    This new OpenIG plugin is based on and uses Boeing's CIGI Class Library.  Boeing also provides a 
    CIGI Host Emulator application for Windows based systems and we have integrated 
