@@ -1,0 +1,4 @@
+f+ disable
+gamma 0.8
+ambient+ 0.35 0.35 0.35
+diffuse+ 0.2 0.2 0.2
