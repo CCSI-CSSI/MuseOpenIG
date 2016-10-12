@@ -1,7 +1,7 @@
 set( APP_NAME openig-demo-a320 )
 
 set( TARGET_SRC_FILES main.cpp )
-set( TARGET_OTHER_FILES DataFiles/default.txt DataFiles/openig.xml )
+set( TARGET_OTHER_FILES DataFiles/default.txt DataFiles/richcolorsdemo.txt DataFiles/openig.xml )
 
 add_executable( ${APP_NAME} ${TARGET_SRC_FILES}
                 ${TARGET_OTHER_FILES} )
@@ -29,6 +29,7 @@ ELSE()
 ENDIF()
 
 install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/default.txt DESTINATION ${INSTALL_BINDIR})
+install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/richcolorsdemo.txt DESTINATION ${INSTALL_BINDIR})
 install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/flightpath.path DESTINATION ${INSTALL_BINDIR}/demo/)
 install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/openig.xml DESTINATION ${INSTALL_BINDIR}/igdata/)
 install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/OpenIG-Splash.jpg DESTINATION ${INSTALL_BINDIR}/igdata/)

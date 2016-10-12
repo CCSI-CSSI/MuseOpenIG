@@ -21,6 +21,10 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 #ifndef ATTRIBUTES_H
 #define ATTRIBUTES_H
@@ -34,9 +38,43 @@ namespace OpenIG {
     namespace Base {
 
         /*! This struct is used to pass data to the available plugins by using it with
+        * \ref igplugincore::PluginContext::Attribute
+        * \brief The MultiSwitchAttributes struct
+        * \author    Curtis Rubel openig@compro.net
+        * \copyright (c)Compro Computer Services, Inc.
+        * \date      Tuesday June 28 2016
+        */
+        struct MultiSwitchAttributes
+        {
+            std::string msName;
+            int         msIndex;
+
+            MultiSwitchAttributes(std::string multiSwitchName, int multiSwitchIndex)
+                : msName(multiSwitchName)
+                , msIndex(multiSwitchIndex)
+            {
+
+            }
+
+            void setMultiSwitchName(std::string multiSwitchName)
+            {
+                msName = multiSwitchName;
+            }
+
+            std::string getMultiSwitchName() const
+            {
+                return msName;
+            }
+
+            void setMultiSwitchIndex(int multiSwitchIndex) { msIndex = multiSwitchIndex; }
+            int getMultiSwitchIndex() { return msIndex; }
+
+        };
+
+        /*! This struct is used to pass data to the available plugins by using it with
          * \ref igplugincore::PluginContext::Attribute
          * \brief The FogAttributes struct
-         * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+         * \author    Trajce Nikolov Nick openig@compro.net
          * \copyright (c)Compro Computer Services, Inc.
          * \date      Sun Jan 11 2015
          */
@@ -70,7 +108,7 @@ namespace OpenIG {
         /*! This struct is used to pass data to the available plugins by using it with
          * \ref igplugincore::PluginContext::Attribute
          * \brief The TimeOfDayAttributes struct
-         * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+         * \author    Trajce Nikolov Nick openig@compro.net
          * \copyright (c)Compro Computer Services, Inc.
          * \date      Sun Jan 11 2015
          */
@@ -107,7 +145,7 @@ namespace OpenIG {
         /*! This struct is used to pass data to the available plugins by using it with
          * \ref igplugincore::PluginContext::Attribute
          * \brief The DateAttributes struct
-         * \author Curtis G Rubel crubel@compro.net
+         * \author Curtis G Rubel openig@compro.net
          * \copyright (c)Compro Computer Services, Inc.
          * \date     Wed May 25 2016
          */
@@ -154,7 +192,7 @@ namespace OpenIG {
         /*! This struct is used to pass data to the available plugins by using it with
          * \ref igplugincore::PluginContext::Attribute
          * \brief The AtmosphereAttributes struct
-         * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+         * \author    Trajce Nikolov Nick openig@compro.net
          * \copyright (c)Compro Computer Services, Inc.
          * \date      Sun Jan 11 2015
          */
@@ -184,7 +222,7 @@ namespace OpenIG {
         /*! This struct is used to pass data to the available plugins by using it with
          * \ref igplugincore::PluginContext::Attribute
          * \brief The WindAttributes struct
-         * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+         * \author    Trajce Nikolov Nick openig@compro.net
          * \copyright (c)Compro Computer Services, Inc.
          * \date      Sun Jan 11 2015
          */
@@ -204,7 +242,7 @@ namespace OpenIG {
         /*! This struct is used to pass data to the available plugins by using it with
          * \ref igplugincore::PluginContext::Attribute
          * \brief The RainSnowAttributes struct
-         * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+         * \author    Trajce Nikolov Nick openig@compro.net
          * \copyright (c)Compro Computer Services, Inc.
          * \date      Sun Jan 11 2015
          */
@@ -231,7 +269,7 @@ namespace OpenIG {
         /*! This struct is used to pass data to the available plugins by using it with
          * \ref igplugincore::PluginContext::Attribute
          * \brief The CLoudLayerAttributes struct
-         * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+         * \author    Trajce Nikolov Nick openig@compro.net
          * \copyright (c)Compro Computer Services, Inc.
          * \date      Sun Jan 11 2015
          */
@@ -239,6 +277,7 @@ namespace OpenIG {
         {
             int             id;
             int             type;
+            int             museLayer;
             double          altitude;
             double          density;
             double          thickness;
@@ -253,6 +292,7 @@ namespace OpenIG {
             CLoudLayerAttributes()
                 : id(-1)
                 , type(-1)
+                , museLayer(-1)
                 , altitude(0.0)
                 , density(0.0)
                 , thickness(0.0)
@@ -273,6 +313,10 @@ namespace OpenIG {
             void setType(int typeIn)
             {
                 type = typeIn;
+            }
+            void setMuseLayer(int layerIn)
+            {
+                museLayer = layerIn;
             }
             void setAltitude(double altitudeIn)
             {
@@ -316,6 +360,10 @@ namespace OpenIG {
             {
                 return type;
             }
+            int getMuseLayer() const
+            {
+                return museLayer;
+            }
             double getDensity() const
             {
                 return density;
@@ -343,6 +391,75 @@ namespace OpenIG {
             }
         };
 
+        /*! This struct is used to pass data to the available plugins by using it with
+         * \ref igplugincore::PluginContext::Attribute
+         * \brief The CLoudLayerFileAttributes struct
+         * \author    Curtis Rubel
+         * \copyright (c)Compro Computer Services, Inc.
+         * \date      Weds 20 July 2016
+         */
+        struct CLoudLayerFileAttributes
+        {
+            int                   id;
+            int                 type;
+            std::string     filename;
+            bool               dirty;
+            bool          saveToFile;
+
+            CLoudLayerFileAttributes()
+                : id(-1)
+                , type(-1)
+                , dirty(false)
+                , saveToFile(false)
+            {
+                filename.clear();
+            }
+
+            void setId(int idIn)
+            {
+                id = idIn;
+            }
+            void setType(int typeIn)
+            {
+                type = typeIn;
+            }
+            void setFilename(std::string fileName)
+            {
+                filename = fileName;
+            }
+            void setIsDirty(bool dirtyIn = true)
+            {
+                dirty = dirtyIn;
+            }
+
+            void setSaveToFile(bool saveToFileIn = false)
+            {
+                saveToFile = saveToFileIn;
+            }
+
+            int getId() const
+            {
+                return id;
+            }
+            int getType() const
+            {
+                return type;
+            }
+            std::string getFilename()
+            {
+                return filename;
+            }
+            bool isDirty() const
+            {
+                return dirty;
+            }
+
+            bool getSaveToFile()
+            {
+                return saveToFile;
+            }
+        };
+
         enum LightType
         {
             LT_DIRECTIONAL = 0
@@ -355,7 +472,7 @@ namespace OpenIG {
          * provinding lighting implementation. See \ref OpenIG::Base::ImageGenerator::addLight
          * \ref OpenIG::Base::ImageGenerator::setLightImplementationCallback
          * \brief The LightAttributes struct
-         * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+         * \author    Trajce Nikolov Nick openig@compro.net
          * \copyright (c)Compro Computer Services, Inc.
          * \date      Sun Jan 11 2015
          */
@@ -435,7 +552,7 @@ namespace OpenIG {
         /*! This struct is used to pass data to the available plugins by using it with
          * \ref igplugincore::PluginContext::Attribute
          * \brief The AnimationAttributes struct
-         * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+         * \author    Trajce Nikolov Nick openig@compro.net
          * \copyright (c)Compro Computer Services, Inc.
          * \date      Sun Jan 11 2015
          */
@@ -456,7 +573,7 @@ namespace OpenIG {
         /*! This struct is used to pass data to the available plugins by using it with
          * \ref igplugincore::PluginContext::Attribute
          * \brief The EnvironmentalMapAttributes struct
-         * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+         * \author    Trajce Nikolov Nick openig@compro.net
          * \copyright (c)Compro Computer Services, Inc.
          * \date      Sun Jan 11 2015
          */
@@ -471,7 +588,7 @@ namespace OpenIG {
         *	for passing custom data through setUserValue. It is handy and general
         *	enough then the previous defined specialized structures
         * \brief	Struct for passing custom data to plugins via setUserValue
-        * \author   Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+        * \author   Trajce Nikolov Nick openig@compro.net
         * \copyright (c)Compro Computer Services, Inc.
         * \date     Sun Jun 14 2015
         */
@@ -484,7 +601,7 @@ namespace OpenIG {
         *	custom implementation of entities. As an example can be Effect
         *	Entity that is implemented in a plugin.
         * \brief	This class is general purpose class for creating and managing custom implementation of entities
-        * \author   Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+        * \author   Trajce Nikolov Nick openig@compro.net
         * \copyright (c)Compro Computer Services, Inc.
         * \date     Sun Jun 14 2015
         */
@@ -500,7 +617,7 @@ namespace OpenIG {
          * Plugins that are implementing lighting to the IG should have inherit and implement
          * from this class
          * \brief The LightImplementationCallback class
-         * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+         * \author    Trajce Nikolov Nick openig@compro.net
          * \copyright (c)Compro Computer Services, Inc.
          * \date      Sun Jan 11 2015
          */
@@ -514,7 +631,7 @@ namespace OpenIG {
              * \param attribs       The light attributes
              * \param lightsGroup   The osg::Group this light is attached to
              * \return              Custom light implmentation.
-             * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+             * \author    Trajce Nikolov Nick openig@compro.net
              * \copyright (c)Compro Computer Services, Inc.
              * \date      Sun Jan 11 2015
              */
@@ -524,19 +641,19 @@ namespace OpenIG {
                 osg::Group* lightsGroup = 0) = 0;
 
             /*!
-			* \brief Method that is called for light deletion
-			* \param id            The id of the light
-			* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-			* \copyright (c)Compro Computer Services, Inc.
-			* \date      Sun Jun 1 2016
-			*/
-			virtual void deleteLight(unsigned int id) {}
+            * \brief Method that is called for light deletion
+            * \param id            The id of the light
+            * \author    Trajce Nikolov Nick openig@compro.net
+            * \copyright (c)Compro Computer Services, Inc.
+            * \date      Sun Jun 1 2016
+            */
+            virtual void deleteLight(unsigned int id) {}
 
-			/*!
+            /*!
              * \brief Method that is called to update the light by new attributes
              * \param id            The id of the light
              * \param attribs       New light attributes
-             * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+             * \author    Trajce Nikolov Nick openig@compro.net
              * \copyright (c)Compro Computer Services, Inc.
              * \date      Sun Jan 11 2015
              */
@@ -546,7 +663,7 @@ namespace OpenIG {
             * \brief Method that is called to set user data to the light
             * \param id				The id of the light
             * \param data			The user data
-            * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+            * \author    Trajce Nikolov Nick openig@compro.net
             * \copyright (c)Compro Computer Services, Inc.
             * \date      Tue May 17 2016
             */

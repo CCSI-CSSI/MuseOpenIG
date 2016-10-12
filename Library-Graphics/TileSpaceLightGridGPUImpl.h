@@ -5,7 +5,7 @@ Copyright:   Copyright (C) 2007-2015 Poojan Prabhu. All rights reserved.
 Created:     05/01/2016
 Last edit:   05/01/2016
 Author:      Poojan Prabhu
-E-mail:      poojanprabhu@gmail.com
+E-mail:      openig@compro.net
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

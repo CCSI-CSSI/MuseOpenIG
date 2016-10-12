@@ -21,6 +21,10 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 #ifndef PLUGINOPERATION_H
 #define PLUGINOPERATION_H
@@ -56,7 +60,7 @@ namespace OpenIG {
 		 *      PluginHost::applyPluginOperation(printPluginOperation.get());
 		 *      \endcode
 		 * \brief The PluginOperation class
-		 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+		 * \author    Trajce Nikolov Nick openig@compro.net
 		 * \copyright (c)Compro Computer Services, Inc.
 		 * \date      Fri Jan 16 2015
 		 */
@@ -65,7 +69,7 @@ namespace OpenIG {
 		public:
 			/*!
 			 * \brief Constructor
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Fri Jan 16 2015
 			 */
@@ -75,7 +79,7 @@ namespace OpenIG {
 			/*!
 			 * \brief Apply this operation on a plugin. Obviouselly call some plugin method
 			 * \param plugin The plugin
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Fri Jan 16 2015
 			 */

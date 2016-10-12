@@ -21,45 +21,54 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
-//#*	author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+//#*	author    Trajce Nikolov Nick openig@compro.net
 //#*	copyright(c)Compro Computer Services, Inc.
+//#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
 
 #pragma once
 
 #if defined(OPENIG_SDK)
-	#include <OpenIG-Networking/buffer.h>
-	#include <OpenIG-Networking/packet.h>
+    #include <OpenIG-Networking/buffer.h>
+    #include <OpenIG-Networking/packet.h>
 
-	#include <OpenIG-Protocol/export.h>
-	#include <OpenIG-Protocol/opcodes.h>
-#else	
-	#include <Library-Networking/buffer.h>
-	#include <Library-Networking/packet.h>
+    #include <OpenIG-Protocol/export.h>
+    #include <OpenIG-Protocol/opcodes.h>
+#else
+    #include <Library-Networking/buffer.h>
+    #include <Library-Networking/packet.h>
 
-	#include <Library-Protocol/export.h>
-	#include <Library-Protocol/opcodes.h>
+    #include <Library-Protocol/export.h>
+    #include <Library-Protocol/opcodes.h>
 #endif
 
 #include <osg/Matrix>
 
 namespace OpenIG {
-	namespace Library {
-		namespace Protocol {
+    namespace Library {
+        namespace Protocol {
 
-			struct IGLIBPROTOCOL_EXPORT Camera : public OpenIG::Library::Networking::Packet
-			{
-				Camera();					
+            struct IGLIBPROTOCOL_EXPORT Camera : public OpenIG::Library::Networking::Packet
+            {
+                Camera();
 
-				META_Packet(OPCODE_CAMERA, Camera);
+                META_Packet(OPCODE_CAMERA, Camera);
 
-				virtual int write(OpenIG::Library::Networking::Buffer &buf) const;				
-				virtual int read(OpenIG::Library::Networking::Buffer &buf);				
+                virtual int write(OpenIG::Library::Networking::Buffer &buf) const;
+                virtual int read(OpenIG::Library::Networking::Buffer &buf);
 
-				osg::Matrixd mx;
-				unsigned int bindToEntity;
-			};
+                osg::Matrixd mx;
+                unsigned int bindToEntity;
+                unsigned int inverse;
+            };
 
-		}
-	}
+        }
+    }
 }

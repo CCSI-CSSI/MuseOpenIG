@@ -21,6 +21,10 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 #ifndef OPENIG_H
 #define OPENIG_H
@@ -47,14 +51,14 @@
 
 #include <OpenThreads/Mutex>
 #include <OpenThreads/ScopedLock>
-
+#include <osgUtil/IntersectVisitor>
 
 namespace OpenIG
 {
 
 /*! Implementation of \ref OpenIG::Base::ImageGenerator
  * \brief The OpenIG class
- * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+ * \author    Trajce Nikolov Nick openig@compro.net
  * \copyright (c)Compro Computer Services, Inc.
  * \date      Fri Jan 16 2015
  */
@@ -66,7 +70,7 @@ class OPENIG_EXPORT Engine:
 public:
     /*!
      * \brief Constructor
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jan 16 2015
      */
@@ -82,7 +86,7 @@ public:
     /*!
      * \brief Load a script with commands on startup
      * \param fileName The sctipt file name
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jan 16 2015
      */
@@ -91,7 +95,7 @@ public:
     /*!
      * \brief Gets the version
      * \return The version
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -99,7 +103,7 @@ public:
 
     /*!
     * \brief		OpenIG specific flags for how to setup the Viewer
-    * \author		Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \author		Trajce Nikolov Nick openig@compro.net
     * \copyright	(c)Compro Computer Services, Inc.
     * \date			Sun Jan 11 2015
     */
@@ -115,7 +119,7 @@ public:
     /*!
     * \brief		Call this before \see init. It will setup OpenIG
     * \param		The mask based on the \see SetupFlags
-    * \author		Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \author		Trajce Nikolov Nick openig@compro.net
     * \copyright	(c)Compro Computer Services, Inc.
     * \date			Sun Jan 11 2015
     */
@@ -135,7 +139,7 @@ public:
      *	\param ids			List of Views to which we let OpenIG render. If empty
      *						it will use all the Views with no SceneData associated
      *  \return             Nothing
-     *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     *  \author    Trajce Nikolov Nick openig@compro.net
      *  \copyright (c)Compro Computer Services, Inc.
      *  \date      Sun Jan 11 2015
      */
@@ -145,7 +149,7 @@ public:
     *	sepcifics for the rendering, like OTW, Sensor etc. Possibly
     *	to be extended as we go
     *  \brief Setup a View with OpenIG with rendering options
-    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \author    Trajce Nikolov Nick openig@compro.net
     *  \copyright (c)Compro Computer Services, Inc.
     *  \date      Thu Feb 25 2016
     */
@@ -163,7 +167,7 @@ public:
     *  \param option		The View option, OTW, EO, IR ... probably will
     *						be extending
     *  \return				Nothing
-    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \author    Trajce Nikolov Nick openig@compro.net
     *  \copyright (c)Compro Computer Services, Inc.
     *  \date      Sat Feb 20 2016
     */
@@ -175,7 +179,7 @@ public:
     *  \param option		The View option, OTW, EO, IR ... probably will
     *						be extending
     *  \return				Nothing
-    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \author    Trajce Nikolov Nick openig@compro.net
     *  \copyright (c)Compro Computer Services, Inc.
     *  \date      Sat Feb 27 2016
     */
@@ -184,7 +188,7 @@ public:
 
     /*! Call it before destruction
      *  \brief Performs cleanup.
-     *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     *  \author    Trajce Nikolov Nick openig@compro.net
      *  \copyright (c)Compro Computer Services, Inc.
      *  \date      Sun Jan 11 2015
      */
@@ -223,7 +227,7 @@ public:
      *       OpenIG::Base::ImageGenerator::postRender
      *      \endcode
      *  \brief The frame, should be called in a loop.
-     *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     *  \author    Trajce Nikolov Nick openig@compro.net
      *  \copyright (c)Compro Computer Services, Inc.
      *  \date      Sun Jan 11 2015
      */
@@ -234,7 +238,7 @@ public:
     *	to read files differently then with osgDB::readNodeFile(...)
     *  \brief Sets the read node callback
     *  \param cb The callback
-    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \author    Trajce Nikolov Nick openig@compro.net
     *  \copyright (c)Compro Computer Services, Inc.
     *  \date      Mon Jun 16 2015
     */
@@ -243,7 +247,7 @@ public:
     /*! Gets the Read node callback. See \ref setReadNodeImplementationCallback
     *  \brief Gets the read node callback
     *  \return cb The callback
-    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \author    Trajce Nikolov Nick openig@compro.net
     *  \copyright (c)Compro Computer Services, Inc.
     *  \date      Mon Jun 16 2015
     */
@@ -254,7 +258,7 @@ public:
     *	have one, it will work together with the OpenIG internal one
     *  \brief Sets user ReadFileCallback
     *  \param cb The callback
-    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \author    Trajce Nikolov Nick openig@compro.net
     *  \copyright (c)Compro Computer Services, Inc.
     *  \date      Thu Mar 17 2016
     */
@@ -263,7 +267,7 @@ public:
     /*! Gets the user ReadFileCallback
     *  \brief Gets the user ReadFileCallback
     *  \return The callback
-    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \author    Trajce Nikolov Nick openig@compro.net
     *  \copyright (c)Compro Computer Services, Inc.
     *  \date      Thu Mar 17 2016
     */
@@ -284,7 +288,7 @@ public:
      *                  Good example can be the VDBOffset which shifts the database
      *                  by a given offset defined in the osgDB::Options string.
      *  \return         Nothing
-     *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     *  \author    Trajce Nikolov Nick openig@compro.net
      *  \copyright (c)Compro Computer Services, Inc.
      *  \date      Sun Jan 11 2015
      */
@@ -300,7 +304,7 @@ public:
     *                  Good example can be the VDBOffset which shifts the database
     *                  by a given offset defined in the osgDB::Options string.
     *  \return         Nothing
-    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \author    Trajce Nikolov Nick openig@compro.net
     *  \copyright (c)Compro Computer Services, Inc.
     *  \date      Tue Jun 16 2015
     */
@@ -313,7 +317,7 @@ public:
      *  \brief Removes \ref Entity from the scene.
      *  \param id       The id of the \ref Entity. This is the id you have used with \ref addEntity
      *  \return         Nothing
-     *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     *  \author    Trajce Nikolov Nick openig@compro.net
      *  \copyright (c)Compro Computer Services, Inc.
      *  \date      Sun Jan 11 2015
      */
@@ -325,7 +329,7 @@ public:
      *  \param mx       The new position and orientation of the \ref Entity. It is handy to use
      *                  \ref OpenIG::Base::Math methods to contruct this Matrix, as toMatrix(...)
      *  \return         Nothing
-     *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     *  \author    Trajce Nikolov Nick openig@compro.net
      *  \copyright (c)Compro Computer Services, Inc.
      *  \date      Sun Jan 11 2015
      */
@@ -336,7 +340,7 @@ public:
      *  \param id       The id of the \ref Entity. This is the id you have used with \ref addEntity
      *  \param show     If true, the \ref Entity will be present in the scene, if false it will not
      *  \return         Nothing
-     *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     *  \author    Trajce Nikolov Nick openig@compro.net
      *  \copyright (c)Compro Computer Services, Inc.
      *  \date      Sun Jan 11 2015
      */
@@ -349,7 +353,7 @@ public:
      *  \param id           The id of the \ref Entity. This is the id you have used with \ref addEntity
      *  \param toEntityId   The id of the parent \ref Entity
      *  \return             Nothing
-     *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     *  \author    Trajce Nikolov Nick openig@compro.net
      *  \copyright (c)Compro Computer Services, Inc.
      *  \date      Sun Jan 11 2015
      */
@@ -361,7 +365,7 @@ public:
      *  \brief Detach an \ref Entity from its parent \ref Entity.
      *  \param id           The id of the attached \ref Entity. This is the id you have used with \ref addEntity
      *  \return             Nothing
-     *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     *  \author    Trajce Nikolov Nick openig@compro.net
      *  \copyright (c)Compro Computer Services, Inc.
      *  \date      Sun Jan 11 2015
      */
@@ -372,7 +376,7 @@ public:
     *  \param id            The id of the \ref Entity, the one you have used with \ref addEntity
     *  \param mx            The local offset wrt. to the \ref Entity
     *  \param cameraID      The ID of the Camera (think View)
-    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \author    Trajce Nikolov Nick openig@compro.net
     *  \copyright (c)Compro Computer Services, Inc.
     *  \date      Sun May 02 2016
     */
@@ -384,7 +388,7 @@ public:
     *  \brief Updates the \ref Entity.
     *  \param id        The id of the \ref Entity, the one you have used with \ref addEntity
     *  \param mx		The matrix to update position and orientation
-    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \author    Trajce Nikolov Nick openig@compro.net
     *  \copyright (c)Compro Computer Services, Inc.
     *  \date      Sun May 02 2016
     */
@@ -392,7 +396,7 @@ public:
 
     /*! Unbinds the \ref Entity from the Camera if it is already bound
     *  \brief Unbinds the \ref Entity from a Camera
-    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \author    Trajce Nikolov Nick openig@compro.net
     *  \copyright (c)Compro Computer Services, Inc.
     *  \date      Sun May 02 2016
     */
@@ -403,7 +407,7 @@ public:
      *  \param fileName The file name of the model. Can be the same or new
      *  \param options  Optional. Some plugins can use the option string from the osgDB::Option object
      *  \return         Nothing
-     *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     *  \author    Trajce Nikolov Nick openig@compro.net
      *  \copyright (c)Compro Computer Services, Inc.
      *  \date      Sun Jan 11 2015
      */
@@ -414,7 +418,7 @@ public:
      *  \param id       The id of the attached \ref Entity. This is the id you have used with \ref addEntity
      *  \param name     The \ref Entity name
      *  \return         Nothing
-     *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     *  \author    Trajce Nikolov Nick openig@compro.net
      *  \copyright (c)Compro Computer Services, Inc.
      *  \date      Sun Jan 11 2015
      */
@@ -424,22 +428,22 @@ public:
      *  \brief Geets a name for an \ref Entity
      *  \param id       The id of the attached \ref Entity. This is the id you have used with \ref addEntity
      *  \return         The \ref Entity name
-     *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     *  \author    Trajce Nikolov Nick openig@compro.net
      *  \copyright (c)Compro Computer Services, Inc.
      *  \date      Mon May 18 2015
      */
     virtual std::string getEntityName(unsigned int id);
 
-	/*! Gets the id of a entity based on the name. Can be handy for lookup
-	*  \brief Gets the id of a entity based on the name
-	*  \param id       The id of parent entity
-	*  \param name     The name of entity/sub-entity
-	*  \return         The Sub-\ref Entity id
-	*  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
-	*  \copyright (c)Compro Computer Services, Inc.
-	*  \date      Fri Jun 17 2016
-	*/
-	virtual unsigned int getEntityId(unsigned int parentEntityId, const std::string& subEntityName);
+    /*! Gets the id of a entity based on the name. Can be handy for lookup
+    *  \brief Gets the id of a entity based on the name
+    *  \param id       The id of parent entity
+    *  \param name     The name of entity/sub-entity
+    *  \return         The Sub-\ref Entity id
+    *  \author    Trajce Nikolov Nick openig@compro.net
+    *  \copyright (c)Compro Computer Services, Inc.
+    *  \date      Fri Jun 17 2016
+    */
+    virtual unsigned int getEntityId(unsigned int parentEntityId, const std::string& subEntityName);
 
     /*! Plays animation on an \ref Entity. At present it uses the internal simple animation handling
      *  - see \ref OpenIG::Base::Animations. The future versions will have FBX support as well. The
@@ -455,7 +459,7 @@ public:
      * \param entityId          The id of the \ref Entity to play the animation
      * \param animationName     The name of the animation, as defined in the model XML or for future
      *                          versions the hame of the FBX animation
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -467,7 +471,7 @@ public:
      * \param entityId          The id of the \ref Entity to play the animations
      * \param animations        The name of the animations, as defined in the model XML or for future
      *                          versions the hame of the FBX animations
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -485,7 +489,7 @@ public:
      * \param animations        The name of the animations, as defined in the model XML or for future
      *                          versions the hame of the FBX animations
      * \param cbs               Referenced std::vector of \ref OpenIG::Base::AnimationSequencePlaybackCallback
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -495,7 +499,7 @@ public:
      * \brief Stops the playback of animation
      * \param entityId          The ID of the entity
      * \param animationName     The name of the animation
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      MOn May 18 2015
      */
@@ -505,7 +509,7 @@ public:
      * \brief Stops the playback of animation
      * \param entityId          The ID of the entity
      * \param animations        The names of the animations
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      MOn May 18 2015
      */
@@ -516,7 +520,7 @@ public:
      * \brief Reset the playback of animation
      * \param entityId          The ID of the entity
      * \param animationName     The name of the animation
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      MOn May 18 2015
      */
@@ -527,7 +531,7 @@ public:
      * \brief Reset the playback of multiple animations at once
      * \param entityId          The ID of the entity
      * \param animations        The names of the animations
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      MOn May 18 2015
      */
@@ -538,7 +542,7 @@ public:
     * \param entityId			The ID of the entity
     * \param status				The status of the animation
     * \param animations			The names of the animations
-    * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \author    Trajce Nikolov Nick openig@compro.net
     * \copyright (c)Compro Computer Services, Inc.
     * \date      Tue May 17 2016
     */
@@ -552,7 +556,7 @@ public:
     *  \param name	Name of the effect
     *  \param mx	The initial position/orientation of the effect
     *  \param attributes String based attributes for the pugins provoding the implementation, in form of token=attr;token=attr ...
-    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \author    Trajce Nikolov Nick openig@compro.net
     *  \copyright (c)Compro Computer Services, Inc.
     *  \date      Sun Jun 14 2015
     */
@@ -561,7 +565,7 @@ public:
     /*! Removes effect from the scene
     *  \brief Removes effect from the scene
     *  \param id	Unique effect to the scene
-    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \author    Trajce Nikolov Nick openig@compro.net
     *  \copyright (c)Compro Computer Services, Inc.
     *  \date      Sun Jun 14 2015
     */
@@ -572,7 +576,7 @@ public:
     *  \param id		Unique effect to the scene
     *  \param entityID	The ID of the \ref Entity
     *  \param mx		The offset position/orientation of the effect
-    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \author    Trajce Nikolov Nick openig@compro.net
     *  \copyright (c)Compro Computer Services, Inc.
     *  \date      Sun Jun 14 2015
     */
@@ -581,7 +585,7 @@ public:
     /*! Unbinds effect to an \ref Entity
     *  \brief Unbinds effect to an \ref Entity
     *  \param id		Unique effect to the scene
-    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \author    Trajce Nikolov Nick openig@compro.net
     *  \copyright (c)Compro Computer Services, Inc.
     *  \date      Sun Jun 14 2015
     */
@@ -591,7 +595,7 @@ public:
     *  \brief Update effect with new position/orientation
     *  \param id		Unique effect to the scene
     *  \param mx		The new position/orientation
-    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \author    Trajce Nikolov Nick openig@compro.net
     *  \copyright (c)Compro Computer Services, Inc.
     *  \date      Sun Jun 14 2015
     */
@@ -602,7 +606,7 @@ public:
     *	the callback that provides the effect implementation
     *  \brief Sets the effect implementation callback
     *  \param cb		The callback
-    *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    *  \author    Trajce Nikolov Nick openig@compro.net
     *  \copyright (c)Compro Computer Services, Inc.
     *  \date      Sun Jun 14 2015
     */
@@ -615,7 +619,7 @@ public:
      *  \brief Set the position of the camera
      *  \param mx            The inital position of the camera. World coordinates
      *  \param viewMatrix    Set true if the provided Matrix is View Matrix
-     *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     *  \author    Trajce Nikolov Nick openig@compro.net
      *  \copyright (c)Compro Computer Services, Inc.
      *  \date      Sun Jan 11 2015
      */
@@ -626,7 +630,7 @@ public:
      *  \brief Binds camera to an \ref Entity
      *  \param id            The id of the \ref Entity, the one you have used with \ref addEntity
      *  \param mx            The local offset wrt. to the \ref Entity
-     *  \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     *  \author    Trajce Nikolov Nick openig@compro.net
      *  \copyright (c)Compro Computer Services, Inc.
      *  \date      Sun Jan 11 2015
      */
@@ -637,7 +641,7 @@ public:
      *  like \ref OpenIG::Base::Math::toMatrix to construct the Matrix
      * \brief Updates the camera.
      * \param mx    The local offset wrt. to the \ref Entity
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -645,7 +649,7 @@ public:
 
     /*! Unbinds the Camera from an \ref Entity if it is already bound
      * \brief Unbinds the Camera from an \ref Entity
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -654,7 +658,7 @@ public:
     /*! Checks if the Camera is bound to an \ref Entity
      * \brief Checks if the Camera is bound to an \ref Entity
      * \return      true if it is bounds, false otherwise
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -668,7 +672,7 @@ public:
      * \brief Sets for fixed up Cametra orientation or not
      * \param       fixedUp true to fix the up axis or false to follow the \ref Entity orientation
      * \param       freezeOrientation true to freeze orientation
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -680,7 +684,7 @@ public:
      *  via \ref OpenIG::PluginBase::PluginContext::Attribute and passing it to all the plugins to deal with.
      * \brief Sets fog in the scene
      * \param visibility    Visibility in meters
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -693,7 +697,7 @@ public:
      * \param month
      * \param day
      * \param year
-     * \author    Curtis G Rubel crubel@compro.net
+     * \author    Curtis G Rubel openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Wed May 25 2016
      */
@@ -705,7 +709,7 @@ public:
      * \brief Sets the time of day.
      * \param hour
      * \param minutes
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -717,7 +721,7 @@ public:
      * \brief Sets rain in the scene
      * \param factor    Can be anything, however some plugins that implements atmospheric effects
      *                  like the \ref SilverLiningPlugin is expecting this in the range of 0.0-1.0
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -729,7 +733,7 @@ public:
      * \brief Sets snow in the scene
      * \param factor    Can be anything, however some plugins that implements atmospheric effects
      *                  like the \ref SilverLiningPlugin is expecting this in the range of 0.0-1.0
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -743,7 +747,7 @@ public:
      *                  is that it might be expected by plugins to be in m/s/
      * \param direction The direction. Can be anything or plugin specific. The \ref SilverLiningPlugin
      *                  is expecting this to be in degrees from North.
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -764,7 +768,7 @@ public:
      * \param width     The width of the cloud layer
      * \param length    The length of the cloud layer
      * \param infinity  Does the cloud layer go on forever?
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -775,7 +779,7 @@ public:
      *  such atmosphere effects. See \ref addCloudLayer for more info
      * \brief Removes a cloud layer from the scene
      * \param id    The id of the clouds layer to be removed
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -791,7 +795,7 @@ public:
      * \param density       Density of the cloud layer. This can be anything but some plugins that
      *                      implements atmospheric effect is the \ref SilverLiningPlugin is is
      *                      expecting this to be in the range of 0.0-1.0
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -801,11 +805,25 @@ public:
      * \brief Removes all cloud layers from the scene. The \ref openig::OpenIG is not implementing this instead it uses
      *  \ref OpenIG::PluginBase::PluginContext::Attribute to pass commands to all the plugins that might deal with
      *  such atmosphere effects. See \ref addCloudLayer for more info
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
     virtual void removeAllCloudlayers();
+
+    /*!
+     * \brief Manipulates cloud layers using saved cloudlayer files from SilverLinings API.
+     *  The \ref openig::OpenIG is not implementing this instead it uses
+     *  \ref igplugincore::PluginContext::Attribute to pass commands to all the plugins that might deal with
+     *  such atmosphere effects. See \ref loadCloudLayer for more info
+     * \param id        The id of the cloud layer
+     * \param filename  The full path to the filename of the cloudlayer
+     * \param type      The SL CloudType enum as integer
+     * \author    Curtis Rubel openig@compro.net
+     * \copyright (c)Compro Computer Services, Inc.
+     * \date      Tue Aug 02 2016
+     */
+    virtual void loadCloudLayerFile(unsigned int id, std::string filename, int type);
 
     /*! Adds light source in the scene. As all others scene players, like \ref Entity, Lights are
      *  ID based. The ID management is up to the user, or one can use the simple OpenIG::Base::GlobalIdGenerator.
@@ -819,7 +837,7 @@ public:
      * \param id    The id of the light
      * \param mx    The initial position and orientation of the light. You might want to use \ref OpenIG::Base::Math
      *              to create this matrix
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -828,7 +846,7 @@ public:
     /*! Removes light from the scene. See \ref addLight for more info.
      * \brief Removes light from the scene
      * \param id    The ID of the light to be removed
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -840,7 +858,7 @@ public:
      * \brief Updates a light in the scene
      * \param id    The ID of the light.
      * \param mx    New position and orientation as Matrix
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -850,7 +868,7 @@ public:
     * \brief Sets user data to a light created by a callback
     * \param id		The ID of the light.
     * \param data	User data
-    * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \author    Trajce Nikolov Nick openig@compro.net
     * \copyright (c)Compro Computer Services, Inc.
     * \date      Tue May 17 2016
     */
@@ -861,7 +879,7 @@ public:
      * \brief Binds a light to an \ref Entity
      * \param id            The ID of the light
      * \param entityId      The ID of the \ref Entity
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -871,7 +889,7 @@ public:
      *  info about lights ID and their management
      * \brief Unbinds light from an \ref Entity, if bound
      * \param id    The ID of the light to be unbind
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -882,7 +900,7 @@ public:
      * \brief Enables/disables light in the scene
      * \param id        The ID of the light to enable/disable
      * \param enable    true for enable, false for disable
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -896,7 +914,7 @@ public:
      * \brief Binds light to a Camera
      * \param id        The ID of the light.
      * \param offset    The offset wrt. the Camera
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -905,7 +923,7 @@ public:
     /*! Unbinds the light from a Camera, if bound. See \ref bindLightToCamera
      * \brief Unbinds the light from a Camera
      * \param id    The ID of the light
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -916,7 +934,7 @@ public:
      * \brief Test if a light is enabled
      * \param id    The ID of the light
      * \return      true if the light is enabled, see \ref enableLight, false otherwise
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -926,7 +944,7 @@ public:
     *	keep track when they are updates. Plugins might use these
     * \brief Returns the LightAttributes map
     * \return The light attributes map
-    * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \author    Trajce Nikolov Nick openig@compro.net
     * \copyright (c)Compro Computer Services, Inc.
     * \date      Sat Jun 06 2015
     */
@@ -937,7 +955,7 @@ public:
     * \brief Returns the LightAttributes based on the light ID
     * \param id The light ID
     * \return The light attributes of the Light
-    * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \author    Trajce Nikolov Nick openig@compro.net
     * \copyright (c)Compro Computer Services, Inc.
     * \date      Sat Jun 06 2015
     */
@@ -950,7 +968,7 @@ public:
      * \brief Update lights attributes, like colors etc..
      * \param id        The ID of the light you used with \ref addLight
      * \param attribs   The new attributes
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -958,7 +976,7 @@ public:
 
     /*! Override preRender method to be called from within a frame. See \ref frame for reference
      * \brief override preRender method to be called from within a frame
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -966,7 +984,7 @@ public:
 
     /*! Override postRender method to be called from within a frame. See \ref frame for reference
      * \brief override postRender method to be called from within a frame
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -975,7 +993,7 @@ public:
     /*!
      * \brief Sets to update any CameraMainpulator coming with the viewer on \ref openig::OpenIG
      * \param update if true updates it when it updates the Camera Position, false to ignore
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jan 16 2015
      */
@@ -983,7 +1001,7 @@ public:
 
     /*!
      * \brief Represntation of LightEntity
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jan 16 2015
      */
@@ -995,7 +1013,7 @@ public:
     /*! Returns the reference for the light implementation callback. See
      * \ref OpenIG::Base::ImageGenerator::setLightImplementationCallback
      * \brief Returns the reference for the light implementation callback
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jan 16 2015
      */
@@ -1007,7 +1025,7 @@ public:
      *  and \ref LightingPlugin
      * \brief Sets the light implementation callback
      * \param cb    The callback, expected to be implemented by a plugin
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -1018,7 +1036,7 @@ public:
      *  viewer from within plugins
      * \brief Returns the viewer.
      * \return  The viewer passed in \ref init
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -1030,7 +1048,7 @@ public:
      *  shaders applied to them.
      * \brief Get the managed scene
      * \return  The managed scene. See \ref init
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -1041,16 +1059,51 @@ public:
      *  doing so
      * \brief The ID based \ref Entity std::map
      * \return  The recent ID based \ref Entity std::map
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
     virtual EntityMap&                  getEntityMap();
 
+    /*! The height of the terrain at the current position
+     * \brief     The height of terrain at the given position
+     * \return    The height of terrain at the given position
+     * \param position -- the current position
+     * \author    Roni Zanolli openig@compro.net
+     * \copyright (c)Compro Computer Services, Inc.
+     * \date      Weds Aug 02 2016
+     */
+    virtual float getTerrainHeight( osg::Vec3 position );
+
+    /*! The distance from input position to the first intersect
+     * \brief     The distance from input position to the first intersect
+     * \return    The distance from input position to the first intersect
+     * \param pos    Current position
+     * \param angles Current Yaw, Pitch and Roll
+     * \param angle  Current Heading
+     * \author    Roni Zanolli openig@compro.net
+     * \copyright (c)Compro Computer Services, Inc.
+     * \date      Weds Aug 02 2016
+     */
+    virtual float getIntersect( osg::Vec3 pos, osg::Vec3 angles,float angle );
+
+    /*! The position of the intersection of our current pos and the angles input
+     * \brief     The distance from input position to the first intersect
+     * \return    The distance from input position to the first intersect
+     * \param pos    Current position
+     * \param angles Current Yaw, Pitch and Roll
+     * \param angle  Current Heading
+     * \author    Roni Zanolli openig@compro.net
+     * \copyright (c)Compro Computer Services, Inc.
+     * \date      Weds Aug 02 2016
+     */
+    virtual osg::Vec3 getIntersectPos( osg::Vec3 pos, osg::Vec3 angles,float angle, float height=100000 );
+
+
     /*! The light that represents sun/moon in the scene. It is the reserved light with an ID of 0
      * \brief   The light that represents sun/moon in the scene
      * \return  The light that represents sun/moon in the scene
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -1059,7 +1112,7 @@ public:
     /*! The scene Fog attribute. See \ref setFog for more info
      * \brief The scene fog
      * \return The scene Fog attribute
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Sun Jan 11 2015
      */
@@ -1068,7 +1121,7 @@ public:
     /*!
      * \brief Returns the internal OpenIG::PluginBase::PluginContext
      * \return The internal OpenIG::PluginBase::PluginContext
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jan 16 2015
      */
@@ -1077,7 +1130,7 @@ public:
     /*!
      * \brief Returns the ID based std::map  of \ref LightEntity
      * \return
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jan 16 2015
      */
@@ -1086,7 +1139,7 @@ public:
     /*!
     * \brief Returns the list of files that use file cache
     * \return	The list of files that use file cache
-    * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \author    Trajce Nikolov Nick openig@compro.net
     * \copyright (c)Compro Computer Services, Inc.
     * \date      Sat Jun 27 2015
     */
@@ -1095,7 +1148,7 @@ public:
     /*!
     * \brief	Adds files to use the cache
     * \param	fileList	The list of files that will use file cache
-    * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \author    Trajce Nikolov Nick openig@compro.net
     * \copyright (c)Compro Computer Services, Inc.
     * \date      Sat Jun 27 2015
     */
@@ -1104,7 +1157,7 @@ public:
     /*!
     * \brief	Returns true if the given file is using the file cache
     * \return	Returns true if the given file is using the file cache
-    * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \author    Trajce Nikolov Nick openig@compro.net
     * \copyright (c)Compro Computer Services, Inc.
     * \date      Sat Jun 27 2015
     */
@@ -1114,6 +1167,8 @@ protected:
 
     /*! \brief  The current added in the scene \ref Entity es, ID based std::map */
     EntityMap                                       _entities;
+
+    osg::ref_ptr<osgUtil::IntersectVisitor> _intersect;
 
     /*! \brief  Handle of the viewer you have passed in \ref init */
     osg::observer_ptr<osgViewer::CompositeViewer>        _viewer;
@@ -1183,7 +1238,7 @@ protected:
      * \param viewer Instance of osgViewer::CompositeViewer
      * \param ids			List of Views to which we let OpenIG render. If empty
      *						it will use all the Views with no SceneData associated
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jan 16 2015
      */
@@ -1191,7 +1246,7 @@ protected:
 
     /*! Peforms init on the onscreen command line terminal. It is bound to F8
      * \brief Peforms init on the onscreen command line terminal
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jan 16 2015
      */
@@ -1200,7 +1255,7 @@ protected:
     /*! Performs init of commands. Here some default commands are implemented. There is
      * onscreen help where all the commands are listed with their usage, bound to F7
      * \brief Performs init of commands.
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jan 16 2015
      */
@@ -1209,7 +1264,7 @@ protected:
     /*! Inits the internal \ref OpenIG::PluginBase::PluginContext. It only sets
      * the image generattor to this. See \ref OpenIG::PluginBase::PluginContext
      * \brief Inits the internal \ref OpenIG::PluginBase::PluginContext
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jan 16 2015
      */
@@ -1217,7 +1272,7 @@ protected:
 
     /*! Init the default scene. See \ref OpenIG::Base::ImageGenerator::getScene
      * \brief Init the scene
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Feb 19 2016
      * \param	  view - view to init the scene, If NULL provided then default to view(0)
@@ -1227,7 +1282,7 @@ protected:
     /*! Init the onscreen help. It is bound to F7 where you can see all the available
      * commands and their usage
      * \brief Init the onscreen help
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jan 16 2015
      */
@@ -1236,7 +1291,7 @@ protected:
     /*! Init the splash screen. It looks for OpenIG-Splash.jpg in, for Windows in /igdata
      * Linux and MacOS in /usr/local/bin/igdata
      * \brief Init the splash screen
-     * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+     * \author    Trajce Nikolov Nick openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jan 16 2015
      */
@@ -1244,7 +1299,7 @@ protected:
 
     /*! Init the effects. Add the effects root to the scene
     * \brief Init the effects
-    * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \author    Trajce Nikolov Nick openig@compro.net
     * \copyright (c)Compro Computer Services, Inc.
     * \date      Sun Jun 14 2015
     */
@@ -1252,7 +1307,7 @@ protected:
 
     /*! Creates sun/moon light with the reserved ID 0
     * \brief Creates sun/moon light with the reserved ID 0
-    * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+    * \author    Trajce Nikolov Nick openig@compro.net
     * \copyright (c)Compro Computer Services, Inc.
     * \date      Wed Nov 4 2015
     */

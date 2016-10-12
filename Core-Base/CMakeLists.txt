@@ -14,12 +14,7 @@ set( LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/igcore.h
     ${HEADER_PATH}/imagegenerator.h
     ${HEADER_PATH}/mathematics.h
-    ${HEADER_PATH}/stringutils.h
-    ${HEADER_PATH}/glerrorutils.h
-    ${HEADER_PATH}/tbo.h
-    ${HEADER_PATH}/framelogging.h
-	${HEADER_PATH}/shaderutils.h
-	${HEADER_PATH}/texturecache.h
+    ${HEADER_PATH}/stringutils.h    
 )
 
 set( _IgCoreSourceFiles
@@ -30,11 +25,7 @@ set( _IgCoreSourceFiles
     globalidgenerator.cpp
     imagegenerator.cpp
     mathematics.cpp
-    stringutils.cpp
-    glerrorutils.cpp
-	shaderutils.cpp
-    tbo.cpp
-	texturecache.cpp
+    stringutils.cpp    
 )
 
 add_library( ${LIB_NAME} SHARED
@@ -48,7 +39,6 @@ target_link_libraries( ${LIB_NAME}
         ${OSG_LIBRARIES}
 	${OPENGL_LIBRARY}
 	${Boost_LIBRARIES}
-	OpenIG-Graphics
 )
 
 set_target_properties( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )

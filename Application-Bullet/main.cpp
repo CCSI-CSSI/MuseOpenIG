@@ -21,9 +21,17 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
-//#*	author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+//#*	author    Trajce Nikolov Nick openig@compro.net
 //#*	copyright(c)Compro Computer Services, Inc.
+//#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
 #include <iostream>
 #include <fstream>
 
@@ -121,88 +129,88 @@ static bool s_CameraManipulatorOn = true;
 class CameraTrackballManipulator : public osgGA::TrackballManipulator
 {
 public:
-	CameraTrackballManipulator(OpenIG::Engine* ig)
-        : osgGA::TrackballManipulator()        
-		, _openIG(ig)
+    CameraTrackballManipulator(OpenIG::Engine* ig)
+        : osgGA::TrackballManipulator()
+        , _openIG(ig)
     {
 
     }
 
     virtual bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& us)
     {
-		
+
         switch(ea.getEventType())
             {
             case(osgGA::GUIEventAdapter::KEYDOWN):
                 {
                     if (ea.getKey() == osgGA::GUIEventAdapter::KEY_F4)
-                    {                        
+                    {
                         flushMouseEventStack();
                         home(ea,us);
                         us.requestRedraw();
                         us.requestContinuousUpdate(false);
                         return true;
-                    }            					
-					if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Left)
-					{			
-						_openIG->getPluginContext().getOrCreateValueObject()->setUserValue("left", (bool)true);
-						_openIG->getPluginContext().getOrCreateValueObject()->setUserValue("BulletSteeringCommand", (bool)true);
-						_openIG->getPluginContext().getOrCreateValueObject()->setUserValue("vehicleID", (unsigned int)1);
-						return true;
-					}
-					if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Right)
-					{
-						_openIG->getPluginContext().getOrCreateValueObject()->setUserValue("left", (bool)false);
-						_openIG->getPluginContext().getOrCreateValueObject()->setUserValue("BulletSteeringCommand", (bool)true);
-						_openIG->getPluginContext().getOrCreateValueObject()->setUserValue("vehicleID", (unsigned int)1);
-						return true;
-					}
-					if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Up)
-					{
-						_openIG->getPluginContext().getOrCreateValueObject()->setUserValue("engine", (bool)true);
-						_openIG->getPluginContext().getOrCreateValueObject()->setUserValue("BulletEngineCommand", (bool)true);
-						_openIG->getPluginContext().getOrCreateValueObject()->setUserValue("vehicleID", (unsigned int)1);
-						return true;
-					}
-					if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Down)
-					{
-						_openIG->getPluginContext().getOrCreateValueObject()->setUserValue("engine", (bool)false);
-						_openIG->getPluginContext().getOrCreateValueObject()->setUserValue("BulletEngineCommand", (bool)true);
-						_openIG->getPluginContext().getOrCreateValueObject()->setUserValue("vehicleID", (unsigned int)1);
-						return true;
-					}
+                    }
+                    if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Left)
+                    {
+                        _openIG->getPluginContext().getOrCreateValueObject()->setUserValue("left", (bool)true);
+                        _openIG->getPluginContext().getOrCreateValueObject()->setUserValue("BulletSteeringCommand", (bool)true);
+                        _openIG->getPluginContext().getOrCreateValueObject()->setUserValue("vehicleID", (unsigned int)1);
+                        return true;
+                    }
+                    if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Right)
+                    {
+                        _openIG->getPluginContext().getOrCreateValueObject()->setUserValue("left", (bool)false);
+                        _openIG->getPluginContext().getOrCreateValueObject()->setUserValue("BulletSteeringCommand", (bool)true);
+                        _openIG->getPluginContext().getOrCreateValueObject()->setUserValue("vehicleID", (unsigned int)1);
+                        return true;
+                    }
+                    if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Up)
+                    {
+                        _openIG->getPluginContext().getOrCreateValueObject()->setUserValue("engine", (bool)true);
+                        _openIG->getPluginContext().getOrCreateValueObject()->setUserValue("BulletEngineCommand", (bool)true);
+                        _openIG->getPluginContext().getOrCreateValueObject()->setUserValue("vehicleID", (unsigned int)1);
+                        return true;
+                    }
+                    if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Down)
+                    {
+                        _openIG->getPluginContext().getOrCreateValueObject()->setUserValue("engine", (bool)false);
+                        _openIG->getPluginContext().getOrCreateValueObject()->setUserValue("BulletEngineCommand", (bool)true);
+                        _openIG->getPluginContext().getOrCreateValueObject()->setUserValue("vehicleID", (unsigned int)1);
+                        return true;
+                    }
                 }
             break;
-			case(osgGA::GUIEventAdapter::KEYUP) :
-			{				
-				if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Left)
-				{					
-					_openIG->getPluginContext().getOrCreateValueObject()->setUserValue("BulletSteeringCommand", (bool)false);
-					return true;
-				}
-				if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Right)
-				{
-					_openIG->getPluginContext().getOrCreateValueObject()->setUserValue("BulletSteeringCommand", (bool)false);
-					return true;
-				}
-				if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Up)
-				{
-					_openIG->getPluginContext().getOrCreateValueObject()->setUserValue("BulletEngineCommand", (bool)false);
-					return true;
-				}
-				if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Down)
-				{
-					_openIG->getPluginContext().getOrCreateValueObject()->setUserValue("BulletEngineCommand", (bool)false);
-					return true;
-				}
-			}
-												  break;
+            case(osgGA::GUIEventAdapter::KEYUP) :
+            {
+                if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Left)
+                {
+                    _openIG->getPluginContext().getOrCreateValueObject()->setUserValue("BulletSteeringCommand", (bool)false);
+                    return true;
+                }
+                if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Right)
+                {
+                    _openIG->getPluginContext().getOrCreateValueObject()->setUserValue("BulletSteeringCommand", (bool)false);
+                    return true;
+                }
+                if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Up)
+                {
+                    _openIG->getPluginContext().getOrCreateValueObject()->setUserValue("BulletEngineCommand", (bool)false);
+                    return true;
+                }
+                if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Down)
+                {
+                    _openIG->getPluginContext().getOrCreateValueObject()->setUserValue("BulletEngineCommand", (bool)false);
+                    return true;
+                }
+            }
+                                                  break;
             default:
                 return osgGA::TrackballManipulator::handle(ea,us);
             }
         return false;
     }
-       
+
     OpenIG::Engine* _openIG;
 };
 
@@ -233,23 +241,23 @@ public:
         return "id name [optional:off]";
     }
 
-	virtual const std::string getArgumentsFormat() const
-	{
-		return	"I:{trackball;earth};{on;off}";
-	}
+    virtual const std::string getArgumentsFormat() const
+    {
+        return	"I:{trackball;earth};{on;off}";
+    }
 
     // Convinient method for the onscreen
     // help. This one is a must too
     virtual const std::string getDescription() const
     {
-		return  "sets camera manipulator\n"
-			"     id - the id of the model\n"
-			"     name - one of these:\n"
-			"           trackball - the OSG Trackball camera manipulator\n"
-			"           earth - the osgEarth camera manipulator\n"
-			"     off - optional, if provided the camera manipulator will be bound\n"
-			"           to the entity but will not be updated (ex: might be over network)";
-				
+        return  "sets camera manipulator\n"
+            "     id - the id of the model\n"
+            "     name - one of these:\n"
+            "           trackball - the OSG Trackball camera manipulator\n"
+            "           earth - the osgEarth camera manipulator\n"
+            "     off - optional, if provided the camera manipulator will be bound\n"
+            "           to the entity but will not be updated (ex: might be over network)";
+
     }
 
     // This method is called when you invoke a command in the
@@ -257,7 +265,7 @@ public:
     // tokens is std::vector<std::string> holding the arguments
     // provided
     virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)
-    {        
+    {
         // We need only two arguments: the entity ID and the
         // manipulator name
         if (tokens.size() >= 2)
@@ -346,11 +354,11 @@ public:
                     osg::notify(osg::NOTICE) << "IG: " << name << " bound to entity " << id << std::endl;
 
                     if (tokens.size() >= 3 && (tokens.at(2).compare(0,3,"off") == 0) )
-					{
-						s_CameraManipulatorOn = false;
+                    {
+                        s_CameraManipulatorOn = false;
                         osg::notify(osg::NOTICE) << "Manipulator set to: OFF" << std::endl;
 
-					}
+                    }
 //                    else
 //                        osg::notify(osg::NOTICE) << "Manipulator set to: ON" << std::endl;
 
@@ -363,7 +371,7 @@ public:
         return -1;
     }
 protected:
-	OpenIG::Engine* _ig;
+    OpenIG::Engine* _ig;
 };
 
 int main(int argc, char** argv)
@@ -390,16 +398,21 @@ int main(int argc, char** argv)
 
     unsigned int screen_width, screen_height;
     wsi->getScreenResolution(osg::GraphicsContext::ScreenIdentifier(0), screen_width, screen_height);
+    int offsetx = 0;
+    if (argc >= 3)
+    {
+        offsetx = atoi(argv[2]);
+    }
 
     double aspectratio = 1.0;
     if (viewer->getNumViews()==0)
     {
         osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
 
-        traits->x = 0;
+        traits->x = offsetx;
         traits->y = 0;
-		traits->width = screen_width;
-		traits->height = screen_height;
+        traits->width = screen_width;
+        traits->height = screen_height;
         traits->windowDecoration = false;
         traits->doubleBuffer = true;
         traits->screenNum = 0;
@@ -428,7 +441,7 @@ int main(int argc, char** argv)
         view->getCamera()->setCullingMode(osg::CullSettings::VIEW_FRUSTUM_CULLING);
         view->setLightingMode(osgViewer::View::SKY_LIGHT);
 
-		viewer->setThreadingModel(osgViewer::ViewerBase::CullDrawThreadPerContext);
+        viewer->setThreadingModel(osgViewer::ViewerBase::CullDrawThreadPerContext);
 
     }
 
@@ -437,10 +450,10 @@ int main(int argc, char** argv)
     stats->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F2);
     viewer->getView(0)->addEventHandler(stats);
 
-	// Add the Windowsing handler to F10
-	osg::ref_ptr<osgViewer::WindowSizeHandler> wshandler = new osgViewer::WindowSizeHandler;
-	wshandler->setKeyEventToggleFullscreen(osgGA::GUIEventAdapter::KEY_F10);
-	viewer->getView(0)->addEventHandler(wshandler);
+    // Add the Windowsing handler to F10
+    osg::ref_ptr<osgViewer::WindowSizeHandler> wshandler = new osgViewer::WindowSizeHandler;
+    wshandler->setKeyEventToggleFullscreen(osgGA::GUIEventAdapter::KEY_F10);
+    viewer->getView(0)->addEventHandler(wshandler);
 
 
     // Add the StateSet event handler bound to F3
@@ -479,16 +492,16 @@ int main(int argc, char** argv)
     // code bellow is present to see how to load
     // entities in the scene too
 
-	// Add this custom command from above
-	// the first argument is the name of
-	// the command, so we invoke it by
-	// 'manip'
-	OpenIG::Base::Commands::instance()->addCommand("manip", new SetCameraManipulatorCommand(ig));
+    // Add this custom command from above
+    // the first argument is the name of
+    // the command, so we invoke it by
+    // 'manip'
+    OpenIG::Base::Commands::instance()->addCommand("manip", new SetCameraManipulatorCommand(ig));
 
     // we espect an argument with the name
     // of the script. If none provided, search
     // for defaults
-    if (argc == 2)
+    if (argc >= 2)
     {
         std::string script = argv[1];
         ig->loadScript(script);
@@ -496,10 +509,10 @@ int main(int argc, char** argv)
     else
     {
         ig->loadScript(std::string("default.txt"));
-    }    
+    }
 
     // Show our viewer
-    viewer->realize();        
+    viewer->realize();
 
     // The demo database is very small,
     // so let make the scene nicer with fog
@@ -543,9 +556,9 @@ int main(int argc, char** argv)
                 {
                     WNDPROC fWndProc = (WNDPROC)::GetWindowLongPtr(hdl->getHWND(), GWLP_WNDPROC);
                     if (fWndProc && hdl->getHWND())
-					{
-						::CallWindowProc(fWndProc,hdl->getHWND(),msg.message, msg.wParam, msg.lParam);
-					}
+                    {
+                        ::CallWindowProc(fWndProc,hdl->getHWND(),msg.message, msg.wParam, msg.lParam);
+                    }
                 }
             }
         }
@@ -555,19 +568,19 @@ int main(int argc, char** argv)
         // based on the Trackball manipulators
         // camera only if we set it using our
         // custom command from above
-		if (s_CameraManipulatorOn && s_CameraManipulator.valid() && ig->isCameraBoundToEntity())
-        {			
-			ig->bindCameraUpdate(s_CameraManipulator->getMatrix());
+        if (s_CameraManipulatorOn && s_CameraManipulator.valid() && ig->isCameraBoundToEntity())
+        {
+            ig->bindCameraUpdate(s_CameraManipulator->getMatrix());
         }
 
         // Here we call the frame
-        ig->frame(); 
+        ig->frame();
 
     }
 
     // Here the mandatory cleanup
     ig->cleanup();
-	ig = NULL;
+    ig = NULL;
 
 }
 

@@ -21,9 +21,17 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
-//#*	author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+//#*	author    Trajce Nikolov Nick openig@compro.net
 //#*	copyright(c)Compro Computer Services, Inc.
+//#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
 
 
 #include <Library-Protocol/camera.h>
@@ -31,32 +39,35 @@
 using namespace OpenIG::Library::Protocol;
 
 Camera::Camera()
-	: bindToEntity(0)
+    : bindToEntity(0)
+    , inverse(1)
 {
 }
 
 int Camera::write(OpenIG::Library::Networking::Buffer &buf) const
 {
-	buf << (unsigned char)opcode();
-	buf << bindToEntity;
-	buf << mx(0, 0) << mx(0, 1) << mx(0, 2) << mx(0, 3);
-	buf << mx(1, 0) << mx(1, 1) << mx(1, 2) << mx(1, 3);
-	buf << mx(2, 0) << mx(2, 1) << mx(2, 2) << mx(2, 3);
-	buf << mx(3, 0) << mx(3, 1) << mx(3, 2) << mx(3, 3);
+    buf << (unsigned char)opcode();
+    buf << bindToEntity;
+    buf << inverse;
+    buf << mx(0, 0) << mx(0, 1) << mx(0, 2) << mx(0, 3);
+    buf << mx(1, 0) << mx(1, 1) << mx(1, 2) << mx(1, 3);
+    buf << mx(2, 0) << mx(2, 1) << mx(2, 2) << mx(2, 3);
+    buf << mx(3, 0) << mx(3, 1) << mx(3, 2) << mx(3, 3);
 
-	return sizeof(unsigned char) + sizeof(osg::Matrixd::value_type) * 16 + sizeof(bindToEntity);
+    return sizeof(unsigned char) + sizeof(osg::Matrixd::value_type) * 16 + sizeof(bindToEntity) + sizeof(inverse);
 }
 
 int Camera::read(OpenIG::Library::Networking::Buffer &buf)
 {
-	unsigned char op;
+    unsigned char op;
 
-	buf >> op;
-	buf >> bindToEntity;
-	buf >> mx(0, 0) >> mx(0, 1) >> mx(0, 2) >> mx(0, 3);
-	buf >> mx(1, 0) >> mx(1, 1) >> mx(1, 2) >> mx(1, 3);
-	buf >> mx(2, 0) >> mx(2, 1) >> mx(2, 2) >> mx(2, 3);
-	buf >> mx(3, 0) >> mx(3, 1) >> mx(3, 2) >> mx(3, 3);
+    buf >> op;
+    buf >> bindToEntity;
+    buf >> inverse;
+    buf >> mx(0, 0) >> mx(0, 1) >> mx(0, 2) >> mx(0, 3);
+    buf >> mx(1, 0) >> mx(1, 1) >> mx(1, 2) >> mx(1, 3);
+    buf >> mx(2, 0) >> mx(2, 1) >> mx(2, 2) >> mx(2, 3);
+    buf >> mx(3, 0) >> mx(3, 1) >> mx(3, 2) >> mx(3, 3);
 
-	return sizeof(unsigned char) + sizeof(osg::Matrixd::value_type) * 16 + sizeof(bindToEntity);
-}			
+    return sizeof(unsigned char) + sizeof(osg::Matrixd::value_type) * 16 + sizeof(bindToEntity) + sizeof(inverse);
+}

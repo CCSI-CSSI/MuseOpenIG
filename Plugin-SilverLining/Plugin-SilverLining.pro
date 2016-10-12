@@ -28,7 +28,7 @@ INCLUDEPATH += ../
 DEPENDPATH += ../
 
 LIBS += -losg -losgDB -losgViewer -lOpenThreads\
-        -lOpenIG-Engine -lOpenIG-Base -lOpenIG-PluginBase
+        -lOpenIG-Engine -lOpenIG-Base -lOpenIG-PluginBase -lOpenIG-Utils
 
 DISTFILES += CMakeLists.txt
 

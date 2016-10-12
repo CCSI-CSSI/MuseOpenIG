@@ -21,6 +21,10 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 
 #pragma once
@@ -40,7 +44,7 @@ namespace OpenIG {
 
 		/*! Handy class to do few filesystem opertaions
 		* \brief The FileSystem class
-		* \author    Poojan Prabhu <poojanprabhu@gmail.com>
+		* \author    Poojan Prabhu <openig@compro.net>
 		* \copyright (c)Compro Computer Services, Inc.
 		* \date      Thu Oct 22 2015
 		*/
@@ -51,7 +55,7 @@ namespace OpenIG {
 			* \brief Checks if a given file exists
 			* \param strFileName the name of the file
 			* \return true if a file exists false otherwise
-			* \author    Poojan Prabhu <poojanprabhu@gmail.com>
+			* \author    Poojan Prabhu <openig@compro.net>
 			* \copyright (c)Compro Computer Services, Inc.
 			* \date      Thu Oct 22 2015
 			*/
@@ -61,7 +65,7 @@ namespace OpenIG {
 			* \brief Reads a whole file into a string
 			* \param strFileName the name of the file
 			* \return the file as a string
-			* \author    Poojan Prabhu <poojanprabhu@gmail.com>
+			* \author    Poojan Prabhu <openig@compro.net>
 			* \copyright (c)Compro Computer Services, Inc.
 			* \date      Thu Oct 22 2015
 			*/
@@ -71,15 +75,19 @@ namespace OpenIG {
 			* \brief Returns the full path of a file
 			* \param strFileName the name of the file
 			* \return the full path
-			* \author    Poojan Prabhu <poojanprabhu@gmail.com>
+			* \author    Poojan Prabhu <openig@compro.net>
 			* \copyright (c)Compro Computer Services, Inc.
 			* \date      Thu Oct 22 2015
 			*/
 			static std::string fileFullPath(const std::string& strFileName);
 
 			/*\brief Enum for Resource types
-			* \author    Trajce Nikolov Nick <trajce.nikolov.nick@gmail.com>
+			* \author    Trajce Nikolov Nick <openig@compro.net>
 			* \copyright(c)Compro Computer Services, Inc.
+//#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
 			* \date      Thu Oct 22 2015
 			*/
 			enum PathType
@@ -96,7 +104,7 @@ namespace OpenIG {
 			* \param type the enum above
 			* \param path optional additional path to be appended
 			* \return the full path based on ENV vars and host system, differs for Linux, Windows and Mac
-			* \author    Trajce Nikolov Nick <trajce.nikolov.nick@gmail.com>
+			* \author    Trajce Nikolov Nick <openig@compro.net>
 			* \copyright (c)Compro Computer Services, Inc.
 			* \date      Thu Oct 22 2015
 			*/
@@ -106,7 +114,7 @@ namespace OpenIG {
 			* \brief Returns the matched existing file from a given FileList. You can use wild cards
 			* \param patterns StringList containing file names with path. You can use wildcard
 			* \return the full path of the file found
-			* \author    Trajce Nikolov Nick <trajce.nikolov.nick@gmail.com>
+			* \author    Trajce Nikolov Nick <openig@compro.net>
 			* \copyright (c)Compro Computer Services, Inc.
 			* \date      Sat Oct 31 2015
 			*/
@@ -116,7 +124,7 @@ namespace OpenIG {
 			* \brief Returns the time stamp of the last write
 			* \param fileName the file name to check
 			* \return the time stamp
-			* \author    Trajce Nikolov Nick <trajce.nikolov.nick@gmail.com>
+			* \author    Trajce Nikolov Nick <openig@compro.net>
 			* \copyright (c)Compro Computer Services, Inc.
 			* \date      Thu Jan 14 2016
 			*/

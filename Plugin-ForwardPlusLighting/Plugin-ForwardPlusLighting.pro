@@ -31,7 +31,7 @@ INCLUDEPATH += ../
 DEPENDPATH += ../
 
 LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgShadow -losgUtil -losgSim -losgText -losgGA\
-        -lOpenIG-Engine -lOpenIG-Base -lOpenIG-Graphics -lOpenIG-PluginBase
+        -lOpenIG-Engine -lOpenIG-Base -lOpenIG-Graphics -lOpenIG-PluginBase -lOpenIG-Utils
 
 OTHER_FILES += DataFiles/libIgPlugin-ForwardPlusLighting.so.xml
 DISTFILES += DataFiles/libIgPlugin-ForwardPlusLighting.so.xml
@@ -99,11 +99,11 @@ unix {
     # library version number files
     exists( "../openig_version.pri" ) {
 
-	include( "../openig_version.pri" )
-	isEmpty( VERSION ){ error( "bad or undefined VERSION variable inside file openig_version.pri" )
-	} else {
-	message( "Set version info to: $$VERSION" )
-	}
+    include( "../openig_version.pri" )
+    isEmpty( VERSION ){ error( "bad or undefined VERSION variable inside file openig_version.pri" )
+    } else {
+    message( "Set version info to: $$VERSION" )
+    }
 
     }
     else { error( "could not find pri library version file openig_version.pri" ) }

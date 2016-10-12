@@ -22,6 +22,10 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 
 
@@ -120,6 +124,7 @@ namespace OpenIG {
 
 			static void setEnvironmentMapDirty(bool dirty);
 			static void setForwardPlusRange(float range);
+			static void setEnableForwardPlus(bool enable);
 
 		protected:
 			void initialize();
@@ -135,6 +140,9 @@ namespace OpenIG {
 			unsigned int						_todHour;
 			bool								_forwardPlusEnabled;
 			bool								_logZEnabled;
+
+			static bool							_enableDisableForwardPlusSet;
+			static bool							_enableDisableForwardPlus;
 		private:
 			void setUpShaders(SilverLining::Atmosphere *atmosphere, osg::RenderInfo& renderInfo) const;
 			void initializeForwardPlus(SilverLining::Atmosphere *atmosphere, osg::RenderInfo& renderInfo, std::vector<GLint>& vecUserShaders) const;

@@ -21,6 +21,10 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 
 #ifndef ANIMATION_H
@@ -54,7 +58,7 @@ namespace OpenIG {
 		 *  values on criteria used in the inherits. See \ref OpenIG::Base::ImageGenerator::playAnimation
 		 * \class AnimationSequencePlaybackCallback
 		 * \brief The AnimationSequencePlaybackCallback class
-		 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+		 * \author    Trajce Nikolov Nick openig@compro.net
 		 * \copyright (c)Compro Computer Services, Inc.
 		 * \date      Sun Jan 11 2015
 		 */
@@ -67,7 +71,7 @@ namespace OpenIG {
 			 * \param value The current run-time value that is result of the linear interpolation
 			 *              of orientation the orientational operation vector
 			 * \return  When inherits returns false, the playback is stopped, otherwise nothing happens
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
@@ -83,7 +87,7 @@ namespace OpenIG {
 		/*! This is the singleton class that is managing the core simple animations
 		 * \brief The Animations class
 		 * \class Animations
-		 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+		 * \author    Trajce Nikolov Nick openig@compro.net
 		 * \copyright (c)Compro Computer Services, Inc.
 		 * \date      Sun Jan 11 2015
 		 */
@@ -92,7 +96,7 @@ namespace OpenIG {
 		protected:
 			/*! Animations constructor
 			 * \brief Animations constructor
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
@@ -100,7 +104,7 @@ namespace OpenIG {
 
 			/*! Animations destructor
 			 * \brief Animations destructor
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
@@ -110,7 +114,7 @@ namespace OpenIG {
 			/*! The singleton
 			 * \brief The singleton
 			 * \return The singleton
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
@@ -121,7 +125,7 @@ namespace OpenIG {
 			 *  \ref ModelCompositionPlugin how the XML definitions are converted to
 			 *  this kind of simple Animations
 			 * \brief The Animation struct
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
@@ -139,7 +143,7 @@ namespace OpenIG {
 				 * See \ref ModelCompositionPlugin implemenetation
 				 * as a reference
 				 * \brief The Sequence struct
-				 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+				 * \author    Trajce Nikolov Nick openig@compro.net
 				 * \copyright (c)Compro Computer Services, Inc.
 				 * \date      Sun Jan 11 2015
 				 */
@@ -201,7 +205,7 @@ namespace OpenIG {
 			 *                      See \ref OpenIG::Base::ImageGenerator::playAnimation
 			 * \param name          The name of the animation
 			 * \param cbs           Optional animation callbacks. See \ref OpenIG::Base::AnimationSequencePlaybackCallback
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
@@ -214,7 +218,7 @@ namespace OpenIG {
 			 * \param entityId      The \ref OpenIG::Base::ImageGenerator::Entity to stop the animation on.
 			 *                      See \ref OpenIG::Base::ImageGenerator::stopAnimation
 			 * \param name          The name of the animation
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Mon May 18 2015
 			 */
@@ -227,7 +231,7 @@ namespace OpenIG {
 			 * \param entityId      The \ref OpenIG::Base::ImageGenerator::Entity to reset the animation on.
 			 *                      See \ref OpenIG::Base::ImageGenerator::resetAnimation
 			 * \param name          The name of the animation
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Mon May 18 2015
 			 */
@@ -240,7 +244,7 @@ namespace OpenIG {
 			*						See \ref OpenIG::Base::ImageGenerator::resetAnimation
 			* \param name			The name of the animation
 			* \param pauseResume	true to pause, false to resume
-			* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			* \author    Trajce Nikolov Nick openig@compro.net
 			* \copyright (c)Compro Computer Services, Inc.
 			* \date      Tue May 16 2016
 			*/
@@ -251,7 +255,7 @@ namespace OpenIG {
 			 *  in the \ref igplugincore::Plugin::update call.
 			 * \brief Updates the animation, should be called in a loop.
 			 * \param ig    The image generator instance
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
@@ -260,7 +264,7 @@ namespace OpenIG {
 		protected:
 			/*! This struct is used internaly to control the playback
 			 * \brief The RuntimeAnimation struct
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */

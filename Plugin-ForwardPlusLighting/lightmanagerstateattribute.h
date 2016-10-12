@@ -21,6 +21,10 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 #pragma once
 
@@ -29,7 +33,7 @@
 #include <Library-Graphics/Vector2.h>
 #include <Library-Graphics/CameraFwdDeclare.h>
 
-#include <Core-Base/tbo.h>
+#include <Core-Utils/tbo.h>
 
 #include <osg/Group>
 #include <osg/observer_ptr>

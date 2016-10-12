@@ -23,6 +23,10 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 
 #pragma once
@@ -44,6 +48,50 @@ namespace OpenIG {
 
         class AtmosphereReference;
         class SkyDrawable;
+
+        struct CloudLayerInfo
+        {
+            SilverLining::CloudLayer* _cl;
+            int     _id;
+            int     _type;
+            int     _handle;
+            int     _museLayer;
+            double  _altitude;
+            double  _density;
+            double	_thickness;
+            double  _width;
+            double  _length;
+            bool    _enable;
+            bool    _infinite;
+            bool    _dirty;
+            bool    _needReseed;
+            bool    _loadFile;
+            bool    _saveFile;
+            osg::Vec3 _pos_offset;
+            std::string _filename;
+
+            CloudLayerInfo()
+                : _cl(NULL)
+                , _type(-1)
+                , _handle(-1)
+                , _museLayer(-1)
+                , _altitude(0.0)
+                , _density(0.0)
+                , _thickness(0.0)
+                , _width(100000)
+                , _length(100000)
+                , _enable(true)
+                , _infinite(true)
+                , _id(-1)
+                , _dirty(false)
+                , _needReseed(false)
+                , _loadFile(false)
+                , _saveFile(false)
+                , _pos_offset(osg::Vec3(-1,-1,-1))
+            {
+                _filename.clear();
+            }
+        };
 
         // Grab the camera and projection matrices for SilverLining. Note we do not use Atmosphere::CullObjects(), since it will
         // interfere with the environment cube maps generated from the render thread.
@@ -121,6 +169,7 @@ namespace OpenIG {
             void            removeCloudLayer(int id);
             void            updateCloudLayer(int id, double altitude, double thickness, double density);
             void            removeAllCloudLayers();
+            void            loadCloudLayer(int id, std::string filename, int type);
             void			setGeocentric(bool geocentric);
             void			setLightingParams(OpenIG::Engine* ig);
             void			setIG(OpenIG::Engine* ig) { _openIG = ig; }
@@ -132,6 +181,7 @@ namespace OpenIG {
                 double			cloudsBaseLength;
                 double			cloudsBaseWidth;
                 bool			generateEnvironmentalMap;
+                bool            paramsUpdated;
 
                 enum Mask
                 {
@@ -145,6 +195,7 @@ namespace OpenIG {
                     : cloudsBaseLength(100000)
                     , cloudsBaseWidth(100000)
                     , generateEnvironmentalMap(false)
+                    , paramsUpdated(false)
                 {
                 }
 
@@ -155,11 +206,13 @@ namespace OpenIG {
                 if ((mask & SilverLiningParams::CLOUDS_BASE_LENGTH) == SilverLiningParams::CLOUDS_BASE_LENGTH)
                 {
                     _silverLiningParams.cloudsBaseLength = params.cloudsBaseLength;
+                    _silverLiningParams.paramsUpdated = true;
                     //osg::notify(osg::NOTICE) << "setSilverLiningParams() cloud layer len: " << _silverLiningParams.cloudsBaseLength << std::endl;
                 }
                 if ((mask & SilverLiningParams::CLOUDS_BASE_WIDTH) == SilverLiningParams::CLOUDS_BASE_WIDTH)
                 {
                     _silverLiningParams.cloudsBaseWidth = params.cloudsBaseWidth;
+                    _silverLiningParams.paramsUpdated = true;
                     //osg::notify(osg::NOTICE) << "setSilverLiningParams() cloud layer wid: " << _silverLiningParams.cloudsBaseWidth << std::endl;
                 }
                 if ((mask & SilverLiningParams::ENVIRONMENTAL_MAP) == SilverLiningParams::ENVIRONMENTAL_MAP)
@@ -183,11 +236,13 @@ namespace OpenIG {
             static void setGamma(double gamma, bool use = false);
             static void setLocation(double lat, double lon);
             static void setUTC(int hour, int minutes);
-			static void setSkyModel(const std::string& skyModel);
+            static void setSkyModel(const std::string& skyModel);
+            static void setAdditionalAmbientLightConstant(const osg::Vec3& value);
+            static void setAdditionalDiffuseLightConstant(const osg::Vec3& value);
 
         protected:
             void setLighting(SilverLining::Atmosphere *atm) const;
-			void resetLighting(SilverLining::Atmosphere *atmosphere) const;
+            void resetLighting(SilverLining::Atmosphere *atmosphere) const;
             void setShadow(SilverLining::Atmosphere *atm, osg::RenderInfo & renderInfo);
             void initializeSilverLining(AtmosphereReference *ar, osg::GLExtensions* ext) const;
             void initializeDrawable();
@@ -245,7 +300,7 @@ namespace OpenIG {
             float								_sunMoonBrightnessNight;
 
             static double						_gamma;
-			static bool							_userDefinedGamma;
+            static bool							_userDefinedGamma;
 
             static double						_latitude;
             static double						_longitude;
@@ -254,41 +309,13 @@ namespace OpenIG {
             static int							_utcHour;
             static int							_utcMinutes;
 
-			static std::string					_skyModel;
+            static std::string					_skyModel;
 
-			osg::Vec4							_originalInsideFogSettings;
-			
+            osg::Vec4							_originalInsideFogSettings;
 
-            struct CloudLayerInfo
-            {
-                int     _id;
-                int     _type;
-                int     _handle;
-                double  _altitude;
-                double  _density;
-                double	_thickness;
-                double _width;
-                double _length;
-                bool   _infinite;
-                bool    _dirty;
-                bool    _needReseed;
+            static osg::Vec3					_additionalAmbientLightConstant;
+            static osg::Vec3					_additionalDiffuseLightConstant;
 
-                CloudLayerInfo()
-                    : _type(-1)
-                    , _handle(-1)
-                    , _altitude(0.0)
-                    , _density(0.0)
-                    , _thickness(0.0)
-                    , _width(50000)
-                    , _length(50000)
-                    , _infinite(true)
-                    , _id(-1)
-                    , _dirty(false)
-                    , _needReseed(false)
-                {
-
-                }
-            };
             typedef std::map< int, CloudLayerInfo >                     CloudLayers;
             typedef std::map< int, CloudLayerInfo >::iterator           CloudLayersIterator;
             typedef std::map< int, CloudLayerInfo >::const_iterator     CloudLayersConstIterator;
@@ -301,10 +328,12 @@ namespace OpenIG {
 
             CloudLayersQueue    _cloudsQueueToAdd;
             CloudLayersQueue    _cloudsQueueToRemove;
+            CloudLayersQueue    _cloudFilesQueueToLoad;
 
             void addClouds(SilverLining::Atmosphere *atmosphere, const osg::Vec3d& position);
             void removeClouds(SilverLining::Atmosphere *atmosphere);
             void updateClouds(SilverLining::Atmosphere *atmosphere);
+            void loadCloudLayerFiles(SilverLining::Atmosphere *atmosphere, const osg::Vec3d& position);
 
             SilverLiningParams		_silverLiningParams;
 

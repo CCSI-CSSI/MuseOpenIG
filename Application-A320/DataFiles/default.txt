@@ -19,12 +19,14 @@ playanim 2 fbx:"Take 001":LOOP
 manip 1 trackball
 bindcamera 1 10 30 -2 -200 0 0
 
-tod 7 0
+tod 7 15
 fog 50000
 wind 5 90
-addclouds 0 0 5000 0 1
+addclouds 0 0 1500 0 1
 
 silverlining flat dynamic
+
+loadconfig richcolorsdemo.txt
 
 
 

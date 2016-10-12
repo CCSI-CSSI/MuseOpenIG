@@ -21,6 +21,10 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 // note: This is experimental, and it is valid
 // with the datanase that is provided by ComPro
@@ -38,7 +42,8 @@
 #include <Core-Base/commands.h>
 #include <Core-Base/filesystem.h>
 #include <Core-Base/configuration.h>
-#include <Core-Base/texturecache.h>
+
+#include <Core-Utils/texturecache.h>
 
 #include <Core-OpenIG/renderbins.h>
 #include <Core-OpenIG/openig.h>
@@ -982,14 +987,14 @@ namespace OpenIG { namespace Plugins {
                             // Print out the stats
                             if (lpnStats.size())
                             {
-                                osg::notify(osg::NOTICE) << "LightsControl: LightPointNode stats ========" << std::endl;
+                                osg::notify(osg::INFO) << "LightsControl: LightPointNode stats ========" << std::endl;
                                 LightPointsStats::iterator lpnIter = lpnStats.begin();
                                 for (; lpnIter != lpnStats.end(); ++lpnIter)
                                 {
                                     LightPointNodeStats& stats = *lpnIter;
-                                    osg::notify(osg::NOTICE) << stats.name << ": " << stats.numOfLightPoints << std::endl;
+                                    osg::notify(osg::INFO) << stats.name << ": " << stats.numOfLightPoints << std::endl;
                                 }
-                                osg::notify(osg::NOTICE) << "============================================" << std::endl;
+                                osg::notify(osg::INFO) << "============================================" << std::endl;
                             }
                         }
                         // No children, they are out
@@ -1480,15 +1485,25 @@ namespace OpenIG { namespace Plugins {
             _xmlAccessMutex.unlock();
 
             // Save the current time
-            osg::ref_ptr<osg::Referenced> ref = context.getAttribute("TOD");
-            OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::TimeOfDayAttributes> *attr = dynamic_cast<OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::TimeOfDayAttributes> *>(ref.get());
-            if (attr)
+            osg::ref_ptr<osg::Referenced> todRef = context.getAttribute("TOD");
+            OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::TimeOfDayAttributes> *todAttr = dynamic_cast<OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::TimeOfDayAttributes> *>(todRef.get());
+            if (todAttr)
             {
                 // NOTE: we have to set some default here
-                LightsControlPlugin::tod.hour() = attr->getValue().getHour();
-                LightsControlPlugin::tod.minutes() = attr->getValue().getMinutes();
+                LightsControlPlugin::tod.hour()    = todAttr->getValue().getHour();
+                LightsControlPlugin::tod.minutes() = todAttr->getValue().getMinutes();
 
                 updateLightPointNodesBasedOnTimeOfDay(context.getImageGenerator()->getScene());
+            }
+
+            // Set a Multiswitch Active Switchset
+            osg::ref_ptr<osg::Referenced> msRef = context.getAttribute("MultiSwitch");
+            OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::MultiSwitchAttributes> *msAttr = dynamic_cast<OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::MultiSwitchAttributes> *>(msRef.get());
+            if (msAttr)
+            {
+                // NOTE: we have to set some default here
+                LightsControlPlugin::msName  = msAttr->getValue().getMultiSwitchName();
+                LightsControlPlugin::msIndex = msAttr->getValue().getMultiSwitchIndex();
             }
         }
 
@@ -1833,10 +1848,10 @@ namespace OpenIG { namespace Plugins {
                     //osg::notify(osg::NOTICE)<<"Lights Control: Setup Sprite texture FAILED!!!!!!!"<<std::endl;
                     return;
                 }
-				else
-				{
-					//osg::notify(osg::NOTICE) << "Lights Control: Setup Sprite texture PASSED!!!!!!!" << std::endl;
-				}
+                else
+                {
+                    //osg::notify(osg::NOTICE) << "Lights Control: Setup Sprite texture PASSED!!!!!!!" << std::endl;
+                }
 
 
                 std::size_t stateSetID = getStateSetID(def);
@@ -2018,6 +2033,8 @@ namespace OpenIG { namespace Plugins {
             static TOD	tod;
             static TOD	onTOD;
             static TOD	offTOD;
+            std::string msName;
+            int         msIndex;
 
         protected:
         // Nodevisitor that will go through

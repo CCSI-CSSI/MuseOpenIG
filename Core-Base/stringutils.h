@@ -21,6 +21,10 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 
 #ifndef STRINGUTILS_H
@@ -43,7 +47,7 @@ namespace OpenIG {
 
 		/*! Handy class to use wit std::strings
 		 * \brief The singleton StringUtils class
-		 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+		 * \author    Trajce Nikolov Nick openig@compro.net
 		 * \copyright (c)Compro Computer Services, Inc.
 		 * \date      Sun Jan 11 2015
 		 */
@@ -57,7 +61,7 @@ namespace OpenIG {
 			/*!
 			 * \brief The singleton
 			 * \return The singleton
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
@@ -76,7 +80,7 @@ namespace OpenIG {
 			 * \param str The input string to tokenize
 			 * \param delimiters String of delimiter chars
 			 * \return std::vector<std::string> of tokens found
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
@@ -87,7 +91,7 @@ namespace OpenIG {
 			* \param str The input string to tokenize
 			* \param delimiters String of delimiter chars
 			* \return std::vector<std::string> of tokens found
-			* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			* \author    Trajce Nikolov Nick openig@compro.net
 			* \copyright (c)Compro Computer Services, Inc.
 			* \date      Tue Jun 30 2015
 			*/
@@ -97,7 +101,7 @@ namespace OpenIG {
 			 * \brief trim a string from left
 			 * \param s             The text to trim
 			 * \param istestchar    Function to test a char if it is a space char
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
@@ -112,7 +116,7 @@ namespace OpenIG {
 			 * \brief trim a string from right
 			 * \param s             The text to trim
 			 * \param istestchar    Function to test a char if it is a space char
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
@@ -127,7 +131,7 @@ namespace OpenIG {
 			 * \brief trim a string from left and right
 			 * \param s             The text to trim
 			 * \param istestchar    Function to test a char if it is a space char
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
@@ -141,7 +145,7 @@ namespace OpenIG {
 			 * \brief Computes the number of lines in a string
 			 * \param text the input string
 			 * \return number of lines in the input string
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
@@ -151,7 +155,7 @@ namespace OpenIG {
 			* \brief Returns the value of an ENV variable, provided in form $ENV_VAR
 			* \param var the ENV variable, provided in form $ENV_VAR
 			* \return the value of an ENV variable
-			* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			* \author    Trajce Nikolov Nick openig@compro.net
 			* \copyright (c)Compro Computer Services, Inc.
 			* \date      Fri Oct 23 2015
 			*/

@@ -21,6 +21,10 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 
 #ifndef CONFIGURATION_H
@@ -39,7 +43,7 @@ namespace OpenIG {
 	namespace Base {
 		/*! Handy singleton to get access to values from an XML file
 		 * \brief The Configuration class
-		 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+		 * \author    Trajce Nikolov Nick openig@compro.net
 		 * \copyright (c)Compro Computer Services, Inc.
 		 * \date      Sun Jan 11 2015
 		 */
@@ -49,7 +53,7 @@ namespace OpenIG {
 			/*!
 			 * \brief The Configuration singleton
 			 * \return  The Configuration singleton
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
@@ -60,7 +64,7 @@ namespace OpenIG {
 			 * \param The file name of the XML
 			 * \param The section name from the XML
 			 * \return true on success, false on failure
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
@@ -70,7 +74,7 @@ namespace OpenIG {
 			 * \brief gets a value based on a given token and provides a default value if the token is not present
 			 * \param token
 			 * \return the value
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
@@ -80,7 +84,7 @@ namespace OpenIG {
 			 * \brief gets a value based on a given token and provides a default value if the token is not present
 			 * \param token
 			 * \return the value
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
@@ -90,7 +94,7 @@ namespace OpenIG {
 			 * \brief gets a value based on a given token and provides a default value if the token is not present
 			 * \param token
 			 * \return the value
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */

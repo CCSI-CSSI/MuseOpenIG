@@ -19,7 +19,7 @@ INCLUDEPATH += ../
 DEPENDPATH += ../
 
 LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgShadow -losgSim -losgUtil\
-        -lOpenIG-Engine -lOpenIG-PluginBase -lOpenIG-Base
+        -lOpenIG-Engine -lOpenIG-PluginBase -lOpenIG-Base -lOpenIG-Utils
 
 OTHER_FILES += CMakeLists.txt
 DISTFILES += CMakeLists.txt
@@ -60,8 +60,8 @@ unix {
     INCLUDEPATH += /usr/local/lib64
     DEPENDPATH += /usr/local/lib64
 
-    SFILES += $$files(../Resources/shaders/*.glsl)
-    TFILES += $$files(../Resources/textures/*)
+    SFILES += $$files($${PWD}/../Resources/shaders/*.glsl)
+    TFILES += $$files($${PWD}/../Resources/textures/*)
 
     SDESTDIR = /usr/local/openig/resources/shaders/
     TDESTDIR = /usr/local/openig/resources/textures/
@@ -83,11 +83,11 @@ unix {
     # library version number files
     exists( "../openig_version.pri" ) {
 
-	include( "../openig_version.pri" )
+    include( "../openig_version.pri" )
         isEmpty( VERSION ){ !build_pass:error( "$$TARGET -- bad or undefined VERSION variable inside file openig_version.pri" )
-	} else {
+    } else {
         !build_pass:message( "$$TARGET -- Set version info to: $$VERSION" )
-	}
+    }
 
     }
     else { error( "$$TARGET -- could not find pri library version file openig_version.pri" ) }

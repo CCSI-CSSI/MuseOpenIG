@@ -71,6 +71,14 @@ unix {
     QMAKE_POST_LINK =  test -d $$quote($$DESTDIR)  || $$QMAKE_MKDIR $$quote($$DESTDIR) $$escape_expand(\\n\\t)
     QMAKE_POST_LINK += test -e $$quote($$DFILE) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
 
+    FILE = $${PWD}/DataFiles/richcolorsdemo.txt
+    DDIR = $$DESTDIR
+    DFILE = $$DESTDIR/richcolorsdemo.txt
+    distfiles += $$DFILE
+
+    QMAKE_POST_LINK += test -d $$quote($$DESTDIR)  || $$QMAKE_MKDIR $$quote($$DESTDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += test -e $$quote($$DFILE) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
+
     FILE = $${PWD}/DataFiles/flightpath.path
     DDIR = $$DESTDIR/demo
     DFILE = $$DESTDIR/demo/flightpath.path
@@ -102,11 +110,11 @@ unix {
     # library version number files
     exists( "../openig_version.pri" ) {
 
-	include( "../openig_version.pri" )
+    include( "../openig_version.pri" )
         isEmpty( VERSION ){ !build_pass:error( "$$basename(_PRO_FILE_) bad or undefined VERSION variable inside file openig_version.pri" )
-	} else {
+    } else {
         !build_pass:message( "$$basename(_PRO_FILE_) -- Set version info to: $$VERSION" )
-	}
+    }
 
     }
     else { error( "$$basename(_PRO_FILE_) could not find pri library version file openig_version.pri" ) }

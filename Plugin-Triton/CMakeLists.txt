@@ -31,6 +31,7 @@ target_link_libraries( ${LIB_NAME}
     ${OSG_LIBRARIES}
     debug ${TRITON_LIBRARY_DEBUG} optimized ${TRITON_LIBRARY_RELEASE}    
     OpenIG-Engine
+	OpenIG-Utils
     ${Boost_LIBRARIES}
 )
 

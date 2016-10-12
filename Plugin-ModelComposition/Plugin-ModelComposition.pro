@@ -16,7 +16,7 @@ DEFINES += IGPLUGINMODELCOMPOSITION_LIBRARY
 SOURCES += igpluginmodelcomposition.cpp
 
 LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgShadow -losgSim -losgUtil\
-        -lOpenIG-Engine -lOpenIG-PluginBase -lOpenIG-Base
+        -lOpenIG-Engine -lOpenIG-PluginBase -lOpenIG-Base -lOpenIG-Utils
 
 INCLUDEPATH += ../
 DEPENDPATH += ../
@@ -78,11 +78,11 @@ unix {
     # library version number files
     exists( "../openig_version.pri" ) {
 
-	include( "../openig_version.pri" )
+    include( "../openig_version.pri" )
         isEmpty( VERSION ){ !build_pass:error($$basename(_PRO_FILE_) -- bad or undefined VERSION variable inside file openig_version.pri)
-	} else {
+    } else {
         !build_pass:message($$basename(_PRO_FILE_) -- Set version info to: $$VERSION)
-	}
+    }
 
     }
     else { !build_pass:error($$basename(_PRO_FILE_) -- could not find pri library version file openig_version.pri) }

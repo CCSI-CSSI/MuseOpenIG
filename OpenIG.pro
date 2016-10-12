@@ -4,6 +4,7 @@ SUBDIRS +=  Library-Graphics \
             Core-Base \
             Core-PluginBase \
             Core-OpenIG \
+            Core-Utils \
             Plugin-SkyDome \
             Utility-veggen \
             Utility-vegviewer \

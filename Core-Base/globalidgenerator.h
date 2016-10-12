@@ -21,6 +21,10 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 
 
@@ -47,7 +51,7 @@ namespace OpenIG {
 		 *  Lights. As a reference see the \ref ModelCompositionPlugin and \ref LightingPlugin
 		 *  implementations/
 		 * \brief Handy singleton class for ID numbers management
-		 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+		 * \author    Trajce Nikolov Nick openig@compro.net
 		 * \copyright (c)Compro Computer Services, Inc.
 		 * \date      Sun Jan 11 2015
 		 */
@@ -57,7 +61,7 @@ namespace OpenIG {
 			/*!
 			 * \brief The singleton
 			 * \return The singleton
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
@@ -68,7 +72,7 @@ namespace OpenIG {
 			 * \param The name of this ID group. You can have multiple groups identified by a name
 			 * \param The base ID. All consequent IDs are from this one and on
 			 * \param The size of the vector. If 10, then only 10 different IDs will be available
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
@@ -79,7 +83,7 @@ namespace OpenIG {
 			 * \param The name of the group ID
 			 * \param The next ID available
 			 * \return true on success, false if no more available IDs
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
@@ -92,7 +96,7 @@ namespace OpenIG {
 			 * \brief Sets list of IDs to be reused
 			 * \param The ID group name
 			 * \param List of available IDs to be reused
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */
@@ -104,7 +108,7 @@ namespace OpenIG {
 
 			/*!
 			 * \brief The IdGroup struct. Internal for ID management
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Sun Jan 11 2015
 			 */

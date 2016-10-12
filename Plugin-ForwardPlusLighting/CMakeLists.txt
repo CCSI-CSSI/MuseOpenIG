@@ -50,6 +50,7 @@ target_link_libraries( ${LIB_NAME}
     ${GLU_LIBRARY}
     OpenIG-Engine
 	OpenIG-Graphics
+	OpenIG-Utils
 	${Boost_LIBRARIES}
 )
 #$ENV{VLD_ROOT}/lib/Win64/vld.lib

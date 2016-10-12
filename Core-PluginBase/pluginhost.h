@@ -21,6 +21,10 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 #ifndef PLUGINHOST_H
 #define PLUGINHOST_H
@@ -46,7 +50,7 @@ namespace OpenIG {
 
 		/*! The PluginHost class. It is managing plugins
 		 * \brief The PluginHost class
-		 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+		 * \author    Trajce Nikolov Nick openig@compro.net
 		 * \copyright (c)Compro Computer Services, Inc.
 		 * \date      Fri Jan 16 2015
 		 */
@@ -55,7 +59,7 @@ namespace OpenIG {
 		public:
 			/*!
 			 * \brief Constructor
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Fri Jan 16 2015
 			 */
@@ -63,7 +67,7 @@ namespace OpenIG {
 
 			/*!
 			 * \brief Destructor
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Fri Jan 16 2015
 			 */
@@ -75,7 +79,7 @@ namespace OpenIG {
 			 * \param configFileName The plugin configuration file. \ref openig::OpenIG is
 			 *      expecting it in: Windows in igdata/openig.xml, Linux and MacOS in /usr/local/lib/igdata/openig.xml
 			 *      or Linux 64bit in /usr/local/lib64/igdata/openig.xml
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Fri Jan 16 2015
 			 */
@@ -83,7 +87,7 @@ namespace OpenIG {
 
 			/*!
 			 * \brief Unloads all plugins
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Fri Jan 16 2015
 			 */
@@ -93,7 +97,7 @@ namespace OpenIG {
 			 * orderd by ther order number. See \ref OpenIG::PluginBase::Plugin::getOrderNumber
 			 * \brief Apply plugin operation on all the plugins in a sorted fashion.
 			 * \param operation The plugin operation
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Fri Jan 16 2015
 			 */
@@ -106,7 +110,7 @@ namespace OpenIG {
 			/*!
 			 * \brief Gets all the plugins in order number based std::map
 			 * \return
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Fri Jan 16 2015
 			 */
@@ -128,7 +132,7 @@ namespace OpenIG {
 			 * \brief Performs if a file match the plugin naming convention
 			 * \param fileName The file name of a file
 			 * \return true if the file is plugin, false otherwise
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Fri Jan 16 2015
 			 */

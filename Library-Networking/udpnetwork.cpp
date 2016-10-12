@@ -21,9 +21,17 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
-//#*	author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+//#*	author    Trajce Nikolov Nick openig@compro.net
 //#*	copyright(c)Compro Computer Services, Inc.
+//#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
 
 #include <iostream>
 
@@ -34,72 +42,87 @@
 
 using namespace OpenIG::Library::Networking;
 
-UDPNetwork::UDPNetwork(const std::string& host)
-	: Network()
-	, _senderSocket(0)
-	, _recieverSocket(0)
-	, _host(host)
-	, _senderSocketInitiated(false)
-	, _recieverSocketInitiated(false)
+//
+// Some of the incoming parameters are configured in the libOpenIG-Plugin-Networking.so.xml file
+//
+UDPNetwork::UDPNetwork(const std::string& host, const std::string &destination, bool broadcast)
+    : Network()
+    , _senderSocket(0)
+    , _recieverSocket(0)
+    , _host(host)
+    , _destination(destination)
+    , _senderSocketInitiated(false)
+    , _recieverSocketInitiated(false)
+    , _broadcast(broadcast)
 {
-
+     std::ostringstream oss;
+    //*log << oss << "Networking(1): UDP incoming host: " << _host << ", broadcast set to: " << _broadcast << std::endl;
 }
 
 UDPNetwork::~UDPNetwork()
 {
-	if (_senderSocket) delete _senderSocket;
-	if (_recieverSocket) delete _recieverSocket;
+    if (_senderSocket) delete _senderSocket;
+    if (_recieverSocket) delete _recieverSocket;
 }
 
 void UDPNetwork::send(const Buffer& buffer)
 {
-	if (_senderSocket == 0 && !_senderSocketInitiated)
-	{		
-		try
-		{
-			_senderSocketInitiated = true;
+    if (_senderSocket == 0 && !_senderSocketInitiated)
+    {
+        try
+        {
+            _senderSocketInitiated = true;
 
-			_senderSocket = new boost::asio::ip::udp::socket(_senderIOService);
-			std::ostringstream oss;
+            _senderSocket = new boost::asio::ip::udp::socket(_senderIOService);
+            std::ostringstream oss;
 
-			_senderSocket->open(boost::asio::ip::udp::v4());
-			_senderSocket->bind(boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string(_host), 0));
-			_senderSocket->set_option(boost::asio::socket_base::reuse_address(true));
-			_senderSocket->set_option(boost::asio::socket_base::broadcast(true));
+            _senderSocket->open(boost::asio::ip::udp::v4());
+            _senderSocket->bind(boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string(_host), 0));
+            _senderSocket->set_option(boost::asio::socket_base::reuse_address(true));
+            if(_broadcast)
+            {
+                _senderSocket->set_option(boost::asio::socket_base::broadcast(true));
+                _senderBroadcastEndpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::address_v4::broadcast(), _port);
+            }
+            else
+                _senderBroadcastEndpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string(_destination), _port);
 
-			*log << oss << "Networking: UDP bound to:" << _senderSocket->local_endpoint().address().to_string() << std::endl;
+            //*log << oss << "Networking(1): UDP bound to:" << _senderSocket->local_endpoint().address().to_string() << std::endl;
 
-			_senderBroadcastEndpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::address_v4::broadcast(), _port);
-		}
-		catch (std::exception& e)
-		{
-			std::ostringstream oss;
-            *log << oss << "Networking(1): UDP socket setup -- exception thrown: " << e.what() << std::endl;
+        }
+        catch (std::exception& e)
+        {
+            std::ostringstream oss;
+            *log << oss << "Networking(2): UDP send(buffer) socket setup -- exception thrown: " << e.what() << std::endl;
 
-			if (_senderSocket)
-			{
-				delete _senderSocket;
-				_senderSocket = 0;
-			}
-		}
-	}
+            if (_senderSocket)
+            {
+                delete _senderSocket;
+                _senderSocket = 0;
+            }
+        }
+    }
 
-	if (_senderSocket)
-	{
-		try
-		{
+    if (_senderSocket)
+    {
+        try
+        {
             boost::system::error_code ignored_error;
             size_t status;
-            status = _senderSocket->send_to(boost::asio::buffer(buffer.getData(), buffer.getSize()), _senderBroadcastEndpoint, 0, ignored_error);
             std::ostringstream oss;
-            *log << oss << "Networking UDP: send_to status: " << status << ", error_code: " << ignored_error << std::endl;
+
+            status = _senderSocket->send_to(boost::asio::buffer(buffer.getData(), buffer.getWritten()), _senderBroadcastEndpoint, 0, ignored_error);
+            //*log << oss << "Networking(3): UDP send_to buffer.getSize: " << buffer.getSize() << ", buffer.getWritten: " <<  buffer.getWritten() << std::endl;
+            //if(ignored_error.message() != "system:0")
+            //    *log << oss << "Networking(4): UDP send_to status: " << status << ", error_code: " << ignored_error << std::endl;
+
         }
-		catch (std::exception& e)
-		{
-			std::ostringstream oss;
-            *log << oss << "Networking(2): UDP socket send exception thrown: " << e.what() << std::endl;
-		}
-	}
+        catch (std::exception& e)
+        {
+            std::ostringstream oss;
+            *log << oss << "Networking(5): UDP socket send_to exception thrown: " << e.what() << std::endl;
+        }
+    }
 
 }
 
@@ -109,10 +132,10 @@ void UDPNetwork::receive(Buffer& buffer, bool resetBuffer)
     size_t bytes_recv=0;
 
     if (_recieverSocket == 0 && !_recieverSocketInitiated)
-	{
-		_recieverSocketInitiated = true;
-		try
-		{
+    {
+        _recieverSocketInitiated = true;
+        try
+        {
             boost::asio::ip::udp::endpoint endpoint;
             boost::asio::ip::address_v4 ipaddr;
 
@@ -126,43 +149,43 @@ void UDPNetwork::receive(Buffer& buffer, bool resetBuffer)
             _recieverSocket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
             _recieverSocket->bind(endpoint, errorcode);
 
-			std::ostringstream oss;
-			*log << oss << "Networking: UDP bound to:" << _recieverSocket->local_endpoint().address().to_string() << std::endl;
+            std::ostringstream oss;
+            //*log << oss << "Networking(6): UDP bound to:" << _recieverSocket->local_endpoint().address().to_string() << std::endl;
 
         }
-		catch (std::exception& e)
-		{
-			std::ostringstream oss;
-            *log << oss << "Networking(3): exception thrown: " << e.what() << ", error code reported: " << errorcode << std::endl;
+        catch (std::exception& e)
+        {
+            std::ostringstream oss;
+            *log << oss << "Networking(7): recieverSocket setup exception thrown: " << e.what() << ", error code reported: " << errorcode << std::endl;
 
-			if (_recieverSocket)
-			{
-				delete _recieverSocket;
-				_recieverSocket = 0;
-			}
-		}
-	}
+            if (_recieverSocket)
+            {
+                delete _recieverSocket;
+                _recieverSocket = 0;
+            }
+        }
+    }
 
-	if (_recieverSocket)
-	{
-		try
-		{
-			Buffer rbuff(BUFFER_SIZE);
-			boost::asio::ip::udp::endpoint	sendersEndpoint;
-			boost::asio::mutable_buffers_1	buff((void*)rbuff.getData(), rbuff.getSize());
+    if (_recieverSocket)
+    {
+        try
+        {
+            Buffer rbuff(BUFFER_SIZE);
+            boost::asio::ip::udp::endpoint	sendersEndpoint;
+            boost::asio::mutable_buffers_1	buff((void*)rbuff.getData(), rbuff.getSize());
 
             bytes_recv = _recieverSocket->receive_from(buff, sendersEndpoint, 0, errorcode);
-			if (bytes_recv)
-			{
-				buffer.write(rbuff.getData(), bytes_recv);
-				if (resetBuffer) buffer.reset();
-			}
-		}
-		catch (std::exception& e)
-		{
-			std::ostringstream oss;
-            *log << oss << "Networking(4): exception thrown: error code: " << errorcode << ", bytes received: " << bytes_recv << std::endl;
-            *log << oss << "Networking(4): exception thrown: " << e.what() << std::endl;
-		}
-	}
+            if (bytes_recv)
+            {
+                buffer.write(rbuff.getData(), bytes_recv);
+                if (resetBuffer) buffer.reset();
+            }
+        }
+        catch (std::exception& e)
+        {
+            std::ostringstream oss;
+            *log << oss << "Networking(8): receive_from exception thrown: error code: " << errorcode << ", bytes received: " << bytes_recv << std::endl;
+            *log << oss << "Networking(8): receive_from exception thrown: " << e.what() << std::endl;
+        }
+    }
 }

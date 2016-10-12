@@ -20,11 +20,7 @@ SOURCES += \
     globalidgenerator.cpp\
     imagegenerator.cpp\
     mathematics.cpp\
-    stringutils.cpp\
-    glerrorutils.cpp\
-    shaderutils.cpp\
-    tbo.cpp\
-    texturecache.cpp
+    stringutils.cpp
 
 HEADERS += \
     animation.h\
@@ -38,12 +34,7 @@ HEADERS += \
     igcore.h\
     imagegenerator.h\
     mathematics.h\
-    stringutils.h\
-    glerrorutils.h\
-    tbo.h\
-    framelogging.h\
-    shaderutils.h\
-    texturecache.h
+    stringutils.h
 
 INCLUDEPATH += ../
 DEPENDPATH += ../
@@ -98,11 +89,11 @@ unix {
     # library version number files
     exists( "../openig_version.pri" ) {
 
-	include( "../openig_version.pri" )
+    include( "../openig_version.pri" )
         isEmpty( VERSION ){ error( "$$TARGET -- bad or undefined VERSION variable inside file openig_version.pri" )
-	} else {
+    } else {
         message( $$TARGET -- "Set version info to: $$VERSION" )
-	}
+    }
 
     }
     else { error( "$$TARGET -- could not find pri library version file openig_version.pri" ) }

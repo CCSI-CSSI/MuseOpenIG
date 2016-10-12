@@ -21,6 +21,10 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 #include "lightmanagerstateattribute.h"
 #include <iostream>
@@ -34,7 +38,8 @@ using namespace OpenIG::Library::Graphics;
 #include <Library-Graphics/TileSpaceLightGrid.h>
 #include <Library-Graphics/DataFormat.h>
 
-#include <Core-Base/glerrorutils.h>
+#include <Core-Utils/glerrorutils.h>
+
 #include <Core-Base/imagegenerator.h>
 
 #include <Core-OpenIG/openig.h>

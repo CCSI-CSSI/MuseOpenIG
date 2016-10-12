@@ -56,6 +56,10 @@ unix {
     QMAKE_POST_LINK =  test -d $$quote($$DESTDIR) || $$QMAKE_MKDIR $$quote($$DESTDIR) $$escape_expand(\\n\\t)
     QMAKE_POST_LINK += test -e $$quote($$DDIR) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DDIR) $$escape_expand(\\n\\t)
 
+    #remove the files we manually installed above when we do a make distclean....
+    #!build_pass:message("$$escape_expand(\n)$$basename(_PRO_FILE_) Files to be removed during \"make distclean\": "$$DDIR$$escape_expand(\n))
+    QMAKE_DISTCLEAN += $${DDIR}
+
     # library version number files
     exists( "../openig_version.pri" ) {
 

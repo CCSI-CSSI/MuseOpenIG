@@ -16,17 +16,17 @@ DEFINES += IGPLUGINTRITON_LIBRARY
 CONFIG -= warn_on
 
 SOURCES +=	igplugintriton.cpp \
-		TritonDrawable.cpp \
-		PlanarReflection.cpp
+        TritonDrawable.cpp \
+        PlanarReflection.cpp
 
 HEADERS +=	TritonDrawable.h \
-		PlanarReflection.h
+        PlanarReflection.h
 
 INCLUDEPATH += ../
 DEPENDPATH += ../
 
 LIBS += -losg -losgDB -losgViewer -losgUtil -lOpenThreads\
-        -lOpenIG-Engine -lOpenIG-Base -lOpenIG-PluginBase
+        -lOpenIG-Engine -lOpenIG-Base -lOpenIG-PluginBase -lOpenIG-Utils
 
 OTHER_FILES += CMakeLists.txt
 DISTFILES += CMakeLists.txt
@@ -134,11 +134,11 @@ unix {
     # library version number files
     exists( "../openig_version.pri" ) {
 
-	include( "../openig_version.pri" )
+    include( "../openig_version.pri" )
         isEmpty( VERSION ){ !build_pass:error($$basename(_PRO_FILE_) -- bad or undefined VERSION variable inside file openig_version.pri)
-	} else {
+    } else {
         !build_pass:message($$basename(_PRO_FILE_) -- Set version info to: $$VERSION)
-	}
+    }
 
     }
     else { !build_pass:error($$basename(_PRO_FILE_) -- could not find pri library version file openig_version.pri) }

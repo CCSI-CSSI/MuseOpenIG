@@ -21,19 +21,27 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
-//#*	author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+//#*	author    Trajce Nikolov Nick openig@compro.net
 //#*	copyright(c)Compro Computer Services, Inc.
+//#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
 
 #ifndef UDPNETWORK_H
 #define UDPNETWORK_H
 
 #if defined(OPENIG_SDK)
-	#include <OpenIG-Networking/export.h>
-	#include <OpenIG-Networking/network.h>
+    #include <OpenIG-Networking/export.h>
+    #include <OpenIG-Networking/network.h>
 #else
-	#include <Library-Networking/export.h>
-	#include <Library-Networking/network.h>
+    #include <Library-Networking/export.h>
+    #include <Library-Networking/network.h>
 #endif
 
 #include <boost/asio/io_service.hpp>
@@ -41,32 +49,34 @@
 
 
 namespace OpenIG {
-	namespace Library {
-		namespace Networking {
+    namespace Library {
+        namespace Networking {
 
-			class IGLIBNETWORKING_EXPORT UDPNetwork : public Network
-			{
-			public:
-				explicit UDPNetwork(const std::string& host);
-				virtual ~UDPNetwork();
+            class IGLIBNETWORKING_EXPORT UDPNetwork : public Network
+            {
+            public:
+                explicit UDPNetwork(const std::string& host, const std::string& destination="", bool broadcast=true);
+                virtual ~UDPNetwork();
 
-				virtual void send(const Buffer&);
-				virtual void receive(Buffer&, bool resetBuffer = true);
+                virtual void send(const Buffer&);
+                virtual void receive(Buffer&, bool resetBuffer = true);
 
-			protected:
-				boost::asio::io_service			_senderIOService;
-				boost::asio::ip::udp::socket*	_senderSocket;
-				boost::asio::ip::udp::endpoint	_senderBroadcastEndpoint;
+            protected:
+                boost::asio::io_service			_senderIOService;
+                boost::asio::ip::udp::socket*	_senderSocket;
+                boost::asio::ip::udp::endpoint	_senderBroadcastEndpoint;
 
-				boost::asio::io_service			_recieverIOService;
-				boost::asio::ip::udp::socket*	_recieverSocket;
+                boost::asio::io_service			_recieverIOService;
+                boost::asio::ip::udp::socket*	_recieverSocket;
 
-				std::string						_host;
-				bool							_senderSocketInitiated;
-				bool							_recieverSocketInitiated;
-			};
-		} // namespace
-	} // namespace
+                std::string						_host;
+                std::string                     _destination;
+                bool							_senderSocketInitiated;
+                bool							_recieverSocketInitiated;
+                bool                            _broadcast;
+            };
+        } // namespace
+    } // namespace
 } // namespace
 
 #endif // UDPNETWORK_H

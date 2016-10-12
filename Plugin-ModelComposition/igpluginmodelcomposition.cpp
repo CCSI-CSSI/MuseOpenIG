@@ -21,6 +21,10 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 #include <Core-PluginBase/plugin.h>
 #include <Core-PluginBase/plugincontext.h>
@@ -32,7 +36,8 @@
 #include <Core-Base/configuration.h>
 #include <Core-Base/globalidgenerator.h>
 #include <Core-Base/filesystem.h>
-#include <Core-Base/texturecache.h>
+
+#include <Core-Utils/texturecache.h>
 
 #include <Core-OpenIG/renderbins.h>
 #include <Core-OpenIG/openig.h>

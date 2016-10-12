@@ -51,6 +51,7 @@ target_link_libraries( ${LIB_NAME}
     ${OPENGL_LIBRARY}
     ${GLU_LIBRARY}
     OpenIG-Engine
+	OpenIG-Utils
 	${Boost_LIBRARIES}
 )
 

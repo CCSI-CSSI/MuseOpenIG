@@ -21,12 +21,17 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 #include <Core-PluginBase/plugin.h>
 #include <Core-PluginBase/plugincontext.h>
 
 #include <Core-Base/imagegenerator.h>
 #include <Core-Base/attributes.h>
+#include <Core-Base/mathematics.h>
 #include <Core-Base/commands.h>
 #include <Core-Base/filesystem.h>
 
@@ -88,6 +93,148 @@ namespace OpenIG {
             {
                 _updateEnvMapDynamically = update;
             }
+
+            class AdditionalAmbientCommand : public OpenIG::Base::Commands::Command
+            {
+            public:
+                AdditionalAmbientCommand() {}
+
+                virtual const std::string getUsage() const
+                {
+                    return "r g b";
+                }
+
+                virtual const std::string getArgumentsFormat() const
+                {
+                    return "D:D:D";
+                }
+
+                virtual const std::string getDescription() const
+                {
+                    return  "set the additional r g b to the ambient light\n"
+                        "    r g b - the colors";
+                }
+
+                virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)
+                {
+                    if (tokens.size() == 3)
+                    {
+                        osg::Vec3 color;
+
+                        color.x() = atof(tokens.at(0).c_str());
+                        color.y() = atof(tokens.at(1).c_str());
+                        color.z() = atof(tokens.at(2).c_str());
+
+                        SkyDrawable::setAdditionalAmbientLightConstant(color);
+                    }
+
+                    return 0;
+                }
+            };
+
+            class AdditionalDiffuseCommand : public OpenIG::Base::Commands::Command
+            {
+            public:
+                AdditionalDiffuseCommand() {}
+
+                virtual const std::string getUsage() const
+                {
+                    return "r g b";
+                }
+
+                virtual const std::string getArgumentsFormat() const
+                {
+                    return "D:D:D";
+                }
+
+                virtual const std::string getDescription() const
+                {
+                    return  "set the additional r g b to the diffuse light\n"
+                        "    r g b - the colors";
+                }
+
+                virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)
+                {
+                    if (tokens.size() == 3)
+                    {
+                        osg::Vec3 color;
+
+                        color.x() = atof(tokens.at(0).c_str());
+                        color.y() = atof(tokens.at(1).c_str());
+                        color.z() = atof(tokens.at(2).c_str());
+
+                        SkyDrawable::setAdditionalDiffuseLightConstant(color);
+                    }
+
+                    return 0;
+                }
+            };
+
+            class EnableDisableForwardPlusCommand : public OpenIG::Base::Commands::Command
+            {
+            public:
+                EnableDisableForwardPlusCommand() {}
+
+                virtual const std::string getUsage() const
+                {
+                    return "enable/disable";
+                }
+
+                virtual const std::string getArgumentsFormat() const
+                {
+                    return "{enable;disable}";
+                }
+
+                virtual const std::string getDescription() const
+                {
+                    return  "enable/disable forward plus for silverlining\n"
+                        "    enable/disable - the switch";
+                }
+
+                virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)
+                {
+                    if (tokens.size() == 1)
+                    {
+                        bool enable = tokens.at(0) == "enable";
+                        CloudsDrawable::setEnableForwardPlus(enable);
+                    }
+
+                    return 0;
+                }
+            };
+
+            class GammaCommand : public OpenIG::Base::Commands::Command
+            {
+            public:
+                GammaCommand() {}
+
+                virtual const std::string getUsage() const
+                {
+                    return "gamma";
+                }
+
+                virtual const std::string getArgumentsFormat() const
+                {
+                    return "D";
+                }
+
+                virtual const std::string getDescription() const
+                {
+                    return  "set gamma for silverlining\n"
+                        "    gamma - the gamma value";
+                }
+
+                virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)
+                {
+                    if (tokens.size() == 1)
+                    {
+                        double gamma = atof(tokens.at(0).c_str());
+                        SkyDrawable::setGamma(gamma, true);
+                    }
+
+                    return 0;
+                }
+            };
 
             class LocationCommand : public OpenIG::Base::Commands::Command
             {
@@ -184,8 +331,8 @@ namespace OpenIG {
                         "    mode - one of these:\n"
                         "           geocentric - if in geocentric mode\n"
                         "           flat       - if in flat earth mode\n"
-						"	 dynamic_env_map_update - 'dynamic' to update the environmental map on each frame, 'onchange' only on clouds change\n";
-						"	 gamma - [optional] SilverLining gamma";
+                        "	 dynamic_env_map_update - 'dynamic' to update the environmental map on each frame, 'onchange' only on clouds change\n";
+                        "	 gamma - [optional] SilverLining gamma";
                 }
 
                 virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)
@@ -200,15 +347,15 @@ namespace OpenIG {
                         else if (mode.compare(0, 4, "flat") == 0)
                             _plugin->setGeocentric(false);
 
-						if (tokens.size() >= 2)
-						{
-							_plugin->setDynamicEnvMapUpdate(tokens.at(1) == "dynamic");
-						}
+                        if (tokens.size() >= 2)
+                        {
+                            _plugin->setDynamicEnvMapUpdate(tokens.at(1) == "dynamic");
+                        }
 
                         if (tokens.size() >= 3)
                         {
                             SkyDrawable::setGamma(atof(tokens.at(1).c_str()),true);
-                        }                        
+                        }
 
                         return 0;
                     }
@@ -310,12 +457,6 @@ namespace OpenIG {
 
             virtual void config(const std::string& fileName)
             {
-                OpenIG::Base::Commands::instance()->addCommand("location", new LocationCommand);
-                OpenIG::Base::Commands::instance()->addCommand("utc", new UTCCommand);
-                OpenIG::Base::Commands::instance()->addCommand("silverlining", new SilverLiningCommand(this));
-                OpenIG::Base::Commands::instance()->addCommand("setskyboxsize", new SetSkyboxSizeCommand(this));
-                OpenIG::Base::Commands::instance()->addCommand("setsilverliningparams", new SetSilverLiningParamsCommand(this));
-
                 osgDB::XmlNode* root = osgDB::readXmlFile(fileName);
                 if (root == 0) return;
 
@@ -324,7 +465,7 @@ namespace OpenIG {
                 osgDB::XmlNode* config = root->children.at(0);
                 if (config->name != "OpenIG-Plugin-Config") return;
 
-				bool useGamma = false;
+                bool useGamma = false;
 
                 osgDB::XmlNode::Children::iterator itr = config->children.begin();
                 for (; itr != config->children.end(); ++itr)
@@ -363,10 +504,10 @@ namespace OpenIG {
                     {
                         CloudsDrawable::setForwardPlusRange(atof(child->contents.c_str()));
                     }
-					if (child->name == "SilverLining-UserDefinedGamma")
-					{
-						useGamma = child->contents == "yes";
-					}
+                    if (child->name == "SilverLining-UserDefinedGamma")
+                    {
+                        useGamma = child->contents == "yes";
+                    }
                     if (child->name == "SilverLining-Gamma")
                     {
                         SkyDrawable::setGamma(atof(child->contents.c_str()),useGamma);
@@ -383,10 +524,10 @@ namespace OpenIG {
                     {
                         _tz = atoi(child->contents.c_str());
                     }
-					if (child->name == "SilverLining-SkyModel")
-					{
-						SkyDrawable::setSkyModel(child->contents);
-					}
+                    if (child->name == "SilverLining-SkyModel")
+                    {
+                        SkyDrawable::setSkyModel(child->contents);
+                    }
                 }
             }
 
@@ -414,6 +555,7 @@ namespace OpenIG {
             virtual void init(OpenIG::PluginBase::PluginContext& context)
             {
                 OpenIG::Base::Commands::instance()->addCommand("addclouds", new AddCloudLayerCommand(context.getImageGenerator()));
+                OpenIG::Base::Commands::instance()->addCommand("loadcloudfile", new LoadCloudLayerCommand(context.getImageGenerator()));
                 OpenIG::Base::Commands::instance()->addCommand("updateclouds", new UpdateCloudLayerCommand(context.getImageGenerator()));
                 OpenIG::Base::Commands::instance()->addCommand("removeclouds", new RemoveCloudLayerCommand(context.getImageGenerator()));
                 OpenIG::Base::Commands::instance()->addCommand("removeallclouds", new RemoveAllCloudLayersCommand(context.getImageGenerator()));
@@ -421,6 +563,15 @@ namespace OpenIG {
                 OpenIG::Base::Commands::instance()->addCommand("rain", new RainCommand(context.getImageGenerator()));
                 OpenIG::Base::Commands::instance()->addCommand("snow", new SnowCommand(context.getImageGenerator()));
                 OpenIG::Base::Commands::instance()->addCommand("date", new DateCommand(context.getImageGenerator()));
+                OpenIG::Base::Commands::instance()->addCommand("location", new LocationCommand);
+                OpenIG::Base::Commands::instance()->addCommand("utc", new UTCCommand);
+                OpenIG::Base::Commands::instance()->addCommand("silverlining", new SilverLiningCommand(this));
+                OpenIG::Base::Commands::instance()->addCommand("setskyboxsize", new SetSkyboxSizeCommand(this));
+                OpenIG::Base::Commands::instance()->addCommand("setsilverliningparams", new SetSilverLiningParamsCommand(this));
+                OpenIG::Base::Commands::instance()->addCommand("ambient+", new AdditionalAmbientCommand);
+                OpenIG::Base::Commands::instance()->addCommand("diffuse+", new AdditionalDiffuseCommand);
+                OpenIG::Base::Commands::instance()->addCommand("f+", new EnableDisableForwardPlusCommand);
+                OpenIG::Base::Commands::instance()->addCommand("gamma", new GammaCommand);
 
                 initSilverLining(context.getImageGenerator());
 
@@ -572,6 +723,18 @@ namespace OpenIG {
                                 _cloudsDrawable->setEnvironmentMapDirty(true);
                             }
                         }
+                    }
+
+                    OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::CLoudLayerFileAttributes> *fileattr = dynamic_cast<OpenIG::PluginBase::PluginContext::Attribute<OpenIG::Base::CLoudLayerFileAttributes> *>(ref.get());
+                    if(fileattr && itr->first == "CloudLayerFile" && _skyDrawable.valid())
+                    {
+//                        osg::notify(osg::NOTICE) << "slpluin::update loadCloudLayer( " << fileattr->getValue().getId()
+//                                                 << ", " << fileattr->getValue().getFilename() << ")" << std::endl;
+                        _skyDrawable->loadCloudLayer(
+                                    fileattr->getValue().getId(),
+                                    fileattr->getValue().getFilename(),
+                                    fileattr->getValue().getType());
+                        _cloudsDrawable->setEnvironmentMapDirty(true);
                     }
 
                 }
@@ -937,8 +1100,9 @@ namespace OpenIG {
                         "          7 - STRATOCUMULUS\n"
                         "          8 - TOWERING_CUMULUS\n"
                         "          9 - SANDSTORM\n"
-                        "     altitude - in meters, the altitude of the layer\n"
-                        "     thickness - the thickness of the layer\n"
+                        "     altitude  - in feet, the base altitude of the layer\n"
+                        "     thickness - in feet, the thickness of the layer, \n"
+                        "                 or random offset of base altitude for clouds, depending on cloud type\n"
                         "     density - from 0.0-1.0, 1.0 most dense\n";
                 }
 
@@ -948,11 +1112,64 @@ namespace OpenIG {
                     {
                         unsigned int id = atoi(tokens.at(0).c_str());
                         int type = atoi(tokens.at(1).c_str());
-                        double altitude = atof(tokens.at(2).c_str());
-                        double thickness = atof(tokens.at(3).c_str());
+                        double altitude = atof(tokens.at(2).c_str());// * Base::Math::instance()->M_PER_FT;
+                        double thickness = atof(tokens.at(3).c_str());// * Base::Math::instance()->M_PER_FT;
                         double density = atof(tokens.at(4).c_str());
 
                         _ig->addCloudLayer(id, type, altitude, thickness, density);
+
+                        return 0;
+                    }
+                    return -1;
+                }
+
+            protected:
+                OpenIG::Base::ImageGenerator* _ig;
+            };
+
+            class LoadCloudLayerCommand : public OpenIG::Base::Commands::Command
+            {
+            public:
+                LoadCloudLayerCommand(OpenIG::Base::ImageGenerator* ig)
+                    : _ig(ig) {}
+
+                virtual const std::string getUsage() const
+                {
+                    return "id filename type";
+                }
+
+                virtual const std::string getArgumentsFormat() const
+                {
+                    return	"I:S:I";
+                }
+
+                virtual const std::string getDescription() const
+                {
+                    return  "load a previously saved cloud layer file -- based on Sundog's SilverLining plugin\n"
+                        "       id - the id of the cloud latyer across the scene\n"
+                        " filename - the complete path to the filename of the cloudlayer file to load\n"
+                        "     type - of layer loaded, from the available cloud types from SilverLining, from 0 to 9 respoding to:\n"
+                        "          0 - CIRROCUMULUS\n"
+                        "          1 - CIRRUS_FIBRATUS\n"
+                        "          2 - STRATUS\n"
+                        "          3 - CUMULUS_MEDIOCRIS\n"
+                        "          4 - CUMULUS_CONGESTUS\n"
+                        "          5 - CUMULUS_CONGESTUS_HI_RES\n"
+                        "          6 - CUMULONIMBUS_CAPPILATUS\n"
+                        "          7 - STRATOCUMULUS\n"
+                        "          8 - TOWERING_CUMULUS\n"
+                        "          9 - SANDSTORM\n";
+                }
+
+                virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)
+                {
+                    if (tokens.size() == 3)
+                    {
+                        unsigned int id      = atoi(tokens.at(0).c_str());
+                        std::string filename = tokens.at(1).c_str();
+                        int type             = atoi(tokens.at(2).c_str());
+
+                        _ig->loadCloudLayerFile(id, filename, type);
 
                         return 0;
                     }
@@ -985,8 +1202,8 @@ namespace OpenIG {
                     return  "updates clouds layer settings -- based on Sundog's SilverLining plugin\n"
                         "     id - the id of the cloud latyer across the scene\n"
                         "     type - NOT Changeable!!!\n"
-                        "     altitude - in meters, the altitude of the layer\n"
-                        "     thickness - the thickness of the layer\n"
+                        "     altitude  - in feet, the altitude of the layer\n"
+                        "     thickness - in feet, the thickness of the layer\n"
                         "     density - from 0.0-1.0, 1.0 most dense\n";
                 }
 

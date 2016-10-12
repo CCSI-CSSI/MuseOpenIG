@@ -21,9 +21,9 @@
     <Material>
         <Name>Day</Name>
         <Ambient>0.5 0.5 0.5 1.0</Ambient>
-        <Diffuse>0.5 0.5 0.5 1.0</Diffuse>
+        <Diffuse>0.7 0.7 0.7 1.0</Diffuse>
         <Specular>0.0 0.0 0.0 1.0</Specular>
-        <Shininess>0</Shininess>
+        <Shininess>0.1</Shininess>
     </Material>
     <Material>
         <Name>Night</Name>
@@ -1813,7 +1813,7 @@
     <Position>-2.416 1.45113 -1.41805</Position>
     <Orientation>0 -15 0</Orientation>
     <Use-Real-Light>yes</Use-Real-Light>
-    <Brightness>0.5</Brightness>
+    <Brightness>2.5</Brightness>
     <Real-Light-Offset>0.0 0 0.0</Real-Light-Offset>
     <ConstAttenuation>40</ConstAttenuation>
     <Animation-Pulses></Animation-Pulses>
@@ -1833,7 +1833,7 @@
     <Position>2.40799 1.60269 -1.48508</Position>
     <Orientation>0 -15 0</Orientation>
     <Use-Real-Light>yes</Use-Real-Light>
-    <Brightness>0.5</Brightness>
+    <Brightness>2.5</Brightness>
     <Real-Light-Offset>0.0 0 0.0</Real-Light-Offset>
     <ConstAttenuation>40</ConstAttenuation>
     <Animation-Pulses></Animation-Pulses>

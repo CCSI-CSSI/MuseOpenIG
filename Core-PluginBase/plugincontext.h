@@ -21,6 +21,10 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 #ifndef PLUGINCONTEXT_H
 #define PLUGINCONTEXT_H
@@ -44,7 +48,7 @@ namespace OpenIG {
 		/*! This class is represnting a context that is passed from the ImageGenerator to the plugin
 		 * It has reference of the OpenIG::Base::ImageGenerator and \ref igplugincore::PluginContext::Attribute
 		 * \brief The PluginContext class
-		 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+		 * \author    Trajce Nikolov Nick openig@compro.net
 		 * \copyright (c)Compro Computer Services, Inc.
 		 * \date      Fri Jan 16 2015
 		 */
@@ -53,7 +57,7 @@ namespace OpenIG {
 		public:
 			/*!
 			 * \brief Constructor
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Fri Jan 16 2015
 			 */
@@ -63,7 +67,7 @@ namespace OpenIG {
 			/*!
 			 * \brief Constructor with reference to \ref OpenIG::Base::ImageGenerator
 			 * \param the reference to \ref OpenIG::Base::ImageGenerator
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Fri Jan 16 2015
 			 */
@@ -73,7 +77,7 @@ namespace OpenIG {
 				/*!
 				 * \brief Sets the \ref OpenIG::Base::ImageGenerator reference
 				 * \param ig    The \ref OpenIG::Base::ImageGenerator reference
-				 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+				 * \author    Trajce Nikolov Nick openig@compro.net
 				 * \copyright (c)Compro Computer Services, Inc.
 				 * \date      Fri Jan 16 2015
 				 */
@@ -85,7 +89,7 @@ namespace OpenIG {
 			/*!
 			 * \brief Returns the \ref OpenIG::Base::ImageGenerator reference
 			 * \return The \ref OpenIG::Base::ImageGenerator reference
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Fri Jan 16 2015
 			 */
@@ -101,7 +105,7 @@ namespace OpenIG {
 			 * keeping a reference of a \ref igplugincore::PluginContext and it cleans it after
 			 * each frame
 			 * \brief Attribute struct
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Fri Jan 16 2015
 			 */
@@ -112,7 +116,7 @@ namespace OpenIG {
 				/*!
 				 * \brief Attribute
 				 * \param A custom value, struct
-				 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+				 * \author    Trajce Nikolov Nick openig@compro.net
 				 * \copyright (c)Compro Computer Services, Inc.
 				 * \date      Fri Jan 16 2015
 				 */
@@ -122,7 +126,7 @@ namespace OpenIG {
 				/*!
 				 * \brief Set some value
 				 * \param The value
-				 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+				 * \author    Trajce Nikolov Nick openig@compro.net
 				 * \copyright (c)Compro Computer Services, Inc.
 				 * \date      Fri Jan 16 2015
 				 */
@@ -134,7 +138,7 @@ namespace OpenIG {
 					/*!
 					 * \brief Gets the value
 					 * \return The value
-					 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+					 * \author    Trajce Nikolov Nick openig@compro.net
 					 * \copyright (c)Compro Computer Services, Inc.
 					 * \date      Fri Jan 16 2015
 					 */
@@ -154,7 +158,7 @@ namespace OpenIG {
 			 * \brief Gets a handle of all the \ref igplugincore::PluginContext::Attribute present
 			 * in the context
 			 * \return
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Fri Jan 16 2015
 			 */
@@ -167,7 +171,7 @@ namespace OpenIG {
 			 * \brief Adds an \ref igplugincore::PluginContext::Attribute with a given name
 			 * \param The name of the \ref igplugincore::PluginContext::Attribute
 			 * \param The custom \ref igplugincore::PluginContext::Attribute
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Fri Jan 16 2015
 			 */
@@ -182,7 +186,7 @@ namespace OpenIG {
 			 * \brief Gets an \ref igplugincore::PluginContext::Attribute by its name
 			 * \param The name of the \ref igplugincore::PluginContext::Attribute
 			 * \return 0 on failure, the \ref igplugincore::PluginContext::Attribute if found
-			 * \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			 * \author    Trajce Nikolov Nick openig@compro.net
 			 * \copyright (c)Compro Computer Services, Inc.
 			 * \date      Fri Jan 16 2015
 			 */
@@ -198,7 +202,7 @@ namespace OpenIG {
 			/*!
 			* \brief Gets a value object to pass data to plugins
 			* \return 0 on failure, the ValueObject if successful
-			* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			* \author    Trajce Nikolov Nick openig@compro.net
 			* \copyright (c)Compro Computer Services, Inc.
 			* \date      Thu Jun 25 2015
 			*/
@@ -214,7 +218,7 @@ namespace OpenIG {
 			/*!
 			* \brief Sets a value object to pass data to plugins
 			* \param	valueObject The new ValueObject to be used
-			* \author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+			* \author    Trajce Nikolov Nick openig@compro.net
 			* \copyright (c)Compro Computer Services, Inc.
 			* \date      Thu Jun 25 2015
 			*/

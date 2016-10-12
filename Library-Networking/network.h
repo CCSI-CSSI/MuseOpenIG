@@ -21,27 +21,35 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
-//#*	author    Trajce Nikolov Nick trajce.nikolov.nick@gmail.com
+//#*	author    Trajce Nikolov Nick openig@compro.net
 //#*	copyright(c)Compro Computer Services, Inc.
+//#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
 
 #ifndef NETWORK_H
 #define NETWORK_H
 
 #if defined(OPENIG_SDK)
-	#include <OpenIG-Networking/export.h>
-	#include <OpenIG-Networking/packet.h>
-	#include <OpenIG-Networking/buffer.h>
-	#include <OpenIG-Networking/parser.h>
-	#include <OpenIG-Networking/network.h>
-	#include <OpenIG-Networking/error.h>
+    #include <OpenIG-Networking/export.h>
+    #include <OpenIG-Networking/packet.h>
+    #include <OpenIG-Networking/buffer.h>
+    #include <OpenIG-Networking/parser.h>
+    #include <OpenIG-Networking/network.h>
+    #include <OpenIG-Networking/error.h>
 #else
-	#include <Library-Networking/export.h>
-	#include <Library-Networking/packet.h>
-	#include <Library-Networking/buffer.h>
-	#include <Library-Networking/parser.h>
-	#include <Library-Networking/network.h>
-	#include <Library-Networking/error.h>
+    #include <Library-Networking/export.h>
+    #include <Library-Networking/packet.h>
+    #include <Library-Networking/buffer.h>
+    #include <Library-Networking/parser.h>
+    #include <Library-Networking/network.h>
+    #include <Library-Networking/error.h>
 #endif
 
 #include <boost/shared_ptr.hpp>
@@ -57,41 +65,41 @@
 //
 
 namespace OpenIG {
-	namespace Library {
-		namespace Networking {
+    namespace Library {
+        namespace Networking {
 
-			class IGLIBNETWORKING_EXPORT Network
-			{
-			public:
-				typedef std::map< Packet::Opcode, boost::shared_ptr<Packet::Callback> >		PacketCallbacks;
+            class IGLIBNETWORKING_EXPORT Network
+            {
+            public:
+                typedef std::map< Packet::Opcode, boost::shared_ptr<Packet::Callback> >		PacketCallbacks;
 
-				Network();
-				virtual ~Network();
+                Network();
+                virtual ~Network();
 
-				virtual void send(const Buffer&) = 0;
-				virtual void receive(Buffer&, bool resetBuffer = true) = 0;
+                virtual void send(const Buffer&) = 0;
+                virtual void receive(Buffer&, bool resetBuffer = true) = 0;
 
-				void addCallback(Packet::Opcode, Packet::Callback*);
-				void removeCallback(Packet::Opcode);
+                void addCallback(Packet::Opcode, Packet::Callback*);
+                void removeCallback(Packet::Opcode);
 
-				void process(Packet&);
-				void process();
+                void process(Packet&);
+                void process();
 
-				void setPort(unsigned int);
-				void setParser(Parser*);
+                void setPort(unsigned int);
+                void setParser(Parser*);
 
-				Network& operator<<(const Packet&);
+                Network& operator<<(const Packet&);
 
-			protected:
-				PacketCallbacks					_callbacks;
-				unsigned int					_port;
-				boost::shared_ptr<Parser>		_parser;
+            protected:
+                PacketCallbacks					_callbacks;
+                unsigned int					_port;
+                boost::shared_ptr<Parser>		_parser;
 
-			public:
-				static boost::shared_ptr<ErrorHandler>	log;
-			};
-		} // namespace
-	} // namespace 
+            public:
+                static boost::shared_ptr<ErrorHandler> log;
+            };
+        } // namespace
+    } // namespace
 } // namespace
 
 #endif // NETWORK_H

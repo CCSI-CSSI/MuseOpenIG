@@ -21,6 +21,10 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 #include "openig.h"
 
@@ -68,6 +72,7 @@ Engine::Engine()
     , _splashOn(true)
     , _setupMask(Standard)
 {
+     _intersect = new osgUtil::IntersectVisitor;
 }
 
 Engine::~Engine()
@@ -77,7 +82,7 @@ Engine::~Engine()
 
 std::string Engine::version()
 {
-    return "2.0.2";
+    return "2.0.3";
 }
 
 class InitPluginOperation : public PluginOperation
@@ -897,41 +902,41 @@ std::string Engine::getEntityName(unsigned int id)
 
 struct FindSubEntityNodeVisitor : public osg::NodeVisitor
 {
-	FindSubEntityNodeVisitor(const std::string& name)
-		: osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
-		, _name(name)
-	{
+    FindSubEntityNodeVisitor(const std::string& name)
+        : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+        , _name(name)
+    {
 
-	}
+    }
 
-	virtual void apply(osg::Node& node)
-	{
-		std::string name;
-		if (node.getUserValue("Name", name) && name == _name)
-		{
-			subEntity = dynamic_cast<osg::MatrixTransform*>(&node);
-		}
+    virtual void apply(osg::Node& node)
+    {
+        std::string name;
+        if (node.getUserValue("Name", name) && name == _name)
+        {
+            subEntity = dynamic_cast<osg::MatrixTransform*>(&node);
+        }
 
-		if (!subEntity.valid()) traverse(node);
-	}
-	Engine::Entity	subEntity;
+        if (!subEntity.valid()) traverse(node);
+    }
+    Engine::Entity	subEntity;
 protected:
-	std::string		_name;
+    std::string		_name;
 };
 
 unsigned int Engine::getEntityId(unsigned int parentEntityId, const std::string& subEntityName)
 {
-	EntityMapIterator itr = _entities.find(parentEntityId);
-	if (itr == _entities.end()) return 0;
+    EntityMapIterator itr = _entities.find(parentEntityId);
+    if (itr == _entities.end()) return 0;
 
-	FindSubEntityNodeVisitor nv(subEntityName);
-	itr->second->accept(nv);
+    FindSubEntityNodeVisitor nv(subEntityName);
+    itr->second->accept(nv);
 
-	unsigned int ID = 0;
-	if (nv.subEntity.valid())
-		nv.subEntity->getUserValue("ID", ID);
+    unsigned int ID = 0;
+    if (nv.subEntity.valid())
+        nv.subEntity->getUserValue("ID", ID);
 
-	return ID;
+    return ID;
 }
 
 
@@ -1470,6 +1475,18 @@ void Engine::updateCloudLayer(unsigned int id, double altitude, double thickness
     _context.addAttribute("CloudLayer", new PluginContext::Attribute<OpenIG::Base::CLoudLayerAttributes>(attr));
 }
 
+void Engine::loadCloudLayerFile(unsigned int id, std::string filename, int type)
+{
+    OpenIG::Base::CLoudLayerFileAttributes attr;
+    attr.setId(id);
+    attr.setType(type);
+    attr.setFilename(filename);
+    //attr.setIsDirty(true);
+
+    //osg::notify(osg::NOTICE) << "Engine::loadCloudLayerFile( " << id << ", " << filename << ")" << std::endl;
+    _context.addAttribute("CloudLayerFile", new PluginContext::Attribute<OpenIG::Base::CLoudLayerFileAttributes>(attr));
+}
+
 void Engine::resetAnimation(unsigned int entityId, const std::string& animationName)
 {
     OpenIG::Base::AnimationAttributes attr;
@@ -1610,6 +1627,104 @@ osg::Node* Engine::getScene()
 OpenIG::Base::ImageGenerator::EntityMap& Engine::getEntityMap()
 {
     return _entities;
+}
+
+float Engine::getTerrainHeight( osg::Vec3 position )
+{
+    osg::LineSegment *aglPosition = new osg::LineSegment( position, osg::Vec3(position.x(), position.y(), -10000.0) );
+    _intersect->reset();
+    _intersect->addLineSegment( aglPosition );
+    _intersect->apply( *getScene() );
+
+    osgUtil::IntersectVisitor::HitList hits;
+
+    if( _intersect->hits() )
+    {
+        hits = _intersect->getHitList( aglPosition );
+
+        if( hits[0].getNodePath()[0]->getName() == "terrain_db" )
+            return hits[0]._intersectPoint.z();
+        else
+            return hits[0]._intersectPoint.z()+2.0f;
+    }
+    else
+        return 0.0;
+}
+
+float Engine::getIntersect(osg::Vec3 pos, osg::Vec3 angles,float angle)
+{
+    float height = 10000.0;
+    osg::Vec3 vec(0,height,0);
+    osg::Quat rot,ant;
+    ant.makeRotate(osg::DegreesToRadians(angle),osg::Vec3(1,0,0));
+
+    rot.makeRotate(osg::DegreesToRadians(angles.z()),osg::Vec3(0,1,0), //roll
+                   osg::DegreesToRadians(angles.y()),osg::Vec3(1,0,0), //pitch
+                   osg::DegreesToRadians(angles.x()),osg::Vec3(0,0,1)); // yaw
+    vec = ant*vec;
+    vec = rot*vec;
+
+    osg::LineSegment *aglPosition = new osg::LineSegment( pos,pos+vec );
+
+    _intersect->reset();
+    _intersect->addLineSegment( aglPosition );
+    _intersect->apply( *getScene() );
+
+    osgUtil::IntersectVisitor::HitList hits;
+    if( _intersect->hits() )
+    {
+        hits = _intersect->getHitList( aglPosition );
+        osgUtil::Hit fhit = hits.front();
+        osg::Vec3d fh = fhit.getWorldIntersectPoint();
+
+        osg::Vec3 interPoint(
+        fh.x(),
+        fh.y(),
+        fh.z());
+
+        return (interPoint-pos).length();
+    }
+
+    return 0.0;
+
+}
+
+osg::Vec3 Engine::getIntersectPos(osg::Vec3 pos, osg::Vec3 angles,float angle, float height)
+{
+    osg::Vec3 vec(0,height,0);
+    osg::Quat rot,ant;
+    ant.makeRotate(osg::DegreesToRadians(angle),osg::Vec3(1,0,0));
+
+    //angles.z() = 0.0f;
+
+    rot.makeRotate(osg::DegreesToRadians(angles.z()),osg::Vec3(0,1,0), //roll
+                   osg::DegreesToRadians(angles.y()),osg::Vec3(1,0,0), //pitch
+                   osg::DegreesToRadians(angles.x()),osg::Vec3(0,0,1)); // yaw
+    vec = ant*vec;
+    vec = rot*vec;
+
+    osg::LineSegment *aglPosition = new osg::LineSegment( pos,pos+vec );
+
+    _intersect->reset();
+    _intersect->addLineSegment( aglPosition );
+    _intersect->apply( *getScene() );
+
+    osgUtil::IntersectVisitor::HitList hits;
+    if( _intersect->hits() )
+    {
+        hits = _intersect->getHitList( aglPosition );
+        osgUtil::Hit fhit = hits.front();
+        osg::Vec3d fh = fhit.getWorldIntersectPoint();
+
+        osg::Vec3 interPoint(
+        fh.x(),
+        fh.y(),
+        fh.z());
+
+        return interPoint;
+    }
+
+    return osg::Vec3(-1,-1,-1);
 }
 
 osg::LightSource* Engine::getSunOrMoonLight()

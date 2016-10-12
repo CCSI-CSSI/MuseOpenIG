@@ -6,13 +6,17 @@
     <Port>8888</Port>
     <!-- UDP or TCP -->
     <Protocol>UDP</Protocol>
+    <!-- Will this be using a network Broadcast? -->
+    <Broadcast>yes</Broadcast>
     <!-- When TCP SLAVE specify here the TCP Server to connect to -->
     <TCP-Server>127.0.0.1</TCP-Server>
+    <!-- In the case of no broadcast message, destination IP -->
+    <Destination>127.0.0.1</Destination>
     <!-- The IP to bind the sending network to, in case of multiple ethernet cards -->
     <Host>127.0.0.1</Host>
     <!-- in seconds -->
     <Timeout>1.0</Timeout>
-    <!-- in seconds. Not real time so we substract 
+    <!-- in seconds. Not real time so we substract
     the ammount of this delta time in seconds to detect a TIMEOUT -->
     <TimeoutDT>0.01</TimeoutDT>
     <!-- To run SLAVEs in separate Thread -->

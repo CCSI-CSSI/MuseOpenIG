@@ -23,6 +23,7 @@ include_directories(
 target_link_libraries( ${LIB_NAME}
     ${OSG_LIBRARIES}
     OpenIG-Engine
+	OpenIG-Utils
     ${OPENGL_LIBRARIES}
 	${Boost_LIBRARIES}
 )

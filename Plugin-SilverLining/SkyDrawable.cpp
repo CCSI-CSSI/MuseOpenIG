@@ -23,6 +23,10 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 
 #include "SkyDrawable.h"
@@ -33,7 +37,9 @@
 #include <sstream>
 
 #include <Core-Base/configuration.h>
-#include <Core-Base/glerrorutils.h>
+#include <Core-Base/mathematics.h>
+
+#include <Core-Utils/glerrorutils.h>
 
 #include <Core-PluginBase/plugincontext.h>
 
@@ -59,7 +65,7 @@
 
 #include <Library-Graphics/OIGMath.h>
 
-#include <Core-Base/shaderutils.h>
+#include <Core-Utils/shaderutils.h>
 
 #define UPDATE_DISTANCE_SQ (500.0 * 500.0)
 #define CLOUD_SHADOW_TEXTURE 4
@@ -292,13 +298,24 @@ void SkyDrawable::setLightingParams(OpenIG::Engine* ig)
 void SkyDrawable::resetLighting(SilverLining::Atmosphere *atmosphere) const
 {
 #if 0
-	if (atmosphere)
-	{
-		atmosphere->GetConditions()->SetFog(_originalInsideFogSettings.a(), _originalInsideFogSettings.r(), _originalInsideFogSettings.g(), _originalInsideFogSettings.b());
-	}
+    if (atmosphere)
+    {
+        atmosphere->GetConditions()->SetFog(_originalInsideFogSettings.a(), _originalInsideFogSettings.r(), _originalInsideFogSettings.g(), _originalInsideFogSettings.b());
+    }
 #endif
 }
 
+osg::Vec3 SkyDrawable::_additionalAmbientLightConstant;
+void SkyDrawable::setAdditionalAmbientLightConstant(const osg::Vec3& value)
+{
+    _additionalAmbientLightConstant = value;
+}
+
+osg::Vec3 SkyDrawable::_additionalDiffuseLightConstant;
+void SkyDrawable::setAdditionalDiffuseLightConstant(const osg::Vec3& value)
+{
+    _additionalDiffuseLightConstant = value;
+}
 
 void SkyDrawable::setLighting(SilverLining::Atmosphere *atmosphere) const
 {
@@ -330,6 +347,17 @@ void SkyDrawable::setLighting(SilverLining::Atmosphere *atmosphere) const
         diffuse = osg::Vec4(rd, gd, bd, 1.0);
         direction.normalize();
 
+        ambient = osg::Vec4(osg::Vec3(ra + _additionalAmbientLightConstant.x(), ga + _additionalAmbientLightConstant.y(), ba + _additionalAmbientLightConstant.z()), 1.0);
+        diffuse = osg::Vec4(osg::Vec3(rd + _additionalDiffuseLightConstant.x(), gd + _additionalDiffuseLightConstant.y(), bd + _additionalDiffuseLightConstant.z()), 1.0);
+
+        ambient.r() = osg::minimum(1.f, ambient.r());
+        ambient.g() = osg::minimum(1.f, ambient.g());
+        ambient.b() = osg::minimum(1.f, ambient.b());
+
+        diffuse.r() = osg::minimum(1.f, diffuse.r());
+        diffuse.g() = osg::minimum(1.f, diffuse.g());
+        diffuse.b() = osg::minimum(1.f, diffuse.b());
+
         light->setAmbient(ambient);
         light->setDiffuse(diffuse);
         light->setSpecular(osg::Vec4(1, 1, 1, 1));
@@ -342,7 +370,7 @@ void SkyDrawable::setLighting(SilverLining::Atmosphere *atmosphere) const
         _inCloudsFogDensity = -1.f;
 
         if(_fog.valid())
-        {			
+        {
             if(atmosphere->GetFogEnabled())
             {//we are inside the stratus layer
 
@@ -352,22 +380,23 @@ void SkyDrawable::setLighting(SilverLining::Atmosphere *atmosphere) const
                 {
                     old_density = _fog->getDensity();
                     getDensity = false;
-                }								
-																
-				atmosphere->GetFogSettings(&density, &hR, &hG, &hB);					
-				osg::Vec4 color(hR, hG, hB,1.f);
-					
-				_fog->setColor(osg::Vec4(color.r(), color.g(), color.b(), 1.f));
-				_fog->setDensity(_inCloudsFogDensity = density);								
+                }
+
+                atmosphere->GetFogSettings(&density, &hR, &hG, &hB);
+                osg::Vec4 color(hR, hG, hB,1.f);
+
+                _fog->setColor(osg::Vec4(color.r(), color.g(), color.b(), 1.f));
+                _fog->setDensity(_inCloudsFogDensity = density);
             }
             else
-            {				
+            {
                 //put back original density when we exit the cloud layer.
                 if(!getDensity)
                 {
                     _fog->setDensity(old_density);
                     getDensity = true;
                 }
+
 
                 atmosphere->GetHorizonColor(0,&hR, &hG, &hB);
                 density = _inCloudsFogDensity = _fog->getDensity();
@@ -383,7 +412,7 @@ std::string SkyDrawable::_skyModel = "Simple";
 
 void SkyDrawable::setSkyModel(const std::string& skyModel)
 {
-	_skyModel = skyModel;
+    _skyModel = skyModel;
 }
 
 void SkyDrawable::initializeSilverLining(AtmosphereReference *ar, osg::GLExtensions* ext) const
@@ -395,7 +424,7 @@ void SkyDrawable::initializeSilverLining(AtmosphereReference *ar, osg::GLExtensi
 
         if (atmosphere)
         {
-            srand(1234); // constant random seed to ensure consistent clouds across windows
+//            srand(1234); // constant random seed to ensure consistent clouds across windows
 
             // Update the path below to where you installed SilverLining's resources folder.
             const char *slPath = getenv("SILVERLINING_PATH");
@@ -442,6 +471,8 @@ void SkyDrawable::initializeSilverLining(AtmosphereReference *ar, osg::GLExtensi
             GLint BBShader = osg::ShaderUtils::compileShader(ssBBShader.str(), osg::Shader::FRAGMENT, ext);
             if (BBShader!=0) vectorUserShaders.push_back(BBShader);
 
+            srand(1234);
+
             int ret = atmosphere->Initialize(SilverLining::Atmosphere::OPENGL, resPath.c_str(),
                                              true, 0, vectorUserShaders);
             if (ret != SilverLining::Atmosphere::E_NOERROR)
@@ -461,13 +492,13 @@ void SkyDrawable::initializeSilverLining(AtmosphereReference *ar, osg::GLExtensi
                 exit(0);
             }
 
-			if (_skyModel == "HosekWilkie")
-				atmosphere->SetSkyModel(HOSEK_WILKIE);
-			else
-			if (_skyModel == "Preetham")
-				atmosphere->SetSkyModel(PREETHAM);
-			else
-				atmosphere->SetConfigOption("sky-simple-shader", "yes");
+            if (_skyModel == "HosekWilkie")
+                atmosphere->SetSkyModel(HOSEK_WILKIE);
+            else
+            if (_skyModel == "Preetham")
+                atmosphere->SetSkyModel(PREETHAM);
+            else
+                atmosphere->SetConfigOption("sky-simple-shader", "yes");
 
             //atmosphere->SetConfigOption( "render-offscreen", "yes" );
             // This config option must set to get shadow clouds
@@ -659,67 +690,91 @@ void SkyDrawable::updateCloudLayer(int id, double altitude, double thickness, do
     if (itr == _clouds.end()) return;
 
     CloudLayerInfo& cli = itr->second;
-    if(cli._altitude != altitude)
+    if(cli._altitude != abs(altitude * Base::Math::instance()->M_PER_FT))
     {
-        cli._altitude = altitude;
+        osg::notify(osg::NOTICE) << "updateCloudLayer cloud layer alt Now: " << cli._altitude << ", altitudeIn: " << (altitude*Base::Math::instance()->M_PER_FT) << std::endl;
+        cli._altitude = abs(altitude * Base::Math::instance()->M_PER_FT);
         cli._dirty = true;
         cli._needReseed = false;
     }
 
     if (cli._density != density)
     {
+        osg::notify(osg::NOTICE) << "updateCloudLayer cloud layer den Now: " << cli._density << ", densityIn: " << density << std::endl;
         cli._density = density;
         cli._dirty = true;
         cli._needReseed = true;
     }
 
-    if (cli._thickness != thickness)
+    if (cli._thickness != abs(thickness * Base::Math::instance()->M_PER_FT))
     {
-        cli._thickness = thickness;
+        osg::notify(osg::NOTICE) << "updateCloudLayer cloud layer thk Now: " << cli._thickness << ", thicknessIn: " << (thickness* Base::Math::instance()->M_PER_FT) << std::endl;
+        cli._thickness = abs(thickness * Base::Math::instance()->M_PER_FT);
         cli._dirty = true;
         cli._needReseed = true;
     }
 
-//    osg::notify(osg::NOTICE) << "updateCloudLayer cloud layer    : " << id << std::endl;
-//    osg::notify(osg::NOTICE) << "updateCloudLayer cloud layer alt: " << altitude << std::endl;
-//    osg::notify(osg::NOTICE) << "updateCloudLayer cloud layer den: " << density << std::endl;
-//    osg::notify(osg::NOTICE) << "updateCloudLayer cloud layer thk: " << thickness << std::endl;
+    osg::notify(osg::NOTICE) << "updateCloudLayer cloud layer    : " << id << std::endl;
+    osg::notify(osg::NOTICE) << "updateCloudLayer cloud layer    : " << cli._type << std::endl;
 }
 
 void SkyDrawable::addClouds(SilverLining::Atmosphere *atmosphere, const osg::Vec3d& position)
 {
+
+//    SilverLining::CloudLayer *tstLayer = SilverLining::CloudLayerFactory::Create((CloudTypes)4);
+//    tstLayer->Restore(*atmosphere,  "/usr/local/muse/amx/data/OsgSceneEffects/CUMULUS_CONGESTUS.config1");
+//    if(!tstLayer->GetEnabled())
+//        tstLayer->SetEnabled(true);
+
     CloudLayersQueueIterator itr = _cloudsQueueToAdd.begin();
     for ( ; itr != _cloudsQueueToAdd.end(); ++itr)
     {
         SilverLining::CloudLayer *cloudLayer = SilverLining::CloudLayerFactory::Create((CloudTypes)itr->_type);
-//        SilverLining::CloudLayer *cloudLayer = SilverLining::CloudLayerFactory::Create(itr->_type);
+
+        double altitude = itr->_altitude * Base::Math::instance()->M_PER_FT;
+        double thickness = itr->_thickness * Base::Math::instance()->M_PER_FT;
+
         cloudLayer->SetIsInfinite(itr->_infinite);
-        cloudLayer->SetBaseAltitude(itr->_altitude);
+        cloudLayer->SetBaseAltitude(altitude);
+        cloudLayer->SetThickness(thickness);
         cloudLayer->SetDensity(itr->_density);
 
         // TDB: Read this from config or change the API
         // to support these parameters
-        cloudLayer->SetThickness(itr->_thickness);
         cloudLayer->SetBaseLength(_silverLiningParams.cloudsBaseLength);
         cloudLayer->SetBaseWidth(_silverLiningParams.cloudsBaseWidth);
+        //cloudLayer->SetBaseLength(100000);
+        //cloudLayer->SetBaseWidth(50000);
         cloudLayer->SetCloudAnimationEffects(0,false);
         cloudLayer->SetLayerPosition(position.x(),-position.y());
+        //cloudLayer->SetEnabled(false);
 
-        cloudLayer->SeedClouds(*atmosphere);
+        bool status = cloudLayer->SeedClouds(*atmosphere);
+        //cloudLayer->Save("/usr/local/muse/amx/data/OsgSceneEffects/CUMULUS_CONGESTUS.config1");
+
         //cloudLayer->GenerateShadowMaps(true); //deprecated.....
         int handle = atmosphere->GetConditions()->AddCloudLayer(cloudLayer);
+        //status = cloudLayer->Restore(*atmosphere, "/usr/local/muse/amx/data/OsgSceneEffects/CUMULUS_CONGESTUS.config1");
 
-//        osg::notify(osg::NOTICE) << "add cloud layer    : " << handle << std::endl;
-//        osg::notify(osg::NOTICE) << "add cloud layer  id: " << itr->_id << std::endl;
-//        osg::notify(osg::NOTICE) << "add cloud layer typ: " << itr->_type << std::endl;
-//        osg::notify(osg::NOTICE) << "add cloud layer alt: " << itr->_altitude << std::endl;
-//        osg::notify(osg::NOTICE) << "add cloud layer den: " << itr->_density << std::endl;
-//        osg::notify(osg::NOTICE) << "add cloud layer thk: " << itr->_thickness << std::endl;
-//        osg::notify(osg::NOTICE) << "add cloud layer len: " << _silverLiningParams.cloudsBaseLength << std::endl;
-//        osg::notify(osg::NOTICE) << "add cloud layer wid: " << _silverLiningParams.cloudsBaseWidth << std::endl;
+        //int handle = cloudLayer->GetHandle();
+        osg::notify(osg::NOTICE) << "add cloud layer    : " << handle << ", status: " << status << std::endl;
+        osg::notify(osg::NOTICE) << "add cloud layer  id: " << itr->_id << std::endl;
+        osg::notify(osg::NOTICE) << "add cloud layer typ: " << itr->_type << std::endl;
+        osg::notify(osg::NOTICE) << "add cloud layer alt: " << altitude << std::endl;
+        osg::notify(osg::NOTICE) << "add cloud layer thk: " << thickness << std::endl;
+        osg::notify(osg::NOTICE) << "add cloud layer den: " << itr->_density << std::endl;
+        osg::notify(osg::NOTICE) << "add cloud layer len: " << _silverLiningParams.cloudsBaseLength << std::endl;
+        osg::notify(osg::NOTICE) << "add cloud layer wid: " << _silverLiningParams.cloudsBaseWidth << std::endl;
+        //cloudLayer->SetEnabled(true);
+        osg::notify(osg::NOTICE) << "add cloud layer enb: " << cloudLayer->GetEnabled() << std::endl;
+        double x, y, z;
+        cloudLayer->GetLayerPosition(x,y);
+        osg::notify(osg::NOTICE) << "add cloud layer pox:y " << x << ':' << -y << std::endl;
 
         CloudLayerInfo cli = *itr;
         cli._handle = handle;
+        cli._thickness = thickness;
+        cli._altitude = altitude;
 
         _clouds[cli._id] = cli;
     }
@@ -734,10 +789,81 @@ void SkyDrawable::removeClouds(SilverLining::Atmosphere *atmosphere)
     {
         atmosphere->GetConditions()->RemoveCloudLayer(itr->_handle);
 
-        //osg::notify(osg::NOTICE) << "removing clouds: " << itr->_handle << std::endl;
+        osg::notify(osg::NOTICE) << "removing clouds: " << itr->_handle << std::endl;
     }
 
     _cloudsQueueToRemove.clear();
+}
+
+void SkyDrawable::loadCloudLayer(int id, std::string filename, int type)
+{
+    CloudLayersIterator itr = _clouds.find(id);
+    if (itr != _clouds.end()) return;
+
+    CloudLayerInfo cli;
+    cli._id = id;
+    cli._filename = filename;
+    cli._type = type;
+
+    osg::notify(osg::NOTICE) << "SkyDrawable::loadCloudLayer( " << id
+                             << ", " << filename << ", " << ", type: " << type << ")" << std::endl;
+    _cloudFilesQueueToLoad.push_back(cli);
+}
+
+void SkyDrawable::loadCloudLayerFiles(SilverLining::Atmosphere *atmosphere, const osg::Vec3d& position)
+{
+    int handle=-1;
+    CloudLayersQueueIterator itr = _cloudFilesQueueToLoad.begin();
+    for ( ; itr != _cloudFilesQueueToLoad.end(); ++itr)
+    {
+        std::string fileToLoad = itr->_filename;
+        SilverLining::CloudLayer* tmpLayer =
+                SilverLining::CloudLayerFactory::Create( (CloudTypes)itr->_type );
+
+        osg::notify(osg::NOTICE) << "SkyDrawable::loadCloudLayerFiles filename: " << fileToLoad << std::endl;
+        std::ifstream infile;
+        infile.open(fileToLoad.c_str(), std::ifstream::in);
+
+        if(infile.is_open())
+        {
+            bool status = tmpLayer->Restore(*atmosphere, fileToLoad.c_str());
+            osg::notify(osg::NOTICE) << "SkyDrawable::loadCloudLayerFiles load file status: " << status << std::endl;
+            if(!tmpLayer->GetEnabled())
+                tmpLayer->SetEnabled(true);
+            double x,y;
+            tmpLayer->GetLayerPosition(x, y);
+            if(x != position.x() || y != -position.y())
+            {
+                tmpLayer->SetLayerPosition(position.x(), -position.y());
+                osg::notify(osg::NOTICE) << "SkyDrawable::loadCloudLayerFiles orig layer pos x: " << x
+                                         << ", y: " << y << std::endl;
+                osg::notify(osg::NOTICE) << "SkyDrawable::loadCloudLayerFiles setting pos x: " << position.x()
+                                         << ", y: " << -position.y() << std::endl;
+            }
+            handle = atmosphere->GetConditions()->AddCloudLayer(tmpLayer);
+            osg::notify(osg::NOTICE) << "SkyDrawable::loadCloudLayerFiles load file handle: " << handle << std::endl;
+        }
+        else
+            osg::notify(osg::NOTICE) << "SkyDrawable::loadCloudLayerFiles unable to load file: " << fileToLoad << std::endl;
+
+        infile.close();
+
+        //Load up our Info data with the data from the layer just loaded so its current.
+        CloudLayerInfo cli = *itr;
+        cli._handle = tmpLayer->GetHandle();
+        cli._altitude = tmpLayer->GetBaseAltitude();
+        cli._density = tmpLayer->GetDensity();
+        cli._length = tmpLayer->GetBaseLength();
+        cli._thickness = tmpLayer->GetThickness();
+        cli._type = tmpLayer->GetType();
+        cli._width = tmpLayer->GetBaseWidth();
+
+        osg::notify(osg::NOTICE) << "SkyDrawable::loadCloudLayerFiles load file handle: " << cli._handle << std::endl;
+        osg::notify(osg::NOTICE) << "SkyDrawable::loadCloudLayerFiles load file   type: " << cli._type << std::endl;
+
+        _clouds[cli._id] = cli;
+    }
+    _cloudFilesQueueToLoad.clear();
 }
 
 void SkyDrawable::setGeocentric(bool geocentric)
@@ -754,51 +880,60 @@ void SkyDrawable::removeAllCloudLayers()
 void SkyDrawable::updateClouds(SilverLining::Atmosphere *atmosphere)
 {
     //osg::notify(osg::NOTICE) << "updateclouds()" << std::endl;
-
+    //return;
     CloudLayersIterator itr = _clouds.begin();
     for ( ; itr != _clouds.end(); ++itr)
     {
         CloudLayerInfo& cli= itr->second;
 
-        //osg::notify(osg::NOTICE) << "updating cloud layer    : " << cli._handle << std::endl;
+//        osg::notify(osg::NOTICE) << "updating cloud layer    : " << cli._handle << std::endl;
 
         CloudLayer* cloudLayer = NULL;
         atmosphere->GetConditions()->GetCloudLayer(cli._handle, &cloudLayer);
 
         if (cloudLayer)
         {
-            if( cloudLayer->GetBaseLength() != _silverLiningParams.cloudsBaseLength
-                    || cloudLayer->GetBaseWidth() != _silverLiningParams.cloudsBaseWidth )
+            if(  _silverLiningParams.paramsUpdated && (cloudLayer->GetBaseLength() != _silverLiningParams.cloudsBaseLength
+                    || cloudLayer->GetBaseWidth() != _silverLiningParams.cloudsBaseWidth) )
             {
+                cli._width = _silverLiningParams.cloudsBaseWidth;
+                cli._length = _silverLiningParams.cloudsBaseLength;
                 cli._dirty = true;
                 cli._needReseed = true;
+                _silverLiningParams.paramsUpdated = false;
             }
 
             if (!cli._dirty) continue;
             cli._dirty = false;
 
-            cloudLayer->SetEnabled(false);
+            //We display in feet, but SL wants meters...
+            //cli._altitude  *= Base::Math::instance()->M_PER_FT;
+            //cli._thickness *= Base::Math::instance()->M_PER_FT;
+
+            //cloudLayer->SetEnabled(false);
             cloudLayer->SetBaseAltitude(cli._altitude);
 
             if (cli._needReseed)
             {
+                osg::notify(osg::NOTICE) << "updating cloud layer reseeding: " << cli._handle << std::endl;
                 cli._needReseed = false;
                 cloudLayer->SetDensity(cli._density);
                 cloudLayer->SetThickness(cli._thickness);
-                cloudLayer->SetBaseLength(_silverLiningParams.cloudsBaseLength);
-                cloudLayer->SetBaseWidth(_silverLiningParams.cloudsBaseWidth);
+                cloudLayer->SetBaseLength(cli._length);
+                cloudLayer->SetBaseWidth(cli._width);
 
                 cloudLayer->SeedClouds(*atmosphere);
 
-//                osg::notify(osg::NOTICE) << "updateClouds cloud layer    : " << cli._handle << std::endl;
-//                osg::notify(osg::NOTICE) << "updateClouds cloud layer alt: " << cli._altitude << std::endl;
-//                osg::notify(osg::NOTICE) << "updateClouds cloud layer den: " << cli._density << std::endl;
-//                osg::notify(osg::NOTICE) << "updateClouds cloud layer thk: " << cli._thickness << std::endl;
-//                osg::notify(osg::NOTICE) << "updateClouds cloud layer len: " << _silverLiningParams.cloudsBaseLength << std::endl;
-//                osg::notify(osg::NOTICE) << "updateClouds cloud layer wid: " << _silverLiningParams.cloudsBaseWidth << std::endl;
+                osg::notify(osg::NOTICE) << "updateClouds cloud layer    : " << cli._handle << std::endl;
+                osg::notify(osg::NOTICE) << "updateClouds cloud layer tpe: " << cli._type << std::endl;
+                osg::notify(osg::NOTICE) << "updateClouds cloud layer alt: " << cli._altitude << std::endl;
+                osg::notify(osg::NOTICE) << "updateClouds cloud layer den: " << cli._density << std::endl;
+                osg::notify(osg::NOTICE) << "updateClouds cloud layer thk: " << cli._thickness << std::endl;
+                osg::notify(osg::NOTICE) << "updateClouds cloud layer len: " << _silverLiningParams.cloudsBaseLength << std::endl;
+                osg::notify(osg::NOTICE) << "updateClouds cloud layer wid: " << _silverLiningParams.cloudsBaseWidth << std::endl;
 
             }
-            cloudLayer->SetEnabled(true);
+            //cloudLayer->SetEnabled(true);
         }
     }
 }
@@ -828,7 +963,7 @@ bool	SkyDrawable::_userDefinedGamma = false;
 void SkyDrawable::setGamma(double gamma, bool use)
 {
     _gamma = gamma;
-	_userDefinedGamma = use;
+    _userDefinedGamma = use;
 
 }
 
@@ -866,7 +1001,7 @@ void SkyDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
     {
         initializeSilverLining(ar, osg::GL2Extensions::Get(renderInfo.getContextID(), true));
 
-		if (_userDefinedGamma) atmosphere->SetGamma(SkyDrawable::_gamma);
+        if (_userDefinedGamma) atmosphere->SetGamma(SkyDrawable::_gamma);
 
         osg::GL2Extensions* ext = osg::GL2Extensions::Get(renderInfo.getContextID(), true);
 
@@ -965,6 +1100,7 @@ void SkyDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
             SkyDrawable* mutableThis = const_cast<SkyDrawable*>(this);
             mutableThis->removeClouds(atmosphere);
             mutableThis->addClouds(atmosphere,position);
+            mutableThis->loadCloudLayerFiles(atmosphere, position);
             mutableThis->updateClouds(atmosphere);
         }
 
@@ -1034,14 +1170,14 @@ void SkyDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
         float fCoef = (float)(2.0f / OpenIG::Library::Graphics::Math::Log2(zFar + 1.0f));
         setLogDepthUniforms(atmosphere, renderInfo.getState(), fCoef);
 
-		resetLighting(atmosphere);
+        resetLighting(atmosphere);
 
         atmosphere->DrawSky(true, _geocentric , _skyboxSize, true, false);
 
-		setLighting(atmosphere);
+        setLighting(atmosphere);
         const_cast<SkyDrawable*>(this)->setShadow(atmosphere,renderInfo);
-        const_cast<SkyDrawable*>(this)->setLightingParams(_openIG);		
-		
+        const_cast<SkyDrawable*>(this)->setLightingParams(_openIG);
+
     }
 
 

@@ -1,3 +1,17 @@
+xx Xxx 2016, version 2.0.3
+- Merge in parts of a bugfix from pull request #6 on OpenIG on GitHub from jenglish.
+
+- Change the UDP network formally it was hard-coded to only send out broadcast messages.  
+  Using the libOpenIG-Plugin-Networking.so.xml file directives you can now send out 
+  broadcast messages or send out non-broadcast messages as well.  This was also suggested
+  in the same pull request #6 on the OpenIG GitHub repository, but that code was modified
+  to allow use of the libOpenIG-Plugin-Networking.so.xml file as mentioned above to configure
+  the transfer required.
+
+- Artistic changes to the SilverLining sky for the A320 demo.
+
+- Some other misc changes in the OpenIG Core in preparation for requested non-public plugin code updates.
+
 06 Jul 2016, version 2.0.2
 
 - New "date" command added to command line command list to set the simulation date.  This affects how
