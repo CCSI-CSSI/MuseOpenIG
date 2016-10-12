@@ -2,11 +2,6 @@ set( LIB_NAME OpenIG-Plugin-Muse )
 
 set( _IgPluginMuse
     igpluginmuse.cpp
-    movingmodelmanager.cpp
-    movingmodelmanager.h
-    miscellaneous.cpp
-    miscellaneous.h
-    scenemodel.h
 )
 
 include_directories(

@@ -1,4 +1,4 @@
-xx Xxx 2016, version 2.0.3
+12 Oct 2016, version 2.0.3
 - Merge in parts of a bugfix from pull request #6 on OpenIG on GitHub from jenglish.
 
 - Change the UDP network formally it was hard-coded to only send out broadcast messages.  
