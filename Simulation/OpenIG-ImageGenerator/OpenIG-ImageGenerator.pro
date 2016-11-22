@@ -15,9 +15,19 @@ DEPENDPATH += ../
 
 DEFINES += OPENIG_SDK
 
-OTHER_FILES += CMakeLists.txt
+OTHER_FILES +=  CMakeLists.txt \
+                DataFiles/default.txt \
+                DataFiles/openig.xml \
+                DataFiles/deployment.pri \
+                DataFiles/OpenIG-Splash.jpg \
+                DataFiles/model/*.*
 
-DISTFILES += CMakeLists.txt
+DISTFILES += CMakeLists.txt \
+            DataFiles/default.txt \
+            DataFiles/openig.xml \
+            DataFiles/deployment.pri \
+            DataFiles/OpenIG-Splash.jpg \
+            DataFiles/model/*.*
 
 LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgGA -losgText -losgUtil -losgSim\
         -lOpenIG-Engine -lOpenIG-Base -lOpenIG-PluginBase -lOpenIG-Networking -lOpenIG-Protocol -lOpenIG-Graphics

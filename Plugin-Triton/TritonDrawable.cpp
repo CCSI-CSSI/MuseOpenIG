@@ -14,11 +14,11 @@
 #include <Library-Graphics/Matrix4.h>
 #include <Library-Graphics/MatrixUtils.h>
 
-#include <Core-Base/filesystem.h>
-#include <Core-Base/configuration.h>
+#include <Core-Base/FileSystem.h>
+#include <Core-Base/Configuration.h>
 
-#include <Core-Utils/glerrorutils.h>
-#include <Core-Utils/shaderutils.h>
+#include <Core-Utils/GLErrorUtils.h>
+#include <Core-Utils/ShaderUtils.h>
 
 
 static const int tboStartOffset = 15;

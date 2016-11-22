@@ -25,9 +25,17 @@
 //#*    Email address: openig@compro.net
 //#*
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 //#*	author    Trajce Nikolov Nick openig@compro.net
 //#*	copyright(c)Compro Computer Services, Inc.
+//#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
 //#*
 //#*    Please direct any questions or comments to the OpenIG Forums
 //#*    Email address: openig@compro.net
@@ -36,18 +44,18 @@
 #include <iostream>
 #include <sstream>
 
-#include <OpenIG-Networking/tcpserver.h>
-#include <OpenIG-Networking/buffer.h>
-#include <OpenIG-Networking/parser.h>
-#include <OpenIG-Networking/factory.h>
+#include <OpenIG-Networking/TCPServer.h>
+#include <OpenIG-Networking/Buffer.h>
+#include <OpenIG-Networking/Parser.h>
+#include <OpenIG-Networking/Factory.h>
 
-#include <OpenIG-Protocol/camera.h>
-#include <OpenIG-Protocol/header.h>
-#include <OpenIG-Protocol/hot.h>
-#include <OpenIG-Protocol/hotresponse.h>
-#include <OpenIG-Protocol/los.h>
-#include <OpenIG-Protocol/losresponse.h>
-#include <OpenIG-Protocol/entitystate.h>
+#include <OpenIG-Protocol/Camera.h>
+#include <OpenIG-Protocol/Header.h>
+#include <OpenIG-Protocol/HOT.h>
+#include <OpenIG-Protocol/HOTResponse.h>
+#include <OpenIG-Protocol/LOS.h>
+#include <OpenIG-Protocol/LOSResponse.h>
+#include <OpenIG-Protocol/EntityState.h>
 
 #include <boost/shared_ptr.hpp>
 

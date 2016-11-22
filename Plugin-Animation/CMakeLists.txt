@@ -1,20 +1,20 @@
-set( LIB_NAME OpenIG-Plugin-Animation )
+SET( LIB_NAME OpenIG-Plugin-Animation )
 
-set( _IgPluginAnimation
-    igpluginanimation.cpp
+SET( _IgPluginAnimation
+    IGPluginAnimation.cpp
 )
 
-add_library( ${LIB_NAME} SHARED
+ADD_LIBRARY( ${LIB_NAME} SHARED
     ${_IgPluginAnimation}
 )
 
-target_link_libraries( ${LIB_NAME}
+TARGET_LINK_LIBRARIES( ${LIB_NAME}
     ${OSG_LIBRARIES}
     OpenIG-Engine
 )
 
-set_target_properties( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Plugin Animation" )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Plugin Animation" )
 
-include( PluginInstall REQUIRED )
+INCLUDE( PluginInstall REQUIRED )

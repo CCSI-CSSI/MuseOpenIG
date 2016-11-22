@@ -1,5 +1,5 @@
-set( LIB_NAME OpenIG-Plugin-SilverLining )
-set( TARGET_OTHER_FILES DataFiles/libIgPlugin-SilverLining.so.xml
+SET( LIB_NAME OpenIG-Plugin-SilverLining )
+SET( TARGET_OTHER_FILES DataFiles/libIgPlugin-SilverLining.so.xml
                         DataFiles/libIgPlugin-SilverLining.so.windows.xml
 )
 
@@ -25,27 +25,27 @@ FILE (GLOB SHADER_FILES_ORIGINAL
 
 SOURCE_GROUP("Shaders Original" FILES ${SHADER_FILES_ORIGINAL})
 
-add_library( ${LIB_NAME} SHARED
+ADD_LIBRARY( ${LIB_NAME} SHARED
     AtmosphereReference.h
     CloudsDrawable.h
     SkyDrawable.h
     CloudsDrawable.cpp
     SkyDrawable.cpp
-    igpluginsilverlining.cpp
+    IGPluginSilverLining.cpp
     ${TARGET_OTHER_FILES}
 	${SHADER_FILES_FPLZ}
 	${SHADER_FILES_SL}
 	${SHADER_FILES_ORIGINAL}
 )
 
-include_directories(
+INCLUDE_DIRECTORIES(
         ${OPENSCENEGRAPH_INCLUDE_DIR}
         ${OPENGL_INCLUDE_DIR}
         ${SILVERLINING_INCLUDE_DIR}
 		${Boost_INCLUDE_DIRS}
 )
 
-target_link_libraries( ${LIB_NAME}
+TARGET_LINK_LIBRARIES( ${LIB_NAME}
     ${OSG_LIBRARIES}
     debug ${SILVERLINING_LIBRARY_DEBUG} optimized ${SILVERLINING_LIBRARY_RELEASE}
     ${OPENGL_LIBRARY}
@@ -55,36 +55,40 @@ target_link_libraries( ${LIB_NAME}
 	${Boost_LIBRARIES}
 )
 
-set_target_properties( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Plugin SilverLining" )
+IF(WIN32)
+    SET( CMAKE_SHARED_LINKER_FLAGS "/force:multiple ${CMAKE_SHARED_LINKER_FLAGS}" )
+ENDIF()
 
-include( PluginInstall REQUIRED )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Plugin SilverLining" )
 
-if (APPLE)
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-SilverLining.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libOpenIG-Plugin-SilverLining.dylib.xml)
-elseif(WIN32)
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-SilverLining.so.windows.xml DESTINATION ${INSTALL_BINDIR} RENAME OpenIG-Plugin-SilverLining.dll.xml)
-else()
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-SilverLining.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libOpenIG-Plugin-SilverLining.so.xml)
-endif()
+INCLUDE( PluginInstall REQUIRED )
+
+IF (APPLE)
+    INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-SilverLining.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libOpenIG-Plugin-SilverLining.dylib.xml)
+ELSEIF(WIN32)
+    INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-SilverLining.so.windows.xml DESTINATION ${INSTALL_BINDIR} RENAME OpenIG-Plugin-SilverLining.dll.xml)
+ELSE()
+    INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-SilverLining.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libOpenIG-Plugin-SilverLining.so.xml)
+ENDIF()
 
 #Shaders for F+ and LogZ on Windows and Linux, currently we do not support F+ on the APPLE
-if(NOT APPLE)
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/SilverLining/WithForwardPlusAndLogZ/UserFunctions-frag.glsl DESTINATION $ENV{SILVERLINING_PATH}/Resources/Shaders)
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/SilverLining/WithForwardPlusAndLogZ/UserFunctions.glsl DESTINATION $ENV{SILVERLINING_PATH}/Resources/Shaders)
-endif()
+IF(NOT APPLE)
+    INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/SilverLining/WithForwardPlusAndLogZ/UserFunctions-frag.glsl DESTINATION $ENV{SILVERLINING_PATH}/Resources/Shaders)
+    INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/SilverLining/WithForwardPlusAndLogZ/UserFunctions.glsl DESTINATION $ENV{SILVERLINING_PATH}/Resources/Shaders)
+ENDIF()
 
 #Original SL shaders are supported on APPLE, WIN32 and Linux
 #for now we will install these on the APPLE by default until F+ is supported there
-if(APPLE)
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/SilverLining/Original/UserFunctions-frag.glsl DESTINATION $ENV{SILVERLINING_PATH}/Resources/Shaders)
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/SilverLining/Original/UserFunctions.glsl DESTINATION $ENV{SILVERLINING_PATH}/Resources/Shaders)
-endif()
+IF(APPLE)
+    INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/SilverLining/Original/UserFunctions-frag.glsl DESTINATION $ENV{SILVERLINING_PATH}/Resources/Shaders)
+    INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/SilverLining/Original/UserFunctions.glsl DESTINATION $ENV{SILVERLINING_PATH}/Resources/Shaders)
+ENDIF()
 
-if(WIN32)
+IF(WIN32)
     SET(INSTALL_BINDIR bin)
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/SilverLining/WithForwardPlusAndLogZ/forward_plus_sl_ps.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
-else()
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/SilverLining/WithForwardPlusAndLogZ/forward_plus_sl_ps.glsl DESTINATION /usr/local/openig/resources/shaders)
-endif()
+    INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/SilverLining/WithForwardPlusAndLogZ/forward_plus_sl_ps.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
+ELSE()
+    INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/SilverLining/WithForwardPlusAndLogZ/forward_plus_sl_ps.glsl DESTINATION /usr/local/openig/resources/shaders)
+ENDIF()

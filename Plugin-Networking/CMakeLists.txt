@@ -1,18 +1,22 @@
-set( LIB_NAME OpenIG-Plugin-Networking )
-set( TARGET_OTHER_FILES DataFiles/libIgPlugin-Networking.so.xml )
+SET( LIB_NAME OpenIG-Plugin-Networking )
+SET( TARGET_OTHER_FILES DataFiles/libIgPlugin-Networking.so.xml )
 
-set( _IgPluginNetworking
-    igpluginnetworking.cpp
+SET( PluginNetworkingSource
+     IGPluginNetworking.cpp
+)
+     
+SET( _IgPluginNetworking
+    ${PluginNetworkingSource}
 	${TARGET_OTHER_FILES}
-	)
+)
 
-add_library( ${LIB_NAME} SHARED
+ADD_LIBRARY( ${LIB_NAME} SHARED
     ${_IgPluginNetworking}
 )
 
-include_directories(${Boost_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
-target_link_libraries( ${LIB_NAME}
+TARGET_LINK_LIBRARIES( ${LIB_NAME}
     ${OSG_LIBRARIES}
     OpenIG-Engine
 	OpenIG-Networking
@@ -20,16 +24,16 @@ target_link_libraries( ${LIB_NAME}
 	${BOOST_LIBRARIES}
 )
 
-set_target_properties( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Plugin Networking" )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Plugin Networking" )
 
-include( PluginInstall REQUIRED )
+INCLUDE( PluginInstall REQUIRED )
 
-if (APPLE)
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-Networking.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libOpenIG-Plugin-Networking.dylib.xml)
-elseif(WIN32)
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-Networking.so.xml DESTINATION ${INSTALL_BINDIR} RENAME OpenIG-Plugin-Networking.dll.xml)
-else()
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-Networking.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libOpenIG-Plugin-Networking.so.xml)
-endif()
+IF (APPLE)
+    INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-Networking.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libOpenIG-Plugin-Networking.dylib.xml)
+ELSEIF(WIN32)
+    INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-Networking.so.xml DESTINATION ${INSTALL_BINDIR} RENAME OpenIG-Plugin-Networking.dll.xml)
+ELSE()
+    INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-Networking.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libOpenIG-Plugin-Networking.so.xml)
+ENDIF()

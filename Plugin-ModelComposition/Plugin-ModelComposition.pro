@@ -6,14 +6,14 @@
 
 QT       -= core gui
 
-CONFIG += silent
+CONFIG += silent warn_off
 
 TARGET = OpenIG-Plugin-ModelComposition
 TEMPLATE = lib
 
 DEFINES += IGPLUGINMODELCOMPOSITION_LIBRARY
 
-SOURCES += igpluginmodelcomposition.cpp
+SOURCES += IGPluginModelComposition.cpp
 
 LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgShadow -losgSim -losgUtil\
         -lOpenIG-Engine -lOpenIG-PluginBase -lOpenIG-Base -lOpenIG-Utils

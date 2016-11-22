@@ -27,6 +27,10 @@
 //#*    Email address: openig@compro.net
 //#*
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 
 #pragma once
@@ -39,9 +43,9 @@
 
 #include <SilverLining.h>
 
-#include <Core-Base/imagegenerator.h>
+#include <Core-Base/ImageGenerator.h>
 
-#include <Core-OpenIG/openig.h>
+#include <Core-OpenIG/Engine.h>
 
 namespace OpenIG {
     namespace Plugins {
@@ -165,11 +169,14 @@ namespace OpenIG {
             void            setDate(int month, int day, int year);
             void            setTimezone(int tz);
             void            setWind(float speed, float direction);
-            void            addCloudLayer(int id, int type, double altitude, double thickness, double density);
+            void            addCloudLayer(int id, int type, double altitude, double thickness, double density, bool enable);
+            void            addCloudLayerFile(int id, int type, double altitude, double thickness, double density, bool enable, std::string filename);
+            void            enableCloudLayer(int id, bool enable);
             void            removeCloudLayer(int id);
+            void            removeCloudLayerFile(int id);
             void            updateCloudLayer(int id, double altitude, double thickness, double density);
             void            removeAllCloudLayers();
-            void            loadCloudLayer(int id, std::string filename, int type);
+            void            loadCloudLayer(int id, int type, std::string filename);
             void			setGeocentric(bool geocentric);
             void			setLightingParams(OpenIG::Engine* ig);
             void			setIG(OpenIG::Engine* ig) { _openIG = ig; }
@@ -321,17 +328,24 @@ namespace OpenIG {
             typedef std::map< int, CloudLayerInfo >::const_iterator     CloudLayersConstIterator;
 
             CloudLayers         _clouds;
+            CloudLayers         _cloudFiles;
 
             typedef std::vector< CloudLayerInfo >                       CloudLayersQueue;
             typedef std::vector< CloudLayerInfo >::iterator             CloudLayersQueueIterator;
             typedef std::vector< CloudLayerInfo >::const_iterator       CloudLayersQueueConstIterator;
 
             CloudLayersQueue    _cloudsQueueToAdd;
+            CloudLayersQueue    _cloudsQueueToEnable;
             CloudLayersQueue    _cloudsQueueToRemove;
+            CloudLayersQueue    _cloudFilesQueueToRemove;
             CloudLayersQueue    _cloudFilesQueueToLoad;
+            CloudLayersQueue    _cloudFilesQueueToAdd;
 
             void addClouds(SilverLining::Atmosphere *atmosphere, const osg::Vec3d& position);
+            void createCloudLayerFile(SilverLining::Atmosphere *atmosphere);
+            void enableClouds(SilverLining::Atmosphere *atmosphere, const osg::Vec3d& position);
             void removeClouds(SilverLining::Atmosphere *atmosphere);
+            void removeCloudLayerFile(SilverLining::Atmosphere *atmosphere);
             void updateClouds(SilverLining::Atmosphere *atmosphere);
             void loadCloudLayerFiles(SilverLining::Atmosphere *atmosphere, const osg::Vec3d& position);
 

@@ -1,37 +1,37 @@
-set( LIB_NAME OpenIG-PluginBase )
-set( HEADER_PATH ${PROJECT_SOURCE_DIR}/Core-PluginBase )
-add_definitions( -DIGPLUGINCORE_LIBRARY )
+SET( LIB_NAME OpenIG-PluginBase )
+SET( HEADER_PATH ${PROJECT_SOURCE_DIR}/Core-PluginBase )
+ADD_DEFINITIONS( -DIGPLUGINCORE_LIBRARY )
 
-set( LIB_PUBLIC_HEADERS
-    ${HEADER_PATH}/config.h
-    ${HEADER_PATH}/export.h
-    ${HEADER_PATH}/igplugincore.h
-    ${HEADER_PATH}/plugin.h
-    ${HEADER_PATH}/plugincontext.h
-    ${HEADER_PATH}/pluginhost.h
-    ${HEADER_PATH}/pluginoperation.h
+SET( LIB_PUBLIC_HEADERS
+    ${HEADER_PATH}/Config.h
+    ${HEADER_PATH}/Export.h
+    ${HEADER_PATH}/IGPluginCore.h
+    ${HEADER_PATH}/Plugin.h
+    ${HEADER_PATH}/PluginContext.h
+    ${HEADER_PATH}/PluginHost.h
+    ${HEADER_PATH}/PluginOperation.h
 )
 
-set( _IgPluginCoreSourceFiles
-    pluginhost.cpp
+SET( _IgPluginCoreSourceFiles
+    PluginHost.cpp
 )
 
-include_directories(${Boost_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
-add_library( ${LIB_NAME} SHARED
+ADD_LIBRARY( ${LIB_NAME} SHARED
     ${LIB_PUBLIC_HEADERS}
     ${_IgPluginCoreSourceFiles}
 )
 
-target_link_libraries( ${LIB_NAME}
+TARGET_LINK_LIBRARIES( ${LIB_NAME}
     ${OSG_LIBRARIES}
     ${Boost_LIBRARIES}
     OpenIG-Base
 )
 
-set_target_properties( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Core PluginBase" )
-set_target_properties (${target} PROPERTIES DEFINE_SYMBOL  "IGPLUGINCORE_LIBRARY")
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Core PluginBase" )
+SET_TARGET_PROPERTIES (${target} PROPERTIES DEFINE_SYMBOL  "IGPLUGINCORE_LIBRARY")
 
-include( ModuleInstall REQUIRED )
+INCLUDE( ModuleInstall REQUIRED )

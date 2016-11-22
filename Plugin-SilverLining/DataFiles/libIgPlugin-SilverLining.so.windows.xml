@@ -12,5 +12,6 @@
     <SilverLining-UserDefinedGamma>no</SilverLining-UserDefinedGamma>
     <SilverLining-Gamma>0.8</SilverLining-Gamma>
     <SilverLining-LogZEnabled>yes</SilverLining-LogZEnabled>
-    <SilverLining-SkyModel>HosekWilkie</SilverLining-SkyModel> <!-- One of these: Simple, HosekWilkie, Preetham-->
+    <SilverLining-SkyModel>HosekWilkie</SilverLining-SkyModel> 
+        <!-- One of these: Simple, HosekWilkie, Preetham-->
 </OpenIG-Plugin-Config>

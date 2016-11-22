@@ -29,9 +29,9 @@ THE SOFTWARE.
 #pragma once
 
 #if defined(OPENIG_SDK)
-	#include <OpenIG-Graphics/export.h>
+    #include <OpenIG-Graphics/Export.h>
 #else
-	#include <Library-Graphics/export.h>
+    #include <Library-Graphics/Export.h>
 #endif
 
 #include <map>
@@ -39,25 +39,25 @@ THE SOFTWARE.
 #include <boost/any.hpp>
 
 namespace OpenIG {
-	namespace Library {
-		namespace Graphics {
+    namespace Library {
+        namespace Graphics {
 
-			class IGLIBGRAPHICS_EXPORT UserObjectBindings
-			{
-			public:
-				UserObjectBindings();
-				virtual ~UserObjectBindings();
+            class IGLIBGRAPHICS_EXPORT UserObjectBindings
+            {
+            public:
+                UserObjectBindings();
+                virtual ~UserObjectBindings();
 
-				void SetUserAny(const std::string& key, const boost::any& anything);
-				bool HasKey(const std::string& key) const;
-				const boost::any& GetUserAny(const std::string& key);
-				void EraseKey(const std::string& key);
-			private:
+                void SetUserAny(const std::string& key, const boost::any& anything);
+                bool HasKey(const std::string& key) const;
+                const boost::any& GetUserAny(const std::string& key);
+                void EraseKey(const std::string& key);
+            private:
 
-				typedef std::map<std::string, boost::any > UserObjectsMap;
-				UserObjectsMap m_UserObjectsMap;
-			};
-		}
-	}
+                typedef std::map<std::string, boost::any > UserObjectsMap;
+                UserObjectsMap m_UserObjectsMap;
+            };
+        }
+    }
 }
 

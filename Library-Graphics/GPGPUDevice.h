@@ -32,9 +32,9 @@ THE SOFTWARE.
 #pragma warning( disable : 4251 )
 
 #if defined(OPENIG_SDK)
-#include <OpenIG-Graphics/export.h>
+#include <OpenIG-Graphics/Export.h>
 #else
-#include <Library-Graphics/export.h>
+#include <Library-Graphics/Export.h>
 #endif
 #include <cstddef>
 

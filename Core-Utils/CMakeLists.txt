@@ -1,41 +1,41 @@
-set( LIB_NAME OpenIG-Utils )
-set( HEADER_PATH ${PROJECT_SOURCE_DIR}/Core-Utils )
-add_definitions( -DIGCOREUTILS_LIBRARY )
+SET( LIB_NAME OpenIG-Utils )
+SET( HEADER_PATH ${PROJECT_SOURCE_DIR}/Core-Utils )
+ADD_DEFINITIONS( -DIGCOREUTILS_LIBRARY )
 
-set( LIB_PUBLIC_HEADERS    
-    ${HEADER_PATH}/config.h    
-    ${HEADER_PATH}/export.h    
-    ${HEADER_PATH}/glerrorutils.h
-    ${HEADER_PATH}/tbo.h
-    ${HEADER_PATH}/framelogging.h
-	${HEADER_PATH}/shaderutils.h
-	${HEADER_PATH}/texturecache.h
+SET( LIB_PUBLIC_HEADERS    
+    ${HEADER_PATH}/Config.h    
+    ${HEADER_PATH}/Export.h    
+    ${HEADER_PATH}/GLErrorUtils.h
+    ${HEADER_PATH}/TBO.h
+    ${HEADER_PATH}/FrameLogging.h
+	${HEADER_PATH}/ShaderUtils.h
+	${HEADER_PATH}/TextureCache.h
 )
 
-set( _IgCoreUtilsSourceFiles    
-    glerrorutils.cpp
-	shaderutils.cpp
-    tbo.cpp
-	texturecache.cpp
+SET( _IgCoreUtilsSourceFiles    
+    GLErrorUtils.cpp
+	ShaderUtils.cpp
+    TBO.cpp
+	TextureCache.cpp
 )
 
-add_library( ${LIB_NAME} SHARED
+ADD_LIBRARY( ${LIB_NAME} SHARED
         ${LIB_PUBLIC_HEADERS}
         ${_IgCoreUtilsSourceFiles}
 )
 
-include_directories(${Boost_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
-target_link_libraries( ${LIB_NAME}
+TARGET_LINK_LIBRARIES( ${LIB_NAME}
     ${OSG_LIBRARIES}
 	${OPENGL_LIBRARY}
 	${Boost_LIBRARIES}
 	OpenIG-Graphics
 )
 
-set_target_properties( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Core Utils" )
-set_target_properties (${target} PROPERTIES DEFINE_SYMBOL  "IGCOREUTILS_LIBRARY")
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Core Utils" )
+SET_TARGET_PROPERTIES (${target} PROPERTIES DEFINE_SYMBOL  "IGCOREUTILS_LIBRARY")
 
-include( ModuleInstall REQUIRED )
+INCLUDE( ModuleInstall REQUIRED )

@@ -27,74 +27,74 @@ THE SOFTWARE.
 -----------------------------------------------------------------------------
 */
 #pragma once
-#include <Library-Graphics/export.h>
+#include <Library-Graphics/Export.h>
 
 #pragma warning( push )
 #pragma warning( disable : 4251 )
 
 #if defined(OPENIG_SDK)
-	#include <OpenIG-Graphics/DataFormat.h>
-	#include <OpenIG-Graphics/ForwardDeclare.h>
-	#include <OpenIG-Graphics/IntSize.h>
+    #include <OpenIG-Graphics/DataFormat.h>
+    #include <OpenIG-Graphics/ForwardDeclare.h>
+    #include <OpenIG-Graphics/IntSize.h>
 #else
-	#include <Library-Graphics/DataFormat.h>
-	#include <Library-Graphics/ForwardDeclare.h>
-	#include <Library-Graphics/IntSize.h>
+    #include <Library-Graphics/DataFormat.h>
+    #include <Library-Graphics/ForwardDeclare.h>
+    #include <Library-Graphics/IntSize.h>
 #endif
 
 FORWARD_DECLARE(Light)
 
 namespace OpenIG {
-	namespace Library {
-		namespace Graphics {
+    namespace Library {
+        namespace Graphics {
 
-			struct LightDataStruct
-			{
-				float ambient[3];
-				float diffuse[3];
-				float specular[3];
+            struct LightDataStruct
+            {
+                float ambient[3];
+                float diffuse[3];
+                float specular[3];
 
-				float position[3];
-				float direction[3];
+                float position[3];
+                float direction[3];
 
-				float spotparams[3];
+                float spotparams[3];
 
-				float rangesandtype[3];
+                float rangesandtype[3];
 
-				float pack[3];
+                float pack[3];
 
-				static size_t GetSizeInFloats(void);
-				static size_t GetSizeInBytes(void);
-			};
+                static size_t GetSizeInFloats(void);
+                static size_t GetSizeInBytes(void);
+            };
 
-			class IGLIBGRAPHICS_EXPORT LightData
-			{
-			public:
-				LightData(size_t initalEstimateNumLights, DataFormat format);
-				virtual ~LightData();
+            class IGLIBGRAPHICS_EXPORT LightData
+            {
+            public:
+                LightData(size_t initalEstimateNumLights, DataFormat format);
+                virtual ~LightData();
 
-				// Get the total number of lights that can be packed
-				size_t GetNumLightsPackable(void);
+                // Get the total number of lights that can be packed
+                size_t GetNumLightsPackable(void);
 
-				size_t GetWidth(void) const;
-				DataFormat GetFormat(void) const;
+                size_t GetWidth(void) const;
+                DataFormat GetFormat(void) const;
 
-				// Pack lights into the grid
-				void PackLights(const VectorLights& lights);
-				// Get the light grid data
-				const float32* GetPackedData(void) const;
-				int            GetPackedDataSizeInBytes(void) const;
-			private:
-				DataFormat m_Format;
-				size_t m_Width;
-				float32* m_pData;
-				int      m_NumPackedLights;
+                // Pack lights into the grid
+                void PackLights(const VectorLights& lights);
+                // Get the light grid data
+                const float32* GetPackedData(void) const;
+                int            GetPackedDataSizeInBytes(void) const;
+            private:
+                DataFormat m_Format;
+                size_t m_Width;
+                float32* m_pData;
+                int      m_NumPackedLights;
 
-				void PackLight(size_t offset, const Light* pLight, bool bUseVec1Vec2);
-			};
+                void PackLight(size_t offset, const Light* pLight, bool bUseVec1Vec2);
+            };
 
-		}
-	}
+        }
+    }
 }
 
 #pragma warning( pop )

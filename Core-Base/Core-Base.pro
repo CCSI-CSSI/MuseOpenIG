@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT     -= core gui
-CONFIG += silent
+CONFIG += silent warn_off
 
 TARGET = OpenIG-Base
 TEMPLATE = lib
@@ -13,28 +13,28 @@ TEMPLATE = lib
 DEFINES += IGCORE_LIBRARY
 
 SOURCES += \
-    animation.cpp\
-    commands.cpp\
-    configuration.cpp\
-    filesystem.cpp\
-    globalidgenerator.cpp\
-    imagegenerator.cpp\
-    mathematics.cpp\
-    stringutils.cpp
+    Animation.cpp\
+    Commands.cpp\
+    Configuration.cpp\
+    FileSystem.cpp\
+    IDPool.cpp\
+    ImageGenerator.cpp\
+    Mathematics.cpp\
+    StringUtils.cpp
 
 HEADERS += \
-    animation.h\
-    attributes.h\
-    commands.h\
-    config.h\
-    configuration.h\
-    export.h\
-    filesystem.h\
-    globalidgenerator.h\
-    igcore.h\
-    imagegenerator.h\
-    mathematics.h\
-    stringutils.h
+    Animation.h\
+    Types.h\
+    Commands.h\
+    Config.h\
+    Configuration.h\
+    Export.h\
+    FileSystem.h\
+    IDPool.h\
+    IGCore.h\
+    ImageGenerator.h\
+    Mathematics.h\
+    StringUtils.h
 
 INCLUDEPATH += ../
 DEPENDPATH += ../

@@ -6,7 +6,7 @@
 
 QT -= core gui
 
-CONFIG += silent
+CONFIG += silent warn_off
 
 TARGET = OpenIG-Plugin-CIGI
 TEMPLATE = lib
@@ -15,7 +15,7 @@ DEFINES += IGPLUGINCIGI_LIBRARY
 
 CONFIG -= warn_on
 
-SOURCES += igplugincigi.cpp
+SOURCES += IGPluginCIGI.cpp
 
 HEADERS +=
 

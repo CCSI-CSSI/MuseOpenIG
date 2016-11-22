@@ -1,6 +1,6 @@
 <OpenIG-Plugin-Config>
     <SilverLining-License-UserName>Compro</SilverLining-License-UserName>
-    <SilverLining-License-Key>MuseOpenIG</SilverLining-License-Key>
+    <SilverLining-License-Key>OpenIG</SilverLining-License-Key>
     <SilverLining-Resource-Path>/usr/local/SilverLining</SilverLining-Resource-Path>
     <SilverLining-Longitude>-43.6847</SilverLining-Longitude>
     <SilverLining-Latitude>-22.9159</SilverLining-Latitude>
@@ -8,9 +8,10 @@
     <SilverLining-Geocentric>no</SilverLining-Geocentric>
     <SilverLining-SkyBoxSize>50000</SilverLining-SkyBoxSize>
     <SilverLining-ForwardPlusEnabled>yes</SilverLining-ForwardPlusEnabled>
-    <SilverLining-ForwardPlusRange>1000</SilverLining-ForwardPlusRange>    
+    <SilverLining-ForwardPlusRange>1000</SilverLining-ForwardPlusRange>
     <SilverLining-UserDefinedGamma>no</SilverLining-UserDefinedGamma>
     <SilverLining-Gamma>0.8</SilverLining-Gamma>
     <SilverLining-LogZEnabled>yes</SilverLining-LogZEnabled>
-    <SilverLining-SkyModel>HosekWilkie</SilverLining-SkyModel> <!-- One of these: Simple, HosekWilkie, Preetham-->
+    <SilverLining-SkyModel>HosekWilkie</SilverLining-SkyModel>
+        <!-- One of these: Simple, HosekWilkie, Preetham-->
 </OpenIG-Plugin-Config>

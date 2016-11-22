@@ -1,22 +1,21 @@
-set( LIB_NAME OpenIG-Plugin-ForwardPlusLighting )
+SET( LIB_NAME OpenIG-Plugin-ForwardPlusLighting )
 
-
-set (HEADER_FILES
-	dummylight.h
-	forwardpluscullvisitor.h
-	forwardplusengine.h
-	forwardpluslightimplementationcallback.h
-	osgtofputils.h
-	lightmanagerstateattribute.h
+SET (HEADER_FILES
+            DummyLight.h
+            ForwardPlusCullVisitor.h
+            ForwardPlusEngine.h
+            ForwardPlusLightImplementationCallback.h
+            OSGtoFPUtils.h
+            LightManagerStateAttribute.h
 )
 
-set (SOURCE_FILES 
-	dummylight.cpp
-	forwardpluscullvisitor.cpp
-	forwardplusengine.cpp
-	forwardpluslightimplementationcallback.cpp
-	igpluginforwardpluslighting.cpp
-	lightmanagerstateattribute.cpp
+SET (SOURCE_FILES 
+            DummyLight.cpp
+            ForwardPlusCullVisitor.cpp
+            ForwardPlusEngine.cpp
+            ForwardPlusLightImplementationCallback.cpp
+            IGPluginForwardPlusLighting.cpp
+            LightManagerStateAttribute.cpp
 )
 
 FILE (GLOB SHADER_FILES 
@@ -31,7 +30,7 @@ FILE (GLOB SHADER_FILES
 
 SOURCE_GROUP(Shaders FILES ${SHADER_FILES})
 
-add_library( ${LIB_NAME} SHARED
+ADD_LIBRARY( ${LIB_NAME} SHARED
 	${HEADER_FILES} 
 	${SOURCE_FILES}
 	${SHADER_FILES}
@@ -39,12 +38,12 @@ add_library( ${LIB_NAME} SHARED
 	DataFiles/libIgPlugin-ForwardPlusLighting.so.xml
 )
 
-include_directories(
+INCLUDE_DIRECTORIES(
 		${Boost_INCLUDE_DIRS}
 )
 #$ENV{VLD_ROOT}/include
 
-target_link_libraries( ${LIB_NAME}
+TARGET_LINK_LIBRARIES( ${LIB_NAME}
     ${OSG_LIBRARIES}
     ${OPENGL_LIBRARY}
     ${GLU_LIBRARY}
@@ -55,35 +54,35 @@ target_link_libraries( ${LIB_NAME}
 )
 #$ENV{VLD_ROOT}/lib/Win64/vld.lib
 
-set_target_properties( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Plugin ForwardPlusLighting" )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Plugin ForwardPlusLighting" )
 
-include( PluginInstall REQUIRED )
+INCLUDE( PluginInstall REQUIRED )
 
-if (APPLE)
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-ForwardPlusLighting.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libOpenIG-Plugin-ForwardPlusLighting.dylib.xml)
-elseif(WIN32)
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-ForwardPlusLighting.so.xml DESTINATION ${INSTALL_BINDIR} RENAME OpenIG-Plugin-ForwardPlusLighting.dll.xml)
-else()
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-ForwardPlusLighting.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libOpenIG-Plugin-ForwardPlusLighting.so.xml)
-endif()
+IF (APPLE)
+    INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-ForwardPlusLighting.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libOpenIG-Plugin-ForwardPlusLighting.dylib.xml)
+ELSEIF(WIN32)
+    INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-ForwardPlusLighting.so.xml DESTINATION ${INSTALL_BINDIR} RENAME OpenIG-Plugin-ForwardPlusLighting.dll.xml)
+ELSE()
+    INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-ForwardPlusLighting.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libOpenIG-Plugin-ForwardPlusLighting.so.xml)
+ENDIF()
 
 SET(INSTALL_BINDIR bin)
-if (WIN32)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_vs.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_ps.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_math.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_preamble.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/shadow_vs.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/shadow_ps.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/lighting_math.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
-else()
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_vs.glsl DESTINATION /usr/local/openig/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_ps.glsl DESTINATION /usr/local/openig/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_math.glsl DESTINATION /usr/local/openig/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_preamble.glsl DESTINATION /usr/local/openig/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/shadow_vs.glsl DESTINATION /usr/local/openig/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/shadow_ps.glsl DESTINATION /usr/local/openig/resources/shaders)
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/lighting_math.glsl DESTINATION /usr/local/openig/resources/shaders)
-endif()
+IF (WIN32)
+	INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_vs.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
+	INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_ps.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
+	INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_math.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
+	INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_preamble.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
+	INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/shadow_vs.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
+	INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/shadow_ps.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
+	INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/lighting_math.glsl DESTINATION ${INSTALL_BINDIR}/resources/shaders)
+ELSE()
+	INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_vs.glsl DESTINATION /usr/local/openig/resources/shaders)
+	INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_ps.glsl DESTINATION /usr/local/openig/resources/shaders)
+	INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_math.glsl DESTINATION /usr/local/openig/resources/shaders)
+	INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/forwardplus_preamble.glsl DESTINATION /usr/local/openig/resources/shaders)
+	INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/shadow_vs.glsl DESTINATION /usr/local/openig/resources/shaders)
+	INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/shadow_ps.glsl DESTINATION /usr/local/openig/resources/shaders)
+	INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/../Resources/shaders/lighting_math.glsl DESTINATION /usr/local/openig/resources/shaders)
+ENDIF()

@@ -6,7 +6,7 @@
 
 QT       -= core gui
 
-#CONFIG += silent
+CONFIG += silent warn_off
 
 TARGET = OpenIG-Plugin-Triton
 TEMPLATE = lib
@@ -15,7 +15,7 @@ DEFINES += IGPLUGINTRITON_LIBRARY
 
 CONFIG -= warn_on
 
-SOURCES +=	igplugintriton.cpp \
+SOURCES += IGPluginTriton.cpp\
         TritonDrawable.cpp \
         PlanarReflection.cpp
 

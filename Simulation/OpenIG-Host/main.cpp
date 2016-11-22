@@ -25,6 +25,10 @@
 //#*    Email address: openig@compro.net
 //#*
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 //#*	author    Trajce Nikolov Nick openig@compro.net
 //#*	copyright(c)Compro Computer Services, Inc.
@@ -32,26 +36,30 @@
 //#*    Please direct any questions or comments to the OpenIG Forums
 //#*    Email address: openig@compro.net
 //#*
+//#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
 
-#include <OpenIG-Protocol/header.h>
-#include <OpenIG-Protocol/entitystate.h>
-#include <OpenIG-Protocol/hot.h>
-#include <OpenIG-Protocol/los.h>
-#include <OpenIG-Protocol/camera.h>
-#include <OpenIG-Protocol/hotresponse.h>
-#include <OpenIG-Protocol/losresponse.h>
-#include <OpenIG-Protocol/camera.h>
-#include <OpenIG-Protocol/tod.h>
-#include <OpenIG-Protocol/command.h>
-#include <OpenIG-Protocol/lightstate.h>
+#include <OpenIG-Protocol/Header.h>
+#include <OpenIG-Protocol/EntityState.h>
+#include <OpenIG-Protocol/HOT.h>
+#include <OpenIG-Protocol/LOS.h>
+#include <OpenIG-Protocol/Camera.h>
+#include <OpenIG-Protocol/HOTResponse.h>
+#include <OpenIG-Protocol/LOSResponse.h>
+#include <OpenIG-Protocol/Camera.h>
+#include <OpenIG-Protocol/TOD.h>
+#include <OpenIG-Protocol/Command.h>
+#include <OpenIG-Protocol/LightState.h>
 
-#include <OpenIG-Networking/udpnetwork.h>
-#include <OpenIG-Networking/tcpclient.h>
-#include <OpenIG-Networking/buffer.h>
-#include <OpenIG-Networking/factory.h>
-#include <OpenIG-Networking/parser.h>
+#include <OpenIG-Networking/UDPNetwork.h>
+#include <OpenIG-Networking/TCPClient.h>
+#include <OpenIG-Networking/Buffer.h>
+#include <OpenIG-Networking/Factory.h>
+#include <OpenIG-Networking/Parser.h>
 
-#include <OpenIG-Base/mathematics.h>
+#include <OpenIG-Base/Mathematics.h>
 
 #include <osg/ArgumentParser>
 #include <osg/Matrix>

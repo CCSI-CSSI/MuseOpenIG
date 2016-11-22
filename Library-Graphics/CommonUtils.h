@@ -31,19 +31,20 @@ THE SOFTWARE.
 
 #include <string>
 
+#ifdef _WIN32
 #pragma warning( push )
 #pragma warning( disable : 4005 )
-
+#endif
 
 #define TYPE_TO_STRING(T) std::string(#T)
 
 #define VAR_NAME_TO_STRING(T) std::string(#T)
 
 #define SAFE_DELETE(p) if (p) \
-					   { \
-					   delete p; \
-					   p = 0; \
-					   } \
+                       { \
+                       delete p; \
+                       p = 0; \
+                       } \
 
 #define SAFE_DELETE_ARRAY(p) { if (p) { delete[] (p);   (p)=NULL; } }
 
@@ -60,6 +61,7 @@ THE SOFTWARE.
 
 #define OIG_UNREFERENCED_VARIABLE(x) static_cast<void>(x)
 
-#pragma warning ( pop ) 
-
+#ifdef _WIN32
+#pragma warning ( pop )
+#endif
 #endif

@@ -6,37 +6,36 @@
 
 QT       -= core gui
 
-CONFIG += silent
+CONFIG += silent warn_off
 
 TARGET = OpenIG-Protocol
 TEMPLATE = lib
 
 DEFINES += IGLIBPROTOCOL_LIBRARY
 
-SOURCES +=  header.cpp\
-            camera.cpp\
-            entitystate.cpp\
-            hot.cpp\
-            hotresponse.cpp\
-            los.cpp\
-            losresponse.cpp\
-            tod.cpp\
-            command.cpp\
-            lightstate.cpp
+SOURCES +=  Header.cpp\
+            Camera.cpp\
+            EntityState.cpp\
+            HOT.cpp\
+            HOTResponse.cpp\
+            LOS.cpp\
+            LOSResponse.cpp\
+            TOD.cpp\
+            Command.cpp\
+            LightState.cpp
 
-
-HEADERS +=  export.h\
-            opcodes.h\
-            header.h\
-            entitystate.h\
-            camera.h\
-            hot.h\
-            hotresponse.h\
-            los.h\
-            losresponse.h\
-            tod.h\
-            command.h\
-            lightstate.h
+HEADERS +=  Export.h\
+            Opcodes.h\
+            Header.h\
+            EntityState.h\
+            Camera.h\
+            HOT.h\
+            HOTResponse.h\
+            LOS.h\
+            LOSResponse.h\
+            TOD.h\
+            Command.h\
+            LightState.h
 
 INCLUDEPATH += ../
 DEPENDPATH += ../

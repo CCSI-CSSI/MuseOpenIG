@@ -25,9 +25,17 @@
 //#*    Email address: openig@compro.net
 //#*
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 //#*	author    Trajce Nikolov Nick openig@compro.net
 //#*	copyright(c)Compro Computer Services, Inc.
+//#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
 //#*
 //#*    Please direct any questions or comments to the OpenIG Forums
 //#*    Email address: openig@compro.net

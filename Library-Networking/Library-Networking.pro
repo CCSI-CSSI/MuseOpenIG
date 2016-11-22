@@ -6,31 +6,31 @@
 
 QT       -= core gui
 
-CONFIG += silent
+CONFIG += silent warn_off
 
 TARGET = OpenIG-Networking
 TEMPLATE = lib
 
 DEFINES += IGLIBNETWORKING_LIBRARY
 
-SOURCES +=  buffer.cpp\
-            network.cpp\
-            packet.cpp\
-            udpnetwork.cpp\
-            tcpserver.cpp\
-            tcpclient.cpp\
-            factory.cpp
+SOURCES +=  Buffer.cpp\
+            Network.cpp\
+            Packet.cpp\
+            UDPNetwork.cpp\
+            TCPServer.cpp\
+            TCPClient.cpp\
+            Factory.cpp
 
-HEADERS +=  export.h\
-            buffer.h\
-            network.h\
-            packet.h\
-            udpnetwork.h\
-            parser.h\
-            tcpserver.h\
-            tcpclient.h\
-            error.h\
-            factory.h
+HEADERS +=  Export.h\
+            Buffer.h\
+            Network.h\
+            Packet.h\
+            UDPNetwork.h\
+            Parser.h\
+            TCPServer.h\
+            TCPClient.h\
+            Error.h\
+            Factory.h
 
 INCLUDEPATH += ../
 DEPENDPATH += ../

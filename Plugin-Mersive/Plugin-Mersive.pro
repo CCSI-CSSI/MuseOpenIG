@@ -6,13 +6,14 @@
 
 QT       -= core gui
 QT       += xml network
+CONFIG +=  silent warn_off
 
 TARGET = OpenIG-Plugin-Mersive
 TEMPLATE = lib
 
 DEFINES += IGPLUGINMERSIVE_LIBRARY
 
-SOURCES += igpluginmersive.cpp
+SOURCES += IGPluginMersive.cpp
 
 HEADERS +=
 

@@ -1,5 +1,5 @@
 TEMPLATE = app
-CONFIG += console silent
+CONFIG += console silent warn_off
 CONFIG -= app_bundle
 CONFIG -= qt
 
@@ -33,11 +33,11 @@ unix {
     # library version number files
     exists( "../openig_version.pri" ) {
 
-	include( "../openig_version.pri" )
+    include( "../openig_version.pri" )
         isEmpty( VERSION ){ !build_pass:error($$basename(_PRO_FILE_) -- bad or undefined VERSION variable inside file openig_version.pri)
-	} else {
+    } else {
         !build_pass:message($$basename(_PRO_FILE_) -- Set version info to: $$VERSION)
-	}
+    }
 
     }
     else { !build_pass:error($$basename(_PRO_FILE_) -- could not find pri library version file openig_version.pri) }

@@ -6,33 +6,33 @@
 
 QT       -= core gui
 
-#CONFIG += silent
+CONFIG += silent warn_off
 
 TARGET = OpenIG-Engine
 TEMPLATE = lib
 
 DEFINES += OPENIG_LIBRARY
 
-SOURCES +=  commands.cpp\
-            help.cpp\
-            keypad.cpp\
-            lights.cpp\
-            openig.cpp\
-            splash.cpp\
-            terminal.cpp\
-            effects.cpp
+SOURCES +=  Commands.cpp\
+            Help.cpp\
+            Keypad.cpp\
+            Lights.cpp\
+            Engine.cpp\
+            Splash.cpp\
+            Terminal.cpp\
+            Effects.cpp
 
-HEADERS +=  config.h\
-            export.h\
-            keypad.h\
-            openig.h\
-            renderbins.h
+HEADERS +=  Config.h\
+            Export.h\
+            Keypad.h\
+            Engine.h\
+            RenderBins.h
 
 
 INCLUDEPATH += ../
 DEPENDPATH += ../
 
-LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgGA -losgText\
+LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgGA -losgText -losgUtil\
         -losgShadow -losgSim -losgParticle -lOpenIG-Base -lOpenIG-PluginBase
 
 OTHER_FILES += CMakeLists.txt
@@ -69,6 +69,18 @@ unix {
 
     QMAKE_POST_LINK  = test -d $$quote($$HDESTDIR) || $$QMAKE_MKDIR $$quote($$HDESTDIR) $$escape_expand(\\n\\t)
     QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$HFILES) $$quote($$HDESTDIR) $$escape_expand(\\n\\t)
+
+    SFILES   = $$files($${PWD}/../Resources/shaders/logz*.glsl)
+    SDESTDIR = /usr/local/openig/resources/shaders/
+
+#   Get the filename(only) list for distclean to remove only the files added from this plugin
+    for(var,SFILES) {
+        distfiles += $$SDESTDIR/$$basename(var)
+    }
+    QMAKE_DISTCLEAN += $$distfiles
+
+    QMAKE_POST_LINK += test -d $$quote($$SDESTDIR) || $$QMAKE_MKDIR $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$SFILES) $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
 
     # library version number files
     exists( "../openig_version.pri" ) {
@@ -136,4 +148,22 @@ win32 {
 
     QMAKE_POST_LINK  = test -d $$quote($$HDESTDIR) || $$QMAKE_MKDIR $$quote($$HDESTDIR) $$escape_expand(\\n\\t)
     QMAKE_POST_LINK += $$QMAKE_COPY $$PDIR\*.h $$quote($$HDESTDIR) $$escape_expand(\\n\\t)
+
+    SFILES   = $$files($${PWD}/../Resources/shaders/logz*.glsl)
+    SDESTDIR = $$OPENIGBUILD/bin/resources/shaders/
+
+    SFILES ~= s,/,\\,g
+    SDESTDIR ~= s,/,\\,g
+
+#   Get the filename(only) list for distclean to remove only the files added from this plugin
+    for(var,SFILES) {
+        distfiles += $$SDESTDIR\\$$basename(var)
+    }
+    QMAKE_DISTCLEAN += $$distfiles
+
+    PDIR = $${PWD}/../Resources/shaders
+    PDIR ~= s,/,\\,g
+
+    QMAKE_POST_LINK += if not exist $$quote($$SDESTDIR) $$QMAKE_MKDIR $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$PDIR\logz*.glsl) $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
 }

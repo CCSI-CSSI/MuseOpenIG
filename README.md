@@ -1,9 +1,52 @@
 The Muse OpenIG.  An opensource OpenSceneGraph based image generator application suite.
 Documentation, sample datasets and Binary Downloads for some platforms available at: http://openig.compro.net
 
+# Muse OpenIG V2.0.4
+- Camel case file naming convention as in OSG, osgearth, SilverLining, Triton and bunch of other modern software projects.
+  The file names were lowercase since the start of the project was on Linux with QtCreator. Now it matches the known
+  opensource standards
+
+- Core-OpenIG openig.h/cpp renamed to Engine.h/cpp. It is unobvious the file name to be different then the contained class
+
+- Core-Base/Attributes.h renamed to Types.h - this was also due historical reasons from the time where this file was
+  containing only the Attributes struct before adding more stuff into
+
+- Small optimization for F+
+
+- Use of upper case only commands across all the CMakeLists.txt .. it was mixed lower/upper from copying code
+
+- Fixed few build scripts to get clean build on Windows removed ccl.lib and instead used the variables from the
+  CMake macros - ${CCL_LIBRARY}
+
+- SilverLining plugin has some new commands: createcloudfile, loadcloudfile, removecloudfile and enableclouds. These new commands
+  are used to create a cloud layer and save it to a file at start of the OpenIG application so that you can use the loadcloudfile
+  command later during realtime and not have as long of a delay before the clouds are loaded into the SL atmosphere. To even make this
+  faster you can load the clouds into the SL amosphere already disabled, then just re-enable them when you want them visible.
+  The enable happens almost immediately.  This is the purpose of the new enableclouds command, using it you can disable or enable a
+  cloud layer from showing on your scene.  Once the layer is disabled, it no longer cause a performance hit within your application,
+  its like it is not there at all.  The enableclouds command just requires the OIG ID number of the cloud layer and a true or false.
+  We also added an optional enable argument to the current addclouds command, which can be used to load the cloud layer enabled or
+  disabled now using true/false as the new argument at the end of the argument list, true being the layer is enabled and visible.
+
+- NickT - fixed a bug in the lightenable command that dealt with lights that are animated/pulsing and would not turn off.  These
+  animaged lights now turn on/off correctly via the enablelight command.
+
+- Updated Sundogs SilverLining to 4.073 and Triton to 3.76 for the Windows binary release, these releases contain bug fixes and some
+  performance increases.
+
+- Remove Plugin-Muse as it was confusing some users since it will not compile due to missing some proprietary include files and libs.
+  It was only meant to serve as an example plugin.
+
+- The Dataset binaries that go with this binary release have also been updated due to some changes in a few of the models xml config
+  files.
+
+- This release has been tested on Windows 7 with VS2013 SP3 and QT5.4.2 and on OpenSuSE 64bit Linux 13.2, Qt 5.4.2 and the latest GCC
+  compiler and linker as of this release.  The Windows binary installers were built with the just referenced packages.
+
 # Muse OpenIG V2.0.3
   UDP network protocol is no longer defaulted to be a broadcast only, configurable
-  via the network plugins xml config/datafile, as requested in pull request #5 & #6 by jenglish.
+  via the network plugins xml config/datafile, as requested in pull request #5 & #6
+  on the public GitHub OpenIG website, by jenglish.
 
   Some content has been moved into the new Core-Utils directory, just keep in
   mind in case of compile time errors after updating.
@@ -14,8 +57,8 @@ Documentation, sample datasets and Binary Downloads for some platforms available
 
 # Muse OpenIG V2.0.2
 #  New CIGI plugin -- Sample code demonstrates how to implement the CIGI protocol with OpenIG.
-   This new OpenIG plugin is based on and uses Boeing's CIGI Class Library.  Boeing also provides a 
-   CIGI Host Emulator application for Windows based systems and we have integrated 
+   This new OpenIG plugin is based on and uses Boeing's CIGI Class Library.  Boeing also provides a
+   CIGI Host Emulator application for Windows based systems and we have integrated
    it with our Application-Earth OSGEarth test application to give you a very basic working example
    to use as a starting point for your CIGI implementation.  The emulator is not available as part
    of OpenIG but can be downloaded separately at: [Boeing Emulator](http://cigi.sourceforge.net/products.php)
@@ -25,7 +68,7 @@ Documentation, sample datasets and Binary Downloads for some platforms available
 -----------------------------------------------------------------------------------------------------------------
 Dependencies for compiling from source:
 --------------------------------------
-*   Minimum of OpenSceneGraph 3.3.7 
+*   Minimum of OpenSceneGraph 3.3.7
     A patched version of OSG 3.3.7 is available on our [Downloads](http://openig.compro.net/download-openig.html)
     page, that contains some updates and allows full functionality
     of all features of MuseOpenIG.

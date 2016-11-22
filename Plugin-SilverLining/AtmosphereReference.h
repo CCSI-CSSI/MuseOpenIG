@@ -26,6 +26,10 @@
 //#*    Email address: openig@compro.net
 //#*
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 
 

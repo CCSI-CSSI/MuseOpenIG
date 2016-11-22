@@ -25,25 +25,29 @@
 //#*    Email address: openig@compro.net
 //#*
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
-#include <OpenIG-PluginBase/plugin.h>
-#include <OpenIG-PluginBase/plugincontext.h>
+#include <OpenIG-PluginBase/Plugin.h>
+#include <OpenIG-PluginBase/PluginContext.h>
 
-#include <OpenIG-Networking/packet.h>
-#include <OpenIG-Networking/network.h>
-#include <OpenIG-Networking/udpnetwork.h>
-#include <OpenIG-Networking/buffer.h>
-#include <OpenIG-Networking/parser.h>
-#include <OpenIG-Networking/factory.h>
+#include <OpenIG-Networking/Packet.h>
+#include <OpenIG-Networking/Network.h>
+#include <OpenIG-Networking/UDPNetwork.h>
+#include <OpenIG-Networking/Buffer.h>
+#include <OpenIG-Networking/Parser.h>
+#include <OpenIG-Networking/Factory.h>
 
-#include <OpenIG-Protocol/header.h>
-#include <OpenIG-Protocol/entitystate.h>
-#include <OpenIG-Protocol/camera.h>
-#include <OpenIG-Protocol/tod.h>
-#include <OpenIG-Protocol/lightstate.h>
-#include <OpenIG-Protocol/command.h>
+#include <OpenIG-Protocol/Header.h>
+#include <OpenIG-Protocol/EntityState.h>
+#include <OpenIG-Protocol/Camera.h>
+#include <OpenIG-Protocol/TOD.h>
+#include <OpenIG-Protocol/LightState.h>
+#include <OpenIG-Protocol/Command.h>
 
-#include <OpenIG-Base/commands.h>
+#include <OpenIG-Base/Commands.h>
 
 #include <iostream>
 
@@ -93,7 +97,6 @@ namespace OpenIG {
                 OpenIG::Library::Protocol::Header* h = dynamic_cast<OpenIG::Library::Protocol::Header*>(&packet);
                 if (h)
                 {
-                    //std::cout << "SimPlugin TCP -- HeaderCallBack frame: " << h->frameNumber <<  std::endl;
                     if (h->masterIsDead == 1) imageGenerator->getViewer()->setDone(true);
                 }
             }
@@ -115,7 +118,6 @@ namespace OpenIG {
                 OpenIG::Library::Protocol::EntityState* es = dynamic_cast<OpenIG::Library::Protocol::EntityState*>(&packet);
                 if (es)
                 {
-                    //std::cout << "SimPlugin -- Entity ID: " << es->entityID << ", updated!!" << std::endl;
                     imageGenerator->updateEntity(es->entityID, es->mx);
                 }
             }
@@ -136,7 +138,6 @@ namespace OpenIG {
                 OpenIG::Library::Protocol::TOD* tod = dynamic_cast<OpenIG::Library::Protocol::TOD*>(&packet);
                 if (tod)
                 {
-                    //std::cout << "SimPlugin UDP -- TOD Hour: " << tod->hour << ", minutes: " << tod->minutes << std::endl;
                     imageGenerator->setTimeOfDay(tod->hour, tod->minutes);
                 }
             }
@@ -157,7 +158,6 @@ namespace OpenIG {
                 OpenIG::Library::Protocol::Command* command = dynamic_cast<OpenIG::Library::Protocol::Command*>(&packet);
                 if (command)
                 {
-                    //std::cout << "SimPlugin UDP -- Command: " << command->command << std::endl;
                     OpenIG::Base::Commands::instance()->exec(command->command);
                 }
             }
@@ -179,7 +179,7 @@ namespace OpenIG {
                 if (ls)
                 {
                     imageGenerator->enableLight(ls->id,ls->enabled);
-                    std::cout << "SimPlugin UDP Light ID: " << ls->id << ", enabled: " << ls->enabled << std::endl;
+                    std::cout << "Light ID: " << ls->id << ", enabled: " << ls->enabled << std::endl;
                 }
             }
 
@@ -201,17 +201,10 @@ namespace OpenIG {
                 {
                     if (cp->bindToEntity)
                         imageGenerator->bindCameraUpdate(osg::Matrixd::inverse(cp->mx));
-                    else if (cp->inverse == 1)
+                    else
                     {
                         // And make it a view one by its inverse
                         imageGenerator->setCameraPosition(osg::Matrixd::inverse(cp->mx), true);
-                        //std::cout << "SimPlugin UDP inverted CameraCallback!!" << std::endl;
-                    }
-                    else
-                    {
-                        // And make it a view one, NON-inverted
-                        imageGenerator->setCameraPosition(cp->mx, true);
-                        //std::cout << "SimPlugin UDP NOT inverted CameraCallback!!" << std::endl;
                     }
                 }
             }
@@ -261,9 +254,8 @@ namespace OpenIG {
             {
                 std::cout << "CustomPlugin - init" << std::endl;
 
-                std::string		 host = "10.5.63.12";
-                std::string localhost = "127.0.0.1";
-                unsigned int	 port = 8888;
+                std::string		host = "127.0.0.1";
+                unsigned int	port = 8888;
 
                 _network = boost::shared_ptr<OpenIG::Library::Networking::UDPNetwork>(new OpenIG::Library::Networking::UDPNetwork(host));
                 _network->setPort(port);
@@ -276,33 +268,15 @@ namespace OpenIG {
                 _network->addCallback((OpenIG::Library::Networking::Packet::Opcode)OPCODE_COMMAND, new CommandCallback(context.getImageGenerator()));
 
                 _network->setParser(new Parser);
-
-                _localhost = boost::shared_ptr<OpenIG::Library::Networking::UDPNetwork>(new OpenIG::Library::Networking::UDPNetwork(localhost));
-                _localhost->setPort(port);
-
-                _localhost->addCallback((OpenIG::Library::Networking::Packet::Opcode)OPCODE_HEADER, new HeaderCallback(context.getImageGenerator()));
-                _localhost->addCallback((OpenIG::Library::Networking::Packet::Opcode)OPCODE_ENTITYSTATE, new EntityStateCallback(context.getImageGenerator()));
-                _localhost->addCallback((OpenIG::Library::Networking::Packet::Opcode)OPCODE_CAMERA, new CameraCallback(context.getImageGenerator()));
-                _localhost->addCallback((OpenIG::Library::Networking::Packet::Opcode)OPCODE_TOD, new TODCallback(context.getImageGenerator()));
-                _localhost->addCallback((OpenIG::Library::Networking::Packet::Opcode)OPCODE_LIGHTSTATE, new LightStateCallback(context.getImageGenerator()));
-                _localhost->addCallback((OpenIG::Library::Networking::Packet::Opcode)OPCODE_COMMAND, new CommandCallback(context.getImageGenerator()));
-
-                _localhost->setParser(new Parser);
             }
 
             virtual void update(OpenIG::PluginBase::PluginContext&)
             {
                 //std::cout << "CustomPlugin - update" << std::endl;
 
-//                if (_network)
-//                {
-//                    std::cout << "CustomPlugin - network processing" << std::endl;
-//                    _network->process();
-//                }
-                if (_localhost)
+                if (_network)
                 {
-                    //std::cout << "CustomPlugin - localhost processing" << std::endl;
-                    _localhost->process();
+                    _network->process();
                 }
             }
 
@@ -329,7 +303,6 @@ namespace OpenIG {
         protected:
             // The network
             boost::shared_ptr<OpenIG::Library::Networking::Network>		_network;
-            boost::shared_ptr<OpenIG::Library::Networking::Network>		_localhost;
             // The View heading offset. Passed from the IG
             double														_headingOffset;
         };

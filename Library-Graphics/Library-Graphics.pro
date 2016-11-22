@@ -6,7 +6,7 @@
 
 QT       -= core gui
 
-CONFIG += silent
+CONFIG += silent warn_off
 
 TARGET = OpenIG-Graphics
 TEMPLATE = lib
@@ -63,7 +63,7 @@ HEADERS +=  AxisAlignedBoundingBox.h \
             Vector4.h\
             VectorForwardDeclare.h\
             VectorUtils.h\
-            export.h
+            Export.h
 
 
 INCLUDEPATH += ../
@@ -73,6 +73,9 @@ OTHER_FILES += CMakeLists.txt
 DISTFILES += CMakeLists.txt
 
 unix {
+QMAKE_CFLAGS   += -Wunused-local-typedefs
+QMAKE_CXXFLAGS += -Wunused-local-typedefs
+
     !mac:contains(QMAKE_HOST.arch, x86_64):{
         DESTDIR = /usr/local/lib64
         LIBS+=-L/usr/local/lib64
@@ -124,11 +127,11 @@ unix {
     # library version number files
     exists( "../openig_version.pri" ) {
 
-	include( "../openig_version.pri" )
+    include( "../openig_version.pri" )
         isEmpty( VERSION ){ !build_pass:error( "$$basename(_PRO_FILE_) -- bad or undefined VERSION variable inside file openig_version.pri" )
-	} else {
+    } else {
         !build_pass:message("$$basename(_PRO_FILE_) -- Set version info to: $$VERSION" )
-	}
+    }
 
     }
     else { !build_pass:error( "$$basename(_PRO_FILE_) -- could not find pri library version file openig_version.pri" ) }

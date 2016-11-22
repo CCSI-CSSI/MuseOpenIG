@@ -1,37 +1,40 @@
-CONFIG  += ordered release silent
+CONFIG  += ordered release silent warn_off
 TEMPLATE = subdirs
-SUBDIRS +=  Library-Graphics \
-            Core-Base \
-            Core-PluginBase \
-            Core-OpenIG \
-            Core-Utils \
-            Plugin-SkyDome \
-            Utility-veggen \
-            Utility-vegviewer \
-            Utility-oigconv \
-            Plugin-GPUVegetation \
-            Plugin-LightsControl \
-            Plugin-SimpleLighting \
-            Plugin-ForwardPlusLighting \
-            Plugin-VDBOffset \
-            Plugin-ModelComposition \
-            Plugin-Animation \
-            Plugin-FBXAnimation \
-            Plugin-OSGParticleEffects \
-            Library-Networking \
-            Library-Protocol \
-            Plugin-Networking \
+SUBDIRS +=  Library-Graphics\
+            Core-Base\
+            Core-PluginBase\
+            Core-OpenIG\
+            Core-Utils\
+            Plugin-SkyDome\
+            Utility-veggen\
+            Utility-vegviewer\
+            Utility-oigconv\
+            Plugin-GPUVegetation\
+            Plugin-LightsControl\
+            Plugin-SimpleLighting\
+            Plugin-ForwardPlusLighting\
+            Plugin-VDBOffset\
+            Plugin-ModelComposition\
+            Plugin-Animation\
+            Plugin-FBXAnimation\
+            Plugin-OSGParticleEffects\
+            Library-Networking\
+            Library-Protocol\
+            Plugin-Networking\
+            Plugin-OigWidget\
             Application-A320
 
 OTHER_FILES += CMakeModules/*.* \
                InstallerSpecificFiles/*.* \
                releasenotes.txt \
+               Doxyfile \
                README.md \
                INSTALL \
                openig_version.pri \
                CMakeLists.txt \
                OpenIG_Environmental_Vars.reg \
                LICENSE \
+               LICENSE.addendum \
                Resources/*.* \
                Resources/shaders/*.* \
                Resources/shaders/SilverLining/Original/*.* \
@@ -42,7 +45,7 @@ OTHER_FILES += CMakeModules/*.* \
 
 unix {
 #SILVERLINING
-    exists( /usr/local/lib/libSilverLining* ){
+    exists( /usr/local/lib/libSilverLining* )|exists( /usr/local/lib64/libSilverLining* ){
         message( "Configuring system to build with Sundog-Software's SilverLining..." )
         SUBDIRS += Plugin-SilverLining
     }else{
@@ -50,7 +53,7 @@ unix {
     }
 
 #TRITON
-    exists( /usr/local/lib/libTriton* ){
+    exists( /usr/local/lib/libTriton* )|exists( /usr/local/lib64/libTriton* ){
         message( "Configuring system to build with Sundog-Software's Triton..." )
         SUBDIRS += Plugin-Triton
     }else{
@@ -58,7 +61,7 @@ unix {
     }
 
 #CSTSHARE
-    exists( /usr/local/lib/libCstShare* ){
+    exists( /usr/local/lib/libCstShare* )|exists( /usr/local/lib64/libCstShare* ){
         message( "Configuring system to build with Legacy Muse products, legacy Muse libraries were found!!!......" )
         SUBDIRS += Plugin-Muse
     }else{
@@ -66,7 +69,8 @@ unix {
     }
 
 #BULLET
-    !mac:exists( /usr/local/lib/libBullet* ):exists( /usr/local/lib64/libosgb* ) {
+    !mac:exists( /usr/local/lib64/libBullet* )|exists( /usr/local/lib/libBullet* ):
+    !mac:exists( /usr/local/lib64/libosgb* )|exists( /usr/local/lib/libosgb* ){
         message( "Configuring system to build with Bullets ..." )
         SUBDIRS += Library-Bullet
         SUBDIRS += Plugin-Bullet
@@ -86,7 +90,7 @@ unix {
     }
 
 #OSGEarth
-    !mac:exists( /usr/local/lib64/libosgEarth* ){
+    !mac:exists( /usr/local/lib64/libosgEarth* )|exists( /usr/local/lib/libosgEarth* ) {
         message( "Configuring system to build with osgEarth ..." )
         SUBDIRS += Plugin-OSGEarthSimpleLighting
         SUBDIRS += Application-Earth
@@ -102,7 +106,8 @@ unix {
     }
 
 #MYGUI
-    !mac:exists( /usr/local/lib64/libMyGUIEngine* ):exists( /usr/local/lib64/libMyGUI.OpenGLPlatform.a ){
+    !mac:exists( /usr/local/lib64/libMyGUIEngine* )|exists( /usr/local/lib/libMyGUIEngine* ):
+    !mac:exists( /usr/local/lib64/libMyGUI.OpenGLPlatform.a )|exists( /usr/local/lib/libMyGUI.OpenGLPlatform.a ){
         message( "Configuring system to build with MyGUI ..." )
         SUBDIRS += Plugin-UI
     }else{
@@ -116,7 +121,7 @@ unix {
     }
 
 ##CIGI
-    exists( /usr/local/lib64/libcigicl* ){
+    exists( /usr/local/lib64/libcigicl* )|exists( /usr/local/lib/libcigicl* ){
         message( "Configuring system to build with CIGI Class Libraries..." )
         SUBDIRS += Plugin-CIGI
     }else{
@@ -138,13 +143,13 @@ unix {
     }
 
 ##JRM Sensors
-#    JRMPATH = $$(JRM_OSV_PATH)
-#    isEmpty(JRMPATH) {
-#         message( "JRM Sensors not found on system, The JRM Sensor plugin is not included in the build ..." )
-#    }else{
-#         message( "Configuring system to build with JRM Sensors..." )
-#         SUBDIRS += Plugin-JRMSensors
-#    }
+    JRMPATH = $$(JRM_OSV_PATH)
+    isEmpty(JRMPATH) {
+         message( "JRM Sensors not found on system, The JRM Sensor plugin is not included in the build ..." )
+    }else{
+         message( "Configuring system to build with JRM Sensors..." )
+         SUBDIRS += Plugin-JRMSensors
+    }
 }
 
 win32 {

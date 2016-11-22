@@ -1,32 +1,32 @@
-set( LIB_NAME OpenIG-Bullet )
-set( HEADER_PATH ${PROJECT_SOURCE_DIR}/Library-Bullet )
-add_definitions( -DIGLIBBULLET_LIBRARY )
+SET( LIB_NAME OpenIG-Bullet )
+SET( HEADER_PATH ${PROJECT_SOURCE_DIR}/Library-Bullet )
+ADD_DEFINITIONS( -DIGLIBBULLET_LIBRARY )
 
-set( LIB_PUBLIC_HEADERS
-    ${HEADER_PATH}/export.h
-	${HEADER_PATH}/bulletmanager.h
-	${HEADER_PATH}/configreader.h	
-	${HEADER_PATH}/vehicle.h	
+SET( LIB_PUBLIC_HEADERS
+    ${HEADER_PATH}/Export.h
+	${HEADER_PATH}/BulletManager.h
+	${HEADER_PATH}/ConfigReader.h	
+	${HEADER_PATH}/Vehicle.h	
 )
 
-set( _IgLibBulletSourceFiles
-    bulletmanager.cpp
-	configreader.cpp
-	vehicle.cpp
+SET( LibBulletSourceFiles
+    BulletManager.cpp
+	ConfigReader.cpp
+	Vehicle.cpp
 )
 
-add_library( ${LIB_NAME} SHARED
+ADD_LIBRARY( ${LIB_NAME} SHARED
     ${LIB_PUBLIC_HEADERS}
-    ${_IgLibBulletSourceFiles}
+    ${LibBulletSourceFiles}
 )
 
-include_directories(
+INCLUDE_DIRECTORIES(
 	${Boost_INCLUDE_DIRS}
 	${BULLET_INCLUDE_DIR}
 	${OSGBULLET_INCLUDE_DIR}
 )
 
-target_link_libraries( ${LIB_NAME}    
+TARGET_LINK_LIBRARIES( ${LIB_NAME}    
 	${OSG_LIBRARIES}
 	${OSGBULLET_LIBRARIES}
 	${BULLET_LIBRARIES}
@@ -34,9 +34,9 @@ target_link_libraries( ${LIB_NAME}
 	OpenIG-Base
 )
 
-set_target_properties( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Library Bullet" )
-set_target_properties (${target} PROPERTIES DEFINE_SYMBOL  "IGLIBBULLET_LIBRARY")
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Library Bullet" )
+SET_TARGET_PROPERTIES (${target} PROPERTIES DEFINE_SYMBOL  "IGLIBBULLET_LIBRARY")
 
-include( ModuleInstall REQUIRED )
+INCLUDE( ModuleInstall REQUIRED )

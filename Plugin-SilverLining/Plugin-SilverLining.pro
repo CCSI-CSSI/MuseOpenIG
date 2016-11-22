@@ -6,7 +6,7 @@
 
 QT -= core gui
 
-CONFIG += silent
+CONFIG += silent warn_off
 
 TARGET = OpenIG-Plugin-SilverLining
 TEMPLATE = lib
@@ -15,7 +15,7 @@ DEFINES += IGPLUGINSILVERLINING_LIBRARY
 
 CONFIG -= warn_on
 
-SOURCES += igpluginsilverlining.cpp \
+SOURCES += IGPluginSilverLining.cpp\
     SkyDrawable.cpp \
     CloudsDrawable.cpp
 
@@ -58,7 +58,6 @@ unix {
     DEPENDPATH += /usr/local/include/Public_Headers
 
     LIBS += -lSilverLiningOpenGL
-
     #
     # Allow alternate boost library path to be set via ENV variable
     #
@@ -183,6 +182,7 @@ win32 {
     DESTDIR = $$OPENIGBUILD/lib
     DLLDESTDIR = $$OPENIGBUILD/bin/plugins
 
+    QMAKE_LFLAGS += /force:multiple
     LIBS += -L$$OPENIGBUILD/lib
 
     SLROOT = $$(SILVERLINING)

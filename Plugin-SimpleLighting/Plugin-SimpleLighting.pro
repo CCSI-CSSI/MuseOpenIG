@@ -6,14 +6,14 @@
 
 QT       -= core gui
 
-#CONFIG += silent
+CONFIG += silent warn_off
 
 TARGET = OpenIG-Plugin-SimpleLighting
 TEMPLATE = lib
 
 DEFINES += IGPLUGINSIMPLELIGHTING_LIBRARY
 
-SOURCES += igpluginsimplelighting.cpp
+SOURCES += IGPluginSimpleLighting.cpp
 
 HEADERS +=
 
@@ -59,6 +59,18 @@ unix {
     #remove the files we manually installed above when we do a make distclean....
     #!build_pass:message("$$escape_expand(\n)$$basename(_PRO_FILE_) Files to be removed during \"make distclean\": "$$DDIR$$escape_expand(\n))
     QMAKE_DISTCLEAN += $${DDIR}
+
+    SFILES   = $$files($${PWD}/../Resources/shaders/simplelighting_*.glsl)
+    SDESTDIR = /usr/local/openig/resources/shaders/
+
+#   Get the filename(only) list for distclean to remove only the files added from this plugin
+    for(var,SFILES) {
+        distfiles += $$SDESTDIR/$$basename(var)
+    }
+    QMAKE_DISTCLEAN += $$distfiles
+
+    QMAKE_POST_LINK += test -d $$quote($$SDESTDIR) || $$QMAKE_MKDIR $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$SFILES) $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
 
     # library version number files
     exists( "../openig_version.pri" ) {
@@ -115,5 +127,23 @@ win32 {
 
     QMAKE_POST_LINK =  if not exist $$quote($$DLLDESTDIR) $$QMAKE_MKDIR $$quote($$DLLDESTDIR) $$escape_expand(\\n\\t)
     QMAKE_POST_LINK += if not exist $$quote($$DFILE) copy /y $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
+
+    SFILES   = $$files($${PWD}/../Resources/shaders/simplelighting_*.glsl)
+    SDESTDIR = $$OPENIGBUILD/bin/resources/shaders/
+
+    SFILES ~= s,/,\\,g
+    SDESTDIR ~= s,/,\\,g
+
+#   Get the filename(only) list for distclean to remove only the files added from this plugin
+    for(var,SFILES) {
+        distfiles += $$SDESTDIR\\$$basename(var)
+    }
+    QMAKE_DISTCLEAN += $$distfiles
+
+    PDIR = $${PWD}/../Resources/shaders
+    PDIR ~= s,/,\\,g
+
+    QMAKE_POST_LINK += if not exist $$quote($$SDESTDIR) $$QMAKE_MKDIR $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$PDIR\simplelighting_*.glsl) $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
 }
 

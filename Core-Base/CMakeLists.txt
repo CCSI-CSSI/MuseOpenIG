@@ -1,52 +1,52 @@
-set( LIB_NAME OpenIG-Base )
-set( HEADER_PATH ${PROJECT_SOURCE_DIR}/Core-Base )
-add_definitions( -DIGCORE_LIBRARY )
+SET( LIB_NAME OpenIG-Base )
+SET( HEADER_PATH ${PROJECT_SOURCE_DIR}/Core-Base )
+ADD_DEFINITIONS( -DIGCORE_LIBRARY )
 
-set( LIB_PUBLIC_HEADERS
-    ${HEADER_PATH}/animation.h
-    ${HEADER_PATH}/attributes.h
-    ${HEADER_PATH}/commands.h
-    ${HEADER_PATH}/config.h
-    ${HEADER_PATH}/configuration.h
-    ${HEADER_PATH}/export.h
-    ${HEADER_PATH}/filesystem.h
-    ${HEADER_PATH}/globalidgenerator.h
-    ${HEADER_PATH}/igcore.h
-    ${HEADER_PATH}/imagegenerator.h
-    ${HEADER_PATH}/mathematics.h
-    ${HEADER_PATH}/stringutils.h    
+SET( LIB_PUBLIC_HEADERS
+    ${HEADER_PATH}/Animation.h
+    ${HEADER_PATH}/Types.h
+    ${HEADER_PATH}/Commands.h
+    ${HEADER_PATH}/Config.h
+    ${HEADER_PATH}/Configuration.h
+    ${HEADER_PATH}/Export.h
+    ${HEADER_PATH}/FileSystem.h
+    ${HEADER_PATH}/IDPool.h
+    ${HEADER_PATH}/IGCore.h
+    ${HEADER_PATH}/ImageGenerator.h
+    ${HEADER_PATH}/Mathematics.h
+    ${HEADER_PATH}/StringUtils.h    
 )
 
-set( _IgCoreSourceFiles
-    animation.cpp
-    commands.cpp
-    configuration.cpp
-    filesystem.cpp
-    globalidgenerator.cpp
-    imagegenerator.cpp
-    mathematics.cpp
-    stringutils.cpp    
+SET( _IgCoreSourceFiles
+    Animation.cpp
+    Commands.cpp
+    Configuration.cpp
+    FileSystem.cpp
+    IDPool.cpp
+    ImageGenerator.cpp
+    Mathematics.cpp
+    StringUtils.cpp    
 )
 
-add_library( ${LIB_NAME} SHARED
+ADD_LIBRARY( ${LIB_NAME} SHARED
         ${LIB_PUBLIC_HEADERS}
         ${_IgCoreSourceFiles}
 )
 
-include_directories(${Boost_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
-target_link_libraries( ${LIB_NAME}
+TARGET_LINK_LIBRARIES( ${LIB_NAME}
         ${OSG_LIBRARIES}
 	${OPENGL_LIBRARY}
 	${Boost_LIBRARIES}
 )
 
-set_target_properties( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Core Base" )
-set_target_properties (${target} PROPERTIES DEFINE_SYMBOL  "IGCORE_LIBRARY")
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Core Base" )
+SET_TARGET_PROPERTIES (${target} PROPERTIES DEFINE_SYMBOL  "IGCORE_LIBRARY")
 
-include( ModuleInstall REQUIRED )
+INCLUDE( ModuleInstall REQUIRED )
 
 INSTALL(
     FILES       ${PROJECT_SOURCE_DIR}/SDK-Readme.txt

@@ -1,5 +1,5 @@
 TEMPLATE = app
-CONFIG += console silent
+CONFIG += console silent warn_off
 CONFIG -= app_bundle
 CONFIG -= qt
 
@@ -15,11 +15,13 @@ DEPENDPATH += ../
 
 OTHER_FILES += DataFiles/default.txt \
                DataFiles/openig.xml \
-               DataFiles/OpenIG-Splash.jpg
+               DataFiles/OpenIG*Splash.jpg \
+               DataFiles/deployment.pri
 
 DISTFILES += DataFiles/default.txt \
              DataFiles/openig.xml \
-             DataFiles/OpenIG-Splash.jpg
+             DataFiles/OpenIG*Splash.jpg \
+             DataFiles/deployment.pri
 
 OTHER_FILES += CMakeLists.txt
 DISTFILES += CMakeLists.txt
@@ -87,11 +89,11 @@ unix {
     # library version number files
     exists( "../openig_version.pri" ) {
 
-	include( "../openig_version.pri" )
-	isEmpty( VERSION ){ error( "bad or undefined VERSION variable inside file openig_version.pri" )
-	} else {
-	message( "Set version info to: $$VERSION" )
-	}
+    include( "../openig_version.pri" )
+    isEmpty( VERSION ){ error( "bad or undefined VERSION variable inside file openig_version.pri" )
+    } else {
+    message( "Set version info to: $$VERSION" )
+    }
 
     }
     else { error( "could not find pri library version file openig_version.pri" ) }

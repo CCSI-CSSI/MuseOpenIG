@@ -1,7 +1,7 @@
-set( LIB_NAME OpenIG-Plugin-UI )
-set( TARGET_OTHER_FILES DataFiles/libIgPlugin-UI.so.xml DataFiles/libIgPlugin-UI.so.windows.xml)
-set( IgPluginUIFiles 
-	igpluginui.cpp 
+SET( LIB_NAME OpenIG-Plugin-UI )
+SET( TARGET_OTHER_FILES DataFiles/libIgPlugin-UI.so.xml DataFiles/libIgPlugin-UI.so.windows.xml)
+SET( IgPluginUIFiles 
+	IGPluginUI.cpp
 	MYGUIManager.h 
 	MYGUIManager.cpp 
 	FileSelectionDialog.h
@@ -11,11 +11,11 @@ set( IgPluginUIFiles
 	${TARGET_OTHER_FILES}
 )
 
-add_library( ${LIB_NAME} SHARED ${IgPluginUIFiles}  )
+ADD_LIBRARY( ${LIB_NAME} SHARED ${IgPluginUIFiles}  )
 
-include_directories( ${MYGUI_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} )
+INCLUDE_DIRECTORIES( ${MYGUI_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} )
 
-target_link_libraries( ${LIB_NAME}
+TARGET_LINK_LIBRARIES( ${LIB_NAME}
     ${OSG_LIBRARIES}
     OpenIG-Engine
 	${MYGUI_LIBRARY}
@@ -24,16 +24,16 @@ target_link_libraries( ${LIB_NAME}
 	${BOOST_LIBRARIES}
 )
 
-set_target_properties( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Plugin UI" )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Plugin UI" )
 
-include( PluginInstall REQUIRED )
+INCLUDE( PluginInstall REQUIRED )
 
-if (APPLE)
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-UI.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libOpenIG-Plugin-UI.dylib.xml)
-elseif(WIN32)
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-UI.so.windows.xml DESTINATION ${INSTALL_BINDIR} RENAME OpenIG-Plugin-UI.dll.xml)
-else()
-    install(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-UI.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libOpenIG-Plugin-UI.so.xml)
-endif()
+IF (APPLE)
+    INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-UI.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libOpenIG-Plugin-UI.dylib.xml)
+ELSEIF(WIN32)
+    INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-UI.so.windows.xml DESTINATION ${INSTALL_BINDIR} RENAME OpenIG-Plugin-UI.dll.xml)
+ELSE()
+    INSTALL(FILES ${CMAKE_CURRENT_LIST_DIR}/DataFiles/libIgPlugin-UI.so.xml DESTINATION ${INSTALL_LIBDIR} RENAME libOpenIG-Plugin-UI.so.xml)
+ENDIF()

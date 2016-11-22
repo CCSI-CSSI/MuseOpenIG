@@ -6,32 +6,31 @@
 
 QT       -= core gui
 
-#CONFIG += silent
+CONFIG += silent warn_off
 
 TARGET = OpenIG-Utils
 TEMPLATE = lib
 
-DEFINES += OPENIG_LIBRARY
+DEFINES += IGCOREUTILS_LIBRARY
 
-SOURCES +=  glerrorutils.cpp\
-            shaderutils.cpp\
-            tbo.cpp\
-            texturecache.cpp
+SOURCES +=  GLErrorUtils.cpp\
+            ShaderUtils.cpp\
+            TBO.cpp\
+            TextureCache.cpp
 
-HEADERS +=  config.h\
-            export.h\
-            glerrorutils.h\
-            tbo.h\
-            framelogging.h\
-            shaderutils.h\
-            texturecache.h
-
+HEADERS +=  Config.h\
+            Export.h\
+            GLErrorUtils.h\
+            TBO.h\
+            FrameLogging.h\
+            ShaderUtils.h\
+            TextureCache.h
 
 INCLUDEPATH += ../
 DEPENDPATH += ../
 
 LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgGA -losgText\
-        -losgShadow -losgSim -losgParticle -lOpenIG-Base -lOpenIG-PluginBase
+        -losgShadow -losgSim -losgParticle -lOpenIG-Base -lOpenIG-PluginBase -lOpenIG-Graphics
 
 OTHER_FILES += CMakeLists.txt
 DISTFILES += CMakeLists.txt
@@ -87,6 +86,8 @@ win32-g++:QMAKE_CXXFLAGS += -fpermissive -shared-libgcc -D_GLIBCXX_DLL
 win32-g++:LIBS += -lstdc++.dll
 
 win32 {
+    LIBS += -lopengl32 -lglu32 -lUser32
+
     OSGROOT = $$(OSG_ROOT)
     isEmpty(OSGROOT) {
         message($$TARGET -- \"OpenSceneGraph\" not detected...)
@@ -105,6 +106,30 @@ win32 {
         DEPENDPATH += $$OSGBUILD/lib
         INCLUDEPATH += $$OSGBUILD/include
         LIBS += -L$$OSGBUILD/lib
+    }
+
+    BOOSTROOT = $$(BOOST_ROOT)
+    isEmpty(BOOSTROOT) {
+        message($$TARGET -- \"boost\" not detected...)
+    }
+    else {
+        INCLUDEPATH += $$BOOSTROOT
+        win32-g++ {
+            message($$TARGET -- win32-g++ --\"boost\" detected in \"$$BOOSTROOT\")
+            LIBS += -L$$BOOSTROOT\stage\lib -llibboost_filesystem -llibboost_system
+        } else {
+            message($$TARGET -- win32 -- \"boost\" detected in \"$$BOOSTROOT\")
+            LIBS += -L$$BOOSTROOT\stage\lib
+            CONFIG( debug,debug|release ){
+                message($$TARGET -- Boost using debug version of libraries )
+                LIBS += -llibboost_filesystem-vc120-mt-gd-1_58  -llibboost_date_time-vc120-mt-gd-1_58 \
+                        -llibboost_system-vc120-mt-gd-1_58 -llibboost_thread-vc120-mt-gd-1_58
+            }else{
+                message($$TARGET -- Boost using release version of libraries )
+                LIBS += -llibboost_filesystem-vc120-mt-1_58  -llibboost_date_time-vc120-mt-1_58 \
+                        -llibboost_system-vc120-mt-1_58 -llibboost_thread-vc120-mt-1_58
+            }
+        }
     }
 
     OPENIGBUILD = $$(OPENIG_BUILD)

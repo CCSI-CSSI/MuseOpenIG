@@ -27,17 +27,21 @@
 //#*    Email address: openig@compro.net
 //#*
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 
 #include "CloudsDrawable.h"
 #include "AtmosphereReference.h"
 
-#include <Core-Base/attributes.h>
-#include <Core-Base/filesystem.h>
-#include <Core-Base/configuration.h>
+#include <Core-Base/Types.h>
+#include <Core-Base/FileSystem.h>
+#include <Core-Base/Configuration.h>
 
-#include <Core-Utils/glerrorutils.h>
-#include <Core-Utils/shaderutils.h>
+#include <Core-Utils/GLErrorUtils.h>
+#include <Core-Utils/ShaderUtils.h>
 
 #include <SilverLining.h>
 
@@ -56,8 +60,8 @@ bool CloudsDrawable::_enableDisableForwardPlus = true;
 
 void CloudsDrawable::setEnableForwardPlus(bool enable)
 {
-	CloudsDrawable::_enableDisableForwardPlusSet = true;
-	CloudsDrawable::_enableDisableForwardPlus = enable;
+    CloudsDrawable::_enableDisableForwardPlusSet = true;
+    CloudsDrawable::_enableDisableForwardPlus = enable;
 }
 
 CloudsDrawable::CloudsDrawable()
@@ -258,10 +262,10 @@ void CloudsDrawable::initializeLogZDepthBuffer(osg::RenderInfo& renderInfo, std:
 {
     static bool _logz_tried = false;
 
-	if (CloudsDrawable::_enableDisableForwardPlusSet && (CloudsDrawable::_enableDisableForwardPlus != _forwardPlusEnabled))
-	{
-		_logz_tried = false;		
-	}
+    if (CloudsDrawable::_enableDisableForwardPlusSet && (CloudsDrawable::_enableDisableForwardPlus != _forwardPlusEnabled))
+    {
+        _logz_tried = false;
+    }
 
     if (_logz_tried==true)
     {
@@ -310,11 +314,11 @@ void CloudsDrawable::initializeForwardPlus(SilverLining::Atmosphere *atmosphere,
 {
     static bool _forwardPlusSetUpTried = false;
 
-	if (CloudsDrawable::_enableDisableForwardPlusSet && (CloudsDrawable::_enableDisableForwardPlus != _forwardPlusEnabled))
-	{
-		_forwardPlusSetUpTried = false;
-		const_cast<CloudsDrawable*>(this)->_forwardPlusEnabled = CloudsDrawable::_enableDisableForwardPlus;
-	}
+    if (CloudsDrawable::_enableDisableForwardPlusSet && (CloudsDrawable::_enableDisableForwardPlus != _forwardPlusEnabled))
+    {
+        _forwardPlusSetUpTried = false;
+        const_cast<CloudsDrawable*>(this)->_forwardPlusEnabled = CloudsDrawable::_enableDisableForwardPlus;
+    }
 
     if (_forwardPlusSetUpTried==true)
     {

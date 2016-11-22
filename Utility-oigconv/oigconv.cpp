@@ -37,7 +37,7 @@
 
 #include "OrientationConverter.h"
 
-#include <Core-Base/filesystem.h>
+#include <Core-Base/FileSystem.h>
 
 typedef std::vector<std::string> FileNameList;
 

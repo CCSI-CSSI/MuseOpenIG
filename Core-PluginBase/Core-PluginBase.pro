@@ -6,22 +6,22 @@
 
 QT     -= core gui
 
-CONFIG += silent
+CONFIG += silent warn_off
 
 TARGET = OpenIG-PluginBase
 TEMPLATE =  lib
 
 DEFINES +=  IGPLUGINCORE_LIBRARY
 
-SOURCES +=  pluginhost.cpp
+SOURCES +=  PluginHost.cpp
 
-HEADERS +=  config.h\
-            export.h\
-            igplugincore.h\
-            plugin.h\
-            plugincontext.h\
-            pluginhost.h\
-            pluginoperation.h
+HEADERS +=  Config.h\
+            Export.h\
+            IGPluginCore.h\
+            Plugin.h\
+            PluginContext.h\
+            PluginHost.h\
+            PluginOperation.h
 
 INCLUDEPATH += ../
 DEPENDPATH += ../

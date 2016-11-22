@@ -29,80 +29,80 @@ THE SOFTWARE.
 #pragma once
 
 #if defined(OPENIG_SDK)
-	#include <OpenIG-Graphics/export.h>
-	#include <OpenIG-Graphics/ForwardDeclare.h>
-	#include <OpenIG-Graphics/AxisAlignedBoundingBox.h>
-	#include <OpenIG-Graphics/Light.h>
-	#include <OpenIG-Graphics/OctreeFwdDeclare.h>
-	#include <OpenIG-Graphics/OctreeNodeFwdDeclare.h>
-	#include <OpenIG-Graphics/CameraFwdDeclare.h>
-	#include <OpenIG-Graphics/Octree.h>
+    #include <OpenIG-Graphics/Export.h>
+    #include <OpenIG-Graphics/ForwardDeclare.h>
+    #include <OpenIG-Graphics/AxisAlignedBoundingBox.h>
+    #include <OpenIG-Graphics/Light.h>
+    #include <OpenIG-Graphics/OctreeFwdDeclare.h>
+    #include <OpenIG-Graphics/OctreeNodeFwdDeclare.h>
+    #include <OpenIG-Graphics/CameraFwdDeclare.h>
+    #include <OpenIG-Graphics/Octree.h>
 #else
-	#include <Library-Graphics/export.h>
-	#include <Library-Graphics/ForwardDeclare.h>
-	#include <Library-Graphics/AxisAlignedBoundingBox.h>
-	#include <Library-Graphics/Light.h>
-	#include <Library-Graphics/OctreeFwdDeclare.h>
-	#include <Library-Graphics/OctreeNodeFwdDeclare.h>
-	#include <Library-Graphics/CameraFwdDeclare.h>
-	#include <Library-Graphics/Octree.h>
+    #include <Library-Graphics/Export.h>
+    #include <Library-Graphics/ForwardDeclare.h>
+    #include <Library-Graphics/AxisAlignedBoundingBox.h>
+    #include <Library-Graphics/Light.h>
+    #include <Library-Graphics/OctreeFwdDeclare.h>
+    #include <Library-Graphics/OctreeNodeFwdDeclare.h>
+    #include <Library-Graphics/CameraFwdDeclare.h>
+    #include <Library-Graphics/Octree.h>
 #endif
 
 namespace OpenIG {
-	namespace Library {
-		namespace Graphics {
+    namespace Library {
+        namespace Graphics {
 
-			class IGLIBGRAPHICS_EXPORT LightManager
-			{
-			public:
-				LightManager(/*const AxisAlignedBoundingBox_64& box, size_t depth*/);
-				virtual ~LightManager();
-				Light*  CreateLight(LightType lightType);
-				void    DestroyLight(Light* pLight);
+            class IGLIBGRAPHICS_EXPORT LightManager
+            {
+            public:
+                LightManager(/*const AxisAlignedBoundingBox_64& box, size_t depth*/);
+                virtual ~LightManager();
+                Light*  CreateLight(LightType lightType);
+                void    DestroyLight(Light* pLight);
 
-				size_t  GetNumLights(void) const;
-				Light*  GetLight(size_t index);
+                size_t  GetNumLights(void) const;
+                Light*  GetLight(size_t index);
 
-				// Get all the lights that have been registered/created
-				const VectorLights& GetAllLights(void) const;
+                // Get all the lights that have been registered/created
+                const VectorLights& GetAllLights(void) const;
 
-				// Call this before calling either of the 2 queries below
-				void Update(Camera_64* pCamera);
+                // Call this before calling either of the 2 queries below
+                void Update(Camera_64* pCamera);
 
-				// Get all the lights that affect the view frustum. Must be called after LightManager::Update
-				const VectorLights& GetFrustumAffectingLights(void) const;
-			protected:
+                // Get all the lights that affect the view frustum. Must be called after LightManager::Update
+                const VectorLights& GetFrustumAffectingLights(void) const;
+            protected:
 
-				ListLights m_Lights;
+                ListLights m_Lights;
 
-				mutable bool m_bVectorLightsdirty;
-				mutable VectorLights m_VectorLights;
+                mutable bool m_bVectorLightsdirty;
+                mutable VectorLights m_VectorLights;
 
-				Octree_64* m_Octree;
-				void InitOctree(const AxisAlignedBoundingBox_64& box);
+                Octree_64* m_Octree;
+                void InitOctree(const AxisAlignedBoundingBox_64& box);
 
-				void LightUpdated(const Light* pLight);
-				void LightBoundsUpdated(const Light* pLight);
-				void LightDestroyed(const Light* pLight);
+                void LightUpdated(const Light* pLight);
+                void LightBoundsUpdated(const Light* pLight);
+                void LightDestroyed(const Light* pLight);
 
-				void ConnectSignals(Light* pSceneNode);
-				void DisconnectSignals(const Light* pLight);
+                void ConnectSignals(Light* pSceneNode);
+                void DisconnectSignals(const Light* pLight);
 
-				void CreateOctreeNode(Light* pLight);
-				void DestroyOctreeNode(Light* pLight);
-				OctreeNode_64* GetOctreeNode(const Light* pLight) const;
+                void CreateOctreeNode(Light* pLight);
+                void DestroyOctreeNode(Light* pLight);
+                OctreeNode_64* GetOctreeNode(const Light* pLight) const;
 
-				static const std::string m_StrOctreeNodeKey;
-				static const std::string m_StrLightKey;
+                static const std::string m_StrOctreeNodeKey;
+                static const std::string m_StrLightKey;
 
-				void FindVisibleObjects(Camera_64* pCamera);
-				Octree_64::NodeList m_VisibleOctreeNodes;
-				VectorLights m_FrustumAffectingLights;
-				DequeLights m_DequeLightsScratchPad;
+                void FindVisibleObjects(Camera_64* pCamera);
+                Octree_64::NodeList m_VisibleOctreeNodes;
+                VectorLights m_FrustumAffectingLights;
+                DequeLights m_DequeLightsScratchPad;
 
-				VectorLights m_FrustumAffectingLightsSortingScratchPad;
-			};
-		}
-	}
+                VectorLights m_FrustumAffectingLightsSortingScratchPad;
+            };
+        }
+    }
 }
 

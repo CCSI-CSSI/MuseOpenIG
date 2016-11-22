@@ -25,9 +25,17 @@
 //#*    Email address: openig@compro.net
 //#*
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 //#*	author    Trajce Nikolov Nick openig@compro.net
 //#*	copyright(c)Compro Computer Services, Inc.
+//#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
 //#*
 //#*    Please direct any questions or comments to the OpenIG Forums
 //#*    Email address: openig@compro.net
@@ -46,11 +54,11 @@
 
 #include <osgText/Text>
 
-#include <Core-OpenIG/openig.h>
+#include <Core-OpenIG/Engine.h>
 
-#include <Core-Base/commands.h>
-#include <Core-Base/mathematics.h>
-#include <Core-Base/imagegenerator.h>
+#include <Core-Base/Commands.h>
+#include <Core-Base/Mathematics.h>
+#include <Core-Base/ImageGenerator.h>
 
 #if defined(_WIN32)
 #include <windows.h>

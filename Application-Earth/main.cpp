@@ -25,9 +25,17 @@
 //#*    Email address: openig@compro.net
 //#*
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 //#*	author    Trajce Nikolov Nick openig@compro.net
 //#*	copyright(c)Compro Computer Services, Inc.
+//#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
 //#*
 //#*    Please direct any questions or comments to the OpenIG Forums
 //#*    Email address: openig@compro.net
@@ -49,10 +57,10 @@
 #include <osgEarth/Units>
 #include <osgEarth/Viewpoint>
 
-#include <Core-OpenIG/openig.h>
+#include <Core-OpenIG/Engine.h>
 
-#include <Core-Base/commands.h>
-#include <Core-Base/mathematics.h>
+#include <Core-Base/Commands.h>
+#include <Core-Base/Mathematics.h>
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -67,7 +75,7 @@ class CameraManipulator : public osgEarth::Util::EarthManipulator
 {
 public:
     CameraManipulator()
-		: osgEarth::Util::EarthManipulator()
+        : osgEarth::Util::EarthManipulator()
     {
 
     }
@@ -91,7 +99,7 @@ public:
                     }
                 }
             default:
-				return osgEarth::Util::EarthManipulator::handle(ea, us);
+                return osgEarth::Util::EarthManipulator::handle(ea, us);
             }
         return false;
     }
@@ -99,16 +107,16 @@ public:
 
 osg::Matrixd toMatrix(double x, double y, double z, double h, double p, double r)
 {
-	osg::Matrixd mxR;
-	mxR.makeRotate(osg::DegreesToRadians(r), osg::Vec3(1, 0, 0));
-	osg::Matrixd mxP;
-	mxP.makeRotate(osg::DegreesToRadians(p), osg::Vec3(0, 1, 0));
-	osg::Matrixd mxH;
-	mxH.makeRotate(osg::DegreesToRadians(-h), osg::Vec3(0, 0, 1));
-	osg::Matrixd mxT;
-	mxT.makeTranslate(osg::Vec3(x, y, z));
+    osg::Matrixd mxR;
+    mxR.makeRotate(osg::DegreesToRadians(r), osg::Vec3(1, 0, 0));
+    osg::Matrixd mxP;
+    mxP.makeRotate(osg::DegreesToRadians(p), osg::Vec3(0, 1, 0));
+    osg::Matrixd mxH;
+    mxH.makeRotate(osg::DegreesToRadians(-h), osg::Vec3(0, 0, 1));
+    osg::Matrixd mxT;
+    mxT.makeTranslate(osg::Vec3(x, y, z));
 
-	return (mxP*mxR*mxH*mxT);
+    return (mxP*mxR*mxH*mxT);
 }
 
 int main(int argc, char** argv)
@@ -155,17 +163,17 @@ int main(int argc, char** argv)
         osgViewer::View* view = new osgViewer::View;
         viewer->addView(view);
         view->getCamera()->setGraphicsContext(gc.get());
-        view->getCamera()->setViewport(new osg::Viewport(0,0, traits->width, traits->height));        
+        view->getCamera()->setViewport(new osg::Viewport(0,0, traits->width, traits->height));
         aspectratio = static_cast<double>(traits->width) / static_cast<double>(traits->height);
-		view->getCamera()->setProjectionMatrixAsPerspective(45, aspectratio, 1.0, 100000);
+        view->getCamera()->setProjectionMatrixAsPerspective(45, aspectratio, 1.0, 100000);
         view->setLightingMode(osgViewer::View::SKY_LIGHT);
-		viewer->setThreadingModel(osgViewer::ViewerBase::DrawThreadPerContext);
-    }	
+        viewer->setThreadingModel(osgViewer::ViewerBase::DrawThreadPerContext);
+    }
 
-	// Add the Windowsing handler to F10
-	osg::ref_ptr<osgViewer::WindowSizeHandler> wshandler = new osgViewer::WindowSizeHandler;
-	wshandler->setKeyEventToggleFullscreen(osgGA::GUIEventAdapter::KEY_F10);
-	viewer->getView(0)->addEventHandler(wshandler);
+    // Add the Windowsing handler to F10
+    osg::ref_ptr<osgViewer::WindowSizeHandler> wshandler = new osgViewer::WindowSizeHandler;
+    wshandler->setKeyEventToggleFullscreen(osgGA::GUIEventAdapter::KEY_F10);
+    viewer->getView(0)->addEventHandler(wshandler);
 
     osg::ref_ptr<OpenIG::Engine> ig = new OpenIG::Engine;
     ig->init(viewer.get(),"igdata/openig.xml");
@@ -180,14 +188,14 @@ int main(int argc, char** argv)
     }
 
 #if 0
-	viewer->getView(0)->setCameraManipulator(new CameraManipulator());
+    viewer->getView(0)->setCameraManipulator(new CameraManipulator());
 #endif
-	
-    viewer->realize();    
+
+    viewer->realize();
 
     osgViewer::CompositeViewer::Windows wins;
     viewer->getWindows(wins);
-	
+
     while (!viewer->done())
     {
 
@@ -195,7 +203,7 @@ int main(int argc, char** argv)
         MSG msg;
         if (::PeekMessage(&msg,NULL,0,0,PM_NOREMOVE))
         {
-            ::GetMessage(&msg, NULL, 0, 0);            
+            ::GetMessage(&msg, NULL, 0, 0);
 
             if (wins.size())
             {
@@ -203,19 +211,19 @@ int main(int argc, char** argv)
                 if(hdl)
                 {
                     WNDPROC fWndProc = (WNDPROC)::GetWindowLongPtr(hdl->getHWND(), GWLP_WNDPROC);
-					if (fWndProc && hdl->getHWND())
-					{
-						::CallWindowProc(fWndProc,hdl->getHWND(),msg.message, msg.wParam, msg.lParam);
-					}
+                    if (fWndProc && hdl->getHWND())
+                    {
+                        ::CallWindowProc(fWndProc,hdl->getHWND(),msg.message, msg.wParam, msg.lParam);
+                    }
                 }
             }
         }
-#endif	  
-						
-        ig->frame();        
+#endif
+
+        ig->frame();
     }
 
     ig->cleanup();
-	ig = NULL;
+    ig = NULL;
 }
 

@@ -5,26 +5,26 @@
 #-------------------------------------------------
 
 QT     -= core gui
-CONFIG += silent
+CONFIG += silent warn_off
 
 TARGET = OpenIG-Plugin-ForwardPlusLighting
 TEMPLATE = lib
 
 DEFINES += IGPLUGINFORWARDPLUSLIGHTING_LIBRARY
 
-SOURCES +=  dummylight.cpp\
-            forwardpluscullvisitor.cpp\
-            forwardplusengine.cpp\
-            forwardpluslightimplementationcallback.cpp\
-            igpluginforwardpluslighting.cpp\
-            lightmanagerstateattribute.cpp
+SOURCES +=  DummyLight.cpp\
+            ForwardPlusCullVisitor.cpp\
+            ForwardPlusEngine.cpp\
+            ForwardPlusLightImplementationCallback.cpp\
+            IGPluginForwardPlusLighting.cpp\
+            LightManagerStateAttribute.cpp
 
-HEADERS +=  dummylight.h\
-            forwardpluscullvisitor.h\
-            forwardplusengine.h\
-            forwardpluslightimplementationcallback.h\
-            osgtofputils.h\
-            lightmanagerstateattribute.h
+HEADERS +=  DummyLight.h\
+            ForwardPlusCullVisitor.h\
+            ForwardPlusEngine.h\
+            ForwardPlusLightImplementationCallback.h\
+            OSGtoFPUtils.h\
+            LightManagerStateAttribute.h
 
 
 INCLUDEPATH += ../
@@ -85,6 +85,7 @@ unix {
 
     SFILES   = $$files($${PWD}/../Resources/shaders/forwardplus*.glsl)
     SFILES  += $$files($${PWD}/../Resources/shaders/shadow_*.glsl)
+    SFILES  += $$files($${PWD}/../Resources/shaders/lighting_math.glsl)
     SDESTDIR = /usr/local/openig/resources/shaders/
 
 #   Get the filename(only) list for distclean to remove only the files added from this plugin
@@ -181,7 +182,7 @@ win32 {
     QMAKE_POST_LINK =  if not exist $$quote($$DLLDESTDIR) $$QMAKE_MKDIR $$quote($$DLLDESTDIR) $$escape_expand(\\n\\t)
     QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
 
-    SFILES   = $$files($${PWD}/shaders/*.glsl)
+    SFILES   = $$files($${PWD}/../Resources/shaders/*.glsl)
     SDESTDIR = $$OPENIGBUILD/bin/resources/shaders/
 
     SFILES ~= s,/,\\,g
@@ -193,9 +194,11 @@ win32 {
     }
     QMAKE_DISTCLEAN += $$distfiles
 
-    PDIR = $${PWD}/shaders
+    PDIR = $${PWD}/../Resources/shaders
     PDIR ~= s,/,\\,g
 
-    QMAKE_POST_LINK += test -d $$quote($$SDESTDIR) || $$QMAKE_MKDIR $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
-    QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$PDIR\*.glsl) $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += if not exist $$quote($$SDESTDIR) $$QMAKE_MKDIR $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$PDIR\forwardplus_*.glsl) $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$PDIR\shadow_*.glsl) $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$PDIR\lighting_math.glsl) $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
 }

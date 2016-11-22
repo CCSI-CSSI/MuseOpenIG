@@ -1,29 +1,29 @@
-add_definitions( -DOPENIG_SDK )
-set( APP_NAME openig-client-tqserver )
+ADD_DEFINITIONS( -DOPENIG_SDK )
+SET( APP_NAME openig-client-tqserver )
 
-set( TARGET_SRC_FILES main.cpp )
+SET( TARGET_SRC_FILES main.cpp )
 
-add_executable( ${APP_NAME} ${TARGET_SRC_FILES} )
+ADD_EXECUTABLE( ${APP_NAME} ${TARGET_SRC_FILES} )
 
-include_directories(
+INCLUDE_DIRECTORIES(
 	${Boost_INCLUDE_DIRS}	
 	${OPENIG_INCLUDE_DIR}	
 	${OSG_INCLUDE_DIRS}	
 )
 
-target_link_libraries( ${APP_NAME}
+TARGET_LINK_LIBRARIES( ${APP_NAME}
     ${OSG_LIBRARIES}
 	${OPENIG_LIBRARIES}
     ${Boost_LIBRARIES}
 	${OPENGL_LIBRARY}
 )
 
-install(
+INSTALL(
     TARGETS ${APP_NAME}
     RUNTIME DESTINATION bin/openig-client COMPONENT openig-client
 )
 
-set_target_properties( ${APP_NAME} PROPERTIES PROJECT_LABEL "Application OpenIG-TerrainQueryServer" )
+SET_TARGET_PROPERTIES( ${APP_NAME} PROPERTIES PROJECT_LABEL "Application OpenIG-TerrainQueryServer" )
 
 SET(INSTALL_INCDIR include)
 SET(INSTALL_BINDIR bin/openig-client)

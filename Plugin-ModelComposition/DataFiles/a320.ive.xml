@@ -1751,7 +1751,7 @@
     <Name>WingStrobeLightWhiteLeft</Name>
     <Color>1.0 1.0 1.0 1.0</Color>
     <Position>-16.89 -5.33 0.456</Position>
-    <Orientation>-120 0 0</Orientation>
+    <Orientation>90 0 0</Orientation>
     <Use-Real-Light>yes</Use-Real-Light>
     <Brightness>1</Brightness>
     <ConstAttenuation>10</ConstAttenuation>
@@ -1763,15 +1763,15 @@
     <Radius>5</Radius>
     <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
     <StartRange>0</StartRange>
-    <EndRange>5</EndRange>
-    <SpotInnerAngle>120</SpotInnerAngle>
-    <SpotOuterAngle>150</SpotOuterAngle>
+    <EndRange>10</EndRange>
+    <SpotInnerAngle>270</SpotInnerAngle>
+    <SpotOuterAngle>270</SpotOuterAngle>
   </Light>
   <Light>
     <Name>WingStrobeLightWhiteRight</Name>
     <Color>1.0 1.0 1.0 1.0</Color>
     <Position>16.89 -5.33 0.456</Position>
-    <Orientation>120 0 0</Orientation>
+    <Orientation>-90 0 0</Orientation>
     <Use-Real-Light>yes</Use-Real-Light>
     <Brightness>1</Brightness>
     <Real-Light-Offset>1.0 0 0.5</Real-Light-Offset>
@@ -1783,9 +1783,9 @@
     <Radius>5</Radius>
     <SpriteTexture>textures/lensflare_white_alpha_5.dds</SpriteTexture>
     <StartRange>0</StartRange>
-    <EndRange>5</EndRange>
-    <SpotInnerAngle>120</SpotInnerAngle>
-    <SpotOuterAngle>150</SpotOuterAngle>
+    <EndRange>10</EndRange>
+    <SpotInnerAngle>270</SpotInnerAngle>
+    <SpotOuterAngle>270</SpotOuterAngle>
   </Light>
   <Light>
     <Name>TailStrobeLightWhite</Name>

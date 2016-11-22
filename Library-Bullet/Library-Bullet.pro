@@ -6,21 +6,21 @@
 
 QT       -= core gui
 
-CONFIG += silent
+CONFIG += silent warn_off
 
 TARGET = OpenIG-Bullet
 TEMPLATE = lib
 
 DEFINES += IGLIBBULLET_LIBRARY
 
-SOURCES +=  bulletmanager.cpp \
-            vehicle.cpp \
-            configreader.cpp
+SOURCES +=  BulletManager.cpp \
+            Vehicle.cpp \
+            ConfigReader.cpp
 
-HEADERS +=  export.h \
-            bulletmanager.h \
-            vehicle.h \
-            configreader.h
+HEADERS +=  Export.h \
+            BulletManager.h \
+            Vehicle.h \
+            ConfigReader.h
 
 LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgShadow -losgAnimation -lOpenIG-Base
 

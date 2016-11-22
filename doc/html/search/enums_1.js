@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['lighttype',['LightType',['../namespace_open_i_g_1_1_base.html#a4c81624bd5159e1b668c138242e0f86d',1,'OpenIG::Base']]]
+  ['setupflags',['SetupFlags',['../class_open_i_g_1_1_engine.html#a2b928d86e84e6ae7fd9b9f6170fd39d7',1,'OpenIG::Engine']]]
 ];

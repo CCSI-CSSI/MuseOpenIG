@@ -1,16 +1,16 @@
-set( LIB_NAME OpenIG-Plugin-VDBOffset )
+SET( LIB_NAME OpenIG-Plugin-VDBOffset )
 
-add_library( ${LIB_NAME} SHARED
-    igpluginvdboffset.cpp
+ADD_LIBRARY( ${LIB_NAME} SHARED
+    IGPluginVDBOffset.cpp
 )
 
-target_link_libraries( ${LIB_NAME}
+TARGET_LINK_LIBRARIES( ${LIB_NAME}
     ${OSG_LIBRARIES}
     OpenIG-Engine
 )
 
-set_target_properties( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Plugin VDBOffset" )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Plugin VDBOffset" )
 
-include( PluginInstall REQUIRED )
+INCLUDE( PluginInstall REQUIRED )

@@ -5,14 +5,15 @@
 #-------------------------------------------------
 
 QT     -= core gui
-CONFIG -= warn_on silent
+CONFIG -= warn_on
+CONFIG +=  silent warn_off
 
 TARGET   = OpenIG-Plugin-SkyDome
 TEMPLATE = lib
 
 DEFINES += IGPLUGINSKYDOME_LIBRARY
 
-SOURCES += igpluginskydome.cpp
+SOURCES += IGPluginSkyDome.cpp
 
 HEADERS +=
 
@@ -61,11 +62,11 @@ unix {
     # library version number files
     exists( "../openig_version.pri" ) {
 
-	include( "../openig_version.pri" )
+    include( "../openig_version.pri" )
         isEmpty( VERSION ){ !build_pass:error($$basename(_PRO_FILE_)  -- bad or undefined VERSION variable inside file openig_version.pri)
-	} else {
+    } else {
         !build_pass:message($$basename(_PRO_FILE_) -- Set version info to: $$VERSION)
-	}
+    }
 
     }
     else { !build_pass:error($$basename(_PRO_FILE_) -- could not find pri library version file openig_version.pri) }

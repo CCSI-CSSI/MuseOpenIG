@@ -25,9 +25,17 @@
 //#*    Email address: openig@compro.net
 //#*
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#****************************************************************************
 //#*	author    Trajce Nikolov Nick openig@compro.net
 //#*	copyright(c)Compro Computer Services, Inc.
+//#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
 //#*
 //#*    Please direct any questions or comments to the OpenIG Forums
 //#*    Email address: openig@compro.net
@@ -50,17 +58,25 @@
 
 #include <osgSim/HeightAboveTerrain>
 
-#include <Core-OpenIG/openig.h>
+#include <Core-OpenIG/Engine.h>
 
-#include <Core-Base/commands.h>
-#include <Core-Base/mathematics.h>
-#include <Core-Base/imagegenerator.h>
+#include <Core-Base/Commands.h>
+#include <Core-Base/Mathematics.h>
+#include <Core-Base/ImageGenerator.h>
+
+#include <cstdio>
 
 #if defined(_WIN32)
 #include <windows.h>
+//#include <process.h>
 #include <osgViewer/api/Win32/GraphicsHandleWin32>
+#define snprintf _snprintf
+#define vsnprintf _vsnprintf
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+#else
+#include <unistd.h>
 #endif
-
 
 // Let make some info HUD for the keyboard bindings
 // based on the osghud example
@@ -175,35 +191,68 @@ static osg::ref_ptr<osgGA::CameraManipulator> s_CameraManipulator;
 // on which we call events. We keep it simple here
 #define LANDING_GEAR_UP             44.4498
 #define FLAPS_UP                    47.0624
+#define LIGHTS_OFF                  109.500
+#define CLOUD_LAYER_CHANGE1         110.011
+#define CLOUD_LAYER_CHANGE2         125.003
+#define CLOUD_LAYER_CHANGE3         150.022
+#define LIGHTS_ON                   155.000
+#define CLOUD_LAYER_CHANGE4         160.021
 #define LANDING_GEAR_DOWN           172.515
 #define FLAPS_DOWN                  176.33
+#define CAMERA_POSITION_CHANGE1     190.000
 #define REVERSE_ON					215
 #define BREAKS_UP                   221.822
 #define FLIGHT_PATH_EOF             223.5
+#define PAUSE_TIME                  240.0
 
-// These are our entity IDs for the
-// model and terrain we will refer
+// These are some of our entity IDs for
+// the model and terrain we will refer
 // to accross the scene management
-// in OpenIG. OpenIG works with
-// IDs
+// in OpenIG. OpenIG expects ID numbers
+// in commands that reference separate
+// models, model parts, etc...
 #define TERRAIN_ENTITY_ID               0
 #define MODEL_ENTITY_ID                 1
+#define LEFT_WING_STROBE_LIGHT          10005
+#define RIGHT_WING_STROBE_LIGHT         10006
+#define TAIL_STROBE_LIGHT               10007
+#define LEFT_WING_LIGHT                 10008
+#define RIGHT_WING_LIGHT                10009
+#define NOSE_LANDING_GEAR_LIGHT1_ID     10010
+#define NOSE_LANDING_GEAR_LIGHT2_ID     10011
+#define NOSE_LANDING_GEAR_LIGHT3_ID     10012
+#define NOSE_LANDING_GEAR_LIGHT4_ID     10013
 #define NOSE_LANDING_GEAR_ID            10090
-#define NOSE_LANDING_GEAR_LIGHT_ID      1
 
 static bool s_LandingGearUp         = false;
 static bool s_FlapsUp               = false;
 static bool s_LandingGearDown       = false;
 static bool s_FlapsDown             = false;
 static bool s_BreaksUp              = false;
-static bool s_Reverse				= false;
+static bool s_Reverse               = false;
+static bool s_Clayer1               = false;
+static bool s_Clayer2               = false;
+static bool s_Clayer3               = false;
+static bool s_Clayer4               = false;
+static bool s_Position1             = false;
 
 // General switch when paused or not
-static bool s_Paused				= false;
+static bool s_Paused                = false;
 
 // Keep this one around too, used to
 // reset the demo on F1
 static bool s_Reset = false;
+
+// If you want to loop the demo
+// set this to true...
+static bool s_loopDemo = false;
+
+//Keep track if iitsec paused...
+static bool s_iitsecPaused = false;
+
+// If you want to run the demo
+// in IITSEC show mode, set this to true...
+static bool s_iitsecMode = false;
 
 // This is offset for th flight path
 // Can be triggered by a custom command
@@ -223,6 +272,23 @@ static bool s_WingTestStarted = false;
 
 // This is flag when we have landed
 static bool s_Landed = false;
+
+// Keep track of Landing Lights status
+static bool s_LandingLightsOFF = false;
+static bool s_LandingLightsON = false;
+
+// This is flag controls how far you can
+// zoom out with the manipulator
+double s_zoomOutDistance = 1500;
+
+// These are the original light attributs
+// that we are changing for one part of our
+// iitsec demo
+static OpenIG::Base::LightAttributes left_wing_strobe_la;
+static OpenIG::Base::LightAttributes right_wing_strobe_la;
+static OpenIG::Base::LightAttributes tail_strobe_la;
+static OpenIG::Base::LightAttributes left_wing_la;
+static OpenIG::Base::LightAttributes right_wing_la;
 
 // This class is to have the same behavior
 // as the standard osg Trackball camera
@@ -258,6 +324,13 @@ public:
     //{
         // Do nothing here
     //}
+
+    void setViewPosition(const osg::Vec3d& eye)
+    {
+        osg::Matrixd mx;
+        mx.makeLookAt(eye, getCenter(), osg::Vec3d(0, 0, 1));
+        setByInverseMatrix(mx);
+    }
 
     virtual bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& us)
     {
@@ -375,6 +448,174 @@ public:
     OpenIG::Base::ImageGenerator* openIG;
     bool                    fixedUpMode;
 };
+//Our trackball camera if present...
+static osg::ref_ptr<CameraTrackballManipulator> _tb;
+
+// For this demo to fly the model we use a
+// recorded path from our MUSE simulation
+// system. This command is to cause the demo
+// to enter a continuous loop mode, especially
+// handy if at some kind of show where you want
+// the demo to fly constantly on your visual system...
+class LoopA320DemoCommand : public OpenIG::Base::Commands::Command
+{
+public:
+    LoopA320DemoCommand(bool& loopDemo)
+        : _loop_demo(loopDemo)
+    {
+    }
+
+    // Convinient method for the onscreen
+    // help. This one is a must
+    virtual const std::string getUsage() const
+    {
+        return "loop true/false";
+    }
+
+    virtual const std::string getArgumentsFormat() const
+    {
+        return	"B";
+    }
+
+    // Convinient method for the onscreen
+    // help. This one is a must too
+    virtual const std::string getDescription() const
+    {
+        return  "Loop the A320 indefinitely if set to true\n";
+    }
+
+    // This method is called when you invoke a command in the
+    // terminal, call a command through the Commands class
+    // tokens is std::vector<std::string> holding the arguments
+    // provided
+    virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)
+    {
+        if (tokens.size() == 1)
+        {
+            if( strncasecmp("true", tokens.at(0).c_str(), 4) == 0 )
+                _loop_demo = true;
+            else
+                _loop_demo = false;
+            osg::notify(osg::NOTICE) << "OpenIG A320 Demo loop command set to " << _loop_demo << std::endl;
+            s_loopDemo = _loop_demo;
+        }
+        return 0;
+    }
+protected:
+    bool _loop_demo;
+};
+
+// For this iitsec mode demo to fly the model we use
+// the same recorded path from our MUSE simulation
+// system. This command is to enable the extra
+// iitsec mode animations and/or other demo things
+// like cloud changes, wind changes to show off Triton
+// and other features
+class IITSECModeCommand : public OpenIG::Base::Commands::Command
+{
+public:
+    IITSECModeCommand(bool& iitsecMode)
+        : _iitsecMode(iitsecMode)
+    {
+    }
+
+    // Convinient method for the onscreen
+    // help. This one is a must
+    virtual const std::string getUsage() const
+    {
+        return "iitsec true/false";
+    }
+
+    virtual const std::string getArgumentsFormat() const
+    {
+        return	"B";
+    }
+
+    // Convinient method for the onscreen
+    // help. This one is a must too
+    virtual const std::string getDescription() const
+    {
+        return  "Enable the IITSEC mode demo\n";
+    }
+
+    // This method is called when you invoke a command in the
+    // terminal, call a command through the Commands class
+    // tokens is std::vector<std::string> holding the arguments
+    // provided
+    virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)
+    {
+        if (tokens.size() == 1)
+        {
+            if( strncasecmp("true", tokens.at(0).c_str(), 4) == 0 )
+                _iitsecMode = true;
+            else
+                _iitsecMode = false;
+            osg::notify(osg::NOTICE) << "OpenIG A320 Demo iitsec command set to " << _iitsecMode << std::endl;
+            s_iitsecMode = _iitsecMode;
+        }
+        return 0;
+    }
+protected:
+    bool _iitsecMode;
+};
+
+
+// For this iitsec mode demo to fly the model we use
+// the same recorded path from our MUSE simulation
+// system. This command is to enable the extra
+// iitsec mode animations and/or other demo things
+// like cloud changes, wind changes to show off Triton
+// and other features
+class ZoomDistanceCommand : public OpenIG::Base::Commands::Command
+{
+public:
+    ZoomDistanceCommand(double& zoom)
+        : _zoom(zoom)
+    {
+    }
+
+    // Convinient method for the onscreen
+    // help. This one is a must
+    virtual const std::string getUsage() const
+    {
+        return "zoomd x.x";
+    }
+
+    virtual const std::string getArgumentsFormat() const
+    {
+        return	"D";
+    }
+
+    // Convinient method for the onscreen
+    // help. This one is a must too
+    virtual const std::string getDescription() const
+    {
+        return  "Set the max zoom distance for the manipulator\n"
+                "Any new value should be greaterthan>, all the previous ones!!!";
+    }
+
+    // This method is called when you invoke a command in the
+    // terminal, call a command through the Commands class
+    // tokens is std::vector<std::string> holding the arguments
+    // provided
+    virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)
+    {
+        if (tokens.size() == 1)
+        {
+            _zoom = atof(tokens.at(0).c_str());
+            if(_zoom > s_zoomOutDistance)
+            {
+                osg::notify(osg::NOTICE) << "OpenIG A320 Demo zoomd command entered is: " << _zoom << std::endl;
+                s_zoomOutDistance = _zoom;
+            }
+            else
+                std::cerr << "A320 Demo -- The incoming zoom level must be larger than the previously set zoom level!!!!" << std::endl;
+        }
+        return 0;
+    }
+protected:
+    double _zoom;
+};
 
 // For this demo to fly the model we use a
 // recorded path from our MUSE simulation
@@ -408,7 +649,7 @@ public:
     virtual const std::string getDescription() const
     {
         return  "offsets the flight path for this demo\n"
-            "     x y z - the offset in 3D";
+                "     x y z - the offset in 3D";
     }
 
     // This method is called when you invoke a command in the
@@ -549,6 +790,10 @@ public:
                     // manipulator with some
                     // defaults
                     osg::ref_ptr<CameraTrackballManipulator> tb = new CameraTrackballManipulator(s_Reset,_ig);
+
+                    if(tb.valid())
+                        _tb = tb.get();
+
                     tb->setAutoComputeHomePosition(false);
                     tb->setNode(entity->getChild(0));
 
@@ -565,10 +810,13 @@ public:
                     // This will be the initial
                     // position
                     osg::Matrixd mx;
-                    mx.makeLookAt(osg::Vec3d(10,radius*factor,-2.5),center,osg::Vec3d(0,0,1));
+                    double y = radius*factor;
+                    osg::notify(osg::NOTICE) << "Trackball setting y: " << y << std::endl;
+                    mx.makeLookAt(osg::Vec3d(10,y,-2.5),center,osg::Vec3d(0,0,1));
 
                     tb->setByMatrix(mx);
                     tb->setHomePosition(osg::Vec3d(10,radius*factor,-2.5),center,osg::Vec3d(0,0,1));
+                    //tb->setHomePosition(osg::Vec3d(0,-30,10),center,osg::Vec3d(0,0,1));
                     tb->setCenter(center);
                     tb->setDistance(radius*factor);
 
@@ -1259,6 +1507,9 @@ int main(int argc, char** argv)
     OpenIG::Base::Commands::instance()->addCommand("manip", new SetCameraManipulatorCommand(ig));
     OpenIG::Base::Commands::instance()->addCommand("fpo", new FlightPathOffsetCommand(s_Offset));
     OpenIG::Base::Commands::instance()->addCommand("geozero", new SetGeocentricZeroCommand);
+    OpenIG::Base::Commands::instance()->addCommand("loop", new LoopA320DemoCommand(s_loopDemo));
+    OpenIG::Base::Commands::instance()->addCommand("iitsec", new IITSECModeCommand(s_iitsecMode));
+    OpenIG::Base::Commands::instance()->addCommand("zoomd", new ZoomDistanceCommand(s_zoomOutDistance));
 
     // The scene can be defined in a startup script
     // using commands. Please have a look at the
@@ -1446,7 +1697,6 @@ int main(int argc, char** argv)
 
     // Now we show how to update
     // Light attributes, colors etc
-    //OpenIG::Base::LightAttributes attr;
     //attr._ambient = osg::Vec4(0,0,0,1);
     //attr._diffuse = osg::Vec4(1,1,1,1);
     //attr._brightness = 5;
@@ -1534,6 +1784,8 @@ int main(int argc, char** argv)
     osgViewer::CompositeViewer::Windows wins;
     viewer->getWindows(wins);
 
+    osg::notify(osg::NOTICE) << "OpenIG A320 Demo s_loopDemo: " << s_loopDemo <<  std::endl;
+
     while (!viewer->done())
     {
 
@@ -1570,13 +1822,14 @@ int main(int argc, char** argv)
             // it's home position and that hangs the app.
 
             // We limit the distance from the home position
-            // to something, like 500m
-            double zoomOutDistance = 500;
+            // to something, like 500m, but its adjustable
+            // using the new zoom command, with the zoom
+            // command you can increase your zoom distance
+            // but you CANNOT make the zoom distance smaller
+            // than the previous entry...
+            double zoomOutDistance = s_zoomOutDistance;
             static osg::Matrixd mx;
 
-#if 0
-            ig->bindCameraUpdate(s_CameraManipulator->getMatrix());
-#else
             if (s_CameraManipulator->getMatrix().getTrans().length() < zoomOutDistance)
             {
                 ig->bindCameraUpdate(s_CameraManipulator->getMatrix());
@@ -1587,7 +1840,6 @@ int main(int argc, char** argv)
                 // here we revert to the best known
                 s_CameraManipulator->setByMatrix(mx);
             }
-#endif
         }
 
         // Here we call the frame
@@ -1749,7 +2001,7 @@ int main(int argc, char** argv)
             // purpose
             osg::Timer_t time = osg::Timer::instance()->delta_s(s_PlaybackStartTime,osg::Timer::instance()->tick());
 
-        if (!s_LandingGearUp && time > (LANDING_GEAR_UP + s_PausedTime))
+            if (!s_LandingGearUp && time > (LANDING_GEAR_UP + s_PausedTime))
             {
                 OpenIG::Base::StringUtils::StringList animations;
                 animations.push_back("close-landing-gear-leg-nose");
@@ -1762,15 +2014,22 @@ int main(int argc, char** argv)
                 // update this
                 s_LandingGearUp = true;
 
-                // Here we disable the lights on the landing gear too
+            }
+
+            if (!s_LandingLightsOFF && time > (LIGHTS_OFF + s_PausedTime))
+            {
+                // Here we turn off all landing lights
                 ig->enableLight(10008, false);
                 ig->enableLight(10009, false);
                 ig->enableLight(10010, false);
                 ig->enableLight(10011, false);
                 ig->enableLight(10012, false);
                 ig->enableLight(10013, false);
+
+                s_LandingLightsOFF = true;
                 osg::notify(osg::NOTICE) << "OpenIG A320 Demo: landing lights turned OFF!!" << std::endl;
             }
+
 
             if (!s_FlapsUp && time > (FLAPS_UP + s_PausedTime))
             {
@@ -1785,8 +2044,141 @@ int main(int argc, char** argv)
                 s_FlapsUp = true;
             }
 
+            if (s_iitsecMode && !s_Clayer1 && time > (CLOUD_LAYER_CHANGE1 + s_PausedTime))
+            {
+                ig->setTimeOfDay(10,0);
+                //ig->loadCloudLayerFile(1, 4, "cloudfile4.1");
+                ig->enableCloudLayer(1, true);
+                s_Clayer1 = true;
+            }
+
+            if (s_iitsecMode && !s_Clayer2 && time > (CLOUD_LAYER_CHANGE2 + s_PausedTime))
+            {
+                ig->setTimeOfDay(0,0);
+
+                //Adjust lights for demo
+                {
+                    unsigned int mask = 0;
+                    OpenIG::Base::LightAttributes la;
+
+                    la.brightness = 4.0f;
+                    la.fStartRange = 0.0f;
+                    la.fEndRange = 1000.0f;
+
+                    mask |= OpenIG::Base::LightAttributes::BRIGHTNESS;
+                    mask |= OpenIG::Base::LightAttributes::RANGES;
+                    la.dirtyMask = mask;
+
+                    //We need the current diffuse attribute to also set/change the brightness...
+                    //so we get the current attributes for this and to reset them all
+                    left_wing_la = ig->getLightAttributes(LEFT_WING_LIGHT);
+                    right_wing_la = ig->getLightAttributes(RIGHT_WING_LIGHT);
+                    left_wing_strobe_la = ig->getLightAttributes(LEFT_WING_STROBE_LIGHT);
+                    right_wing_strobe_la = ig->getLightAttributes(RIGHT_WING_STROBE_LIGHT);
+                    //tail_strobe_la = ig->getLightAttributes(TAIL_STROBE_LIGHT);
+
+                    //change left wing light
+                    la.diffuse = left_wing_la.diffuse;
+                    ig->updateLightAttributes(LEFT_WING_LIGHT,la);
+
+                    //Now right wing light
+                    la.diffuse = right_wing_la.diffuse;
+                    ig->updateLightAttributes(RIGHT_WING_LIGHT,la);
+
+                    //now left wing strobe
+                    la.diffuse = left_wing_strobe_la.diffuse;
+                    ig->updateLightAttributes(LEFT_WING_STROBE_LIGHT,la);
+
+                    //now right wing strobe
+                    la.diffuse = right_wing_strobe_la.diffuse;
+                    ig->updateLightAttributes(RIGHT_WING_STROBE_LIGHT,la);
+
+                    //now tail strobe
+                    //la.diffuse = tail_strobe_la.diffuse;
+                    //ig->updateLightAttributes(TAIL_STROBE_LIGHT,la);
+
+                    ig->enableCloudLayer(1, false);
+                    ig->enableCloudLayer(2, true);
+
+                    // Turn on the wing lights to light up clouds...
+//                    ig->enableLight(10008, true);
+//                    ig->enableLight(10009, true);
+//                    ig->enableLight(10010, true);
+//                    ig->enableLight(10011, true);
+//                    ig->enableLight(10012, true);
+//                    ig->enableLight(10013, true);
+                }
+
+                if (trackball.valid())
+                    trackball->setViewPosition(osg::Vec3d(0,-45,5));
+
+                //ig->setRain(0.35);
+                s_Clayer2 = true;
+            }
+
+            if (s_iitsecMode && !s_Clayer3 && time > (CLOUD_LAYER_CHANGE3 + s_PausedTime))
+            {
+                unsigned int    mask = 0;
+                mask |= OpenIG::Base::LightAttributes::BRIGHTNESS;
+                mask |= OpenIG::Base::LightAttributes::RANGES;
+
+                //Restore original light attributes now
+                left_wing_la.dirtyMask = right_wing_la.dirtyMask = mask;
+                left_wing_strobe_la.dirtyMask = right_wing_strobe_la.dirtyMask = tail_strobe_la.dirtyMask = mask;
+
+                ig->updateLightAttributes(LEFT_WING_LIGHT, left_wing_la);
+                ig->updateLightAttributes(RIGHT_WING_LIGHT, right_wing_la);
+                ig->updateLightAttributes(LEFT_WING_STROBE_LIGHT, left_wing_strobe_la);
+                ig->updateLightAttributes(RIGHT_WING_STROBE_LIGHT, right_wing_strobe_la);
+                //ig->updateLightAttributes(TAIL_STROBE_LIGHT, tail_strobe_la);
+
+                //ig->removeCloudLayer(2);
+                ig->setTimeOfDay(7,0);
+                ig->enableCloudLayer(2, false);
+                ig->setRain(0.0);
+                //ig->loadCloudLayerFile(3, 2, "cloudfile2.3");
+                ig->enableCloudLayer(3, true);
+                s_Clayer3 = true;
+            }
+
+            if (!s_LandingLightsON && time > (LIGHTS_ON + s_PausedTime))
+            {
+                // Turn on the lights on all landing lights...
+                ig->enableLight(10008, true);
+                ig->enableLight(10009, true);
+                ig->enableLight(10010, true);
+                ig->enableLight(10011, true);
+                ig->enableLight(10012, true);
+                ig->enableLight(10013, true);
+
+                s_LandingLightsON = true;
+            }
+
+            if (s_iitsecMode && !s_Clayer4 && time > (CLOUD_LAYER_CHANGE4 + s_PausedTime))
+            {
+                ig->enableCloudLayer(3, false);
+
+                //ig->setTimeOfDay(7,0);
+                ig->setRain(0.35);
+                //ig->loadCloudLayerFile(4, 6, "cloudfile6.4");
+                ig->enableCloudLayer(4, true);
+
+                s_Clayer4 = true;
+            }
+
+            if (s_iitsecMode && !s_Position1 && time > (CAMERA_POSITION_CHANGE1 + s_PausedTime))
+            {
+                if (trackball.valid())
+                    trackball->setViewPosition(osg::Vec3d(10, 40, -2));
+
+                s_Position1 = true;
+            }
+
             if (!s_LandingGearDown && (time > LANDING_GEAR_DOWN + s_PausedTime))
             {
+                if (s_iitsecMode)
+                    ig->setWind(35,270);
+
                 OpenIG::Base::StringUtils::StringList animations;
                 animations.push_back("open-landing-gear-leg-nose");
                 animations.push_back("open-landing-gear-leg-left");
@@ -1798,17 +2190,10 @@ int main(int argc, char** argv)
                 // update this
                 s_LandingGearDown = true;
 
-                // Here we disable the lights on the landing gear too
-                ig->enableLight(10008, true);
-                ig->enableLight(10009, true);
-                ig->enableLight(10010, true);
-                ig->enableLight(10011, true);
-                ig->enableLight(10012, true);
-                ig->enableLight(10013, true);
                 osg::notify(osg::NOTICE) << "OpenIG A320 Demo: landing lights turned ON!!" << std::endl;
             }
 
-        if (!s_FlapsDown && (time > FLAPS_DOWN + s_PausedTime))
+            if (!s_FlapsDown && (time > FLAPS_DOWN + s_PausedTime))
             {
                 OpenIG::Base::StringUtils::StringList animations;
                 animations.push_back("flaps-down-left");
@@ -1833,7 +2218,7 @@ int main(int argc, char** argv)
 
                 s_Reverse = true;
             }
-        if (!s_BreaksUp && (time > BREAKS_UP + s_PausedTime))
+            if (!s_BreaksUp && (time > BREAKS_UP + s_PausedTime))
             {
                 OpenIG::Base::StringUtils::StringList animations;
                 animations.push_back("breaks-up-left");
@@ -1847,7 +2232,7 @@ int main(int argc, char** argv)
                 s_BreaksUp = true;
             }
 
-        if (time > (FLIGHT_PATH_EOF + s_PausedTime))
+            if (!s_Landed && time > (FLIGHT_PATH_EOF + s_PausedTime))
             {
                 OpenIG::Base::StringUtils::StringList animations;
                 animations.push_back("breaks-down-left");
@@ -1862,13 +2247,28 @@ int main(int argc, char** argv)
                 ig->playAnimation(MODEL_ENTITY_ID,animations);
 
                 // We are not in playback now
-                if (trackball.valid())
+                if (!s_iitsecMode && trackball.valid() && trackball->playbackOn == true)
                 {
                     trackball->playbackOn = false;
                 }
 
                 // we set this
                 s_Landed = true;
+            }
+
+            //osg::notify(osg::NOTICE) << "OpenIG A320 Demo time: " << time << ", PAUSE_TIME: " << PAUSE_TIME << std::endl;
+            //If your looping, pause a bit before resetting to beginning....
+            if (!s_iitsecPaused && s_iitsecMode && time >= (PAUSE_TIME + s_PausedTime))
+            {
+                // We are not in playback now stop the timer, etc...
+                if (trackball.valid() && trackball->playbackOn == true)
+                {
+                    trackball->playbackOn = false;
+                }
+                //pause for a few seconds before resetting
+                //to allow storm clouds to be seen....
+                s_Reset = s_iitsecPaused = true;
+                osg::notify(osg::NOTICE) << "OpenIG A320 Demo s_loopDemo!!" << std::endl;
             }
         }
 
@@ -1883,11 +2283,11 @@ int main(int argc, char** argv)
             osg::Matrixd mx;
             path->getMatrix(path->getFirstTime(),mx);
 
-        // we apply offset here
-        mx = osg::Matrixd::translate(s_Offset) * mx;
+            // we apply offset here
+            mx = osg::Matrixd::translate(s_Offset) * mx;
 
             // And we update our model.
-        ig->updateEntity(MODEL_ENTITY_ID, mx*s_GeoZeroMatrix);
+            ig->updateEntity(MODEL_ENTITY_ID, mx*s_GeoZeroMatrix);
 
             // update this
             s_PlaybackStartTime = 0;
@@ -1948,9 +2348,65 @@ int main(int argc, char** argv)
             ig->resetAnimation(MODEL_ENTITY_ID,"close-landing-gear-leg-right");
             ig->stopAnimation(MODEL_ENTITY_ID,"close-landing-gear-leg-right");
             ig->stopAnimation(MODEL_ENTITY_ID,"open-landing-gear-leg-right");
+
+            // Ensure that the landing lights are all on again to match startup..
+            //ig->enableLight(10008, true);
+            //ig->enableLight(10009, true);
+            //ig->enableLight(10010, true);
+            //ig->enableLight(10011, true);
+            //ig->enableLight(10012, true);
+            //ig->enableLight(10013, true);
+            s_LandingLightsOFF = false;
+            s_LandingLightsON  = false;
+
+            if(s_iitsecMode)
+            {
+                s_Clayer1				= false;
+                s_Clayer2				= false;
+                s_Clayer3				= false;
+                s_Clayer4				= false;
+                s_iitsecPaused          = false;
+                s_Position1             = false;
+
+                //ig->removeCloudLayer(4);
+                ig->enableCloudLayer(2, false);
+                ig->enableCloudLayer(4, false);
+                ig->setWind(5,90);
+                ig->setTimeOfDay(7,15);
+                ig->setRain(0);
+                if (trackball.valid())
+                {
+                    OpenIG::Base::ImageGenerator::Entity& entity = ig->getEntityMap()[1];
+                    if (entity.valid())
+                    {
+                        double radius = entity->getChild(0)->getBound().radius();
+                        double factor = 1.5;
+                        double y = radius*factor;
+
+                        trackball->setViewPosition(osg::Vec3d(10,y,-2));
+                    }
+                    else
+                        trackball->setViewPosition(osg::Vec3d(10,40,-2));
+                }
+            }
+
+            if (s_loopDemo)
+            {
+                trackball->playbackOn = true;
+                osg::notify(osg::NOTICE) << "OpenIG A320 Demo restarting playback loop!!!!" << std::endl;
+            }
         }
 
+
     }
+
+     osg::notify(osg::NOTICE) << "OpenIG A320 Demo EXITING!!!!!!!!!" << std::endl;
+
+    //Remove any temporary cloud files we created via the demo files
+    std::remove("cloudfile2.3");
+    std::remove("cloudfile4.1");
+    std::remove("cloudfile6.4");
+    std::remove("cloudfile8.2");
 
     // OSG still messes up ref ptrs
     // on exit. Let "clean it" manually

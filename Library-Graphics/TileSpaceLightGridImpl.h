@@ -1,7 +1,7 @@
 #pragma once
 
 #if defined(OPENIG_SDK)
-#include <OpenIG-Graphics/export.h>
+#include <OpenIG-Graphics/Export.h>
 #include <OpenIG-Graphics/CameraFwdDeclare.h>
 #include <OpenIG-Graphics/AxisAlignedBoundingBox.h>
 #include <OpenIG-Graphics/ForwardDeclare.h>
@@ -9,7 +9,7 @@
 #include <OpenIG-Graphics/ScreenRect.h>
 #include <OpenIG-Graphics/DataFormat.h>
 #else
-#include <Library-Graphics/export.h>
+#include <Library-Graphics/Export.h>
 #include <Library-Graphics/CameraFwdDeclare.h>
 #include <Library-Graphics/AxisAlignedBoundingBox.h>
 #include <Library-Graphics/ForwardDeclare.h>

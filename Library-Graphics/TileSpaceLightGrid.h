@@ -31,94 +31,94 @@ THE SOFTWARE.
 #pragma warning( disable : 4251 )
 
 #if defined(OPENIG_SDK)
-	#include <OpenIG-Graphics/export.h>
-	#include <OpenIG-Graphics/CameraFwdDeclare.h>
-	#include <OpenIG-Graphics/ForwardDeclare.h>
-	#include <OpenIG-Graphics/Vector2.h>
-	#include <OpenIG-Graphics/ScreenRect.h>
-	#include <OpenIG-Graphics/DataFormat.h>
+    #include <OpenIG-Graphics/Export.h>
+    #include <OpenIG-Graphics/CameraFwdDeclare.h>
+    #include <OpenIG-Graphics/ForwardDeclare.h>
+    #include <OpenIG-Graphics/Vector2.h>
+    #include <OpenIG-Graphics/ScreenRect.h>
+    #include <OpenIG-Graphics/DataFormat.h>
 #else
-	#include <Library-Graphics/export.h>
-	#include <Library-Graphics/CameraFwdDeclare.h>
-	#include <Library-Graphics/ForwardDeclare.h>
-	#include <Library-Graphics/Vector2.h>
-	#include <Library-Graphics/ScreenRect.h>
-	#include <Library-Graphics/DataFormat.h>
+    #include <Library-Graphics/Export.h>
+    #include <Library-Graphics/CameraFwdDeclare.h>
+    #include <Library-Graphics/ForwardDeclare.h>
+    #include <Library-Graphics/Vector2.h>
+    #include <Library-Graphics/ScreenRect.h>
+    #include <Library-Graphics/DataFormat.h>
 #endif
 
 FORWARD_DECLARE(Light)
 
 namespace OpenIG {
-	namespace Library {
-		namespace Graphics {
+    namespace Library {
+        namespace Graphics {
 
-			class IGLIBGRAPHICS_EXPORT TileSpaceLightGrid
-			{
-			public:
-				TileSpaceLightGrid(const Vector2_uint32& tileSize);
-				virtual ~TileSpaceLightGrid();
+            class IGLIBGRAPHICS_EXPORT TileSpaceLightGrid
+            {
+            public:
+                TileSpaceLightGrid(const Vector2_uint32& tileSize);
+                virtual ~TileSpaceLightGrid();
 
-				void Update(const VectorLights& frustumVisibleLights, const Camera_64* pCamera, const Vector2_uint32& viewportSize);
+                void Update(const VectorLights& frustumVisibleLights, const Camera_64* pCamera, const Vector2_uint32& viewportSize);
 
-				const int *GetTileLightIndexListsPtr() const { return &m_TileLightIndexLists[0]; }
-				uint32     GetTotalTileLightIndexListLength() const { return uint32(m_TileLightIndexLists.size()); }
+                const int *GetTileLightIndexListsPtr() const { return &m_TileLightIndexLists[0]; }
+                uint32     GetTotalTileLightIndexListLength() const { return uint32(m_TileLightIndexLists.size()); }
 
-				// Rejects lights with screen space area less than this value
-				void SetScreenAreaCullSize(const Vector2_uint32& val);
-				const Vector2_uint32& GetScreenAreaCullSize(void) const;
+                // Rejects lights with screen space area less than this value
+                void SetScreenAreaCullSize(const Vector2_uint32& val);
+                const Vector2_uint32& GetScreenAreaCullSize(void) const;
 
-				const int32* GetTileGridOffsetAndSizeDataPtr(void) const { return m_pGridOffsetsAndSizesData; }
-				DataFormat   GetTileGridOffsetAndSizeDataFormat(void) const { return FORMAT_R32G32_SINT; }
-				uint32       GetTileGridOffsetAndSizeWidth(void) const{ return m_GridOffsetsAndSizeWidth; }
-				uint32       GetTileGridOffsetAndSizeSizeInBytes(void) const{ return GetTileGridOffsetAndSizeWidth() * 2 * sizeof(int32); }
+                const int32* GetTileGridOffsetAndSizeDataPtr(void) const { return m_pGridOffsetsAndSizesData; }
+                DataFormat   GetTileGridOffsetAndSizeDataFormat(void) const { return FORMAT_R32G32_SINT; }
+                uint32       GetTileGridOffsetAndSizeWidth(void) const{ return m_GridOffsetsAndSizeWidth; }
+                uint32       GetTileGridOffsetAndSizeSizeInBytes(void) const{ return GetTileGridOffsetAndSizeWidth() * 2 * sizeof(int32); }
 
-				const Vector2_uint32& GetTileSize(void) const{ return m_TileSize; }
-			private:
-				void UpdateScreenSpaceRectangles(const VectorLights& frustumVisibleLights, const Camera_64* pCamera, const Vector2_uint32& viewportSize, const Vector2_uint32& tileSize);
+                const Vector2_uint32& GetTileSize(void) const{ return m_TileSize; }
+            private:
+                void UpdateScreenSpaceRectangles(const VectorLights& frustumVisibleLights, const Camera_64* pCamera, const Vector2_uint32& viewportSize, const Vector2_uint32& tileSize);
 
 #if 0
-				const Vector2_32 getTileMinMax(uint32 x, uint32 y) const { return m_minMaxGridValid ? m_gridMinMaxZ[x + y * m_gridDim.x] : chag::make_vector(0.0f, 0.0f); }
-				std::vector<chag::float2> m_gridMinMaxZ;
+                const Vector2_32 getTileMinMax(uint32 x, uint32 y) const { return m_minMaxGridValid ? m_gridMinMaxZ[x + y * m_gridDim.x] : chag::make_vector(0.0f, 0.0f); }
+                std::vector<chag::float2> m_gridMinMaxZ;
 #endif
-				int32* m_GridOffsets;
-				int32* m_GridCounts;
-				int32* m_pGridOffsetsAndSizesData;
+                int32* m_GridOffsets;
+                int32* m_GridCounts;
+                int32* m_pGridOffsetsAndSizesData;
 
-				uint32 m_GridOffsetsAndSizeWidth;
+                uint32 m_GridOffsetsAndSizeWidth;
 
-				void TearDownGridOffsetsAndCounts(void);
-				void ResizeGridOffsetsAndCountsIfNecessary(const Vector2_uint32& tileGridMaxDims);
+                void TearDownGridOffsetsAndCounts(void);
+                void ResizeGridOffsetsAndCountsIfNecessary(const Vector2_uint32& tileGridMaxDims);
 
-				std::vector<int> m_TileLightIndexLists;
-				uint32 m_MaxTileLightCount;
-				bool m_MinMaxGridValid;
+                std::vector<int> m_TileLightIndexLists;
+                uint32 m_MaxTileLightCount;
+                bool m_MinMaxGridValid;
 
-				ConstVectorLights m_ViewSpaceLights;
-				VectorScreenRectangles m_ScreenRects;
+                ConstVectorLights m_ViewSpaceLights;
+                VectorScreenRectangles m_ScreenRects;
 
-				int GetGridOffset(int x, int y, const Vector2_uint32& lightGridMaxDims);
-				int GetGridCount(int x, int y, const Vector2_uint32& lightGridMaxDims);
-				int& GridOffset(int x, int y, const Vector2_uint32& lightGridMaxDims);
-				int& GridCount(int x, int y, const Vector2_uint32& lightGridMaxDims);
+                int GetGridOffset(int x, int y, const Vector2_uint32& lightGridMaxDims);
+                int GetGridCount(int x, int y, const Vector2_uint32& lightGridMaxDims);
+                int& GridOffset(int x, int y, const Vector2_uint32& lightGridMaxDims);
+                int& GridCount(int x, int y, const Vector2_uint32& lightGridMaxDims);
 
-				Vector2_uint32 m_ScreenSpaceRejectArea;
+                Vector2_uint32 m_ScreenSpaceRejectArea;
 
-				// Tile accessor functions. Returns tile data for an individual tile
-				int GeTileLightCount(uint32 x, uint32 y, const Vector2_uint32& tileGridMaxDims) const
-				{
-					return m_GridCounts[x + y * tileGridMaxDims.x];
-				}
-				// Grid data pointer accessors, used for uploading to GPU.
-				const int *GetTileDataPtr() const { return m_GridOffsets; }
-				const int *GetTileCountsDataPtr() const { return m_GridCounts; }
+                // Tile accessor functions. Returns tile data for an individual tile
+                int GeTileLightCount(uint32 x, uint32 y, const Vector2_uint32& tileGridMaxDims) const
+                {
+                    return m_GridCounts[x + y * tileGridMaxDims.x];
+                }
+                // Grid data pointer accessors, used for uploading to GPU.
+                const int *GetTileDataPtr() const { return m_GridOffsets; }
+                const int *GetTileCountsDataPtr() const { return m_GridCounts; }
 
-				Vector2_uint32 m_TileSize;
+                Vector2_uint32 m_TileSize;
 
-				Vector2_uint32 ComputeGridMaxDims(const Vector2_uint32& viewportSize) const;
-			};
+                Vector2_uint32 ComputeGridMaxDims(const Vector2_uint32& viewportSize) const;
+            };
 
-		}
-	}
+        }
+    }
 }
 
 #pragma warning(pop)

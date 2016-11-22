@@ -5,21 +5,25 @@
 #-------------------------------------------------
 
 QT       -= core gui
+CONFIG +=  silent warn_off
 
 TARGET = OpenIG-Plugin-LightsControl
 TEMPLATE = lib
 
 DEFINES += IGPLUGINLIGHTSCONTROL_LIBRARY
 
-SOURCES += igpluginlightscontrol.cpp
+SOURCES += IGPluginLightsControl.cpp
 
 HEADERS +=
 
 INCLUDEPATH += ../
 DEPENDPATH += ../
 
-LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgShadow -losgSim -losgUtil\
-        -lOpenIG-Engine -lOpenIG-PluginBase -lOpenIG-Base -lOpenIG-Utils
+LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgGA -losgText -losgShadow -losgSim -losgParticle\
+        -lOpenIG-Engine -lOpenIG-Base -lOpenIG-PluginBase -lOpenIG-Graphics -lOpenIG-Utils
+
+#LIBS += -losg -losgDB -losgViewer -lOpenThreads -losgShadow -losgUtil -losgSim -losgText -losgGA -losgTexture\
+#        -lOpenIG-Engine -lOpenIG-Base -lOpenIG-Graphics -lOpenIG-PluginBase -lOpenIG-Utils
 
 OTHER_FILES += CMakeLists.txt
 DISTFILES += CMakeLists.txt
@@ -60,7 +64,8 @@ unix {
     INCLUDEPATH += /usr/local/lib64
     DEPENDPATH += /usr/local/lib64
 
-    SFILES += $$files($${PWD}/../Resources/shaders/*.glsl)
+    SFILES  = $$files($${PWD}/../Resources/shaders/lightpoint_*.glsl)
+    SFILES += $$files($${PWD}/../Resources/shaders/sprite_bb_*.glsl)
     TFILES += $$files($${PWD}/../Resources/textures/*)
 
     SDESTDIR = /usr/local/openig/resources/shaders/
@@ -98,21 +103,23 @@ unix {
 win32-g++:QMAKE_CXXFLAGS += -fpermissive -shared-libgcc -D_GLIBCXX_DLL
 
 win32 {
+    LIBS += -lopengl32 -lglu32 -lUser32
+
     OSGROOT = $$(OSG_ROOT)
     isEmpty(OSGROOT) {
-        !build_pass:message($$basename(_PRO_FILE_) -- \"OpenSceneGraph\" not detected...)
+        message(\"OpenSceneGraph\" not detected...)
     }
     else {
-       !build_pass:message($$basename(_PRO_FILE_) -- \"OpenSceneGraph\" detected in \"$$OSGROOT\")
+        message(\"OpenSceneGraph\" detected in \"$$OSGROOT\")
         INCLUDEPATH += $$OSGROOT/include
         LIBS += -L$$OSGROOT/lib
     }
     OSGBUILD = $$(OSG_BUILD)
     isEmpty(OSGBUILD) {
-       !build_pass:message($$basename(_PRO_FILE_) -- \"OpenSceneGraph build\" not detected...)
+        message(\"OpenSceneGraph build\" not detected...)
     }
     else {
-        !build_pass:message($$basename(_PRO_FILE_) -- \"OpenSceneGraph build\" detected in \"$$OSGBUILD\")
+        message(\"OpenSceneGraph build\" detected in \"$$OSGBUILD\")
         DEPENDPATH += $$OSGBUILD/lib
         INCLUDEPATH += $$OSGBUILD/include
         LIBS += -L$$OSGBUILD/lib
@@ -132,10 +139,12 @@ win32 {
             LIBS += -L$$BOOSTROOT\stage\lib
             CONFIG( debug,debug|release ){
                 message($$TARGET -- Boost using debug version of libraries )
-                LIBS += -llibboost_filesystem-vc120-mt-gd-1_58 -llibboost_system-vc120-mt-gd-1_58 -llibboost_thread-vc120-mt-gd-1_58
+                LIBS += -llibboost_filesystem-vc120-mt-gd-1_58  -llibboost_date_time-vc120-mt-gd-1_58 \
+                        -llibboost_system-vc120-mt-gd-1_58 -llibboost_thread-vc120-mt-gd-1_58
             }else{
                 message($$TARGET -- Boost using release version of libraries )
-                LIBS += -llibboost_filesystem-vc120-mt-1_58 -llibboost_system-vc120-mt-1_58 -llibboost_thread-vc120-mt-1_58
+                LIBS += -llibboost_filesystem-vc120-mt-1_58  -llibboost_date_time-vc120-mt-1_58 \
+                        -llibboost_system-vc120-mt-1_58 -llibboost_thread-vc120-mt-1_58
             }
         }
     }
@@ -144,13 +153,13 @@ win32 {
     isEmpty (OPENIGBUILD) {
         OPENIGBUILD = $$IN_PWD/..
     }
-    !build_pass:message($$basename(_PRO_FILE_) -- \"openig build\" detected in \"$$OPENIGBUILD\")
     DESTDIR = $$OPENIGBUILD/lib
     DLLDESTDIR = $$OPENIGBUILD/bin/plugins
 
     LIBS += -L$$OPENIGBUILD/lib
 
-    SFILES   = $$files($${PWD}/../Resources/shaders/*.glsl)
+    SFILES   = $$files($${PWD}/../Resources/shaders/lightpoint_*.glsl)
+    SFILES  += $$files($${PWD}/../Resources/shaders/sprite_bb_*.glsl)
     SDESTDIR = $$OPENIGBUILD/bin/resources/shaders/
 
     SFILES   ~= s,/,\\,g
@@ -179,7 +188,8 @@ win32 {
     QMAKE_DISTCLEAN += $$distfiles
 
     QMAKE_POST_LINK  = test -d $$quote($$SDESTDIR) || $$QMAKE_MKDIR $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
-    QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$PDIR\..\Resources\shaders\*.glsl) $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$PDIR\..\Resources\shaders\lightpoint_*.glsl) $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$PDIR\..\Resources\shaders\sprite_bb_*.glsl) $$quote($$SDESTDIR) $$escape_expand(\\n\\t)
 
     QMAKE_POST_LINK += test -d $$quote($$TDESTDIR) || $$QMAKE_MKDIR $$quote($$TDESTDIR) $$escape_expand(\\n\\t)
     QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$PDIR\..\Resources\textures\*.*) $$quote($$TDESTDIR) $$escape_expand(\\n\\t)

@@ -6,14 +6,14 @@
 
 QT       -= core gui
 
-CONFIG += silent
+CONFIG += silent warn_off
 
 TARGET = OpenIG-Plugin-FBXAnimation
 TEMPLATE = lib
 
 DEFINES += IGPLUGINFBXANIMATION_LIBRARY
 
-SOURCES += igpluginfbxanimation.cpp
+SOURCES += IGPluginFBXAnimation.cpp
 
 HEADERS +=
 
@@ -47,11 +47,11 @@ unix {
     # library version number files
     exists( "../openig_version.pri" ) {
 
-	include( "../openig_version.pri" )
+    include( "../openig_version.pri" )
         isEmpty( VERSION ){ error( "$$TARGET -- bad or undefined VERSION variable inside file openig_version.pri" )
-	} else {
+    } else {
         message( "$$TARGET -- Set version info to: $$VERSION" )
-	}
+    }
 
     }
     else { error( "$$TARGET -- could not find pri library version file openig_version.pri" ) }

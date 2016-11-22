@@ -1,18 +1,18 @@
-set( LIB_NAME OpenIG-Plugin-OSGEarthSimpleLighting )
+SET( LIB_NAME OpenIG-Plugin-OSGEarthSimpleLighting )
 
-add_library( ${LIB_NAME} SHARED
-    igpluginosgearthsimplelighting.cpp    
+ADD_LIBRARY( ${LIB_NAME} SHARED
+    IGPluginOSGEarthSimpleLighting.cpp
 )
 
-target_link_libraries( ${LIB_NAME}
+TARGET_LINK_LIBRARIES( ${LIB_NAME}
     ${OSG_LIBRARIES}
     OpenIG-Engine
 	${OSGEARTH_LIBRARY}
 )
 
-set_target_properties( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
-set_target_properties( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Plugin OSGEarthSimpleLighting" )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES VERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES SOVERSION ${OPENIG_VERSION} )
+SET_TARGET_PROPERTIES( ${LIB_NAME} PROPERTIES PROJECT_LABEL "Plugin OSGEarthSimpleLighting" )
 
-include( PluginInstall REQUIRED )
+INCLUDE( PluginInstall REQUIRED )
 

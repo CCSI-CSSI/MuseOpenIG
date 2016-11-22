@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['filesystem',['FileSystem',['../class_open_i_g_1_1_base_1_1_file_system.html',1,'OpenIG::Base']]],
-  ['fogattributes',['FogAttributes',['../struct_open_i_g_1_1_base_1_1_fog_attributes.html',1,'OpenIG::Base']]]
+  ['idgroup',['IdGroup',['../struct_open_i_g_1_1_base_1_1_i_d_pool_1_1_id_group.html',1,'OpenIG::Base::IDPool']]],
+  ['idpool',['IDPool',['../class_open_i_g_1_1_base_1_1_i_d_pool.html',1,'OpenIG::Base']]],
+  ['imagegenerator',['ImageGenerator',['../class_open_i_g_1_1_base_1_1_image_generator.html',1,'OpenIG::Base']]]
 ];

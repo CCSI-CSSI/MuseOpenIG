@@ -29,54 +29,54 @@ THE SOFTWARE.
 #pragma once
 
 #if defined(OPENIG_SDK)
-	#include <OpenIG-Graphics/export.h>
-	#include <OpenIG-Graphics/CommonTypes.h>
+    #include <OpenIG-Graphics/Export.h>
+    #include <OpenIG-Graphics/CommonTypes.h>
 #else
-	#include <Library-Graphics/export.h>
-	#include <Library-Graphics/CommonTypes.h>
+    #include <Library-Graphics/Export.h>
+    #include <Library-Graphics/CommonTypes.h>
 #endif
 
 namespace OpenIG {
-	namespace Library {
-		namespace Graphics {
+    namespace Library {
+        namespace Graphics {
 
-			class IGLIBGRAPHICS_EXPORT ColorValue
-			{
-			public:
-				ColorValue();
-				ColorValue(float32 r, float32 g, float32 b, float32 a);
-				~ColorValue(){}
+            class IGLIBGRAPHICS_EXPORT ColorValue
+            {
+            public:
+                ColorValue();
+                ColorValue(float32 r, float32 g, float32 b, float32 a);
+                ~ColorValue(){}
 
-				float32 r;
-				float32 g;
-				float32 b;
-				float32 a;
+                float32 r;
+                float32 g;
+                float32 b;
+                float32 a;
 
-				static const uint32 sizeInBytes;
+                static const uint32 sizeInBytes;
 
-				void* ptr(void);
-				const void* ptr(void) const;
+                void* ptr(void);
+                const void* ptr(void) const;
 
-				static ColorValue ZERO;
+                static ColorValue ZERO;
 
-				// Alpha is one
-				static ColorValue BLACK;
-				static ColorValue WHITE;
+                // Alpha is one
+                static ColorValue BLACK;
+                static ColorValue WHITE;
 
-				static ColorValue RED;
-				static ColorValue GREEN;
-				static ColorValue BLUE;
+                static ColorValue RED;
+                static ColorValue GREEN;
+                static ColorValue BLUE;
 
-				static ColorValue YELLOW;
-				static ColorValue MAGENTA;
-				static ColorValue CYAN;
+                static ColorValue YELLOW;
+                static ColorValue MAGENTA;
+                static ColorValue CYAN;
 
-				bool operator == (const ColorValue& rhs) const;
-				bool operator != (const ColorValue& rhs) const;
-			private:
+                bool operator == (const ColorValue& rhs) const;
+                bool operator != (const ColorValue& rhs) const;
+            private:
 
-			};
+            };
 
-		}
-	}
+        }
+    }
 }

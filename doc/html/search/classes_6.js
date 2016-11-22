@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['idgroup',['IdGroup',['../struct_open_i_g_1_1_base_1_1_global_id_generator_1_1_id_group.html',1,'OpenIG::Base::GlobalIdGenerator']]],
-  ['imagegenerator',['ImageGenerator',['../class_open_i_g_1_1_base_1_1_image_generator.html',1,'OpenIG::Base']]]
+  ['plugin',['Plugin',['../class_open_i_g_1_1_plugin_base_1_1_plugin.html',1,'OpenIG::PluginBase']]],
+  ['plugincontext',['PluginContext',['../class_open_i_g_1_1_plugin_base_1_1_plugin_context.html',1,'OpenIG::PluginBase']]],
+  ['pluginhost',['PluginHost',['../class_open_i_g_1_1_plugin_base_1_1_plugin_host.html',1,'OpenIG::PluginBase']]],
+  ['pluginoperation',['PluginOperation',['../class_open_i_g_1_1_plugin_base_1_1_plugin_operation.html',1,'OpenIG::PluginBase']]]
 ];

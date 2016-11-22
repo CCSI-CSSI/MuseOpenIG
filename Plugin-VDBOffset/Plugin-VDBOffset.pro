@@ -6,14 +6,14 @@
 
 QT       -= core gui
 
-CONFIG += silent
+CONFIG += silent warn_off
 
 TARGET = OpenIG-Plugin-VDBOffset
 TEMPLATE = lib
 
 DEFINES += IGPLUGINVDBOFFSET_LIBRARY
 
-SOURCES += igpluginvdboffset.cpp
+SOURCES += IGPluginVDBOffset.cpp
 
 HEADERS +=
 
@@ -49,11 +49,11 @@ unix {
     # library version number files
     exists( "../openig_version.pri" ) {
 
-	include( "../openig_version.pri" )
+    include( "../openig_version.pri" )
         isEmpty( VERSION ){ !build_pass:error($$basename(_PRO_FILE_)  -- bad or undefined VERSION variable inside file openig_version.pri)
-	} else {
+    } else {
         !build_pass:message($$basename(_PRO_FILE_) -- Set version info to: $$VERSION)
-	}
+    }
 
     }
     else { !build_pass:error($$basename(_PRO_FILE_) -- could not find pri library version file openig_version.pri) }

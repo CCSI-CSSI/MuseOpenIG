@@ -1,18 +1,18 @@
-set( APP_NAME veggen )
+SET( APP_NAME veggen )
 
-set( TARGET_OTHER_FILES DataFiles/VegetationInfo.xml )
+SET( TARGET_OTHER_FILES DataFiles/VegetationInfo.xml )
 
-add_executable( ${APP_NAME} main.cpp 
+ADD_EXECUTABLE( ${APP_NAME} main.cpp 
                 ${TARGET_OTHER_FILES} )
 
-target_link_libraries( ${APP_NAME}
+TARGET_LINK_LIBRARIES( ${APP_NAME}
     ${OSG_LIBRARIES}
     OpenIG-Engine
 )
 
-install(
+INSTALL(
     TARGETS ${APP_NAME}
     RUNTIME DESTINATION bin COMPONENT openig
 )
 
-set_target_properties( ${APP_NAME} PROPERTIES PROJECT_LABEL "Utility ${APP_NAME}" )
+SET_TARGET_PROPERTIES( ${APP_NAME} PROPERTIES PROJECT_LABEL "Utility ${APP_NAME}" )

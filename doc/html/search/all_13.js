@@ -1,7 +1,8 @@
 var searchData=
 [
-  ['version',['version',['../class_open_i_g_1_1_base_1_1_image_generator.html#a36c841ffd2261a52095b01c1d9317f8d',1,'OpenIG::Base::ImageGenerator::version()'],['../class_open_i_g_1_1_engine.html#a1708b07ac2fc5462d5d64a819bfa3b21',1,'OpenIG::Engine::version()']]],
-  ['viewidentifiers',['ViewIdentifiers',['../class_open_i_g_1_1_base_1_1_image_generator.html#aade6995a60f67435d4f8207560408aee',1,'OpenIG::Base::ImageGenerator']]],
-  ['viewtype',['ViewType',['../class_open_i_g_1_1_engine.html#a788f5d7ce120c1e362d9cf4611f8a836',1,'OpenIG::Engine']]],
-  ['visibility',['visibility',['../struct_open_i_g_1_1_base_1_1_fog_attributes.html#ab2e8cf28442fc0e4d794ac40a70bb640',1,'OpenIG::Base::FogAttributes']]]
+  ['_7eanimations',['~Animations',['../class_open_i_g_1_1_base_1_1_animations.html#a9a96ee49b2e162e7d1873297535c955e',1,'OpenIG::Base::Animations']]],
+  ['_7ecommands',['~Commands',['../class_open_i_g_1_1_base_1_1_commands.html#ae46c6ba21e1023fb375f686bccffb501',1,'OpenIG::Base::Commands']]],
+  ['_7eengine',['~Engine',['../class_open_i_g_1_1_engine.html#a99f92093c195bf007d5203b525dc31a2',1,'OpenIG::Engine']]],
+  ['_7eimagegenerator',['~ImageGenerator',['../class_open_i_g_1_1_base_1_1_image_generator.html#ae88894d7e657e5ae3c741fb2e8965c1a',1,'OpenIG::Base::ImageGenerator']]],
+  ['_7epluginhost',['~PluginHost',['../class_open_i_g_1_1_plugin_base_1_1_plugin_host.html#af41ec7dd0411e2ceea37141073a3b64e',1,'OpenIG::PluginBase::PluginHost']]]
 ];

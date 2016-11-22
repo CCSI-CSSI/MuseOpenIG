@@ -25,6 +25,10 @@
 //#*    Email address: openig@compro.net
 //#*
 //#*
+//#*    Please direct any questions or comments to the OpenIG Forums
+//#*    Email address: openig@compro.net
+//#*
+//#*
 //#*****************************************************************************
 
 //#*****************************************************************************
@@ -41,7 +45,7 @@
 
 #include <iomanip>
 
-#include <Core-Base/commands.h>
+#include <Core-Base/Commands.h>
 
 using namespace OpenIG::Plugins;
 
