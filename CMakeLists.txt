@@ -98,7 +98,7 @@ ADD_SUBDIRECTORY( Library-Graphics )
 ADD_SUBDIRECTORY( Library-Networking )
 ADD_SUBDIRECTORY( Library-Protocol )
 
-ADD_SUBDIRECTORY( Plugin-OigWidget)
+#ADD_SUBDIRECTORY( Plugin-OigWidget)
 
 IF( MERSIVE_FOUND )
  ADD_SUBDIRECTORY( Plugin-Mersive )
