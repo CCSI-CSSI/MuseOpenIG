@@ -21,7 +21,7 @@ SUBDIRS +=  Library-Graphics\
             Library-Networking\
             Library-Protocol\
             Plugin-Networking\
-            Plugin-OigWidget\
+#            Plugin-OigWidget\
             Application-A320
 
 OTHER_FILES += CMakeModules/*.* \
@@ -61,12 +61,12 @@ unix {
     }
 
 #CSTSHARE
-    exists( /usr/local/lib/libCstShare* )|exists( /usr/local/lib64/libCstShare* ){
-        message( "Configuring system to build with Legacy Muse products, legacy Muse libraries were found!!!......" )
-        SUBDIRS += Plugin-Muse
-    }else{
-        message( "We are NOT Configuring for building with Legacy Muse products. required Muse libraries were not found!!!..." )
-    }
+#    exists( /usr/local/lib/libCstShare* )|exists( /usr/local/lib64/libCstShare* ){
+#        message( "Configuring system to build with Legacy Muse products, legacy Muse libraries were found!!!......" )
+#        SUBDIRS += Plugin-Muse
+#    }else{
+#        message( "We are NOT Configuring for building with Legacy Muse products. required Muse libraries were not found!!!..." )
+#    }
 
 #BULLET
     !mac:exists( /usr/local/lib64/libBullet* )|exists( /usr/local/lib/libBullet* ):
@@ -143,13 +143,13 @@ unix {
     }
 
 ##JRM Sensors
-    JRMPATH = $$(JRM_OSV_PATH)
-    isEmpty(JRMPATH) {
-         message( "JRM Sensors not found on system, The JRM Sensor plugin is not included in the build ..." )
-    }else{
-         message( "Configuring system to build with JRM Sensors..." )
-         SUBDIRS += Plugin-JRMSensors
-    }
+#    JRMPATH = $$(JRM_OSV_PATH)
+#    isEmpty(JRMPATH) {
+#         message( "JRM Sensors not found on system, The JRM Sensor plugin is not included in the build ..." )
+#    }else{
+#         message( "Configuring system to build with JRM Sensors..." )
+#         SUBDIRS += Plugin-JRMSensors
+#    }
 }
 
 win32 {
@@ -213,14 +213,14 @@ win32 {
     }
 
 #CSTSHARED
-    CSTSHAREROOT = $$(CSTSHARE)
-    isEmpty(CSTSHAREROOT) {
-        message( "We are NOT Configuring for building with Legacy Muse products. required Muse libraries were not found!!!..." )
-    }
-    else {
-        message( "Configuring Windows system to build with Legacy Muse products..." )
-        SUBDIRS += Plugin-Muse
-    }
+#    CSTSHAREROOT = $$(CSTSHARE)
+#    isEmpty(CSTSHAREROOT) {
+#        message( "We are NOT Configuring for building with Legacy Muse products. required Muse libraries were not found!!!..." )
+#    }
+#    else {
+#        message( "Configuring Windows system to build with Legacy Muse products..." )
+#        SUBDIRS += Plugin-Muse
+#    }
 
 #MYGUI
     MYGUIROOT = $$(MYGUI_ROOT)
