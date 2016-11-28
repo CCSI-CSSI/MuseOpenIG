@@ -1731,11 +1731,11 @@
     <Name>LowerAnticolisionRed</Name>
     <Color>1.0 0.0 0.0 1.0</Color>
     <Position>0 1 -2.214</Position>
-    <Orientation>0 90 0</Orientation>
+    <Orientation>0 270 0</Orientation>
     <Use-Real-Light>yes</Use-Real-Light>
     <Real-Light-Offset>0 0 -0.4</Real-Light-Offset>
     <Animation-Pulses>0.25 1 0 0 1, 1.5 0 0 0 1</Animation-Pulses>
-    <Brightness>0.5</Brightness>
+    <Brightness>1.5</Brightness>
     <ConstAttenuation>3</ConstAttenuation>
     <MinPixelSize>2</MinPixelSize>
     <MaxPixelSize>2</MaxPixelSize>
@@ -1743,9 +1743,9 @@
     <Radius>3</Radius>
     <SpriteTexture>textures/lensflare_red_alpha_3.dds</SpriteTexture>
     <StartRange>0</StartRange>
-    <EndRange>0.7</EndRange>
-    <SpotInnerAngle>60</SpotInnerAngle>
-    <SpotOuterAngle>80</SpotOuterAngle>
+    <EndRange>10</EndRange>
+    <SpotInnerAngle>180</SpotInnerAngle>
+    <SpotOuterAngle>180</SpotOuterAngle>
   </Light>
   <Light>
     <Name>WingStrobeLightWhiteLeft</Name>
