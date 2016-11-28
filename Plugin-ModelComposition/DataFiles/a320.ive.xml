@@ -1740,12 +1740,12 @@
     <MinPixelSize>2</MinPixelSize>
     <MaxPixelSize>2</MaxPixelSize>
     <MinPixelSizeMultiplierForSprites>10</MinPixelSizeMultiplierForSprites>
-    <Radius>3</Radius>
+    <Radius>5</Radius>
     <SpriteTexture>textures/lensflare_red_alpha_3.dds</SpriteTexture>
     <StartRange>0</StartRange>
-    <EndRange>10</EndRange>
-    <SpotInnerAngle>180</SpotInnerAngle>
-    <SpotOuterAngle>180</SpotOuterAngle>
+    <EndRange>6.5</EndRange>
+    <SpotInnerAngle>200</SpotInnerAngle>
+    <SpotOuterAngle>200</SpotOuterAngle>
   </Light>
   <Light>
     <Name>WingStrobeLightWhiteLeft</Name>
