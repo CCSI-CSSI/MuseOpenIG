@@ -86,7 +86,7 @@ Engine::~Engine()
 
 std::string Engine::version()
 {
-    return "2.0.4";
+    return "2.0.5";
 }
 
 class InitPluginOperation : public PluginOperation

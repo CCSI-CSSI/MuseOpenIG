@@ -1,3 +1,6 @@
+xx Xxx xxxx, version 2.0.5
+-
+
 22 Nov 2016, version 2.0.4
 - Camel case file naming convention as in OSG, osgearth, SilverLining, Triton and bunch of other modern software projects.
   The file names were lowercase since the start of the project was on Linux with QtCreator. Now it matches the known
