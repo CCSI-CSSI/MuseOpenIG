@@ -1,6 +1,19 @@
 The Muse OpenIG.  An opensource OpenSceneGraph based image generator application suite.
 Documentation, sample datasets and Binary Downloads for some platforms available at: http://openig.compro.net
 
+# Muse OpenIG V2.0.5
+- Turn of osgShadows until the OSG users have time to fix some of the issues present
+  in their shadowing system.
+- Moved looping demo cloud layers to new iitsec.txt file so we do not take time
+  away from loading the standard/normal A320 demo.
+- Anti-collision lights on A320 were changed a bit to show more light on the
+  terrain, to include the red lower center light on the fuselage and wing tip
+  strobes.  NOTE: This requires the user to copy the new version of the
+  Plugin-ModelComposition/DataFiles/a320.ive.xml  file into the directory that
+  contains their a320.ive model, which varies depending on their installation.
+  On Windows binary installations the updated a320.ive.xml file can be found
+  in the installdir/bin/UpdatedMiscDatafiles directory.
+
 # Muse OpenIG V2.0.4
 - Camel case file naming convention as in OSG, osgearth, SilverLining, Triton and bunch of other modern software projects.
   The file names were lowercase since the start of the project was on Linux with QtCreator. Now it matches the known
