@@ -144,7 +144,7 @@ unix {
 
 ##JRM Sensors
 #    JRMPATH = $$(JRM_OSV_PATH)
-#    isEmpty(JRMPATH) {
+#    exists(/usr/local/JRM) {
 #         message( "JRM Sensors not found on system, The JRM Sensor plugin is not included in the build ..." )
 #    }else{
 #         message( "Configuring system to build with JRM Sensors..." )
