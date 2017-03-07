@@ -63,7 +63,7 @@ namespace OpenIG {
             class IGLIBNETWORKING_EXPORT UDPNetwork : public Network
             {
             public:
-                explicit UDPNetwork(const std::string& host, const std::string& destination="", bool broadcast=true);
+                explicit UDPNetwork(const std::string& host, const std::string& destination="", bool broadcast=true, bool nonBlocking = false);
                 virtual ~UDPNetwork();
 
                 virtual void send(const Buffer&);
@@ -82,6 +82,7 @@ namespace OpenIG {
                 bool							_senderSocketInitiated;
                 bool							_recieverSocketInitiated;
                 bool                            _broadcast;
+				bool							_nonBlocking;
             };
         } // namespace
     } // namespace

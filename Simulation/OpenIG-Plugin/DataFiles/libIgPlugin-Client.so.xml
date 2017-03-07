@@ -1,4 +1,11 @@
 <OpenIG-Plugin-Config>    
     <Host>127.0.0.1</Host>
-    <Port>8888</Port>    
+    <Port>8888</Port> 
+    <!-- 
+        One of these: 
+        None -      The client will expect EntityState with full Entity Matrix
+        SimpleDR -  The client will expect at list one EntityState for initial positioning
+                    following by many DeadReckonEntityState that will interpolate from
+    -->
+    <Mode>SimpleDR</Mode>
 </OpenIG-Plugin-Config>

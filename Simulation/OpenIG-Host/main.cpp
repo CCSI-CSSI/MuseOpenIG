@@ -31,7 +31,8 @@
 //#*
 //#*****************************************************************************
 //#*	author    Trajce Nikolov Nick openig@compro.net
-//#*	copyright(c)Compro Computer Services, Inc.
+//#*	copyright(c)Compro Computer Services, Inc.sure
+
 //#*
 //#*    Please direct any questions or comments to the OpenIG Forums
 //#*    Email address: openig@compro.net
@@ -52,6 +53,7 @@
 #include <OpenIG-Protocol/TOD.h>
 #include <OpenIG-Protocol/Command.h>
 #include <OpenIG-Protocol/LightState.h>
+#include <OpenIG-Protocol/DeadReckonEntityState.h>
 
 #include <OpenIG-Networking/UDPNetwork.h>
 #include <OpenIG-Networking/TCPClient.h>
@@ -167,6 +169,16 @@ struct LOSResponse : public OpenIG::Library::Networking::Packet::Callback
         }
     }
 };
+
+struct EntityState
+{
+	osg::Vec3d	position;
+	osg::Vec3	orientation;
+	double		dt;
+};
+
+typedef std::map<int, OpenIG::Library::Protocol::EntityState>		EntityStateMap;
+EntityStateMap	entityStateMap;
 
 int main(int argc, char** argv)
 {
@@ -291,16 +303,63 @@ int main(int argc, char** argv)
         // Write the header to the buffer
         header.write(buffer_to_ig);
 
-        // write the entity update to the buffer
-        // We create a packet for the entity update
-        estate.mx = OpenIG::Base::Math::instance()->toMatrix(x, y + dy, hotResponses[HOTRequestID].z(), 0.0, 0.0, 0.0);
-        estate.write(buffer_to_ig);
+		// write the entity update to the buffer
+		// We create a packet for the entity update
+		estate.mx = OpenIG::Base::Math::instance()->toMatrix(x, y + dy, hotResponses[HOTRequestID].z(), 0.0, 0.0, 0.0);
+
+		// For the dead reckon we need to set the initial position
+		// of the model, thus we send it only once
+		static bool once = true;
+		if (once)
+		{
+			once = false;			
+			estate.write(buffer_to_ig);
+		}				
+
+		static osg::Timer_t lastRecordedTime = 0;
+		osg::Timer_t now = osg::Timer::instance()->tick();
+		if (lastRecordedTime == 0)
+		{
+			lastRecordedTime = now;
+		}
+
+		double dt = osg::Timer::instance()->delta_s(lastRecordedTime, now);
+		lastRecordedTime = now;
+
+		EntityStateMap::iterator itr = entityStateMap.find(estate.entityID);
+		if (itr != entityStateMap.end())
+		{
+			OpenIG::Library::Protocol::EntityState& last_es = itr->second;
+			osg::Matrixd last_esmx = last_es.mx;
+
+			osg::Vec3d last_position;
+			osg::Vec3d last_orientation;
+			OpenIG::Base::Math::instance()->fromMatrix(last_esmx, last_position.x(), last_position.y(), last_position.z(), last_orientation.x(), last_orientation.y(), last_orientation.z());
+
+			osg::Vec3d current_orientation;
+			osg::Vec3d current_position;
+			OpenIG::Base::Math::instance()->fromMatrix(estate.mx, current_position.x(), current_position.y(), current_position.z(), current_orientation.x(), current_orientation.y(), current_orientation.z());
+
+			OpenIG::Library::Protocol::DeadReckonEntityState dres;
+			if (dt > 0.0)
+			{
+				dres.orientationalVelocity = (current_orientation - last_orientation) / dt;
+				dres.positionalVelocity = (current_position - last_position) / dt;
+				dres.entityID = estate.entityID;
+
+				dres.write(buffer_to_ig);
+			}
+
+		}
+
+		entityStateMap[estate.entityID] = estate;		
 
         camera.mx = OpenIG::Base::Math::instance()->toMatrix(x, (y + dy)-6, hotResponses[HOTRequestID].z()+2, 0.0, 90.0, 0.0);
         //camera.bindToEntity = 0;
         //camera.inverse = 0;
         camera.write(buffer_to_ig);
 
+#if 0
         // Turn the front wheels a bit
         estate.entityID = 10000;
         estate.mx = OpenIG::Base::Math::instance()->toMatrix(0.75, 1.45, 0.3, 70.0, 0.0, 0.0);
@@ -309,6 +368,7 @@ int main(int argc, char** argv)
         estate.entityID = 10001;
         estate.mx = OpenIG::Base::Math::instance()->toMatrix(-0.75, 1.45, 0.3, 70.0, 0.0, 0.0);
         estate.write(buffer_to_ig);
+#endif
 
 #if 0
         // Command - all from OpenIG are supported
@@ -348,7 +408,7 @@ int main(int argc, char** argv)
         static osg::Timer_t lastTime = 0;
         static bool			lightsOn = true;
 
-        osg::Timer_t now = osg::Timer::instance()->tick();
+        now = osg::Timer::instance()->tick();
         if (lastTime == 0) lastTime = now;
 
         if (osg::Timer::instance()->delta_s(lastTime, now) > 1.0)
@@ -378,7 +438,7 @@ int main(int argc, char** argv)
         //-----------------------------------------------------------------------------------------
 
         // Breath a bit
-        OpenThreads::Thread::microSleep(16000);
+        OpenThreads::Thread::microSleep(160000);
 
     }
 
