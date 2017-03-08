@@ -1,5 +1,6 @@
-xx Xxx xxxx, version 2.x.x
--
+xx Xxx xxxx, version 2.0.6
+- Fix minor bug in CMake build of Simulation project where it would not find the
+  installed OpenIG include files on case-sensitive systems such as Linux...
 
 22 Feb 2017, version 2.0.5
 - Turn of osgShadows until the OSG users have time to fix some of the issues present
@@ -29,7 +30,9 @@ xx Xxx xxxx, version 2.x.x
 - Use of upper case only commands across all the CMakeLists.txt .. it was mixed lower/upper from copying code
 
 - Fixed few build scripts to get clean build on Windows removed ccl.lib and instead used the variables from the
-  CMake macros - ${CCL_LIBRARY}
+  CMake macros - ${CCL_LIBRARY}- Fix minor bug in CMake build of Simulation project where it would not find the
+  installed OpenIG include files on case-sensitive systems such as Linux...
+
 
 - SilverLining plugin has some new commands: createcloudfile, loadcloudfile, removecloudfile and enableclouds. These new commands
   are used to create a cloud layer and save it to a file at start of the OpenIG application so that you can use the loadcloudfile
