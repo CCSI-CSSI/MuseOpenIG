@@ -8,3 +8,4 @@ Trajce Nikolov -- trajce.nikolov.nick@gmail.com
 Poojan Prabhu  -- poojanprabhu@gmail.com
 Roni Zanolli   -- roni@compro.net
 Curtis Rubel   -- crubel@compro.net
+Pelle Nordqvist-- nordqvist@gmail.com -- 	First implementation of Simple DeadReckoning code
