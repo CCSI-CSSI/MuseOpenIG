@@ -1,6 +1,21 @@
 The Muse OpenIG.  An opensource OpenSceneGraph based image generator application suite.
 Documentation, sample datasets and Binary Downloads for some platforms available at: http://openig.compro.net
 
+# Muse OpenIG V2.0.6
+- Introduction of DeadReckonEntityState packet that caries only entity ID, and
+  positional and orientational velocities. Much thinner packet then the EntityState
+  that will allow the host to send updates for more entities in one network frame,
+  or spread the updates of dozen entities thru more then one network frame
+- Update in the Simulation project to use simple Dead Reckoning on the HOST and the
+  IG side. This works in combination of sending EntityState (which contains the whole
+  entity Matrix) at the beginning (thus the IG needs to run before the HOST) for initial
+  positioning and after updating the entities with the new DeadReckonEntityState. The
+  Client plugin that is responsible for OpenIG UDP communication with the HOST can be
+  configured in it's xml file to use this feature or to work as before relying only on
+  use of EntityState packets
+  
+- Fix minor bug in CMake build of Simulation project where it would not find the
+  installed OpenIG include files on case-sensitive systems such as Linux...
 # Muse OpenIG V2.0.5
 - Turn of osgShadows until the OSG users have time to fix some of the issues present
   in their shadowing system.
