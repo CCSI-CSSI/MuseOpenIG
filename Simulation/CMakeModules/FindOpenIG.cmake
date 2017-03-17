@@ -13,8 +13,8 @@ MACRO( FIND_OPENIG_INCLUDE THIS_OPENIG_INCLUDE_DIR THIS_OPENIG_INCLUDE_FILE )
             ${OPENIG_SOURCE_DIR}
             $ENV{OPENIG_SOURCE_DIR}
             /usr/local
-			/usr/local/include
-			/usr/include
+	    /usr/local/include
+	    /usr/include
             /usr
             /sw/ # Fink
             /opt/local # DarwinPorts
@@ -44,7 +44,7 @@ MACRO( FIND_OPENIG_LIBRARY MYLIBRARY MYLIBRARYNAME )
             $ENV{OPENIG_BUILD_DIR}
             ~/Library/Frameworks
             /Library/Frameworks
-			/usr/local/lib
+	    /usr/local/lib
             /usr/local/lib64
             /usr/lib
             /sw/lib
@@ -88,7 +88,7 @@ if (NOT "${OPENIG_INSTALL_DIR}" STREQUAL "")
 	FIND_OPENIG_LIBRARY( OPENIG_LIBRARY_NETWORKING OpenIG-Networking )
 	FIND_OPENIG_LIBRARY( OPENIG_LIBRARY_PROTOCOL OpenIG-Protocol)
 else()
-	FIND_OPENIG_INCLUDE( OPENIG_INCLUDE_DIR OpenIG-Base/imagegenerator.h )
+	FIND_OPENIG_INCLUDE( OPENIG_INCLUDE_DIR OpenIG-Base/ImageGenerator.h )
 
 	FIND_OPENIG_LIBRARY( OPENIG_LIBRARY_BASE OpenIG-Base )
 	FIND_OPENIG_LIBRARY( OPENIG_LIBRARY_PLUGINBASE OpenIG-PluginBase )
