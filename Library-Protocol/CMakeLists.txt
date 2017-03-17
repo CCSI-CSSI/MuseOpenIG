@@ -15,6 +15,7 @@ SET( LIB_PUBLIC_HEADERS
 	${HEADER_PATH}/TOD.h
 	${HEADER_PATH}/Command.h
 	${HEADER_PATH}/LightState.h
+	${HEADER_PATH}/DeadReckonEntityState.h
 )
 
 SET( LIB_SOURCE
@@ -28,6 +29,7 @@ SET( LIB_SOURCE
 	TOD.cpp
 	Command.cpp
 	LightState.cpp
+	DeadReckonEntityState.cpp
 	)
 	
 ADD_LIBRARY( ${LIB_NAME} SHARED

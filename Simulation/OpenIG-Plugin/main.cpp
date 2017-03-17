@@ -46,10 +46,14 @@
 #include <OpenIG-Protocol/TOD.h>
 #include <OpenIG-Protocol/LightState.h>
 #include <OpenIG-Protocol/Command.h>
+#include <OpenIG-Protocol/DeadReckonEntityState.h>
 
 #include <OpenIG-Base/Commands.h>
+#include <OpenIG-Base/Mathematics.h>
 
 #include <iostream>
+
+#include <osgDB/XmlParser>
 
 namespace OpenIG {
     namespace Plugins {
@@ -64,6 +68,7 @@ namespace OpenIG {
                 OpenIG::Library::Networking::Factory::instance()->addTemplate(new OpenIG::Library::Protocol::TOD);
                 OpenIG::Library::Networking::Factory::instance()->addTemplate(new OpenIG::Library::Protocol::LightState);
                 OpenIG::Library::Networking::Factory::instance()->addTemplate(new OpenIG::Library::Protocol::Command);
+				OpenIG::Library::Networking::Factory::instance()->addTemplate(new OpenIG::Library::Protocol::DeadReckonEntityState);
             }
 
             virtual OpenIG::Library::Networking::Packet* parse(OpenIG::Library::Networking::Buffer& buffer)
@@ -124,6 +129,66 @@ namespace OpenIG {
 
             OpenIG::Base::ImageGenerator* imageGenerator;
         };
+
+		struct DeadReckonEntityStateCallback : public OpenIG::Library::Networking::Packet::Callback
+		{
+			DeadReckonEntityStateCallback(OpenIG::Base::ImageGenerator* ig, double& dt)
+				: _imageGenerator(ig)
+				, _dt(dt)
+			{
+
+			}
+
+			virtual void process(OpenIG::Library::Networking::Packet& packet)
+			{
+				OpenIG::Library::Protocol::DeadReckonEntityState* es = dynamic_cast<OpenIG::Library::Protocol::DeadReckonEntityState*>(&packet);
+				if (es)
+				{	
+					_drMap[es->entityID] = *es;					
+				}
+			}			
+
+			void updateSimpleDR()
+			{
+				DRMap::iterator itr = _drMap.begin();
+				for (; itr != _drMap.end(); ++itr)
+				{
+					int id = itr->first;
+					OpenIG::Library::Protocol::DeadReckonEntityState& dr = itr->second;
+
+					OpenIG::Base::ImageGenerator::Entity& entity = _imageGenerator->getEntityMap()[id];
+					if (entity.valid())
+					{
+						osg::Matrixd mx = entity->getMatrix();
+
+						osg::Vec3d position = mx.getTrans();
+						osg::Vec3d orientation = OpenIG::Base::Math::instance()->fromQuat(mx.getRotate());
+
+						position += dr.positionalVelocity * _dt;
+						orientation += dr.orientationalVelocity * _dt;
+
+						mx = OpenIG::Base::Math::instance()->toMatrix(
+							position.x(),
+							position.y(),
+							position.z(),
+							orientation.x(),
+							orientation.y(),
+							orientation.z()
+							);
+
+						_imageGenerator->updateEntity(id, mx);
+					}
+				}
+			}
+
+		protected:
+			OpenIG::Base::ImageGenerator*											_imageGenerator;			
+			double&																	_dt;
+
+			typedef std::map<int, OpenIG::Library::Protocol::DeadReckonEntityState>	DRMap;
+			DRMap																	_drMap;
+
+		};
 
         struct TODCallback : public OpenIG::Library::Networking::Packet::Callback
         {
@@ -219,6 +284,11 @@ namespace OpenIG {
 
             ClientPlugin()
                 : _headingOffset(0.0)
+				, _dt(0.0)
+				, _drCallback(0)
+				, _mode(None)
+				, _host("127.0.0.1")
+				, _port(8888)
             {
             }
 
@@ -232,7 +302,7 @@ namespace OpenIG {
 
             virtual void databaseRead(const std::string& fileName, osg::Node*, const osgDB::Options*)
             {
-                std::cout << "CustomPlugin - databaseRead: " << fileName << std::endl;
+                //std::cout << "CustomPlugin - databaseRead: " << fileName << std::endl;
             }
 
             virtual void databaseReadInVisitorBeforeTraverse(osg::Node&, const osgDB::Options*)
@@ -247,18 +317,47 @@ namespace OpenIG {
 
             virtual void config(const std::string& fileName)
             {
-                std::cout << "CustomPlugin - config" << fileName << std::endl;
+                //std::cout << "CustomPlugin - config" << fileName << std::endl;
+
+				osgDB::XmlNode* root = osgDB::readXmlFile(fileName);
+				if (root == 0) return;
+
+				if (root->children.size() == 0) return;
+
+				osgDB::XmlNode* config = root->children.at(0);
+				if (config->name != "OpenIG-Plugin-Config") return;
+
+				osgDB::XmlNode::Children::iterator itr = config->children.begin();
+				for (; itr != config->children.end(); ++itr)
+				{
+					osgDB::XmlNode* child = *itr;
+
+					if (child->name == "Host")
+					{
+						_host = child->contents;
+					}
+					if (child->name == "Port")
+					{
+						_port = atoi(child->contents.c_str());
+					}
+					if (child->name == "Mode")
+					{
+						_mode = None;
+						
+						if (child->contents == "SimpleDR")
+						{
+							_mode = SimpleDR;
+						}
+					}
+				}
             }
 
             virtual void init(OpenIG::PluginBase::PluginContext& context)
             {
-                std::cout << "CustomPlugin - init" << std::endl;
+                //std::cout << "CustomPlugin - init" << std::endl;           
 
-                std::string		host = "127.0.0.1";
-                unsigned int	port = 8888;
-
-                _network = boost::shared_ptr<OpenIG::Library::Networking::UDPNetwork>(new OpenIG::Library::Networking::UDPNetwork(host));
-                _network->setPort(port);
+                _network = boost::shared_ptr<OpenIG::Library::Networking::UDPNetwork>(new OpenIG::Library::Networking::UDPNetwork(_host,"",false,true));
+                _network->setPort(_port);
 
                 _network->addCallback((OpenIG::Library::Networking::Packet::Opcode)OPCODE_HEADER, new HeaderCallback(context.getImageGenerator()));
                 _network->addCallback((OpenIG::Library::Networking::Packet::Opcode)OPCODE_ENTITYSTATE, new EntityStateCallback(context.getImageGenerator()));
@@ -266,6 +365,7 @@ namespace OpenIG {
                 _network->addCallback((OpenIG::Library::Networking::Packet::Opcode)OPCODE_TOD, new TODCallback(context.getImageGenerator()));
                 _network->addCallback((OpenIG::Library::Networking::Packet::Opcode)OPCODE_LIGHTSTATE, new LightStateCallback(context.getImageGenerator()));
                 _network->addCallback((OpenIG::Library::Networking::Packet::Opcode)OPCODE_COMMAND, new CommandCallback(context.getImageGenerator()));
+				_network->addCallback((OpenIG::Library::Networking::Packet::Opcode)OPCODE_DEADRECKON_ENTITYSTATE, _drCallback = new DeadReckonEntityStateCallback(context.getImageGenerator(), _dt));
 
                 _network->setParser(new Parser);
             }
@@ -276,7 +376,29 @@ namespace OpenIG {
 
                 if (_network)
                 {
+					static osg::Timer_t lastRecorededTime = 0.0;
+					osg::Timer_t now = osg::Timer::instance()->tick();
+
+					if (lastRecorededTime == 0.0)
+					{
+						lastRecorededTime = now;
+					}
+
+					_dt = osg::Timer::instance()->delta_s(lastRecorededTime, now);
+
                     _network->process();
+
+					if (_drCallback != 0)
+					{
+						switch (_mode)
+						{
+						case SimpleDR:
+							_drCallback->updateSimpleDR();
+							break;
+						}						
+					}
+
+					lastRecorededTime = now;
                 }
             }
 
@@ -292,12 +414,12 @@ namespace OpenIG {
 
             virtual void clean(OpenIG::PluginBase::PluginContext&)
             {
-                std::cout << "CustomPlugin - clean" << std::endl;
+                //std::cout << "CustomPlugin - clean" << std::endl;
             }
 
             virtual void entityAdded(OpenIG::PluginBase::PluginContext&, unsigned int, osg::Node&, const std::string& fileName)
             {
-                std::cout << "CustomPlugin - entityAdded: " << fileName << std::endl;
+                //std::cout << "CustomPlugin - entityAdded: " << fileName << std::endl;
             }
 
         protected:
@@ -305,6 +427,20 @@ namespace OpenIG {
             boost::shared_ptr<OpenIG::Library::Networking::Network>		_network;
             // The View heading offset. Passed from the IG
             double														_headingOffset;
+
+			double														_dt;
+
+			DeadReckonEntityStateCallback*								_drCallback;
+
+			enum Mode
+			{
+				None,
+				SimpleDR
+			};
+			Mode														_mode;
+
+			std::string													_host;
+			int															_port;
         };
     } // namespace
 } // namespace

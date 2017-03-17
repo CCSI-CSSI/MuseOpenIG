@@ -49,6 +49,7 @@
 #define OPCODE_TOD                      106
 #define OPCODE_COMMAND                  107
 #define OPCODE_LIGHTSTATE               108
+#define OPCODE_DEADRECKON_ENTITYSTATE   109
 
 namespace OpenIG {
     namespace Library {
