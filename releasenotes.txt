@@ -1,4 +1,4 @@
-xx Xxx xxxx, version 2.0.6
+17 Mar 2017, version 2.0.6
 - Introduction of DeadReckonEntityState packet that caries only entity ID, and
   positional and orientational velocities. Much thinner packet then the EntityState
   that will allow the host to send updates for more entities in one network frame,
