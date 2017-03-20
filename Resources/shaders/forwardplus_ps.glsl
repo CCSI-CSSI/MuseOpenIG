@@ -141,7 +141,8 @@ void main()
     vec4 fReflectColor = computeEnvironmentalMap(); 
 	//fColor.rgb = mix(fColor.xyz,fReflectColor.xyz,ENVIRONMENTAL_FACTOR).xyz;
 #if 0
-	// This suppose to be the proper way	fColor.rgb = ((1.0-ENVIRONMENTAL_FACTOR)*fColor.rgb + ENVIRONMENTAL_FACTOR*fReflectColor.rgb);
+	// This suppose to be the proper way	
+        // fColor.rgb = ((1.0-ENVIRONMENTAL_FACTOR)*fColor.rgb + ENVIRONMENTAL_FACTOR*fReflectColor.rgb);
 #else
 	// But I like it this way better. Nick
 	vec3 mixed_color = mix(fReflectColor.rgb, fColor.rgb, 1.0-ENVIRONMENTAL_FACTOR).rgb;
