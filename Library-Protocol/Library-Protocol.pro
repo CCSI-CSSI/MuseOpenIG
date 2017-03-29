@@ -22,7 +22,8 @@ SOURCES +=  Header.cpp\
             LOSResponse.cpp\
             TOD.cpp\
             Command.cpp\
-            LightState.cpp
+            LightState.cpp\
+            DeadReckonEntityState.cpp
 
 HEADERS +=  Export.h\
             Opcodes.h\
@@ -35,7 +36,8 @@ HEADERS +=  Export.h\
             LOSResponse.h\
             TOD.h\
             Command.h\
-            LightState.h
+            LightState.h\
+            DeadReckonEntityState.h
 
 INCLUDEPATH += ../
 DEPENDPATH += ../
