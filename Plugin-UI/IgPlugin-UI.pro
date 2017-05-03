@@ -7,6 +7,7 @@
 QT       -= core gui
 
 CONFIG += silent
+CONFIG += c++11
 
 TARGET = IgPlugin-Networking
 TEMPLATE = lib
