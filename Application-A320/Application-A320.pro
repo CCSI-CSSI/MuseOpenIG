@@ -82,6 +82,14 @@ unix {
     QMAKE_POST_LINK += test -d $$quote($$DESTDIR)  || $$QMAKE_MKDIR $$quote($$DESTDIR) $$escape_expand(\\n\\t)
     QMAKE_POST_LINK += test -e $$quote($$DFILE) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
 
+    FILE = $${PWD}/DataFiles/iitsec.txt
+    DDIR = $$DESTDIR
+    DFILE = $$DESTDIR/iitsec.txt
+    distfiles += $$DFILE
+
+    QMAKE_POST_LINK += test -d $$quote($$DESTDIR)  || $$QMAKE_MKDIR $$quote($$DESTDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += test -e $$quote($$DFILE) || $$QMAKE_COPY $$quote($$FILE) $$quote($$DFILE) $$escape_expand(\\n\\t)
+
     FILE = $${PWD}/DataFiles/boeing.txt
     DDIR = $$DESTDIR
     DFILE = $$DESTDIR/boeing.txt
@@ -185,6 +193,17 @@ win32 {
     QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$FILE) $$quote($$DDIR) $$escape_expand(\\n\\t)
 
     FILE = $${PWD}/DataFiles/richcolorsdemo.txt
+    DDIR = $$DESTDIR
+
+    FILE ~= s,/,\\,g
+    DDIR ~= s,/,\\,g
+    distfiles += $$DDIR\\$$basename(FILE)
+
+    !build_pass:message("$$escape_expand(\n)$$basename(_PRO_FILE_) Files to be removed during \"make distclean\": "$$distfiles$$escape_expand(\n))
+    QMAKE_PRE_LINK   = $$QMAKE_CHK_DIR_EXISTS $$quote($$DDIR) $$QMAKE_MKDIR $$quote($$DDIR) $$escape_expand(\\n\\t)
+    QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$FILE) $$quote($$DDIR) $$escape_expand(\\n\\t)
+
+    FILE = $${PWD}/DataFiles/iitsec.txt
     DDIR = $$DESTDIR
 
     FILE ~= s,/,\\,g
