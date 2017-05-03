@@ -1,6 +1,14 @@
 The Muse OpenIG.  An opensource OpenSceneGraph based image generator application suite.
 Documentation, sample datasets and Binary Downloads for some platforms available at: http://openig.compro.net
 
+# Muse OpenIG V2.0.6a
+- Two new files that were added to the Library-Protocol library as part of the 2.0.6
+  release were inadvertently left out of the Library-Protocol.pro when the release
+  was committed and finalized on GitHub. This caused anyone who is using qmake to build
+  OpenIG to fail during the compile process of the Simulation project section of OpenIG.
+  The DeadReckonEntityState.cpp and DeadReckonEntityState.h files have now been added to
+  the Library-Protocol.pro file. Qmake builds should now complete successfully.
+
 # Muse OpenIG V2.0.6
 - Introduction of DeadReckonEntityState packet that caries only entity ID, and
   positional and orientational velocities. Much thinner packet then the EntityState
