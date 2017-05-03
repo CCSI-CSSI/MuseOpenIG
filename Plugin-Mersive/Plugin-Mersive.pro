@@ -17,7 +17,8 @@ SOURCES += IGPluginMersive.cpp
 
 HEADERS +=
 
-LIBS += -losg -losgDB -losgViewer -lCstShare -lOpenThreads -lOpenIG-Engine
+LIBS += -losg -losgDB -losgViewer -lOpenThreads -lOpenIG-Engine
+#-lCstShare
 
 INCLUDEPATH += ../
 DEPENDPATH += ../
