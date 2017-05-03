@@ -30,7 +30,7 @@ ELSE()
     TARGET_LINK_LIBRARIES( ${LIB_NAME}
     OpenIG-Engine
     ${OSG_LIBRARIES}
-    CstShare
+#    CstShare
     jpeg
     /mersive/lib/libMersiveCalibrator.a
     /mersive/lib/libEwbRemoteRendererDeviceProxy.so
