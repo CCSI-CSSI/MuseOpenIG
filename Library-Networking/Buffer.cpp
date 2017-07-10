@@ -141,12 +141,14 @@ void Buffer::setSwapBytes(bool swap)
 
 int Buffer::write(const void *src, int length)
 {
-    //For some reason we are getting lenghts < 0 intermittently
+    //For some reason we are getting lengths < 0 intermittently
     //possibly bad/corrupted network packets??
     if(length <= 0)
         return -1;
     if (isShort(length))
+    {
         resize(_pos + length);
+    }
     if (_data && src)
     {
         memcpy(_data + _pos, src, length);
@@ -159,10 +161,12 @@ int Buffer::write(const void *src, int length)
 
 int Buffer::read(void *dst, int length)
 {
-    //For some reason we are getting lenghts < 0 intermittently
+    //For some reason we are getting lengths < 0 intermittently
     //possibly bad/corrupted network packets??
     if (isShort(length) || length <= 0)
+    {
         return -1;
+    }
     if (_data && dst) {
         memcpy(dst, _data + _pos, length);
         _pos += length;
@@ -194,7 +198,7 @@ void Buffer::resize(int a_Size)
     if (_data)
         _data = reinterpret_cast<unsigned char *>(realloc(_data, a_Size));
     else
-        _data = reinterpret_cast<unsigned char *>(malloc(a_Size));
+        _data = reinterpret_cast<unsigned char *>(calloc(a_Size, sizeof(char)));
     _len = a_Size;
 }
 

@@ -62,7 +62,7 @@ UDPNetwork::UDPNetwork(const std::string& host, const std::string &destination, 
     , _senderSocketInitiated(false)
     , _recieverSocketInitiated(false)
     , _broadcast(broadcast)
-	, _nonBlocking(nonBlocking)
+    , _nonBlocking(nonBlocking)
 {
      std::ostringstream oss;
     //*log << oss << "Networking(1): UDP incoming host: " << _host << ", broadcast set to: " << _broadcast << std::endl;
@@ -157,7 +157,7 @@ void UDPNetwork::receive(Buffer& buffer, bool resetBuffer)
             _recieverSocket->open(endpoint.protocol(), errorcode);
             _recieverSocket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
             _recieverSocket->bind(endpoint, errorcode);
-			if (_nonBlocking) _recieverSocket->non_blocking(true);
+            if (_nonBlocking) _recieverSocket->non_blocking(true);
 
             std::ostringstream oss;
             //*log << oss << "Networking(6): UDP bound to:" << _recieverSocket->local_endpoint().address().to_string() << std::endl;
