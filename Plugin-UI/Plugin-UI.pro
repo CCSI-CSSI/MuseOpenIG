@@ -7,6 +7,7 @@
 QT       -= core gui
 
 CONFIG += silent warn_off
+CONFIG += c++11
 
 TARGET = OpenIG-Plugin-UI
 TEMPLATE = lib
