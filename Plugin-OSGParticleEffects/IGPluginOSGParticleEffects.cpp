@@ -61,7 +61,7 @@ namespace OpenIG {
 
             virtual std::string getName() { return "OSGParticleEffects"; }
 
-            virtual std::string getDescription() { return "Implements effects using osgParticle foundation"; }
+            virtual std::string getDescription() { return "Implements effects using the osgParticle foundation"; }
 
             virtual std::string getVersion() { return "1.0.0"; }
 
@@ -97,6 +97,7 @@ namespace OpenIG {
                         attributes->getUserValue("mass", mass);
                     }
 
+                    std::string resourcePath = OpenIG::Base::FileSystem::path(OpenIG::Base::FileSystem::Resources, "../resources");
                     osg::ref_ptr<osgParticle::ParticleEffect> effect;
                     if (name == "ExplosionEffect")
                     {
@@ -117,6 +118,12 @@ namespace OpenIG {
                     if (name == "SmokeTrailEffect")
                     {
                         effect = new osgParticle::SmokeTrailEffect(osg::Vec3(0, 0, 0), scale, intensity);
+
+                        if(effect.valid())
+                        {
+                            effect->setWind(osg::Vec3(1.0f,0.0f,0.0f));
+                            effect->setTextureFileName(resourcePath + "/textures/continous_smoke.rgb");
+                        }
                     }
 
                     if (!effect.valid()) return 0;
@@ -124,8 +131,8 @@ namespace OpenIG {
                     effect->setParticleDuration(particleDuration);
                     effect->setEmitterDuration(emiterDuration);
 
-                    std::string resourcePath = OpenIG::Base::FileSystem::path(OpenIG::Base::FileSystem::Resources, "../resources");
-                    effect->setTextureFileName(resourcePath + "/textures/smoke.rgb");
+                    if (name != "SmokeTrailEffect")
+                        effect->setTextureFileName(resourcePath + "/textures/smoke.rgb");
 
                     _effects[id] = effect;
 
