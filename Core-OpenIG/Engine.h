@@ -117,7 +117,8 @@ public:
         WithTerminal		= 0x01,
         WithSplashScreen	= 0x02,
         WithOnscreenHelp	= 0x04,
-        Standard			= WithTerminal | WithSplashScreen | WithOnscreenHelp
+        WithCrashScreen     = 0x08,
+        Standard			= WithTerminal | WithSplashScreen | WithOnscreenHelp | WithCrashScreen
     };
 
     /*!
@@ -1172,6 +1173,23 @@ public:
      */
     virtual osg::Fog*                   getFog();
 
+    /*! Turns on the Red transparent OpenIG Crash Screen
+     * \brief Sets the light implementation callback
+     * \param     Text to be displayed on crash screen
+     * \author    Curtis Rubel openig@compro.net
+     * \copyright (c)Compro Computer Services, Inc.
+     * \date      Fri Jul 7 2017
+     */
+    virtual void turnOnCrashScreen(std::string crashtext);
+
+    /*! Turns off the Red transparent OpenIG Crash Screen
+     * \brief Sets the light implementation callback
+     * \author    Curtis Rubel openig@compro.net
+     * \copyright (c)Compro Computer Services, Inc.
+     * \date      Fri Jul 7 2017
+     */
+    virtual void turnOffCrashScreen();
+
     /*!
      * \brief Returns the internal OpenIG::PluginBase::PluginContext
      * \return The internal OpenIG::PluginBase::PluginContext
@@ -1340,8 +1358,8 @@ protected:
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jan 16 2015
      */
-
     void initOnScreenHelp();
+
     /*! Init the splash screen. It looks for OpenIG-Splash.jpg in, for Windows in /igdata
      * Linux and MacOS in /usr/local/bin/igdata
      * \brief Init the splash screen
@@ -1366,6 +1384,14 @@ protected:
     * \date      Wed Nov 4 2015
     */
     void createSunMoonLight();
+
+    /*! Display the red IG crash screen ontop of the scene
+     * \brief Display the red IG Crash screen
+     * \author    Curtis Rubel openig@compro.net
+     * \copyright (c)Compro Computer Services, Inc.
+     * \date      Fri Jul 7 2017
+     */
+    void initCrashScreen();
 };
 
 } // namespace

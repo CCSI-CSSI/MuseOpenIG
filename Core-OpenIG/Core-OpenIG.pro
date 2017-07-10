@@ -15,12 +15,14 @@ DEFINES += OPENIG_LIBRARY
 
 SOURCES +=  Commands.cpp\
             Help.cpp\
+            CrashScreen.cpp\
             Keypad.cpp\
             Lights.cpp\
             Engine.cpp\
             Splash.cpp\
             Terminal.cpp\
-            Effects.cpp
+            Effects.cpp \
+    CrashScreen.cpp
 
 HEADERS +=  Config.h\
             Export.h\

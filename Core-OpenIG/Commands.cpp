@@ -1702,6 +1702,45 @@ protected:
     OpenIG::Base::ImageGenerator* _ig;
 };
 
+class RemoveEffectCommand : public OpenIG::Base::Commands::Command
+{
+public:
+    RemoveEffectCommand(OpenIG::Base::ImageGenerator* ig)
+        : _ig(ig) {}
+
+    virtual const std::string getUsage() const
+    {
+        return "id";
+    }
+
+    virtual const std::string getArgumentsFormat() const
+    {
+        return "I";
+    }
+
+    virtual const std::string getDescription() const
+    {
+        return  "remove a previously added effect from the scene\n"
+            "     id - the id of the previously added effect\n";
+    }
+
+    virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)
+    {
+        if (tokens.size() == 1)
+        {
+            unsigned int	id = atoi(tokens.at(0).c_str());
+
+            _ig->removeEffect(id);
+
+            return 0;
+        }
+
+        return -1;
+    }
+protected:
+    OpenIG::Base::ImageGenerator* _ig;
+};
+
 class BindEffectCommand : public OpenIG::Base::Commands::Command
 {
 public:
@@ -1710,12 +1749,12 @@ public:
 
     virtual const std::string getUsage() const
     {
-        return "id name x y z heading pitch roll";
+        return "id entityID x y z heading pitch roll";
     }
 
     virtual const std::string getArgumentsFormat() const
     {
-        return "I:S:D:D:D:D:D:D";
+        return "I:I:D:D:D:D:D:D";
     }
 
     virtual const std::string getDescription() const
@@ -1747,6 +1786,45 @@ public:
             osg::Matrixd mx = Math::instance()->toMatrix(x, y, z, h, p, r);
 
             _ig->bindEffect(id, entityID, mx);
+
+            return 0;
+        }
+
+        return -1;
+    }
+protected:
+    OpenIG::Base::ImageGenerator* _ig;
+};
+
+class UnBindEffectCommand : public OpenIG::Base::Commands::Command
+{
+public:
+    UnBindEffectCommand(OpenIG::Base::ImageGenerator* ig)
+        : _ig(ig) {}
+
+    virtual const std::string getUsage() const
+    {
+        return "id";
+    }
+
+    virtual const std::string getArgumentsFormat() const
+    {
+        return "I";
+    }
+
+    virtual const std::string getDescription() const
+    {
+        return  "unbinds an effect from the Entity in the scene it was bound to previously\n"
+            "     id - the id of the effect\n";
+    }
+
+    virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)
+    {
+        if (tokens.size() == 1)
+        {
+            unsigned int id = atoi(tokens.at(0).c_str());
+
+            _ig->unbindEffect(id);
 
             return 0;
         }
@@ -1836,6 +1914,83 @@ public:
 
 };
 
+class TurnOnCrashScreenCommand : public OpenIG::Base::Commands::Command
+{
+public:
+    TurnOnCrashScreenCommand(OpenIG::Base::ImageGenerator* ig)
+        : _ig(ig) {}
+
+    virtual const std::string getUsage() const
+    {
+        return "string to display on crash screen\n\n"
+               "if no string provided only the word\n"
+               " CRASH!!  will be displayed\n";
+    }
+
+    virtual const std::string getArgumentsFormat() const
+    {
+        return "S";
+    }
+
+    virtual const std::string getDescription() const
+    {
+        return  "turns on the OpenIG Red crash screen\n"
+                "and displays text provided on center of screen\n"
+                "Text should be input on one continous line to\n"
+                "the command.  Text will be centered and split\n"
+                "up on the crash screen to approximately 35\n"
+                "characters per line\n";
+    }
+
+    virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)
+    {
+        std::string crashtext;
+        int tokensize = tokens.size();
+
+        //Check for text with multiple spaces
+        for(int x=0;x<tokensize;x++)
+        {
+            crashtext += tokens.at(x);
+            crashtext += " ";
+        }
+
+        _ig->turnOnCrashScreen(crashtext);
+        return 0;
+    }
+protected:
+    OpenIG::Base::ImageGenerator* _ig;
+};
+
+class TurnOffCrashScreenCommand : public OpenIG::Base::Commands::Command
+{
+public:
+    TurnOffCrashScreenCommand(OpenIG::Base::ImageGenerator* ig)
+        : _ig(ig) {}
+
+    virtual const std::string getUsage() const
+    {
+        return "turnoffcrashscreen";
+    }
+
+    virtual const std::string getArgumentsFormat() const
+    {
+        return "";
+    }
+
+    virtual const std::string getDescription() const
+    {
+        return  "turns off the OpenIG Red crash screen\n";
+    }
+
+    virtual int exec(const OpenIG::Base::StringUtils::Tokens&)
+    {
+            _ig->turnOffCrashScreen();
+            return 0;
+    }
+protected:
+    OpenIG::Base::ImageGenerator* _ig;
+};
+
 }
 
 void Engine::initCommands()
@@ -1865,11 +2020,15 @@ void Engine::initCommands()
     Commands::instance()->addCommand("mplayanim", new MultipleAnimationCommand(this));
     Commands::instance()->addCommand("reloadentity", new ReloadEntityCommand(this));
     Commands::instance()->addCommand("bindeffect", new BindEffectCommand(this));
+    Commands::instance()->addCommand("unbindeffect", new UnBindEffectCommand(this));
     Commands::instance()->addCommand("addeffect", new AddEffectCommand(this));
+    Commands::instance()->addCommand("removeeffect", new RemoveEffectCommand(this));
     Commands::instance()->addCommand("cache", new CacheCommand(this));
     Commands::instance()->addCommand("loadconfig", new LoadConfigCommand());
     Commands::instance()->addCommand("bindtocamera", new BindEntityToCameraCommand(this));
     Commands::instance()->addCommand("bindtocameraupdate", new BindEntityToCameraUpdateCommand(this));
     Commands::instance()->addCommand("updateentity", new UpdateEntityCommand(this));
     Commands::instance()->addCommand("unbindfromcamera", new UnbindEntityFromCameraCommand(this));
+    Commands::instance()->addCommand("turnoffcrashscreen", new TurnOffCrashScreenCommand(this));
+    Commands::instance()->addCommand("turnoncrashscreen", new TurnOnCrashScreenCommand(this));
 }

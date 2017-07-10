@@ -1105,6 +1105,23 @@ namespace OpenIG {
              */
             virtual osg::Fog*           getFog() = 0;
 
+            /*! Turns on the Red transparent OpenIG Crash Screen
+             * \brief Sets the light implementation callback
+             * \param	fileList	The list of files that will use file cache
+             * \author    Curtis Rubel openig@compro.net
+             * \copyright (c)Compro Computer Services, Inc.
+             * \date      Fri Jul 7 2017
+             */
+            virtual void turnOnCrashScreen(std::string crashtext) = 0;
+
+            /*! Turns off the Red transparent OpenIG Crash Screen
+             * \brief Sets the light implementation callback
+             * \author    Curtis Rubel openig@compro.net
+             * \copyright (c)Compro Computer Services, Inc.
+             * \date      Fri Jul 7 2017
+             */
+            virtual void turnOffCrashScreen() = 0;
+
             /*! Override preRender method to be called from within a frame. See \ref frame for reference
              * \brief override preRender method to be called from within a frame
              * \author    Trajce Nikolov Nick openig@compro.net

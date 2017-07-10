@@ -15,18 +15,19 @@ SET( LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/Export.h
     ${HEADER_PATH}/Keypad.h
     ${HEADER_PATH}/Engine.h
-	${HEADER_PATH}/RenderBins.h
+    ${HEADER_PATH}/RenderBins.h
 )
 
 SET( _OpenIGSourceFiles
     Commands.cpp
     Help.cpp
+    CrashScreen.cpp
     Keypad.cpp
     Lights.cpp
     Engine.cpp
     Splash.cpp
     Terminal.cpp
-	Effects.cpp
+    Effects.cpp
 )
 
 ADD_LIBRARY( ${LIB_NAME} SHARED

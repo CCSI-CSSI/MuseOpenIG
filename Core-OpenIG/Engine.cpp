@@ -487,6 +487,7 @@ void Engine::init(osgViewer::CompositeViewer* viewer, const std::string& xmlFile
     initPluginContext();
     if (_setupMask & WithOnscreenHelp) initOnScreenHelp();
     if (_setupMask & WithSplashScreen) initSplashScreen();
+    if (_setupMask & WithCrashScreen) initCrashScreen();
     initEffects();
 
     osgDB::Registry::instance()->setReadFileCallback( new DatabaseReadCallback(this) );

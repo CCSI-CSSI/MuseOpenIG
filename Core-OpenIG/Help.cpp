@@ -24,11 +24,6 @@
 //#*    Please direct any questions or comments to the OpenIG Forums
 //#*    Email address: openig@compro.net
 //#*
-//#*
-//#*    Please direct any questions or comments to the OpenIG Forums
-//#*    Email address: openig@compro.net
-//#*
-//#*
 //#*****************************************************************************
 #include <Core-Base/Commands.h>
 #include <Core-Base/StringUtils.h>
@@ -59,7 +54,7 @@ public:
                     osg::Group* scene,
                     osg::Node* help)
         : _ig(ig)
-        , _viewer(v)
+        , _hviewer(v)
         , _scene(scene)
         , _help(help)
         , _text(text)
@@ -194,7 +189,7 @@ public:
 
 protected:
     Engine*             _ig;
-    osgViewer::CompositeViewer* _viewer;
+    osgViewer::CompositeViewer* _hviewer;
     osg::Group*                 _scene;
     osg::ref_ptr<osg::Node>     _help;
     osg::ref_ptr<osgText::Text> _text;
