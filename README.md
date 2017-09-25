@@ -1,6 +1,25 @@
 The Muse OpenIG.  An opensource OpenSceneGraph based image generator application suite.
 Documentation, sample datasets and Binary Downloads for some platforms available at: http://openig.compro.net
 
+# Changes/Updates since last release
+- New "lpb" LightPointsBrightnessCommand, adjust lightpoint brightness
+  by name via commandline. 
+  Sent in from NickTrajce for all OIG users to take advantage of.
+- Mark terrain to only receive shadows.  This gives a nice performance boost.
+  Sent in from NickTrajce for all OIG users to take advantage of.
+- Some misc fixes in the TCPServer to get it working better.
+  Sent in from NickTrajce for all OIG users to take advantage of.
+- New Red Crash Screen added to OpenIG that can be displayed utilizing the two new
+  commands --  turnoncrashscreen TextToBeDisplayedOnCrashScreen   -- turnoffcrashscreen
+- Fixed what appeared to be a network transfer issue with commands being repeated, but
+  actually ended up being an issue with the malloc not clearing the memory buffer used
+  for the network data and the stale data left in this memory location was apparently
+  being re-read sometimes as new incoming commands. Changed malloc to calloc to clear
+  buffer and the issue appears to have been resolved, was affecting Linux for sure
+  unclear if any other systems were affected.
+- Brought unbindeffect and removeeffect out to the external command line so that they
+  can be used over the network on effects.
+
 # Muse OpenIG V2.0.6a
 - Two new files that were added to the Library-Protocol library as part of the 2.0.6
   release were inadvertently left out of the Library-Protocol.pro when the release
