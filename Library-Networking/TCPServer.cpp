@@ -36,10 +36,6 @@
 //#*    Please direct any questions or comments to the OpenIG Forums
 //#*    Email address: openig@compro.net
 //#*
-//#*
-//#*    Please direct any questions or comments to the OpenIG Forums
-//#*    Email address: openig@compro.net
-//#*
 
 #include <iostream>
 
@@ -159,7 +155,6 @@ void TCPServer::receive(Buffer& buffer, bool resetBuffer)
             if (len)
             {
                 buffer.write(cbuff.getData(), len);
-                if (resetBuffer) buffer.reset();
             }
 
             if (error)
@@ -187,6 +182,7 @@ void TCPServer::receive(Buffer& buffer, bool resetBuffer)
         *log << oss << "Networking: tcp server exception: " << e.what() << std::endl;
     }
 
+    if(resetBuffer) buffer.reset();
 }
 
 void TCPServer::run()

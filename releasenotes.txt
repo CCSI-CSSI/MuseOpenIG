@@ -1,4 +1,11 @@
 xx xxx 2017, version 2.0.7
+- New "lpb" LightPointsBrightnessCommand, adjust lightpoint brightness
+  by name via commandline. 
+  Sent in from NickTrajce for all OIG users to take advantage of.
+- Mark terrain to only receive shadows.  This gives a nice performance boost.
+  Sent in from NickTrajce for all OIG users to take advantage of.
+- Some misc fixes in the TCPServer to get it working better.
+  Sent in from NickTrajce for all OIG users to take advantage of.
 - New Red Crash Screen added to OpenIG that can be displayed utilizing the two new
   commands --  turnoncrashscreen TextToBeDisplayedOnCrashScreen   -- turnoffcrashscreen
 - Fixed what appeared to be a network transfer issue with commands being repeated, but
