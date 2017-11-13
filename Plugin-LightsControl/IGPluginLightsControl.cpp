@@ -2014,9 +2014,15 @@ namespace OpenIG { namespace Plugins {
         SpriteStateSetCache::const_iterator it = _spriteStateSetCache.find(stateSetID);
         if (it!=_spriteStateSetCache.end())
         {
+          #if 0
+          // This is wrong. No idea who added it, me (Nick) or Poojan
+          // but it causes crashes on large paged databases with lots of
+          // lights. Anyhow, this uniform is set below in the StateSet
+          // that is cached and being used here
           static const float radiusMultiplier = 0.25f;
           osg::Vec4f vSpriteDimensions(def.minPixelSize*def.minPixelSizeMultiplierForSprites, def.maxPixelSize, def.radius*radiusMultiplier, 0);
           it->second->addUniform(new osg::Uniform("spriteDimensions", vSpriteDimensions), osg::StateAttribute::ON | osg::StateAttribute::PROTECTED);
+          #endif
           
           lpn->setStateSet(it->second);
           //osg::notify(osg::NOTICE)<<"Lights Control: Setup exisiting lp: "<<lpn->getName() << "'s stateset" << std::endl;
