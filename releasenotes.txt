@@ -1,4 +1,6 @@
 xx xxx 2017, version 2.0.7
+- Fixed crash when using large paged databases with lots of lights
+  Sent in from NickTrajce for all OIG users to take advantage of.
 - New "lpb" LightPointsBrightnessCommand, adjust lightpoint brightness
   by name via commandline. 
   Sent in from NickTrajce for all OIG users to take advantage of.
