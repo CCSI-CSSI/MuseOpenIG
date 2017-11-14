@@ -1036,6 +1036,8 @@ void Engine::unbindFromEntity(unsigned int id)
     }
 
     entity->setMatrix(wmx);
+    //Ensure the newly unbound entity is added to the scene as a super entity  NICK
+    getScene()->asGroup()->addChild(entity);
 }
 
 void Engine::bindEntityToCamera(unsigned int id, const osg::Matrixd& mx, unsigned int cameraID)

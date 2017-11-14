@@ -2,6 +2,9 @@ The Muse OpenIG.  An opensource OpenSceneGraph based image generator application
 Documentation, sample datasets and Binary Downloads for some platforms available at: http://openig.compro.net
 
 # Changes/Updates since last release
+- Fixed bug where an enity that is unbound from its parent was not
+  added to the scene as its own super entity. 
+  Sent in from NickTrajce for all OIG users to take advantage of.
 - Fixed crash when using large paged databases with lots of lights
   Sent in from NickTrajce for all OIG users to take advantage of.
 - New "lpb" LightPointsBrightnessCommand, adjust lightpoint brightness
