@@ -97,7 +97,11 @@ namespace OpenIG {
                         attributes->getUserValue("mass", mass);
                     }
 
+#ifdef _WIN32
                     std::string resourcePath = OpenIG::Base::FileSystem::path(OpenIG::Base::FileSystem::Resources, "../resources");
+#else
+                    std::string resourcePath = OpenIG::Base::FileSystem::path(OpenIG::Base::FileSystem::Resources, "../../resources");
+#endif
                     osg::ref_ptr<osgParticle::ParticleEffect> effect;
                     if (name == "ExplosionEffect")
                     {
@@ -122,7 +126,7 @@ namespace OpenIG {
                         if(effect.valid())
                         {
                             effect->setWind(osg::Vec3(1.0f,0.0f,0.0f));
-                            effect->setTextureFileName(resourcePath + "/textures/continous_smoke.rgb");
+                            effect->setTextureFileName(resourcePath + "/textures/continuous_smoke.rgb");
                         }
                     }
 
@@ -205,7 +209,8 @@ namespace OpenIG {
                     pointProgram->addShader(new osg::Shader(osg::Shader::FRAGMENT, FragSource));
 
                     osg::StateSet *stateSet = geode->getOrCreateStateSet();
-                    stateSet->setAttributeAndModes(pointProgram.get(), osg::StateAttribute::ON | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE);
+                    //Commented out to allow smoke trails to be white until we can fix whatever the shader issue is at the moment CGR for NICK...
+                    //stateSet->setAttributeAndModes(pointProgram.get(), osg::StateAttribute::ON | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE);
 
                     _ig->getViewer()->getView(0)->getSceneData()->asGroup()->addChild(geode);
 
