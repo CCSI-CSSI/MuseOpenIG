@@ -393,39 +393,49 @@ public:
         }
 
         // setup environmental mapping
-        bool envmapping = tags["Environmental"].value == "yes";
-        if (envmapping)
+        // Read the 6 images of the env map
+        OpenIG::Base::StringUtils::StringList environmentalMaps;
+        environmentalMaps.push_back(tags["Environmental-Texture-Right"].value);
+        environmentalMaps.push_back(tags["Environmental-Texture-Left"].value);
+        environmentalMaps.push_back(tags["Environmental-Texture-Bottom"].value);
+        environmentalMaps.push_back(tags["Environmental-Texture-Top"].value);
+        environmentalMaps.push_back(tags["Environmental-Texture-Back"].value);
+        environmentalMaps.push_back(tags["Environmental-Texture-Front"].value);
+
+        TextureCubeMapPointer texture = _textureCubeMapCache.get(environmentalMaps);
+        if (texture.valid())
         {
-            // Read the 6 images of the env map
-            OpenIG::Base::StringUtils::StringList environmentalMaps;
-            environmentalMaps.push_back(tags["Environmental-Texture-Right"].value);
-            environmentalMaps.push_back(tags["Environmental-Texture-Left"].value);
-            environmentalMaps.push_back(tags["Environmental-Texture-Bottom"].value);
-            environmentalMaps.push_back(tags["Environmental-Texture-Top"].value);
-            environmentalMaps.push_back(tags["Environmental-Texture-Back"].value);
-            environmentalMaps.push_back(tags["Environmental-Texture-Front"].value);
+            _ss->addUniform(new osg::Uniform("environmentalMapTexture", (int)_environmentalMapSlot), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
+            _ss->setTextureAttributeAndModes(_environmentalMapSlot, texture, osg::StateAttribute::ON);
 
-            TextureCubeMapPointer texture = _textureCubeMapCache.get(environmentalMaps);
-            if (texture.valid())
-            {
-                _ss->addUniform(new osg::Uniform("environmentalMapTexture", (int)_environmentalMapSlot), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
-                _ss->setTextureAttributeAndModes(_environmentalMapSlot, texture, osg::StateAttribute::ON);
-                _ss->setDefine("ENVIRONMENTAL");
-                _ss->setDefine("ENVIRONMENTAL_FACTOR", tags["Environmental-Factor"].value);
+			bool envmapping = tags["Environmental"].value == "yes";
 
-                _ss->setUpdateCallback(new UpdateEnvironmentalFactor(context.getImageGenerator(), atof(tags["Environmental-Factor"].value.c_str())));
+			osg::StateAttribute::OverrideValue value = 0;
+			switch (envmapping)
+			{
+			case true:
+				value = osg::StateAttribute::ON;
+				break;
+			case false:
+				value = osg::StateAttribute::OFF;
+				break;
+			}
+			
+			_ss->setDefine("ENVIRONMENTAL", value);
+			_ss->setDefine("ENVIRONMENTAL_FACTOR", tags["Environmental-Factor"].value, value);
 
-                osg::Uniform* u = new osg::Uniform(osg::Uniform::FLOAT, "todBasedEnvironmentalLightingFactor", 1.f);
-                u->setUpdateCallback(new UpdateFloatUniformCallback(_todBasedEnvironmentalLightingFactor));
-                _ss->addUniform(u);
+            _ss->setUpdateCallback(new UpdateEnvironmentalFactor(context.getImageGenerator(), atof(tags["Environmental-Factor"].value.c_str())));
 
-                texture->setInternalFormat(GL_RGB);
-                texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
-                texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-                texture->setWrap(osg::Texture::WRAP_R, osg::Texture::CLAMP_TO_EDGE);
-                texture->setFilter(osg::TextureCubeMap::MIN_FILTER, osg::TextureCubeMap::LINEAR);
-                texture->setFilter(osg::TextureCubeMap::MAG_FILTER, osg::TextureCubeMap::LINEAR);
-            }
+            osg::Uniform* u = new osg::Uniform(osg::Uniform::FLOAT, "todBasedEnvironmentalLightingFactor", 1.f);
+            u->setUpdateCallback(new UpdateFloatUniformCallback(_todBasedEnvironmentalLightingFactor));
+            _ss->addUniform(u);
+
+            texture->setInternalFormat(GL_RGB);
+            texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+            texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+            texture->setWrap(osg::Texture::WRAP_R, osg::Texture::CLAMP_TO_EDGE);
+            texture->setFilter(osg::TextureCubeMap::MIN_FILTER, osg::TextureCubeMap::LINEAR);
+            texture->setFilter(osg::TextureCubeMap::MAG_FILTER, osg::TextureCubeMap::LINEAR);
         }
 
         // setup diffuse
@@ -462,8 +472,9 @@ public:
         // shadowing, set deffault to casting
         int ReceivesShadowTraversalMask = 0x1;
         int CastsShadowTraversalMask = 0x2;
+		int NoShadow = 0x4;
 
-        entity.setNodeMask(CastsShadowTraversalMask);
+        entity.setNodeMask(NoShadow);
 
         bool shadowing = tags["Shadowing"].value == "yes";
         if (shadowing)
@@ -483,12 +494,16 @@ public:
 
 
         // setup the material if valid
+#if 0
         if (_dayMaterial.valid() && _nightMaterial.valid())
         {
             _runtimeMaterial = new osg::Material(*_dayMaterial);
 
             entity.getOrCreateStateSet()->setAttributeAndModes(_runtimeMaterial,osg::StateAttribute::ON|osg::StateAttribute::PROTECTED|osg::StateAttribute::OVERRIDE);
         }
+		_ss->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+		_ss->setMode(GL_BLEND, osg::StateAttribute::ON);
+#endif
 
         // set our stateset
         entity.asGroup()->getChild(0)->setStateSet(_ss);
@@ -538,10 +553,11 @@ protected:
         std::string		_specular;
         std::string		_shininess;
         bool			_environmentalSet;
+		float			_environmentalFactor;
         bool			_materialSet;
         osg::ref_ptr<osg::Material>	_material;
 
-        SubModelEntry() : _id(0), _environmental(true), _environmentalSet(false), _materialSet(false) {}
+        SubModelEntry() : _id(0), _environmental(true), _environmentalFactor(0.5f), _environmentalSet(false), _materialSet(false) {}
 
         bool isValid() const
         {
@@ -1209,6 +1225,7 @@ protected:
         {
             submodel._environmentalSet = true;
             submodel._environmental = tags["Environmental"].value == "yes";
+			submodel._environmentalFactor = atof(tags["EnvironmentalFactor"].value.c_str());
         }
 
         // Read the material
@@ -1360,7 +1377,21 @@ protected:
         osg::Matrixd mx = OpenIG::Base::Math::instance()->toMatrix(pos.x(),pos.y(),pos.z(),ori.x(),ori.y(),ori.z());
 
         std::string subModelFileName = _path + "/" + submodel._fileName;
-        osg::notify(osg::NOTICE) << "Model Composition: Loading submodel: (" << submodel._id << ") " << subModelFileName << std::endl;
+		osg::notify(osg::NOTICE) << "Model Composition: Loading submodel: (" << submodel._id << ") " << subModelFileName << std::endl;
+
+		OpenIG::Engine* openig = dynamic_cast<OpenIG::Engine*>(context.getImageGenerator());
+		if (openig)
+		{
+			if (!openig->isFileCached(subModelFileName))
+			{
+				osg::notify(osg::NOTICE) << "Model Composition: submodel not cashed, added to be: " << subModelFileName << std::endl;
+
+				OpenIG::Base::StringUtils::StringList toBeCashed;
+				toBeCashed.push_back(subModelFileName);
+
+				openig->addFilesToBeCached(toBeCashed);
+			}
+		}
 
         context.getImageGenerator()->addEntity(submodel._id,subModelFileName,mx);
         context.getImageGenerator()->bindToEntity(submodel._id,entityId);
@@ -1378,15 +1409,16 @@ protected:
             switch (submodel._environmental)
             {
             case true:
-                value = osg::StateAttribute::ON | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE;
+                value = osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE;
                 break;
             case false:
-                value = osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE;
+                value = osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE;
                 break;
             }
             osg::ref_ptr<osg::StateSet> ss = new osg::StateSet;
+			ss->merge(*_ss);
+
             ss->setDefine("ENVIRONMENTAL", value);
-            ss->merge(*_ss);
 
             subentity->setStateSet(ss);
         }

@@ -188,7 +188,10 @@ void Engine::bindLightToEntity(unsigned int id, unsigned int entityId)
 
             _lightsGroup->removeChild(light);
 
-            eitr->second->addChild(light);
+            if (eitr->second.valid())
+            {
+                eitr->second->addChild(light);
+            }
         }
     }
 }

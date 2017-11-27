@@ -2,13 +2,23 @@ The Muse OpenIG.  An opensource OpenSceneGraph based image generator application
 Documentation, sample datasets and Binary Downloads for some platforms available at: http://openig.compro.net
 
 # Changes/Updates since last release
+- Check for validity of an entity before adding light to it.
+  Sent in from NickTrajce for all OIG users to take advantage of.
+- Caching based on full pathname is not reliable as the same models can
+  on occasion be loaded from a different folder, which would cause them
+  to be reloaded when using the full pathname.  Using only the models
+  filename now with no path information.
+  Sent in from NickTrajce for all OIG users to take advantage of.
+- Ensure caching of subentites are handled properly so that they
+  only get loaded once now.
+  Sent in from NickTrajce for all OIG users to take advantage of.
 - Fixed bug where an enity that is unbound from its parent was not
   added to the scene as its own super entity. 
   Sent in from NickTrajce for all OIG users to take advantage of.
 - Fixed crash when using large paged databases with lots of lights
   Sent in from NickTrajce for all OIG users to take advantage of.
 - New "lpb" LightPointsBrightnessCommand, adjust lightpoint brightness
-  by name via commandline. 
+  by name via commandline.
   Sent in from NickTrajce for all OIG users to take advantage of.
 - Mark terrain to only receive shadows.  This gives a nice performance boost.
   Sent in from NickTrajce for all OIG users to take advantage of.

@@ -779,7 +779,7 @@ void Engine::addEntity(unsigned int id, const std::string& fileName, const osg::
 
     osg::ref_ptr<osg::Node> model;
 
-    std::string simpleFileName = osgDB::getSimpleFileName(fileName);
+    std::string simpleFileName = fileName;//osgDB::getSimpleFileName(fileName);
     if (isFileCached(simpleFileName))
     {
         EntityCache::iterator itr = _entityCache.find(simpleFileName);
