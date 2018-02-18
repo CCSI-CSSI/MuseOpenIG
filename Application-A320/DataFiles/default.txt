@@ -1,6 +1,6 @@
 #All platforms
-addentity 2 {$OPENIG_DATA_PATH;/usr/local/database;../data}/model/radar/radar.FBX.(0.1,0.1,0.1).scale -50 50 5 0 90 0
-addentity 1 {$OPENIG_DATA_PATH;/usr/local/database;../data}/model/A320/a320.ive 0 0 10 0 0 0
+#addentity 2 {$OPENIG_DATA_PATH;/usr/local/database;../data}/model/radar/radar.FBX.(0.1,0.1,0.1).scale -50 50 5 0 90 0
+addentity 1 {$OPENIG_DATA_PATH;/usr/local/database;../data}/model/A320/a320.ive 0 0 0 0 0 0
 addentity 0 {$OPENIG_DATA_PATH/terrain;/data/OIG/OIG_DEMO_SC_7_NT_;../data/terrain}/master.flt.osg 0 0 0 -51.1 0 0
 
 fpo -4 0 -37
@@ -14,17 +14,17 @@ ms SBSC_Activ 0
 # be placed right there
 #geozero -22.943 -43.7251
 
-playanim 2 fbx:"Take 001":LOOP
+#playanim 2 fbx:"Take 001":LOOP
 
 manip 1 trackball
 bindcamera 1 10 30 -2 -200 0 0
 
-tod 7 15
+tod 7 59
 fog 50000
 wind 5 90
 addclouds 0 0 1500 0 1
 
-silverlining flat dynamic
+#silverlining flat dynamic
 
 loadconfig richcolorsdemo.txt
 

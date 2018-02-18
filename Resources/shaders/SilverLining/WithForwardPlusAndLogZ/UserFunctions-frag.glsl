@@ -10,6 +10,7 @@ void overrideSkyFragColor(inout vec4 finalColor)
 // Allows overriding of the fog color, fog blend factor, underlying cloud color, and alpha blending of the cloud.
 void overrideStratusLighting(in vec3 fogColor, in float fogFactor, in vec3 cloudColor, in float cloudFade, inout vec4 finalColor)
 {
+
 }
 
 // Overrides fragment colors in stratocumulus clouds. The pre-lit color (which incorporates light scattering within the cloud) is
@@ -20,8 +21,10 @@ void overrideStratocumulus(in vec4 color, in vec4 lightColor, inout vec4 finalCo
 
 }
 
+
 void overrideBillboardFragment_forward_plus_sl_ps(in vec4 texColor, in vec4 lightColor, inout vec4 finalColor);
 
+// Tested agains SilverLining Version 5.008 February 2, 2018
 
 // Overrides fragment colors of billboards (cloud puffs, sun, moon.)
 void overrideBillboardFragment(in vec4 texColor, in vec4 lightColor, inout vec4 finalColor)

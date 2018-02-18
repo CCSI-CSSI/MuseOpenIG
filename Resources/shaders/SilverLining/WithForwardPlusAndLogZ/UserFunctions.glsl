@@ -1,4 +1,4 @@
-// Tested agains SilverLining Version 4.040 January 12, 2016
+// Tested agains SilverLining Version 5.008 February 2, 2018
 
 varying vec3 vVertex_View_Space;
 varying vec3 vNormal_View_Space;
@@ -7,7 +7,7 @@ varying vec4 vVertex_Projection_Space;
 // Hook to override computation of fog on clouds
 // fogExponent is squared to determine the blending of clouds with the background
 // fogBlend is used for blending fogColor with the cloud color.
-void overrideBillboardFog(in vec3 eyePosition, inout vec4 fogColor, inout float fogExponent, inout float fogBlend)
+void overrideBillboardFog(in vec3 eyePosition, inout vec4 fogColor, inout float fogExponent, inout float fogBlend, inout float fogFade)
 {
 
 }

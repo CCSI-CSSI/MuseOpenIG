@@ -1,3 +1,4 @@
+// Latest test against Triton SDK Version 3.91 February 10, 2018
 
 varying vec3 eyeVec;
 
@@ -5,6 +6,22 @@ float user_get_depth( in vec3 worldPos )
 {
     return 1000.0;
 }
+
+#ifdef DOUBLE_PRECISION
+
+dvec3 user_horizon(in dvec3 intersect)
+{
+    return intersect;
+}
+
+#else
+
+vec3 user_horizon(in vec3 intersect)
+{
+    return intersect;
+}
+
+#endif
 
 vec4 log_z_vs(in vec4 position);
 

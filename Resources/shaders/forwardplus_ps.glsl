@@ -127,10 +127,10 @@ void main()
 	cDiffuseColor *= computeAmbientOcclusion();
 #endif
 
-//#ifdef SHADOWING
-//	float fShadowFactor = computeShadowFactor();	
-//	cDiffuseColor.rgb = mix(cDiffuseColor.rgb*0.5, cDiffuseColor.rgb, fShadowFactor);
-//#endif
+#ifdef SHADOWING
+	float fShadowFactor = computeShadowFactor();	
+	cDiffuseColor.rgb = mix(cDiffuseColor.rgb*0.5, cDiffuseColor.rgb, fShadowFactor);
+#endif
 	vec4 fColor = compute_forward_plus_lighting(cDiffuseColor, gl_FrontMaterial.specular, gl_FrontMaterial.shininess
 										 , vPositionEyeSpace, vNormalEyeSpaceN, vEyePosition
 										 , vPositionProj);
