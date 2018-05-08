@@ -64,6 +64,7 @@
 
 #include <osgShadow/ShadowedScene>
 #include <osgShadow/MinimalShadowMap>
+#include <osgShadow/ViewDependentShadowMap>
 
 #include <OpenThreads/Thread>
 #include <OpenThreads/Mutex>
@@ -376,6 +377,17 @@ namespace OpenIG {
 				sv->setCullVisitor(new ForwardPlusCullVisitor(fpEngine));
 				osg::notify(osg::NOTICE) << "ForwardPlusLighting: default CullVisitor replaced in SceneView 0" << std::endl;
 #endif
+
+				sv = renderer->getSceneView(1);
+				if (sv == 0)
+				{
+					return;
+				}
+
+#if 1
+				sv->setCullVisitor(renderer->getSceneView(0)->getCullVisitor());
+				osg::notify(osg::NOTICE) << "ForwardPlusLighting: default CullVisitor replaced in SceneView 1" << std::endl;
+#endif
 			}
 
 			ForwardPlusCullVisitor* getCullVisitor(OpenIG::PluginBase::PluginContext& context)
@@ -448,6 +460,9 @@ namespace OpenIG {
 					return;
 				}
 
+				osg::StateSet* ss = context.getImageGenerator()->getViewer()->getView(0)->getSceneData()->getOrCreateStateSet();
+
+#if 0
 				osgShadow::MinimalShadowMap* msm = dynamic_cast<osgShadow::MinimalShadowMap*>(
 					scene->getShadowTechnique()
 					);
@@ -461,7 +476,43 @@ namespace OpenIG {
 				msm->setShadowVertexShader(shadowVertexShader);
 				msm->setShadowFragmentShader(shadowFragmentShader);
 
-				osg::StateSet* ss = context.getImageGenerator()->getViewer()->getView(0)->getSceneData()->getOrCreateStateSet();
+				unsigned int defaultDiffuseSlot = OpenIG::Base::Configuration::instance()->getConfig("Default-diffuse-texture-slot", 0);
+				ss->addUniform(new osg::Uniform("baseTexture", (int)defaultDiffuseSlot), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+#else
+				float minLightMargin = OpenIG::Base::Configuration::instance()->getConfig("ShadowedScene-minLightMargin", 10.0);
+				float maxFarPlane = OpenIG::Base::Configuration::instance()->getConfig("ShadowedScene-maxFarPlane", 1000.0);
+				unsigned int texSize = OpenIG::Base::Configuration::instance()->getConfig("ShadowedScene-texSize", 4096);
+				unsigned int baseTexUnit = OpenIG::Base::Configuration::instance()->getConfig("ShadowedScene-baseTexUnit", 0);
+				unsigned int shadowTexUnit = OpenIG::Base::Configuration::instance()->getConfig("ShadowedScene-shadowTexUnit", 1);
+
+				osgShadow::ShadowSettings* settings = scene->getShadowSettings();
+				settings->setNumShadowMapsPerLight(1);
+				settings->setShaderHint(osgShadow::ShadowSettings::NO_SHADERS);
+				settings->setBaseShadowTextureUnit(shadowTexUnit);
+				settings->setLightNum(0);
+				settings->setMaximumShadowMapDistance(maxFarPlane);
+				settings->setTextureSize(osg::Vec2s(texSize, texSize));
+				settings->setReceivesShadowTraversalMask(0x1);
+				settings->setCastsShadowTraversalMask(0x2);
+
+				osg::ref_ptr<osgShadow::ViewDependentShadowMap> vdsm = new osgShadow::ViewDependentShadowMap;
+				scene->setShadowTechnique(vdsm);
+
+				osg::ref_ptr<osg::Program> program = new osg::Program;
+				program->addShader(mainVertexShader);
+				program->addShader(mainFragmentShader);
+				program->addShader(shadowVertexShader);
+				program->addShader(shadowFragmentShader);
+				scene->getOrCreateStateSet()->setAttributeAndModes(program, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+
+				float factor = 10.1;
+				float units = 40.0;
+				osg::ref_ptr<osg::PolygonOffset> polygonOffset = new osg::PolygonOffset(factor, units);
+				scene->getOrCreateStateSet()->setAttribute(polygonOffset.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+				scene->getOrCreateStateSet()->setMode(GL_POLYGON_OFFSET_FILL, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+
+#endif
+				
 
 #if OSG_VERSION_GREATER_OR_EQUAL(3,3,7)
 				ss->setDefine("SHADOWING");
@@ -489,8 +540,7 @@ namespace OpenIG {
 				float shadowsFactor = OpenIG::Base::Configuration::instance()->getConfig("Shadows-Factor", 0.5);
 				ss->addUniform(new osg::Uniform("shadowsFactor", shadowsFactor));
 
-				unsigned int defaultDiffuseSlot = OpenIG::Base::Configuration::instance()->getConfig("Default-diffuse-texture-slot", 0);
-				ss->addUniform(new osg::Uniform("baseTexture", (int)defaultDiffuseSlot), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+				
 
 				osg::Uniform* todBasedLightingUniform = new osg::Uniform("todBasedLightBrightness", (float)1.f);
 				todBasedLightingUniform->setUpdateCallback(new UpdateTODBasedLightingUniformCallback(

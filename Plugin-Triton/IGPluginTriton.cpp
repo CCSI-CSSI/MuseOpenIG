@@ -500,7 +500,7 @@ namespace OpenIG {
                     osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
                 _heightMapcamera->setLODScale(0.5f);
                 _heightMapcamera->setCullingMode(osg::CullSettings::ENABLE_ALL_CULLING);
-                _heightMapcamera->setCullMask(0x2);
+                _heightMapcamera->setCullMask(0x3);
 
                 osg::ref_ptr<osg::Program> heightMapProgram = new osg::Program;
                 heightMapProgram->addShader(new osg::Shader(osg::Shader::VERTEX, HeightMapVertSource));

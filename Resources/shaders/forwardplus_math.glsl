@@ -118,12 +118,15 @@ void ComputeLighting(int index
     else
     {
         vLightDirection = GetLightVector(vPosition, light.vPosition);
+		
     }
 
 	float fSpot = 0.0f;
     if (lightType == 0 || lightType == 1)
     {
         fSpot = 1.0f;        // Spot is 1 for non-spot lights
+
+		
     }
     else
     {

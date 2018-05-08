@@ -479,18 +479,18 @@ public:
         bool shadowing = tags["Shadowing"].value == "yes";
         if (shadowing)
         {
-            std::string shadow = tags["Shadow"].value;
-            if (shadow == "CAST")
-                entity.setNodeMask(CastsShadowTraversalMask);
-            if (shadow == "RECEIVE")
-                entity.setNodeMask(ReceivesShadowTraversalMask);
-            if (shadow == "CAST-AND-RECEIVE")
-                entity.setNodeMask(CastsShadowTraversalMask | ReceivesShadowTraversalMask);
-
             _ss->setDefine("SHADOWING", osg::StateAttribute::ON);
         }
         else
             _ss->setDefine("SHADOWING", osg::StateAttribute::OFF);
+
+		std::string shadow = tags["Shadow"].value;
+		if (shadow == "CAST")
+			entity.setNodeMask(CastsShadowTraversalMask);
+		if (shadow == "RECEIVE")
+			entity.setNodeMask(ReceivesShadowTraversalMask);
+		if (shadow == "CAST-AND-RECEIVE")
+			entity.setNodeMask(CastsShadowTraversalMask | ReceivesShadowTraversalMask);
 
 
         // setup the material if valid

@@ -249,7 +249,10 @@ osg::Referenced* ForwardPlusLightImplementationCallback::createLight(unsigned in
 	// TODO: Investigate and fix
 	// lightSource->setCullingActive(definition.cullingActive);
 	lightSource->setDataVariance(definition.dataVariance);
-	lightSource->setNodeMask(0x4);
+	if (definition.dataVariance == osg::Object::STATIC)
+		lightSource->setNodeMask(0x4);
+	else
+		lightSource->setNodeMask(0x3);
 
 	osgLight->setLightSource(lightSource);
 
