@@ -21,7 +21,7 @@ SET( LIB_PUBLIC_HEADERS
 SET( _OpenIGSourceFiles
     Commands.cpp
     Help.cpp
-    CrashScreen.cpp
+    OnScreenMessages.cpp
     Keypad.cpp
     Lights.cpp
     Engine.cpp

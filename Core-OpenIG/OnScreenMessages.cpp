@@ -44,11 +44,12 @@
 namespace OpenIG
 {
 
-class CrashScreen: public osgGA::GUIEventHandler
+class OnScreenMessages: public osgGA::GUIEventHandler
 {
 public:
-    CrashScreen(   Engine* ig,
+    OnScreenMessages(   Engine* ig,
                     osgText::Text* text,
+                    osg::Geometry* geometry,
                     osgViewer::CompositeViewer* v,
                     osg::Group* scene,
                     osg::Node* crashg)
@@ -57,61 +58,83 @@ public:
         , _scene(scene)
         , _crashg(crashg)
         , _text(text)
+        , _geometry(geometry)
         , _isON(false)
     {
 
     }
 
-    void turnOffCrash()
+    void turnOffMessage()
     {
         //osg::notify(osg::NOTICE)<<"CrashScreen::turnOffCrash()!!" << std::endl;
         _scene->removeChild(_crashg);
         _isON=false;
     }
 
-    void turnOnCrash(std::string crashtext)
+    void turnOnMessage(std::string text, bool crashScreen=false )
     {
         //osg::notify(osg::NOTICE)<<"CrashScreen::turnOnCrash()!!" << std::endl;
 
-        //if crashscreen is already on, we turn off to reset before
+        //if screen messages are already on, we turn off to reset before
         //turning on again to display new message and to keep our
         //child list at a minimum as we are not keeping track of multiples.
         if(_isON)
-            turnOffCrash();
+            turnOffMessage();
 
-        if(crashtext.size())
+        //Set the screen background color to RED for the crash screen
+        //or GREY for the regular messages screen.
+        osg::Vec4Array* colors = new osg::Vec4Array;
+        if(crashScreen)//RED
+        {
+            colors->push_back(osg::Vec4(1.0f,0.0,0.0f,0.5f));
+        }
+        else//GREY
+        {
+            colors->push_back(osg::Vec4(0.2f,0.2,0.2f,0.7f));
+        }
+        _geometry->setColorArray(colors);
+        _geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
+        _geometry->addPrimitiveSet(new osg::DrawArrays(GL_QUADS,0,4));
+        _geometry->getOrCreateStateSet()->setMode(GL_BLEND,osg::StateAttribute::ON);
+        _geometry->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+
+        if(text.size())
         {
             //Lets try to fit text longer than 47 chars onto multiple lines
-            //if/when we encounter any long incoming crash text messages.
-            int textsize = crashtext.size();
+            //if/when we encounter any long incoming text messages.
+            int textsize = text.size();
             if(textsize>45)
             {
                 for(int x=1;x<textsize;x++)
                 {
-                    //osg::notify(osg::NOTICE)<<"CrashScreen::turnOnCrash() -- crashtext.at(x): "<< crashtext.at(x) << std::endl;
+                    //osg::notify(osg::NOTICE)<<"onScreenMessages::turnOnMessage() -- text.at(x): "<< text.at(x) << std::endl;
                     if(x % 35 == 0)
                     {
                         int y = x;
-                        //osg::notify(osg::NOTICE)<<"CrashScreen::turnOnCrash()!! x: "<< x << ", y: " << y << std::endl;
-                        while(crashtext.at(y) != ' ' && y!=0)
+                        //osg::notify(osg::NOTICE)<<"onScreenMessages::turnOnMessage()!! x: "<< x << ", y: " << y << std::endl;
+                        while(text.at(y) != ' ' && y!=0)
                         {
-                           //osg::notify(osg::NOTICE)<<"CrashScreen::turnOnCrash() -- crashtext.at(y): "<< crashtext.at(y) << std::endl;
+                           //osg::notify(osg::NOTICE)<<"onScreenMessages::turnOnMessage() -- text.at(y): "<< text.at(y) << std::endl;
                             y--;
                             if(y<0) y=0;//safety
                         }
-                        //osg::notify(osg::NOTICE)<<"CrashScreen::turnOnCrash()!! replacing at y: " << y << std::endl;
-                        crashtext.replace(y,1,1,'\n');
+                        //osg::notify(osg::NOTICE)<<"onScreenMessages::turnOnMessage()!! replacing at y: " << y << std::endl;
+                        text.replace(y,1,1,'\n');
                         continue;
                     }
                 }
             }
 
-            _text->setText(crashtext.c_str());
+            _text->setText(text.c_str());
         }
         //Put back to default if no text provided to display per description of command..
         else
-            _text->setText("Crash!!");
-
+        {
+            if(crashScreen)
+                _text->setText("Crash Detected!!");
+            else
+                _text->setText("OpenIG Message Screen\nNo Text Entered To Be Displayed!");
+        }
         _scene->addChild(_crashg);
         _isON=true;
     }
@@ -123,11 +146,12 @@ protected:
     osg::Group*                 _scene;
     osg::ref_ptr<osg::Node>     _crashg;
     osg::ref_ptr<osgText::Text> _text;
+    osg::Geometry*          _geometry;
     bool _isON;
 };
-CrashScreen *_crashScreen;
+OnScreenMessages *_onScreenMessages;
 
-void Engine::initCrashScreen()
+void Engine::initOnScreenMessages()
 {
     if (!_viewer.valid())
         return;
@@ -182,14 +206,14 @@ void Engine::initCrashScreen()
     geometry->setNormalArray(normals);
     geometry->setNormalBinding(osg::Geometry::BIND_OVERALL);
 
-    osg::Vec4Array* colors = new osg::Vec4Array;
-    colors->push_back(osg::Vec4(1.f,.0,0.0f,0.5f));
-    geometry->setColorArray(colors);
-    geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
+//    osg::Vec4Array* colors = new osg::Vec4Array;
+//    colors->push_back(osg::Vec4(0.2f,0.2,0.2f,0.5f));
+//    geometry->setColorArray(colors);
+//    geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
 
-    geometry->addPrimitiveSet(new osg::DrawArrays(GL_QUADS,0,4));
-    geometry->getOrCreateStateSet()->setMode(GL_BLEND,osg::StateAttribute::ON);
-    geometry->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+//    geometry->addPrimitiveSet(new osg::DrawArrays(GL_QUADS,0,4));
+//    geometry->getOrCreateStateSet()->setMode(GL_BLEND,osg::StateAttribute::ON);
+//    geometry->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 
     osgText::Text* text = new osgText::Text;
     geode->addDrawable(text);
@@ -203,27 +227,38 @@ void Engine::initCrashScreen()
     text->setCharacterSizeMode(osgText::TextBase::OBJECT_COORDS);
     text->setAxisAlignment(osgText::TextBase::XY_PLANE);
     text->setFontResolution(256,256);
-    text->setText("CRASH!!");
+    text->setText("OpenIG Message Screen, no Text Entered!");
     text->setDataVariance(osg::Object::DYNAMIC);
     text->setAlignment(osgText::Text::CENTER_CENTER);
 
-    _crashScreen = new CrashScreen(
+    _onScreenMessages = new OnScreenMessages(
                 this,
                 text,
+                geometry,
                 _viewer.get(),
                 _viewer->getView(0)->getSceneData()->asGroup(),
                 crashGroup.get());
 
 }
 
-void Engine::turnOnCrashScreen(std::string crashtext)
+void Engine::turnOnCrashScreen(const std::string& crashtext)
 {
-    _crashScreen->turnOnCrash(crashtext);
+    _onScreenMessages->turnOnMessage(crashtext, true);
 }
 
 void Engine::turnOffCrashScreen()
 {
-    _crashScreen->turnOffCrash();
+    _onScreenMessages->turnOffMessage();
+}
+
+void Engine::turnOnScreenMessage(const std::string& text)
+{
+    _onScreenMessages->turnOnMessage(text, false);
+}
+
+void Engine::turnOffScreenMessage()
+{
+    _onScreenMessages->turnOffMessage();
 }
 
 }

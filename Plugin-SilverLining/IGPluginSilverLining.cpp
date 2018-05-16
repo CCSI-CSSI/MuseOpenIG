@@ -115,8 +115,8 @@ namespace OpenIG {
 
                 virtual const std::string getDescription() const
                 {
-                    return  "set the additional r g b to the ambient light\n"
-                        "    r g b - the colors";
+                    return  "Set/Add the additional r g b values to the current ambient light\n"
+                            "    r g b - the colors as floating point numbers";
                 }
 
                 virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)
@@ -333,10 +333,11 @@ namespace OpenIG {
                 {
                     return  "configures the SilverLining plugin\n"
                         "    mode - one of these:\n"
-                        "           geocentric - if in geocentric mode\n"
-                        "           flat       - if in flat earth mode\n"
-                        "	 dynamic_env_map_update - 'dynamic' to update the environmental map on each frame, 'onchange' only on clouds change\n";
-                        "	 gamma - [optional] SilverLining gamma";
+                        "    geocentric - if in geocentric mode\n"
+                        "    flat       - if in flat earth mode\n"
+                        "    dynamic_env_map_update - 'dynamic' to update the environmental\n"
+                        "                             map on each frame, 'onchange' only on clouds change\n";
+                        "	 gamma     - [optional] SilverLining gamma";
                 }
 
                 virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)
@@ -1405,7 +1406,7 @@ namespace OpenIG {
                 virtual const std::string getDescription() const
                 {
                     return  "enables the cloud layer in the scene using the cloud layer id\n"
-                        "     id - the id of the cloud layer"
+                        "     id - the id of the cloud layer\n"
                         " enable - This is an OPTIONAL flag, default is set to true, but it can be set to false\n"
                         "          in cases where you want the layer created but not visible when its loaded into,\n"
                         "          the SL atmosphere.  When it is finally enabled it will show immediately\n"
@@ -1492,8 +1493,9 @@ namespace OpenIG {
 
                 virtual const std::string getDescription() const
                 {
-                    return  "removes the cloud layer file from the scene as well as the associated saved cloud file, by a given cloud layer id\n"
-                        "     id - the id of the cloud layer";
+                    return  "Removes the cloud layer file from the scene as well\n"
+                            "as the associated saved cloud file, by a given cloud layer id\n\n"
+                            "id - the id of the cloud layer";
                 }
 
                 virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)

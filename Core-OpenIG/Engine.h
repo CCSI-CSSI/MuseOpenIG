@@ -55,7 +55,6 @@
 
 #include <OpenThreads/Mutex>
 #include <OpenThreads/ScopedLock>
-#include <osgUtil/IntersectVisitor>
 
 namespace OpenIG
 {
@@ -113,12 +112,12 @@ public:
     */
     enum SetupFlags
     {
-        None				= 0x00,
+        None			= 0x00,
         WithTerminal		= 0x01,
         WithSplashScreen	= 0x02,
         WithOnscreenHelp	= 0x04,
-        WithCrashScreen     = 0x08,
-        Standard			= WithTerminal | WithSplashScreen | WithOnscreenHelp | WithCrashScreen
+        WithScreenMessages  = 0x08,
+        Standard                = WithTerminal | WithSplashScreen | WithOnscreenHelp | WithScreenMessages
     };
 
     /*!
@@ -1120,41 +1119,6 @@ public:
      */
     virtual EntityMap&                  getEntityMap();
 
-    /*! The height of the terrain at the current position
-     * \brief     The height of terrain at the given position
-     * \return    The height of terrain at the given position
-     * \param position -- the current position
-     * \author    Roni Zanolli openig@compro.net
-     * \copyright (c)Compro Computer Services, Inc.
-     * \date      Weds Aug 02 2016
-     */
-    virtual float getTerrainHeight( const osg::Vec3& position );
-
-    /*! The distance from input position to the first intersect
-     * \brief     The distance from input position to the first intersect
-     * \return    The distance from input position to the first intersect
-     * \param pos    Current position
-     * \param angles Current Yaw, Pitch and Roll
-     * \param angle  Current Heading
-     * \author    Roni Zanolli openig@compro.net
-     * \copyright (c)Compro Computer Services, Inc.
-     * \date      Weds Aug 02 2016
-     */
-    virtual float getIntersect( const osg::Vec3& pos, const osg::Vec3& angles, float angle );
-
-    /*! The position of the intersection of our current pos and the angles input
-     * \brief     The distance from input position to the first intersect
-     * \return    The distance from input position to the first intersect
-     * \param pos    Current position
-     * \param angles Current Yaw, Pitch and Roll
-     * \param angle  Current Heading
-     * \author    Roni Zanolli openig@compro.net
-     * \copyright (c)Compro Computer Services, Inc.
-     * \date      Weds Aug 02 2016
-     */
-    virtual osg::Vec3 getIntersectPos( const osg::Vec3& pos, const osg::Vec3& angles, float angle, float height=100000 );
-
-
     /*! The light that represents sun/moon in the scene. It is the reserved light with an ID of 0
      * \brief   The light that represents sun/moon in the scene
      * \return  The light that represents sun/moon in the scene
@@ -1180,7 +1144,7 @@ public:
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jul 7 2017
      */
-    virtual void turnOnCrashScreen(std::string crashtext);
+    virtual void turnOnCrashScreen(const std::string& crashtext);
 
     /*! Turns off the Red transparent OpenIG Crash Screen
      * \brief Sets the light implementation callback
@@ -1189,6 +1153,23 @@ public:
      * \date      Fri Jul 7 2017
      */
     virtual void turnOffCrashScreen();
+
+    /*! Turns on the OpenIG Message Screen
+     * \brief Turns on the message screen and displays the text provided
+     * \param	text  Message to be displayed
+     * \author    Curtis Rubel openig@compro.net
+     * \copyright (c)Compro Computer Services, Inc.
+     * \date      Fri Jul 7 2017
+     */
+    virtual void turnOnScreenMessage(const std::string& text);
+
+    /*! Turns off the OpenIG Message Screen
+     * \brief Turns off the Message Screen
+     * \author    Curtis Rubel openig@compro.net
+     * \copyright (c)Compro Computer Services, Inc.
+     * \date      Fri Jul 7 2017
+     */
+    virtual void turnOffScreenMessage();
 
     /*!
      * \brief Returns the internal OpenIG::PluginBase::PluginContext
@@ -1235,12 +1216,34 @@ public:
     */
     bool isFileCached(const std::string& fileName);
 
+	/*! Sets/Adds intersection callbacks. Your own implementation of the intersection
+	* \brief Sets/Adds intersection callbacks.
+	* \author    Trajce Nikolov Nick openig@compro.net
+	* \copyright (c)Compro Computer Services, Inc.
+	* \date      Sun Apr 13 2018
+	*/
+	virtual void setIntersectionCallback(IntersectionCallback* cb);
+
+	/*! Performs the intersections. It calls the callback
+	* \brief Performs the intersections.
+	* \param start The start of the intersection ray
+	* \param end The end of the intersection ray
+	* \param the resulting intersection point if any
+	* \param mask see \ref IntersectionMask. Assume \ref Entity with id 0 to be the terrain
+	* \return true if intersection performed, false otherwise
+	* \author    Trajce Nikolov Nick openig@compro.net
+	* \copyright (c)Compro Computer Services, Inc.
+	* \date      Sun Apr 13 2018
+	*/
+	virtual bool intersect(const osg::Vec3d& start, const osg::Vec3d& end, osg::Vec3d& intersectionPoint, unsigned mask);
+
 protected:
+
+	/*! \brief  The intersection callback */
+	osg::ref_ptr<ImageGenerator::IntersectionCallback> _intersectionCallback;
 
     /*! \brief  The current added in the scene \ref Entity es, ID based std::map */
     EntityMap                                       _entities;
-
-    osg::ref_ptr<osgUtil::IntersectVisitor> _intersect;
 
     /*! \brief  Handle of the viewer you have passed in \ref init */
     osg::observer_ptr<osgViewer::CompositeViewer>        _viewer;
@@ -1385,13 +1388,13 @@ protected:
     */
     void createSunMoonLight();
 
-    /*! Display the red IG crash screen ontop of the scene
-     * \brief Display the red IG Crash screen
+    /*! Display the IG message screen ontop of the scene
+     * \brief Display the IG message screen
      * \author    Curtis Rubel openig@compro.net
      * \copyright (c)Compro Computer Services, Inc.
      * \date      Fri Jul 7 2017
      */
-    void initCrashScreen();
+    void initOnScreenMessages();
 };
 
 } // namespace

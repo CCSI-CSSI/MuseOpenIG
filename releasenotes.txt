@@ -1,4 +1,7 @@
-xx xxx 2017, version 2.0.7
+16 May 2018, version 2.0.7
+- Replaced the LSPSM with VDSM in the F+ plugin, updated SilverLining and Triton plugins
+  to run with current packages as of this date. Sent in from NickTrajce for all OIG users
+- corrected some spelling and line ending off screen issues on the on-screen help.
 - added path for Linux uses to the resources directory in the Plugin-OSGParticleeffects
 - corrected spelling of the continuous_smoke.rgb texture in the Plugin-OSGParticleeffects CGR
 - Commented out to allow smoke trails to be white until we can fix whatever the shader issue 

@@ -1,8 +1,11 @@
 The Muse OpenIG.  An opensource OpenSceneGraph based image generator application suite.
 Documentation, sample datasets and Binary Downloads for some platforms available at: http://openig.compro.net
 
-# Changes/Updates since last release
-- added path for Linux uses to the resources directory in the Plugin-OSGParticleeffects
+# Muse OpenIG V2.0.7
+- Replaced the LSPSM with VDSM in the F+ plugin, updated SilverLining and Triton plugins
+  to run with current packages as of this date. Sent in from NickTrajce for all OIG users
+- corrected some spelling and line ending off screen issues on the on-screen help.
+- added path for Linux users to the resources directory in the Plugin-OSGParticleeffects
 - corrected spelling of the continuous_smoke.rgb texture in the Plugin-OSGParticleeffects CGR
 - Commented out to allow smoke trails to be white until we can fix whatever the shader issue 
   is at the moment in the Plugin-OSGParticleeffects.. CGR for NICK

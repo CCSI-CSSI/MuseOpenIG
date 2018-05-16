@@ -792,16 +792,18 @@ public:
 
     virtual const std::string getDescription() const
     {
-        return  "sets the attribues of the light sources like diffuse, speculat, ambient ....\n"
-            "     id - the id of the light source\n"
+        return  "sets the attribues of the light sources such as, diffuse, specular, ambient ....\n"
+            "     id     - the id of the light source\n"
             "     attrib - light attribute, can be one of these:\n"
-            "          ambient red green blue - the ambient comonent of the light source, followed by the color components\n"
-            "          diffuse red green blue brightness [optional:cloudbrightness] [optional:waterbrightness]- the diffuse component, followed by a brightness\n"
+            "          ambient red green blue   - the ambient comonent of the light source,\n"
+            "          followed by the color components\n\n"
+            "          diffuse red green blue brightness [optional:cloudbrightness] [optional:waterbrightness]-\n"
+            "          the diffuse component, followed by a brightness\n\n"
             "          specular red green blue - the specular component\n"
-            "          attenuation distance - the constant attenuation, in meters\n"
-            "          spotcutoff value - the spot cutsoff of the light source\n"
-            "		   ranges start end - the range of the light\n"
-            "		   spotangles inner outer - the angles of the light";
+            "          attenuation distance    - the constant attenuation, in meters\n"
+            "          spotcutoff value        - the spot cutsoff of the light source\n"
+            "          ranges start end        - the range of the light\n"
+            "          spotangles inner outer  - the angles of the light";
     }
 
     virtual int exec(const StringUtils::Tokens& tokens)
@@ -952,7 +954,7 @@ public:
         return  "if id provided, binds the keyboard to an entity to move it in the scene, otherwise controls the camera.\n"
             "if 'off' provided, unbinds from entity or camera\n"
             "     id - the id of the entity\n"
-            "          - the keyboard is bound to the entity and is moved by the combination of these numeric pad keys + LEFT ALT\n"
+            "          - the keyboard is bound to the entity and is moved by\nthe combination of these numeric pad keys + LEFT ALT key\n\n"
             "          - ENTER: forward\n"
             "          - ./Del: backward\n"
             "          - +: up\n"
@@ -1365,8 +1367,8 @@ public:
 
     virtual const std::string getDescription() const
     {
-        return  "unbinds entity from the parent entity, the position will be transformed in world space from the parent space\n"
-            "     id - the entity to unbind";
+        return  "unbinds entity from the parent entity, the position\nwill be transformed in world space from the parent space\n"
+            "     id - the entity to unbind\n";
     }
 
     virtual int exec(const StringUtils::Tokens& tokens)
@@ -1922,9 +1924,9 @@ public:
 
     virtual const std::string getUsage() const
     {
-        return "string to display on crash screen\n\n"
+        return "A string to display on crash screen\n\n"
                "if no string provided only the word\n"
-               " CRASH!!  will be displayed\n";
+               " CRASH DETECTED!! will be displayed\n";
     }
 
     virtual const std::string getArgumentsFormat() const
@@ -1934,12 +1936,12 @@ public:
 
     virtual const std::string getDescription() const
     {
-        return  "turns on the OpenIG Red crash screen\n"
-                "and displays text provided on center of screen\n"
+        return  "Turns on the OpenIG Red crash screen\n"
+                "and displays the text provided at the center of screen\n"
                 "Text should be input on one continous line to\n"
-                "the command.  Text will be centered and split\n"
+                "the command. Text will be centered and split\n"
                 "up on the crash screen to approximately 35\n"
-                "characters per line\n";
+                "characters per line for you!\n";
     }
 
     virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)
@@ -1969,7 +1971,7 @@ public:
 
     virtual const std::string getUsage() const
     {
-        return "turnoffcrashscreen";
+        return "Turnoffcrashscreen, no arguments";
     }
 
     virtual const std::string getArgumentsFormat() const
@@ -1979,12 +1981,89 @@ public:
 
     virtual const std::string getDescription() const
     {
-        return  "turns off the OpenIG Red crash screen\n";
+        return  "Turns off the OpenIG Red crash screen\n";
     }
 
     virtual int exec(const OpenIG::Base::StringUtils::Tokens&)
     {
             _ig->turnOffCrashScreen();
+            return 0;
+    }
+protected:
+    OpenIG::Base::ImageGenerator* _ig;
+};
+
+class TurnOnScreenMessageCommand : public OpenIG::Base::Commands::Command
+{
+public:
+    TurnOnScreenMessageCommand(OpenIG::Base::ImageGenerator* ig)
+        : _ig(ig) {}
+
+    virtual const std::string getUsage() const
+    {
+        return "A string to display on message screen\n\n"
+               "if no string provided only the string\n"
+               "OpenIG Message Screen,\nNo Text Entered To Be Displayed!\nwill be displayed\n\n";
+    }
+
+    virtual const std::string getArgumentsFormat() const
+    {
+        return "S";
+    }
+
+    virtual const std::string getDescription() const
+    {
+        return  "Turns on the OpenIG Message screen\n"
+                "and displays the text provided at the center of the screen\n"
+                "Text should be input on one continous line to\n"
+                "this command.  Text will be centered and split\n"
+                "up on the message screen to approximately 35\n"
+                "characters per line for you!\n";
+    }
+
+    virtual int exec(const OpenIG::Base::StringUtils::Tokens& tokens)
+    {
+        std::string text;
+        int tokensize = tokens.size();
+
+        //Check for text with multiple spaces
+        for(int x=0;x<tokensize;x++)
+        {
+            text += tokens.at(x);
+            text += " ";
+        }
+
+        _ig->turnOnScreenMessage(text);
+        return 0;
+    }
+protected:
+    OpenIG::Base::ImageGenerator* _ig;
+};
+
+class TurnOffScreenMessageCommand : public OpenIG::Base::Commands::Command
+{
+public:
+    TurnOffScreenMessageCommand(OpenIG::Base::ImageGenerator* ig)
+        : _ig(ig) {}
+
+    virtual const std::string getUsage() const
+    {
+        return "turnoffScreenMessage, no arguments";
+    }
+
+    virtual const std::string getArgumentsFormat() const
+    {
+        return "";
+    }
+
+    virtual const std::string getDescription() const
+    {
+        return  "turns off the OpenIG onscreen message\n";
+    }
+
+    virtual int exec(const OpenIG::Base::StringUtils::Tokens&)
+    {
+            _ig->turnOffScreenMessage();
             return 0;
     }
 protected:
@@ -2031,4 +2110,6 @@ void Engine::initCommands()
     Commands::instance()->addCommand("unbindfromcamera", new UnbindEntityFromCameraCommand(this));
     Commands::instance()->addCommand("turnoffcrashscreen", new TurnOffCrashScreenCommand(this));
     Commands::instance()->addCommand("turnoncrashscreen", new TurnOnCrashScreenCommand(this));
+    Commands::instance()->addCommand("turnoffscreenmessage", new TurnOffScreenMessageCommand(this));
+    Commands::instance()->addCommand("turnonscreenmessage", new TurnOnScreenMessageCommand(this));
 }

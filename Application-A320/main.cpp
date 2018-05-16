@@ -47,6 +47,7 @@
 
 #include <osg/AnimationPath>
 #include <osg/ValueObject>
+#include <osg/io_utils>
 
 #include <osgViewer/CompositeViewer>
 #include <osgViewer/ViewerEventHandlers>
@@ -179,6 +180,7 @@ osg::Node* createInfoHUD(OpenIG::Engine* ig)
     geometry->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
     geometry->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 
+	camera->getOrCreateStateSet()->setAttributeAndModes(new osg::Program, osg::StateAttribute::ON | osg::StateAttribute::PROTECTED);
 
     return camera;
 }
@@ -1133,36 +1135,22 @@ struct UpdateWheelUpdateCallback : public osg::NodeCallback
 
         // Now here we test intersection against the terrain model
         // if it is in the air we break the wheel movement
-        osgSim::LineOfSight los;
-        osgSim::HeightAboveTerrain hat;
-        hat.setDatabaseCacheReadCallback(los.getDatabaseCacheReadCallback());
-
+        
         // Since this is sub-entity, we need the localtoworld matrix to work
         // in world space
         osg::Matrixd l2w = osg::computeLocalToWorld(nv->getNodePath());
 
         // we add the intersection ray here e
         osg::Vec3d s = osg::Vec3d(0, 0, 0) * l2w;
-        hat.addPoint(s);
+		osg::Vec3d ignore;
+        
 
         // save this flag. We check later
         // if we just land and we touch down, and we
         // launch a particle effect there
         bool savedInTheAir = inTheAir;
 
-        // compute the intersections
-        OpenIG::Base::ImageGenerator::Entity terrain = imageGenerator->getEntityMap()[TERRAIN_ENTITY_ID];
-        if (terrain.valid())
-        {
-            hat.computeIntersections(terrain);
-            if (hat.getNumPoints())
-            {
-                if (hat.getHeightAboveTerrain(hat.getNumPoints() - 1) > 0.6 )
-                    inTheAir = true;
-                else
-                    inTheAir = false;
-            }
-        }
+	inTheAir = imageGenerator->intersect(s, ignore, ignore, 0);
 
         // we update only if we are not in the air
         if (!inTheAir)
@@ -1403,6 +1391,45 @@ protected:
     osg::Timer_t	_landingTime;
 };
 
+// Here we will use our custom Intersectioncallback for Flat earth for this demo.
+// It will be based on osgSim::HeightAboveTerrain
+struct HatIntersectionCallback : public OpenIG::Base::ImageGenerator::IntersectionCallback
+{
+	HatIntersectionCallback(OpenIG::Base::ImageGenerator* ig)
+		: imageGenerator(ig)
+	{
+		hat.setDatabaseCacheReadCallback(los.getDatabaseCacheReadCallback());
+	}
+
+	virtual bool intersect(const osg::Vec3d& start, const osg::Vec3d& end, osg::Vec3d& intersectionPoint, unsigned mask)
+	{
+		bool result = false;
+
+		hat.clear();
+		hat.addPoint(start);
+
+		OpenIG::Base::ImageGenerator::Entity terrain = imageGenerator->getEntityMap()[TERRAIN_ENTITY_ID];
+		if (terrain.valid())
+		{
+			hat.computeIntersections(terrain);
+			if (hat.getNumPoints())
+			{
+				if (hat.getHeightAboveTerrain(hat.getNumPoints() - 1) > 0.6)
+				{
+					result = true;
+				}
+			}
+		}
+
+		return result;
+	}
+
+	osgSim::LineOfSight los;
+	osgSim::HeightAboveTerrain hat;
+	OpenIG::Base::ImageGenerator* imageGenerator;
+
+};
+
 int main(int argc, char** argv)
 {
     // We use osgViewer::CompositeViewer in OpenIG
@@ -1494,6 +1521,9 @@ int main(int argc, char** argv)
 
     // We init OpenIG with your Viewer
     ig->init(viewer.get(),"igdata/openig.xml");
+
+	// Set simple HAT intersection callback
+	ig->setIntersectionCallback(new HatIntersectionCallback(ig));
 
     // OpenIG provides hook to add entity to
     // the shadowed scene which is default, by

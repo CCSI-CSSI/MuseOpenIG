@@ -128,6 +128,44 @@ public:
 		_cursorgeometry->addPrimitiveSet(new osg::DrawArrays(GL_QUADS,0,4));
 	}
 
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,4) // What was the version this changed?
+	void calcOffsets()
+	{
+		_offsets.clear();
+		_charsizes.clear();
+		_wordoffsets.clear();
+		if (_text->getText().size() == 0)
+		{
+			_offsets.push_back(0);
+			_charsizes.push_back(0);
+			return;
+		}
+		
+		osg::Vec3 bottomLeft, bottomRight, topLeft, topRight;
+		for (size_t i = 0; i < _text->getText().size(); ++i)
+		{
+			_text->getCharacterCorners(i, bottomLeft, bottomRight, topLeft, topRight);
+
+			bottomRight = bottomRight * _text->getMatrix();
+			bottomLeft = bottomLeft * _text->getMatrix();
+
+			_offsets.push_back(_text->getPosition().x() + bottomLeft.x());
+			_charsizes.push_back(bottomRight.x() - bottomLeft.x());
+		}
+
+		_offsets.push_back(_text->getPosition().x() + bottomRight.x());
+		_charsizes.push_back(0);
+		
+
+		std::string text = getFormatedInput();
+		for (unsigned int i = 0; i<_text->getText().size(); ++i)
+		{
+			while (i<text.size() && text.at(i) == ' ') ++i;
+			_wordoffsets.push_back(i);
+			while (i<text.size() && text.at(i) != ' ') ++i;
+		}
+	}
+#else
 	void calcOffsets()
 	{
 		_offsets.clear();
@@ -211,6 +249,7 @@ public:
 			while (i<text.size() && text.at(i)!=' ') ++i;
 		}
 	}
+#endif
 
 	void setText(const std::string& text)
 	{
@@ -553,6 +592,7 @@ void Engine::initTerminal()
 
 	osg::Geode* geode = new osg::Geode;
 	camera->addChild(geode);
+	camera->getOrCreateStateSet()->setAttributeAndModes(new osg::Program, osg::StateAttribute::ON | osg::StateAttribute::PROTECTED);
 
 	geode->getOrCreateStateSet()->setMode(GL_LIGHTING,osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE|osg::StateAttribute::PROTECTED);
 

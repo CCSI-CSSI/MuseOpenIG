@@ -1053,39 +1053,6 @@ namespace OpenIG {
              */
             virtual EntityMap& getEntityMap() = 0;
 
-            /*! The height of the terrain, currently entity 0, at the current position
-             * \brief     The height of terrain at the given position
-             * \return    The height of terrain at the given position
-             * \author    Roni Zanolli openig@compro.net
-             * \copyright (c)Compro Computer Services, Inc.
-             * \date      Weds Aug 02 2016
-             */
-            virtual float getTerrainHeight( const osg::Vec3& position ) = 0;
-
-            /*! The distance from the input position to the first intersect of the terrain, currently entity id 0
-             * \brief     The distance from input position to the first intersect
-             * \return    The distance from input position to the first intersect
-             * \param pos    Current position
-             * \param angles Current Yaw, Pitch and Roll
-             * \param angle  Current Heading
-             * \author    Roni Zanolli openig@compro.net
-             * \copyright (c)Compro Computer Services, Inc.
-             * \date      Weds Aug 02 2016
-             */
-            virtual float getIntersect( const osg::Vec3& pos, const osg::Vec3& angles, float angle ) = 0;
-
-            /*! The position of the intersection of our current pos and the angles input and the terrain, currently entity id 0
-             * \brief     The distance from input position to the first intersect
-             * \return    The distance from input position to the first intersect
-             * \param pos    Current position
-             * \param angles Current Yaw, Pitch and Roll
-             * \param angle  Current Heading
-             * \author    Roni Zanolli openig@compro.net
-             * \copyright (c)Compro Computer Services, Inc.
-             * \date      Weds Aug 02 2016
-             */
-            virtual osg::Vec3 getIntersectPos( const osg::Vec3& pos, const osg::Vec3& angles, float angle, float height=100000 ) = 0;
-
 
             /*! The light that represents sun/moon in the scene. It is the reserved light with an ID of 0
              * \brief   The light that represents sun/moon in the scene
@@ -1106,21 +1073,38 @@ namespace OpenIG {
             virtual osg::Fog*           getFog() = 0;
 
             /*! Turns on the Red transparent OpenIG Crash Screen
-             * \brief Sets the light implementation callback
-             * \param	fileList	The list of files that will use file cache
+             * \brief Turns on the Crash message screen and displays the text provided
+             * \param	text  Message to be displayed
              * \author    Curtis Rubel openig@compro.net
              * \copyright (c)Compro Computer Services, Inc.
              * \date      Fri Jul 7 2017
              */
-            virtual void turnOnCrashScreen(std::string crashtext) = 0;
+            virtual void turnOnCrashScreen(const std::string& crashtext) = 0;
 
             /*! Turns off the Red transparent OpenIG Crash Screen
-             * \brief Sets the light implementation callback
+             * \brief Turns off the Crash Screen
              * \author    Curtis Rubel openig@compro.net
              * \copyright (c)Compro Computer Services, Inc.
              * \date      Fri Jul 7 2017
              */
             virtual void turnOffCrashScreen() = 0;
+
+            /*! Turns on the OpenIG Message Screen
+             * \brief Turns on the message screen and displays the text provided
+             * \param	text  Message to be displayed
+             * \author    Curtis Rubel openig@compro.net
+             * \copyright (c)Compro Computer Services, Inc.
+             * \date      Fri Jul 7 2017
+             */
+            virtual void turnOnScreenMessage(const std::string& text) = 0;
+
+            /*! Turns off the OpenIG Message Screen
+             * \brief Turns off the Message Screen
+             * \author    Curtis Rubel openig@compro.net
+             * \copyright (c)Compro Computer Services, Inc.
+             * \date      Fri Jul 7 2017
+             */
+            virtual void turnOffScreenMessage() = 0;
 
             /*! Override preRender method to be called from within a frame. See \ref frame for reference
              * \brief override preRender method to be called from within a frame
@@ -1137,8 +1121,51 @@ namespace OpenIG {
              * \date      Sun Jan 11 2015
              */
             virtual void postRender() = 0;
+			
+			/*! Mask to perform the intersection against. Assumes \ref Entity with id 0 to be the terrain
+			* \brief Mask to perform the intersection against
+			* \author    Trajce Nikolov Nick openig@compro.net
+			* \copyright (c)Compro Computer Services, Inc.
+			* \date      Sun Apr 13 2018
+			*/
+			enum IntersectionMask
+			{
+				Terrain = 0x1,
+				Scene = 0xF
+			};
+
+			/*! Intersection callback. Your own implementation of the intersection
+			* \brief Intersection callback. 
+			* \author    Trajce Nikolov Nick openig@compro.net
+			* \copyright (c)Compro Computer Services, Inc.
+			* \date      Sun Apr 13 2018
+			*/
+			struct IntersectionCallback : public osg::Referenced
+			{
+				virtual bool intersect(const osg::Vec3d& start, const osg::Vec3d& end, osg::Vec3d& intersectionPoint, unsigned mask) = 0;
+			};
+
+			/*! Sets/Adds intersection callbacks. Your own implementation of the intersection
+			* \brief Sets/Adds intersection callbacks.
+			* \author    Trajce Nikolov Nick openig@compro.net
+			* \copyright (c)Compro Computer Services, Inc.
+			* \date      Sun Apr 13 2018
+			*/
+			virtual void setIntersectionCallback(IntersectionCallback* cb) = 0;
+			
+			/*! Performs the intersections. You decide if you call callbacks or peform your own/other
+			* \brief Performs the intersections.
+			* \param start The start of the intersection ray
+			* \param end The end of the intersection ray
+			* \param mask see \ref IntersectionMask. Assume \ref Entity with id 0 to be the terrain
+			* \return true if intersection performed, false otherwise
+			* \author    Trajce Nikolov Nick openig@compro.net
+			* \copyright (c)Compro Computer Services, Inc.
+			* \date      Sun Apr 13 2018
+			*/
+			virtual bool intersect(const osg::Vec3d& start, const osg::Vec3d& end, osg::Vec3d& intersectionPoint, unsigned mask) = 0;
         };
-    } // namespace
+    } // names0pace
 } // namespace
 
 #endif // IMAGEGENERATOR_H

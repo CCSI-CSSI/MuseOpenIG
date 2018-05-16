@@ -57,6 +57,7 @@
 
 #include <osgShadow/ShadowedScene>
 #include <osgShadow/LightSpacePerspectiveShadowMap>
+#include <osgShadow/ViewDependentShadowMap>
 #include <osgShadow/StandardShadowMap>
 
 #include <Library-Graphics/OIGMath.h>
@@ -67,8 +68,8 @@ using namespace OpenIG;
 using namespace OpenIG::Base;
 using namespace OpenIG::PluginBase;
 
-static int ReceivesShadowTraversalMask = 0x1;
-static int CastsShadowTraversalMask = 0x2;
+static int ReceivesShadowTraversalMask = 0x10;
+static int CastsShadowTraversalMask = 0x20;
 
 Engine::Engine()
     : _sceneCreatedByOpenIG(false)
@@ -76,7 +77,6 @@ Engine::Engine()
     , _splashOn(true)
     , _setupMask(Standard)
 {
-     _intersect = new osgUtil::IntersectVisitor;
 }
 
 Engine::~Engine()
@@ -86,7 +86,7 @@ Engine::~Engine()
 
 std::string Engine::version()
 {
-    return "2.0.6";
+    return "2.0.7";
 }
 
 class InitPluginOperation : public PluginOperation
@@ -487,7 +487,7 @@ void Engine::init(osgViewer::CompositeViewer* viewer, const std::string& xmlFile
     initPluginContext();
     if (_setupMask & WithOnscreenHelp) initOnScreenHelp();
     if (_setupMask & WithSplashScreen) initSplashScreen();
-    if (_setupMask & WithCrashScreen) initCrashScreen();
+    if (_setupMask & WithScreenMessages) initOnScreenMessages();
     initEffects();
 
     osgDB::Registry::instance()->setReadFileCallback( new DatabaseReadCallback(this) );
@@ -779,7 +779,7 @@ void Engine::addEntity(unsigned int id, const std::string& fileName, const osg::
 
     osg::ref_ptr<osg::Node> model;
 
-    std::string simpleFileName = fileName;//osgDB::getSimpleFileName(fileName);
+	std::string simpleFileName = fileName;// osgDB::getSimpleFileName(fileName);
     if (isFileCached(simpleFileName))
     {
         EntityCache::iterator itr = _entityCache.find(simpleFileName);
@@ -1036,8 +1036,7 @@ void Engine::unbindFromEntity(unsigned int id)
     }
 
     entity->setMatrix(wmx);
-    //Ensure the newly unbound entity is added to the scene as a super entity  NICK
-    getScene()->asGroup()->addChild(entity);
+	getScene()->asGroup()->addChild(entity);
 }
 
 void Engine::bindEntityToCamera(unsigned int id, const osg::Matrixd& mx, unsigned int cameraID)
@@ -1150,15 +1149,18 @@ void Engine::initScene()
         unsigned int shadowTexUnit = Configuration::instance()->getConfig("ShadowedScene-shadowTexUnit", 1);
         bool useShadowedScene = Configuration::instance()->getConfig("ShadowedScene", "yes") == "yes";
 
+		osg::ref_ptr<osgShadow::ViewDependentShadowMap> vdsm = new osgShadow::ViewDependentShadowMap;
+
+
         if (useShadowedScene)
         {
             osg::ref_ptr<osgShadow::ShadowedScene> shadowedScene = new osgShadow::ShadowedScene;
+			shadowedScene->setReceivesShadowTraversalMask(ReceivesShadowTraversalMask);
+			shadowedScene->setCastsShadowTraversalMask(CastsShadowTraversalMask);
+#if 0
             osg::ref_ptr<osgShadow::MinimalShadowMap> msm = new osgShadow::LightSpacePerspectiveShadowMapDB;
             shadowedScene->setShadowTechnique(msm.get());
-
-            shadowedScene->setReceivesShadowTraversalMask(ReceivesShadowTraversalMask);
-            shadowedScene->setCastsShadowTraversalMask(CastsShadowTraversalMask);
-
+            
             msm->setMinLightMargin(minLightMargin);
             msm->setMaxFarPlane(maxFarPlane);
             msm->setTextureSize(osg::Vec2s(texSize, texSize));
@@ -1204,6 +1206,39 @@ void Engine::initScene()
                 "} \n");
 
             msm->setMainFragmentShader(mainFragmentShader);
+#else 
+			osgShadow::ShadowSettings* settings = shadowedScene->getShadowSettings();
+			settings->setNumShadowMapsPerLight(1);
+			settings->setShaderHint(osgShadow::ShadowSettings::NO_SHADERS);
+			settings->setBaseShadowTextureUnit(1);
+			settings->setLightNum(0);
+			settings->setMaximumShadowMapDistance(200);
+			settings->setTextureSize(osg::Vec2s(8192, 8192));
+			settings->setReceivesShadowTraversalMask(ReceivesShadowTraversalMask);
+			settings->setCastsShadowTraversalMask(CastsShadowTraversalMask);
+
+			osg::ref_ptr<osgShadow::ViewDependentShadowMap> vdsm = new osgShadow::ViewDependentShadowMap;
+			shadowedScene->setShadowTechnique(vdsm);
+
+			static const char fragmentShaderSource_withBaseTexture[] =
+				"uniform sampler2D baseTexture;                                          \n"
+				"uniform int baseTextureUnit;                                            \n"
+				"uniform sampler2DShadow shadowTexture0;                                 \n"
+				"uniform int shadowTextureUnit0;                                         \n"
+				"                                                                        \n"
+				"void main(void)                                                         \n"
+				"{                                                                       \n"
+				"  vec4 colorAmbientEmissive = gl_FrontLightModelProduct.sceneColor;     \n"
+				"  vec4 color = texture2D( baseTexture, gl_TexCoord[baseTextureUnit].xy );                                              \n"
+				"  color *= mix( colorAmbientEmissive, gl_Color, shadow2DProj( shadowTexture0, gl_TexCoord[shadowTextureUnit0] ).r );     \n"
+				"  gl_FragColor = color;                                                                                                \n"
+				"} \n";
+
+			osg::ref_ptr<osg::Program> program = new osg::Program;
+			program->addShader(new osg::Shader(osg::Shader::FRAGMENT, fragmentShaderSource_withBaseTexture));
+
+			//shadowedScene->getOrCreateStateSet()->setAttributeAndModes(program, osg::StateAttribute::ON);
+#endif
 
             _scene = shadowedScene;
         }
@@ -1217,6 +1252,7 @@ void Engine::initScene()
         _fog = new osg::Fog;
         _fog->setDensity(0);
         _scene->getOrCreateStateSet()->setAttributeAndModes(_fog.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+		_scene->getOrCreateStateSet()->setDefine("FOG", osg::StateAttribute::ON);
 
     }
 }
@@ -1674,104 +1710,6 @@ OpenIG::Base::ImageGenerator::EntityMap& Engine::getEntityMap()
     return _entities;
 }
 
-float Engine::getTerrainHeight( const osg::Vec3& position )
-{
-    osg::LineSegment *aglPosition = new osg::LineSegment( position, osg::Vec3(position.x(), position.y(), -10000.0) );
-    _intersect->reset();
-    _intersect->addLineSegment( aglPosition );
-    _intersect->apply( *getScene() );
-
-    osgUtil::IntersectVisitor::HitList hits;
-
-    if( _intersect->hits() )
-    {
-        hits = _intersect->getHitList( aglPosition );
-
-        if( hits[0].getNodePath()[0]->getName() == "terrain_db" )
-            return hits[0]._intersectPoint.z();
-        else
-            return hits[0]._intersectPoint.z()+2.0f;
-    }
-    else
-        return 0.0;
-}
-
-float Engine::getIntersect(const osg::Vec3& pos, const osg::Vec3& angles,float angle)
-{
-    float height = 10000.0;
-    osg::Vec3 vec(0,height,0);
-    osg::Quat rot,ant;
-    ant.makeRotate(osg::DegreesToRadians(angle),osg::Vec3(1,0,0));
-
-    rot.makeRotate(osg::DegreesToRadians(angles.z()),osg::Vec3(0,1,0), //roll
-                   osg::DegreesToRadians(angles.y()),osg::Vec3(1,0,0), //pitch
-                   osg::DegreesToRadians(angles.x()),osg::Vec3(0,0,1)); // yaw
-    vec = ant*vec;
-    vec = rot*vec;
-
-    osg::LineSegment *aglPosition = new osg::LineSegment( pos,pos+vec );
-
-    _intersect->reset();
-    _intersect->addLineSegment( aglPosition );
-    _intersect->apply( *getScene() );
-
-    osgUtil::IntersectVisitor::HitList hits;
-    if( _intersect->hits() )
-    {
-        hits = _intersect->getHitList( aglPosition );
-        osgUtil::Hit fhit = hits.front();
-        osg::Vec3d fh = fhit.getWorldIntersectPoint();
-
-        osg::Vec3 interPoint(
-        fh.x(),
-        fh.y(),
-        fh.z());
-
-        return (interPoint-pos).length();
-    }
-
-    return 0.0;
-
-}
-
-osg::Vec3 Engine::getIntersectPos(const osg::Vec3& pos, const osg::Vec3& angles,float angle, float height)
-{
-    osg::Vec3 vec(0,height,0);
-    osg::Quat rot,ant;
-    ant.makeRotate(osg::DegreesToRadians(angle),osg::Vec3(1,0,0));
-
-    //angles.z() = 0.0f;
-
-    rot.makeRotate(osg::DegreesToRadians(angles.z()),osg::Vec3(0,1,0), //roll
-                   osg::DegreesToRadians(angles.y()),osg::Vec3(1,0,0), //pitch
-                   osg::DegreesToRadians(angles.x()),osg::Vec3(0,0,1)); // yaw
-    vec = ant*vec;
-    vec = rot*vec;
-
-    osg::LineSegment *aglPosition = new osg::LineSegment( pos,pos+vec );
-
-    _intersect->reset();
-    _intersect->addLineSegment( aglPosition );
-    _intersect->apply( *getScene() );
-
-    osgUtil::IntersectVisitor::HitList hits;
-    if( _intersect->hits() )
-    {
-        hits = _intersect->getHitList( aglPosition );
-        osgUtil::Hit fhit = hits.front();
-        osg::Vec3d fh = fhit.getWorldIntersectPoint();
-
-        osg::Vec3 interPoint(
-        fh.x(),
-        fh.y(),
-        fh.z());
-
-        return interPoint;
-    }
-
-    return osg::Vec3(-1,-1,-1);
-}
-
 osg::LightSource* Engine::getSunOrMoonLight()
 {
     return _sunOrMoonLight.get();
@@ -1812,4 +1750,14 @@ bool Engine::isFileCached(const std::string& fileName)
     return false;
 }
 
+void Engine::setIntersectionCallback(IntersectionCallback* cb)
+{
+	_intersectionCallback = cb;
+}
 
+bool Engine::intersect(const osg::Vec3d& start, const osg::Vec3d& end, osg::Vec3d& intersectionPoint, unsigned mask)
+{
+	if (_intersectionCallback.valid())
+		return _intersectionCallback->intersect(start, end, intersectionPoint, mask);
+	return false;
+}
