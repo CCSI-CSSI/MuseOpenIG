@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['viewtype',['ViewType',['../class_open_i_g_1_1_engine.html#a788f5d7ce120c1e362d9cf4611f8a836',1,'OpenIG::Engine']]]
+  ['setupflags',['SetupFlags',['../class_open_i_g_1_1_engine.html#a2b928d86e84e6ae7fd9b9f6170fd39d7',1,'OpenIG::Engine']]]
 ];

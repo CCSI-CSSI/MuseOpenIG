@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['setupflags',['SetupFlags',['../class_open_i_g_1_1_engine.html#a2b928d86e84e6ae7fd9b9f6170fd39d7',1,'OpenIG::Engine']]]
+  ['intersectionmask',['IntersectionMask',['../class_open_i_g_1_1_base_1_1_image_generator.html#abd9544223ea20b204486958b9eef19e3',1,'OpenIG::Base::ImageGenerator']]]
 ];

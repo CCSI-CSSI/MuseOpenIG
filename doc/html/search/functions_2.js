@@ -6,6 +6,7 @@ var searchData=
   ['clear',['clear',['../class_open_i_g_1_1_base_1_1_commands.html#af90d6234ce89b1e084154f4bb806d20c',1,'OpenIG::Base::Commands']]],
   ['commands',['Commands',['../class_open_i_g_1_1_base_1_1_commands.html#a27d9f774355845db64727b215676d931',1,'OpenIG::Base::Commands']]],
   ['config',['config',['../class_open_i_g_1_1_plugin_base_1_1_plugin.html#a484e1323f6b71a570452dc61c1e5a262',1,'OpenIG::PluginBase::Plugin']]],
-  ['createcloudlayerfile',['createCloudLayerFile',['../class_open_i_g_1_1_base_1_1_image_generator.html#aafb11d393afa6e51bfd5bb4701bd5930',1,'OpenIG::Base::ImageGenerator::createCloudLayerFile()'],['../class_open_i_g_1_1_engine.html#a9db06ff3459f65a4626641333a527c5c',1,'OpenIG::Engine::createCloudLayerFile()']]],
+  ['createcloudlayerfile',['createCloudLayerFile',['../class_open_i_g_1_1_base_1_1_image_generator.html#ae83f55483bbfbfdeb12052552c1e9f4c',1,'OpenIG::Base::ImageGenerator::createCloudLayerFile()'],['../class_open_i_g_1_1_engine.html#ac034b5315850162342729b1538dd8790',1,'OpenIG::Engine::createCloudLayerFile()']]],
+  ['createlight',['createLight',['../class_open_i_g_1_1_base_1_1_light_implementation_callback.html#a814c838efd179e21d734233224b58b90',1,'OpenIG::Base::LightImplementationCallback']]],
   ['createsunmoonlight',['createSunMoonLight',['../class_open_i_g_1_1_engine.html#abc24b608f4e5dd2aa0033b94ef8cf0c1',1,'OpenIG::Engine']]]
 ];

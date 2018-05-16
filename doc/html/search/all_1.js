@@ -9,13 +9,13 @@ var searchData=
   ['addlight',['addLight',['../class_open_i_g_1_1_base_1_1_image_generator.html#a93f40cfa72885892e32a6fabc4d8aa0b',1,'OpenIG::Base::ImageGenerator::addLight()'],['../class_open_i_g_1_1_engine.html#a02844e01e5e8272661bf8ec8788edb09',1,'OpenIG::Engine::addLight()']]],
   ['animation',['Animation',['../struct_open_i_g_1_1_base_1_1_animations_1_1_animation.html',1,'OpenIG::Base::Animations']]],
   ['animation_2eh',['Animation.h',['../_animation_8h.html',1,'']]],
+  ['animationattributes',['AnimationAttributes',['../struct_open_i_g_1_1_base_1_1_animation_attributes.html',1,'OpenIG::Base']]],
   ['animationcontainer',['AnimationContainer',['../struct_open_i_g_1_1_base_1_1_animations_1_1_animation_container.html',1,'OpenIG::Base::Animations']]],
-  ['animations',['Animations',['../class_open_i_g_1_1_base_1_1_animations.html#a29a5af5c88ac03493c3b0850a6cf1995',1,'OpenIG::Base::Animations']]],
-  ['animations',['Animations',['../class_open_i_g_1_1_base_1_1_animations.html',1,'OpenIG::Base']]],
+  ['animations',['Animations',['../class_open_i_g_1_1_base_1_1_animations.html',1,'OpenIG::Base::Animations'],['../class_open_i_g_1_1_base_1_1_animations.html#a29a5af5c88ac03493c3b0850a6cf1995',1,'OpenIG::Base::Animations::Animations()']]],
   ['animationsequenceplaybackcallback',['AnimationSequencePlaybackCallback',['../class_open_i_g_1_1_base_1_1_animation_sequence_playback_callback.html',1,'OpenIG::Base']]],
   ['animationstatus',['AnimationStatus',['../class_open_i_g_1_1_base_1_1_image_generator.html#aac729739f7a77d7bbdd93711d5abe9e1',1,'OpenIG::Base::ImageGenerator']]],
   ['apply',['apply',['../class_open_i_g_1_1_plugin_base_1_1_plugin_operation.html#a36a901ecae367e9ec92402faf94f0868',1,'OpenIG::PluginBase::PluginOperation']]],
   ['applypluginoperation',['applyPluginOperation',['../class_open_i_g_1_1_plugin_base_1_1_plugin_host.html#ab82c833a6723b2af8129c3b68af00350',1,'OpenIG::PluginBase::PluginHost']]],
-  ['attribute',['Attribute',['../struct_open_i_g_1_1_plugin_base_1_1_plugin_context_1_1_attribute.html#acf40335bd1311ab5d4591660ed1c44e5',1,'OpenIG::PluginBase::PluginContext::Attribute']]],
-  ['attribute',['Attribute',['../struct_open_i_g_1_1_plugin_base_1_1_plugin_context_1_1_attribute.html',1,'OpenIG::PluginBase::PluginContext']]]
+  ['atmosphereattributes',['AtmosphereAttributes',['../struct_open_i_g_1_1_base_1_1_atmosphere_attributes.html',1,'OpenIG::Base']]],
+  ['attribute',['Attribute',['../struct_open_i_g_1_1_plugin_base_1_1_plugin_context_1_1_attribute.html',1,'OpenIG::PluginBase::PluginContext::Attribute&lt; T &gt;'],['../struct_open_i_g_1_1_plugin_base_1_1_plugin_context_1_1_attribute.html#acf40335bd1311ab5d4591660ed1c44e5',1,'OpenIG::PluginBase::PluginContext::Attribute::Attribute()']]]
 ];

@@ -38,7 +38,7 @@ PROJECT_NAME           = OpenIG
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = 2.0.4
+PROJECT_NUMBER         = 2.0.7
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -51,7 +51,7 @@ PROJECT_BRIEF          = "cross-platform open-source OpenSceneGraph Image Genera
 # pixels and the maximum width should not exceed 200 pixels. Doxygen will copy
 # the logo to the output directory.
 
-PROJECT_LOGO           = C:/Users/Nick/Dev/OpenIG-2.1.0/doc/openig_logo.png
+PROJECT_LOGO           = ./doc/openig_logo.png
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) path
 # into which the generated documentation will be written. If a relative path is
@@ -771,17 +771,28 @@ WARN_LOGFILE           =
 INPUT                  =  \
                          ./Core-Base/Animation.h \
                          ./Core-Base/Commands.h \
+                         ./Core-Base/Config.h \
                          ./Core-Base/Configuration.h \
+                         ./Core-Base/Export.h \
                          ./Core-Base/FileSystem.h \
                          ./Core-Base/IDPool.h \
+                         ./Core-Base/IGCore.h \
                          ./Core-Base/ImageGenerator.h \
                          ./Core-Base/Mathematics.h \
                          ./Core-Base/StringUtils.h \
-                         ./Core-PluginBase/Plugin.h \
+                         ./Core-Base/Types.h \
+                         ./Core-PluginBase/Config.h \
+                         ./Core-PluginBase/Export.h \
+                         ./Core-PluginBase/IGPluginCore.h \
                          ./Core-PluginBase/PluginContext.h \
+                         ./Core-PluginBase/Plugin.h \
                          ./Core-PluginBase/PluginHost.h \
                          ./Core-PluginBase/PluginOperation.h \
-                         ./Core-OpenIG/Engine.h
+                         ./Core-OpenIG/Config.h \
+                         ./Core-OpenIG/Engine.h \
+                         ./Core-OpenIG/Export.h \
+                         ./Core-OpenIG/Keypad.h \
+                         ./Core-OpenIG/RenderBins.h
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
