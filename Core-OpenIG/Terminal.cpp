@@ -128,7 +128,7 @@ public:
 		_cursorgeometry->addPrimitiveSet(new osg::DrawArrays(GL_QUADS,0,4));
 	}
 
-#if OSG_VERSION_GREATER_OR_EQUAL(3,3,4) // What was the version this changed?
+#if OSG_VERSION_GREATER_OR_EQUAL(3,5,9) // What was the version this changed?
 	void calcOffsets()
 	{
 		_offsets.clear();
