@@ -1,11 +1,11 @@
 //#******************************************************************************
 //#*
-//#*      Copyright (C) 2015  Compro Computer Services
-//#*      http://openig.compro.net
+//#*   Copyright (C) 2015  Compro Computer Services
+//#*   http://openig.compro.net
 //#*
-//#*      Source available at: https://github.com/CCSI-CSSI/MuseOpenIG
+//#*   Source available at: https://github.com/CCSI-CSSI/MuseOpenIG
 //#*
-//#*      This software is released under the LGPL.
+//#*   This software is released under the LGPL.
 //#*
 //#*   This software is free software; you can redistribute it and/or modify
 //#*   it under the terms of the GNU Lesser General Public License as published
@@ -21,13 +21,8 @@
 //#*   along with this library; if not, write to the Free Software
 //#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //#*
-//#*    Please direct any questions or comments to the OpenIG Forums
-//#*    Email address: openig@compro.net
-//#*
-//#*
-//#*    Please direct any questions or comments to the OpenIG Forums
-//#*    Email address: openig@compro.net
-//#*
+//#*   Please direct any questions or comments to the OpenIG Forums
+//#*   Email address: openig@compro.net
 //#*
 //#*****************************************************************************
 
