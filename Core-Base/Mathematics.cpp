@@ -241,6 +241,7 @@ osg::Vec3d Math::fromQuat(const osg::Quat& quat, bool degrees)
     double pitch = atan2(term4, term5);
     double roll = asin(term3);
 
+    //Return values in degrees if requested, else its radians
     if(degrees)
     {
         heading = osg::RadiansToDegrees(heading);
