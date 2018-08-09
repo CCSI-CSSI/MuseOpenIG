@@ -167,12 +167,13 @@ namespace OpenIG {
             /*!
              * \brief Euler from osg::Quat ernion
              * \param the Quaternion
-             * \return eulers in degrees, x() heading, y() pitch, z() roll
+             * \param degrees, true = return values in degrees, false=return values in radians
+             * \return eulers, x() heading, y() pitch, z() roll
              * \author    Trajce Nikolov Nick openig@compro.net
              * \copyright (c)Compro Computer Services, Inc.
              * \date      Sun Jan 11 2015
              */
-            osg::Vec3d   fromQuat(const osg::Quat& q);
+            osg::Vec3d   fromQuat(const osg::Quat& q, bool degrees=false);
 
             /*!
              * \brief Code snippet borrowed from osgGA::StandardManipulator. Please refer to the OSG documentation
