@@ -217,7 +217,7 @@ void Math::fromMatrix(const osg::Matrixd& mx, double& x, double& y, double& z, d
     r = osg::RadiansToDegrees(hpr.z());
 }
 
-osg::Vec3d Math::fromQuat(const osg::Quat& quat)
+osg::Vec3d Math::fromQuat(const osg::Quat& quat, bool degrees)
 {
     // From: http://guardian.curtin.edu.au/cga/faq/angles.html
     // Except OSG exchanges pitch & roll from what is listed on that page
@@ -240,6 +240,13 @@ osg::Vec3d Math::fromQuat(const osg::Quat& quat)
     double heading = atan2(term1, term2);
     double pitch = atan2(term4, term5);
     double roll = asin(term3);
+
+    if(degrees)
+    {
+        heading = osg::RadiansToDegrees(heading);
+        pitch   = osg::RadiansToDegrees(pitch);
+        roll    = osg::RadiansToDegrees(roll);
+    }
 
     return osg::Vec3d(heading, pitch, roll);
 }
